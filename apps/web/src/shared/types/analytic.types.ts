@@ -1,0 +1,26 @@
+export enum AnalyticAction {
+  // клики
+  ClickTab = 'Клик на таб',
+  ClickDayCard = 'Клик на карту дня',
+  ClickCategoryMainPage = 'Клик категории главная',
+  ClickPopularMainPage = 'Клик популярные расклады',
+  ClickSpreadInCategory = 'Клик расклад в категории',
+  ClickSpreadsGroup = 'Клик группа раскладов',
+  ClickPaidContent = 'Клик платный контент',
+  ClickCategoriesLibrary = 'Клик категории библиотека',
+  ClickSettings = 'Клик настройки',
+  ClickMakeSpread = 'Клик Сделать расклад',
+  ClickCompleteSpread = 'Клик Читать объяснение',
+  ClickTarotCard = 'Клик Карта Таро',
+  ClickLikeTarotCard = 'Клик Лайк Карта Таро',
+  ClickSettingsSegment = 'Клик Раздел из настроек',
+  ClickChangeLanguage = 'Клик Смена языка',
+  ClickChangeDeckStyle = 'Клик Смена стиля колоды',
+  ClickSubmitPaidContent = 'Клик Submit Подписка',
+  // показы
+  ShowLastCardSpread = 'Показ Конец расклада',
+  ShowPaidContent = 'Показ Платный контент',
+  GetAIGeneration = 'Генерация AI',
+  ShareApp = 'Поделился приложением',
+  ShareAppCancel = 'Не поделился приложением IOS',
+}

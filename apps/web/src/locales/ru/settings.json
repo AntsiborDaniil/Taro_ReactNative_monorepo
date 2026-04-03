@@ -1,0 +1,29 @@
+{
+  "settings": "Настройки",
+
+  "sound": "Звук и уведомления",
+  "sound.vibration": "Вибрация",
+  "sound.notifications": "Уведомления",
+  "sound.moon.notifications": "Уведомления о фазах Луны",
+
+  "language": "Язык приложения",
+
+  "hasReversed": "Перевернутые карты",
+
+  "payments": "Подписка и покупки",
+  "payments.restore": "Восстановить покупки",
+
+  "deck.style": "Стиль колоды",
+
+  "deck.style.flat": "Флет",
+  "deck.style.classic": "Классический",
+  "deck.style.modern": "Современный модерн",
+
+  "share": "Поделиться",
+
+  "rate.app": "Оценить приложение",
+
+  "terms.of.use": "Условия использования",
+
+  "privacy.policy": "Политика конфиденц."
+}

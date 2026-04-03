@@ -1,0 +1,6 @@
+[submodule "apps/native"]
+	path = apps/native
+	url = https://gitlab.com/san-marino-llc/tarot-mobile-native.git
+[submodule "apps/api"]
+	path = apps/api
+	url = https://gitlab.com/san-marino-llc/tarot-api.git

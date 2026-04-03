@@ -1,0 +1,53 @@
+# ── Dependencies ─────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ── Build outputs ─────────────────────────────────────────────
+dist/
+build/
+out/
+web-build/
+.expo/
+.expo-shared/
+
+# ── Environment & secrets ─────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+
+# ── OS / Editor ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# ── Logs ──────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Native build artefacts ────────────────────────────────────
+apps/native/android/
+apps/native/ios/
+apps/native/*.jks
+apps/native/*.p8
+apps/native/*.p12
+apps/native/*.key
+apps/native/*.mobileprovision
+
+# ── Metro / Expo cache ────────────────────────────────────────
+.metro-health-check*
+**/.expo/
+**/expo-env.d.ts
+
+# ── TypeScript incremental build cache ───────────────────────
+*.tsbuildinfo
+
+# ── Test / coverage ───────────────────────────────────────────
+coverage/

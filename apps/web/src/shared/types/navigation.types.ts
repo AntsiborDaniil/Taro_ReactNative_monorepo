@@ -1,0 +1,31 @@
+export enum NavigationRoute {
+  Main = 'Main',
+  Spreads = 'Spreads',
+  SpreadDetailCard = 'SpreadDetailCard',
+  Library = 'Library',
+  SpreadReadings = 'SpreadReadings',
+  Settings = 'Settings',
+  SpreadDescriptionChoice = 'SpreadDescriptionChoice',
+  CardsDictionary = 'CardsDictionary',
+  Affirmations = 'Affirmations',
+  DayAdvice = 'DayAdvice',
+  Language = 'Language',
+  Sound = 'Sound',
+  DeckStyle = 'DeckStyle',
+  PrivacyPolicy = 'PrivacyPolicy',
+  TermsOfUse = 'TermsOfUse',
+  SpreadsHistory = 'SpreadsHistory',
+  FavoriteCards = 'FavoriteCards',
+  HabitCreate = 'HabitCreate',
+  MoodAndEnergy = 'MoodAndEnergy',
+  HabitChoose = 'HabitChoose',
+  HabitsWeek = 'HabitsWeek',
+  MotivationCard = 'MotivationCard',
+  GoalCelebration = 'GoalCelebration',
+}
+
+export enum TabRoute {
+  MainTab = 'MainTab',
+  SpreadsTab = 'SpreadsTab',
+  LibraryTab = 'LibraryTab',
+}

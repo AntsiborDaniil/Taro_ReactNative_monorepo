@@ -1,0 +1,1454 @@
+{
+  "affirmations": "Аффирмации",
+  "hasAffirmation": "Для вас есть аффирмация",
+  "tomorrowAffirmation": "Завтра будет доступна новая аффирмация",
+  "general": "Общее благополучие",
+  "career": "Карьера и успех",
+  "love": "Любовь и отношения",
+  "purpose": "Жизненное предназначение",
+  "health": "Здоровье и благополучие",
+  "motivation": "Мотивация и энергия",
+  "affirmationsItems": {
+    "general": [
+      {
+        "id": 1,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "достоин", "colored": true },
+          { "content": "всех благ жизни", "colored": false }
+        ]
+      },
+      {
+        "id": 2,
+        "text": [
+          { "content": "Каждый день я становлюсь", "colored": false },
+          { "content": "лучше и сильнее", "colored": true }
+        ]
+      },
+      {
+        "id": 3,
+        "text": [
+          { "content": "Мои", "colored": false },
+          { "content": "возможности", "colored": true },
+          { "content": "безграничны", "colored": true }
+        ]
+      },
+      {
+        "id": 4,
+        "text": [
+          { "content": "Я принимаю себя", "colored": false },
+          { "content": "полностью", "colored": true },
+          { "content": "и безусловно", "colored": false }
+        ]
+      },
+      {
+        "id": 5,
+        "text": [
+          { "content": "Во мне есть", "colored": false },
+          { "content": "внутренняя мудрость", "colored": true },
+          { "content": "и сила", "colored": true }
+        ]
+      },
+      {
+        "id": 6,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "привлекаю", "colored": true },
+          { "content": "положительные события", "colored": false }
+        ]
+      },
+      {
+        "id": 7,
+        "text": [
+          { "content": "Моя жизнь наполнена", "colored": false },
+          { "content": "радостью", "colored": true },
+          { "content": "и благодарностью", "colored": true }
+        ]
+      },
+      {
+        "id": 8,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "верю", "colored": true },
+          { "content": "в свои способности", "colored": false }
+        ]
+      },
+      {
+        "id": 9,
+        "text": [
+          { "content": "Каждое препятствие - это", "colored": false },
+          { "content": "возможность роста", "colored": true }
+        ]
+      },
+      {
+        "id": 10,
+        "text": [
+          { "content": "Я окружён", "colored": false },
+          { "content": "любовью", "colored": true },
+          { "content": "и поддержкой", "colored": true }
+        ]
+      },
+      {
+        "id": 11,
+        "text": [
+          { "content": "Мой", "colored": false },
+          { "content": "внутренний мир", "colored": true },
+          { "content": "спокоен и гармоничен", "colored": false }
+        ]
+      },
+      {
+        "id": 12,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "создаю", "colored": true },
+          { "content": "свою реальность", "colored": false }
+        ]
+      },
+      {
+        "id": 13,
+        "text": [
+          { "content": "Все приходит ко мне", "colored": false },
+          { "content": "в нужное время", "colored": true }
+        ]
+      },
+      {
+        "id": 14,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "открыт", "colored": true },
+          { "content": "для новых возможностей", "colored": false }
+        ]
+      },
+      {
+        "id": 15,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "уверенность", "colored": true },
+          { "content": "растёт с каждым днём", "colored": false }
+        ]
+      },
+      {
+        "id": 16,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "заслуживаю", "colored": true },
+          { "content": "счастья и успеха", "colored": false }
+        ]
+      },
+      {
+        "id": 17,
+        "text": [
+          { "content": "Мои мысли", "colored": false },
+          { "content": "позитивны", "colored": true },
+          { "content": "и созидательны", "colored": true }
+        ]
+      },
+      {
+        "id": 18,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "благодарен", "colored": true },
+          { "content": "за каждый день", "colored": false }
+        ]
+      },
+      {
+        "id": 19,
+        "text": [
+          { "content": "Во мне живёт", "colored": false },
+          { "content": "неиссякаемый источник", "colored": true },
+          { "content": "энергии и вдохновения", "colored": false }
+        ]
+      },
+      {
+        "id": 20,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "принимаю", "colored": true },
+          { "content": "правильные решения", "colored": false }
+        ]
+      },
+      {
+        "id": 21,
+        "text": [
+          { "content": "Моя жизнь - это", "colored": false },
+          { "content": "удивительное путешествие", "colored": true }
+        ]
+      },
+      {
+        "id": 22,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "излучаю", "colored": true },
+          { "content": "позитивную энергию", "colored": false }
+        ]
+      },
+      {
+        "id": 23,
+        "text": [
+          { "content": "Все мои", "colored": false },
+          { "content": "мечты осуществимы", "colored": true }
+        ]
+      },
+      {
+        "id": 24,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "живу", "colored": true },
+          { "content": "в гармонии с собой", "colored": false }
+        ]
+      },
+      {
+        "id": 25,
+        "text": [
+          { "content": "Моё", "colored": false },
+          { "content": "присутствие", "colored": true },
+          { "content": "приносит радость окружающим", "colored": false }
+        ]
+      },
+      {
+        "id": 26,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "доверяю", "colored": true },
+          { "content": "течению жизни", "colored": false }
+        ]
+      },
+      {
+        "id": 27,
+        "text": [
+          { "content": "Каждый момент моей жизни", "colored": false },
+          { "content": "ценен и значим", "colored": true }
+        ]
+      },
+      {
+        "id": 28,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "наполнен", "colored": true },
+          { "content": "внутренним светом", "colored": false }
+        ]
+      },
+      {
+        "id": 29,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "интуиция", "colored": true },
+          { "content": "всегда направляет меня правильно", "colored": false }
+        ]
+      },
+      {
+        "id": 30,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "создаю", "colored": true },
+          { "content": "прекрасное будущее", "colored": false }
+        ]
+      }
+    ],
+    "career": [
+      {
+        "id": 31,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "карьера", "colored": true },
+          { "content": "процветает", "colored": true }
+        ]
+      },
+      {
+        "id": 32,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "привлекаю", "colored": true },
+          { "content": "идеальные возможности", "colored": false }
+        ]
+      },
+      {
+        "id": 33,
+        "text": [
+          { "content": "Мои", "colored": false },
+          { "content": "профессиональные навыки", "colored": true },
+          { "content": "постоянно развиваются", "colored": false }
+        ]
+      },
+      {
+        "id": 34,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "уверенно", "colored": true },
+          { "content": "достигаю своих целей", "colored": false }
+        ]
+      },
+      {
+        "id": 35,
+        "text": [
+          { "content": "Моя работа приносит мне", "colored": false },
+          { "content": "радость и удовлетворение", "colored": true }
+        ]
+      },
+      {
+        "id": 36,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "ценный специалист", "colored": true },
+          { "content": "в своей области", "colored": false }
+        ]
+      },
+      {
+        "id": 37,
+        "text": [
+          { "content": "Каждый день я", "colored": false },
+          { "content": "приближаюсь", "colored": true },
+          { "content": "к профессиональному успеху", "colored": false }
+        ]
+      },
+      {
+        "id": 38,
+        "text": [
+          { "content": "Мои", "colored": false },
+          { "content": "идеи и решения", "colored": true },
+          { "content": "высоко ценятся", "colored": false }
+        ]
+      },
+      {
+        "id": 39,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "легко", "colored": true },
+          { "content": "справляюсь с любыми задачами", "colored": false }
+        ]
+      },
+      {
+        "id": 40,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "карьера", "colored": true },
+          { "content": "развивается стремительно", "colored": false }
+        ]
+      },
+      {
+        "id": 41,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "притягиваю", "colored": true },
+          { "content": "успешных партнёров и коллег", "colored": false }
+        ]
+      },
+      {
+        "id": 42,
+        "text": [
+          { "content": "Мой", "colored": false },
+          { "content": "профессиональный рост", "colored": true },
+          { "content": "не знает границ", "colored": false }
+        ]
+      },
+      {
+        "id": 43,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "заслуживаю", "colored": true },
+          { "content": "высокую оплату труда", "colored": false }
+        ]
+      },
+      {
+        "id": 44,
+        "text": [
+          { "content": "Каждый проект приносит мне", "colored": false },
+          { "content": "новый опыт", "colored": true },
+          { "content": "и признание", "colored": true }
+        ]
+      },
+      {
+        "id": 45,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "лидер", "colored": true },
+          { "content": "в своей сфере", "colored": false }
+        ]
+      },
+      {
+        "id": 46,
+        "text": [
+          { "content": "Мои", "colored": false },
+          { "content": "достижения", "colored": true },
+          { "content": "вдохновляют других", "colored": false }
+        ]
+      },
+      {
+        "id": 47,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "открыт", "colored": true },
+          { "content": "для новых вызовов", "colored": false }
+        ]
+      },
+      {
+        "id": 48,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "работа", "colored": true },
+          { "content": "меняет мир к лучшему", "colored": false }
+        ]
+      },
+      {
+        "id": 49,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "создаю", "colored": true },
+          { "content": "инновационные решения", "colored": false }
+        ]
+      },
+      {
+        "id": 50,
+        "text": [
+          { "content": "Мой", "colored": false },
+          { "content": "талант", "colored": true },
+          { "content": "признаётся и вознаграждается", "colored": false }
+        ]
+      },
+      {
+        "id": 51,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "нахожу", "colored": true },
+          { "content": "идеальный баланс работы и жизни", "colored": false }
+        ]
+      },
+      {
+        "id": 52,
+        "text": [
+          { "content": "Каждое препятствие делает меня", "colored": false },
+          { "content": "сильнее и мудрее", "colored": true }
+        ]
+      },
+      {
+        "id": 53,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "притягиваю", "colored": true },
+          { "content": "благоприятные обстоятельства", "colored": false }
+        ]
+      },
+      {
+        "id": 54,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "репутация", "colored": true },
+          { "content": "безупречна", "colored": true }
+        ]
+      },
+      {
+        "id": 55,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "мастер", "colored": true },
+          { "content": "своего дела", "colored": false }
+        ]
+      },
+      {
+        "id": 56,
+        "text": [
+          { "content": "Мои", "colored": false },
+          { "content": "амбиции", "colored": true },
+          { "content": "воплощаются в реальность", "colored": false }
+        ]
+      },
+      {
+        "id": 57,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "строю", "colored": true },
+          { "content": "успешную империю", "colored": false }
+        ]
+      },
+      {
+        "id": 58,
+        "text": [
+          { "content": "Каждый день приносит", "colored": false },
+          { "content": "новые возможности", "colored": true },
+          { "content": "для роста", "colored": false }
+        ]
+      },
+      {
+        "id": 59,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "вдохновляю", "colored": true },
+          { "content": "команду на достижения", "colored": false }
+        ]
+      },
+      {
+        "id": 60,
+        "text": [
+          { "content": "Моё", "colored": false },
+          { "content": "профессиональное будущее", "colored": true },
+          { "content": "светло и безгранично", "colored": false }
+        ]
+      }
+    ],
+    "love": [
+      {
+        "id": 61,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "достоин", "colored": true },
+          { "content": "истинной любви", "colored": false }
+        ]
+      },
+      {
+        "id": 62,
+        "text": [
+          { "content": "Моё сердце", "colored": false },
+          { "content": "открыто", "colored": true },
+          { "content": "для любви", "colored": false }
+        ]
+      },
+      {
+        "id": 63,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "привлекаю", "colored": true },
+          { "content": "гармоничные отношения", "colored": false }
+        ]
+      },
+      {
+        "id": 64,
+        "text": [
+          { "content": "Любовь", "colored": true },
+          { "content": "окружает меня повсюду", "colored": false }
+        ]
+      },
+      {
+        "id": 65,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "излучаю", "colored": true },
+          { "content": "любовь и притягиваю её", "colored": false }
+        ]
+      },
+      {
+        "id": 66,
+        "text": [
+          { "content": "Мои отношения", "colored": false },
+          { "content": "наполнены", "colored": true },
+          { "content": "взаимопониманием", "colored": false }
+        ]
+      },
+      {
+        "id": 67,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "встречаю", "colored": true },
+          { "content": "свою родственную душу", "colored": false }
+        ]
+      },
+      {
+        "id": 68,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "любовь к себе", "colored": true },
+          { "content": "растёт каждый день", "colored": false }
+        ]
+      },
+      {
+        "id": 69,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "создаю", "colored": true },
+          { "content": "счастливые отношения", "colored": false }
+        ]
+      },
+      {
+        "id": 70,
+        "text": [
+          { "content": "Любовь", "colored": true },
+          { "content": "приходит ко мне", "colored": false },
+          { "content": "легко и естественно", "colored": true }
+        ]
+      },
+      {
+        "id": 71,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "принимаю", "colored": true },
+          { "content": "любовь во всех её проявлениях", "colored": false }
+        ]
+      },
+      {
+        "id": 72,
+        "text": [
+          { "content": "Мои отношения", "colored": false },
+          { "content": "основаны", "colored": true },
+          { "content": "на доверии и уважении", "colored": false }
+        ]
+      },
+      {
+        "id": 73,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "заслуживаю", "colored": true },
+          { "content": "глубокой и искренней любви", "colored": false }
+        ]
+      },
+      {
+        "id": 74,
+        "text": [
+          { "content": "Каждый день моя", "colored": false },
+          { "content": "способность любить", "colored": true },
+          { "content": "становится сильнее", "colored": false }
+        ]
+      },
+      {
+        "id": 75,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "окружён", "colored": true },
+          { "content": "людьми, которые меня ценят", "colored": false }
+        ]
+      },
+      {
+        "id": 76,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "душа", "colored": true },
+          { "content": "поёт от счастья в любви", "colored": false }
+        ]
+      },
+      {
+        "id": 77,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "прощаю", "colored": true },
+          { "content": "прошлые обиды", "colored": false }
+        ]
+      },
+      {
+        "id": 78,
+        "text": [
+          { "content": "Любовь", "colored": true },
+          { "content": "исцеляет", "colored": true },
+          { "content": "моё сердце", "colored": false }
+        ]
+      },
+      {
+        "id": 79,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "притягиваю", "colored": true },
+          { "content": "человека своей мечты", "colored": false }
+        ]
+      },
+      {
+        "id": 80,
+        "text": [
+          { "content": "Мои отношения", "colored": false },
+          { "content": "растут", "colored": true },
+          { "content": "в любви и гармонии", "colored": false }
+        ]
+      },
+      {
+        "id": 81,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "дарю", "colored": true },
+          { "content": "и получаю безусловную любовь", "colored": false }
+        ]
+      },
+      {
+        "id": 82,
+        "text": [
+          { "content": "Каждое мгновение в любви", "colored": false },
+          { "content": "драгоценно", "colored": true },
+          { "content": "и неповторимо", "colored": true }
+        ]
+      },
+      {
+        "id": 83,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "открываю", "colored": true },
+          { "content": "своё сердце для счастья", "colored": false }
+        ]
+      },
+      {
+        "id": 84,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "любовная жизнь", "colored": true },
+          { "content": "полна радости", "colored": false }
+        ]
+      },
+      {
+        "id": 85,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "умею", "colored": true },
+          { "content": "любить и быть любимым", "colored": false }
+        ]
+      },
+      {
+        "id": 86,
+        "text": [
+          { "content": "Вселенная", "colored": false },
+          { "content": "соединяет", "colored": true },
+          { "content": "меня с моей половинкой", "colored": false }
+        ]
+      },
+      {
+        "id": 87,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "благодарен", "colored": true },
+          { "content": "за любовь в моей жизни", "colored": false }
+        ]
+      },
+      {
+        "id": 88,
+        "text": [
+          { "content": "Моё", "colored": false },
+          { "content": "сердце", "colored": true },
+          { "content": "переполнено любовью", "colored": false }
+        ]
+      },
+      {
+        "id": 89,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "строю", "colored": true },
+          { "content": "крепкие и долговечные отношения", "colored": false }
+        ]
+      },
+      {
+        "id": 90,
+        "text": [
+          { "content": "Любовь", "colored": true },
+          { "content": "- это", "colored": false },
+          { "content": "моя естественная сущность", "colored": true }
+        ]
+      }
+    ],
+    "purpose": [
+      {
+        "id": 91,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "знаю", "colored": true },
+          { "content": "своё предназначение", "colored": false }
+        ]
+      },
+      {
+        "id": 92,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "жизненная миссия", "colored": true },
+          { "content": "раскрывается передо мной", "colored": false }
+        ]
+      },
+      {
+        "id": 93,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "следую", "colored": true },
+          { "content": "своему истинному пути", "colored": false }
+        ]
+      },
+      {
+        "id": 94,
+        "text": [
+          { "content": "Каждый шаг приближает меня к", "colored": false },
+          { "content": "моей цели", "colored": true }
+        ]
+      },
+      {
+        "id": 95,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "живу", "colored": true },
+          { "content": "в соответствии со своими ценностями", "colored": false }
+        ]
+      },
+      {
+        "id": 96,
+        "text": [
+          { "content": "Моё", "colored": false },
+          { "content": "предназначение", "colored": true },
+          { "content": "служит высшему благу", "colored": false }
+        ]
+      },
+      {
+        "id": 97,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "вношу", "colored": true },
+          { "content": "уникальный вклад в мир", "colored": false }
+        ]
+      },
+      {
+        "id": 98,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "душа", "colored": true },
+          { "content": "знает правильное направление", "colored": false }
+        ]
+      },
+      {
+        "id": 99,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "исполняю", "colored": true },
+          { "content": "свою жизненную роль", "colored": false }
+        ]
+      },
+      {
+        "id": 100,
+        "text": [
+          { "content": "Каждый день", "colored": false },
+          { "content": "раскрывает", "colored": true },
+          { "content": "новые грани моего призвания", "colored": false }
+        ]
+      },
+      {
+        "id": 101,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "доверяю", "colored": true },
+          { "content": "своей внутренней мудрости", "colored": false }
+        ]
+      },
+      {
+        "id": 102,
+        "text": [
+          { "content": "Мой", "colored": false },
+          { "content": "жизненный путь", "colored": true },
+          { "content": "освещён изнутри", "colored": false }
+        ]
+      },
+      {
+        "id": 103,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "помогаю", "colored": true },
+          { "content": "другим найти их путь", "colored": false }
+        ]
+      },
+      {
+        "id": 104,
+        "text": [
+          { "content": "Моё", "colored": false },
+          { "content": "призвание", "colored": true },
+          { "content": "приносит радость людям", "colored": false }
+        ]
+      },
+      {
+        "id": 105,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "создаю", "colored": true },
+          { "content": "значимые изменения", "colored": false }
+        ]
+      },
+      {
+        "id": 106,
+        "text": [
+          { "content": "Каждое моё действие", "colored": false },
+          { "content": "имеет глубокий смысл", "colored": true }
+        ]
+      },
+      {
+        "id": 107,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "вдохновляю", "colored": true },
+          { "content": "окружающих своим примером", "colored": false }
+        ]
+      },
+      {
+        "id": 108,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "миссия", "colored": true },
+          { "content": "наполняет жизнь смыслом", "colored": false }
+        ]
+      },
+      {
+        "id": 109,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "служу", "colored": true },
+          { "content": "чему-то большему, чем я", "colored": false }
+        ]
+      },
+      {
+        "id": 110,
+        "text": [
+          { "content": "Вселенная", "colored": false },
+          { "content": "поддерживает", "colored": true },
+          { "content": "моё предназначение", "colored": false }
+        ]
+      },
+      {
+        "id": 111,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "оставляю", "colored": true },
+          { "content": "положительный след", "colored": false }
+        ]
+      },
+      {
+        "id": 112,
+        "text": [
+          { "content": "Моё", "colored": false },
+          { "content": "сердце", "colored": true },
+          { "content": "знает истинное направление", "colored": false }
+        ]
+      },
+      {
+        "id": 113,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "живу", "colored": true },
+          { "content": "осознанной жизнью", "colored": false }
+        ]
+      },
+      {
+        "id": 114,
+        "text": [
+          { "content": "Каждый опыт", "colored": false },
+          { "content": "ведёт", "colored": true },
+          { "content": "к моему предназначению", "colored": false }
+        ]
+      },
+      {
+        "id": 115,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "проявляю", "colored": true },
+          { "content": "свои уникальные дары", "colored": false }
+        ]
+      },
+      {
+        "id": 116,
+        "text": [
+          { "content": "Мой", "colored": false },
+          { "content": "путь", "colored": true },
+          { "content": "освещает дорогу другим", "colored": false }
+        ]
+      },
+      {
+        "id": 117,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "чувствую", "colored": true },
+          { "content": "глубокую связь с жизнью", "colored": false }
+        ]
+      },
+      {
+        "id": 118,
+        "text": [
+          { "content": "Моё", "colored": false },
+          { "content": "предназначение", "colored": true },
+          { "content": "больше моих страхов", "colored": false }
+        ]
+      },
+      {
+        "id": 119,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "смело", "colored": true },
+          { "content": "иду к своей мечте", "colored": false }
+        ]
+      },
+      {
+        "id": 120,
+        "text": [
+          { "content": "Каждый день", "colored": false },
+          { "content": "приближает", "colored": true },
+          { "content": "меня к осуществлению миссии", "colored": false }
+        ]
+      }
+    ],
+    "health": [
+      {
+        "id": 121,
+        "text": [
+          { "content": "Моё тело", "colored": false },
+          { "content": "здорово", "colored": true },
+          { "content": "и полно энергии", "colored": false }
+        ]
+      },
+      {
+        "id": 122,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "забочусь", "colored": true },
+          { "content": "о своём здоровье каждый день", "colored": false }
+        ]
+      },
+      {
+        "id": 123,
+        "text": [
+          { "content": "Каждая клетка моего тела", "colored": false },
+          { "content": "исцеляется", "colored": true },
+          { "content": "и обновляется", "colored": true }
+        ]
+      },
+      {
+        "id": 124,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "выбираю", "colored": true },
+          { "content": "здоровую пищу", "colored": false }
+        ]
+      },
+      {
+        "id": 125,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "иммунная система", "colored": true },
+          { "content": "сильна и надёжна", "colored": false }
+        ]
+      },
+      {
+        "id": 126,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "наслаждаюсь", "colored": true },
+          { "content": "активным образом жизни", "colored": false }
+        ]
+      },
+      {
+        "id": 127,
+        "text": [
+          { "content": "Моё тело", "colored": false },
+          { "content": "быстро", "colored": true },
+          { "content": "восстанавливается", "colored": true }
+        ]
+      },
+      {
+        "id": 128,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "слушаю", "colored": true },
+          { "content": "потребности своего тела", "colored": false }
+        ]
+      },
+      {
+        "id": 129,
+        "text": [
+          { "content": "Каждый вдох", "colored": false },
+          { "content": "наполняет", "colored": true },
+          { "content": "меня жизненной силой", "colored": false }
+        ]
+      },
+      {
+        "id": 130,
+        "text": [
+          { "content": "Мой", "colored": false },
+          { "content": "сон", "colored": true },
+          { "content": "глубокий и восстанавливающий", "colored": false }
+        ]
+      },
+      {
+        "id": 131,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "излучаю", "colored": true },
+          { "content": "здоровье и жизнелюбие", "colored": false }
+        ]
+      },
+      {
+        "id": 132,
+        "text": [
+          { "content": "Моё", "colored": false },
+          { "content": "сердце", "colored": true },
+          { "content": "работает ритмично и сильно", "colored": false }
+        ]
+      },
+      {
+        "id": 133,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "принимаю", "colored": true },
+          { "content": "мудрые решения о здоровье", "colored": false }
+        ]
+      },
+      {
+        "id": 134,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "энергия", "colored": true },
+          { "content": "неиссякаема", "colored": true }
+        ]
+      },
+      {
+        "id": 135,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "благодарен", "colored": true },
+          { "content": "своему телу за служение", "colored": false }
+        ]
+      },
+      {
+        "id": 136,
+        "text": [
+          { "content": "Каждое движение", "colored": false },
+          { "content": "укрепляет", "colored": true },
+          { "content": "моё здоровье", "colored": false }
+        ]
+      },
+      {
+        "id": 137,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "создаю", "colored": true },
+          { "content": "гармонию тела и разума", "colored": false }
+        ]
+      },
+      {
+        "id": 138,
+        "text": [
+          { "content": "Моё", "colored": false },
+          { "content": "дыхание", "colored": true },
+          { "content": "спокойно и глубоко", "colored": false }
+        ]
+      },
+      {
+        "id": 139,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "привлекаю", "colored": true },
+          { "content": "исцеление во всех формах", "colored": false }
+        ]
+      },
+      {
+        "id": 140,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "жизненная сила", "colored": true },
+          { "content": "растёт с каждым днём", "colored": false }
+        ]
+      },
+      {
+        "id": 141,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "окружаю", "colored": true },
+          { "content": "себя целебной энергией", "colored": false }
+        ]
+      },
+      {
+        "id": 142,
+        "text": [
+          { "content": "Моё тело", "colored": false },
+          { "content": "знает", "colored": true },
+          { "content": "как исцелить себя", "colored": false }
+        ]
+      },
+      {
+        "id": 143,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "поддерживаю", "colored": true },
+          { "content": "идеальный вес", "colored": false }
+        ]
+      },
+      {
+        "id": 144,
+        "text": [
+          { "content": "Каждая мышца", "colored": false },
+          { "content": "становится", "colored": true },
+          { "content": "сильнее и гибче", "colored": false }
+        ]
+      },
+      {
+        "id": 145,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "чувствую", "colored": true },
+          { "content": "прилив сил и бодрости", "colored": false }
+        ]
+      },
+      {
+        "id": 146,
+        "text": [
+          { "content": "Мой", "colored": false },
+          { "content": "разум", "colored": true },
+          { "content": "ясен и сосредоточен", "colored": false }
+        ]
+      },
+      {
+        "id": 147,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "живу", "colored": true },
+          { "content": "в гармонии с природой", "colored": false }
+        ]
+      },
+      {
+        "id": 148,
+        "text": [
+          { "content": "Моё", "colored": false },
+          { "content": "здоровье", "colored": true },
+          { "content": "- мой главный приоритет", "colored": false }
+        ]
+      },
+      {
+        "id": 149,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "излучаю", "colored": true },
+          { "content": "молодость и красоту", "colored": false }
+        ]
+      },
+      {
+        "id": 150,
+        "text": [
+          { "content": "Каждый день", "colored": false },
+          { "content": "приносит", "colored": true },
+          { "content": "новые силы и здоровье", "colored": false }
+        ]
+      }
+    ],
+    "motivation": [
+      {
+        "id": 151,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "полон", "colored": true },
+          { "content": "энергии и мотивации", "colored": false }
+        ]
+      },
+      {
+        "id": 152,
+        "text": [
+          { "content": "Каждое утро", "colored": false },
+          { "content": "зажигает", "colored": true },
+          { "content": "во мне огонь действия", "colored": false }
+        ]
+      },
+      {
+        "id": 153,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "превращаю", "colored": true },
+          { "content": "мечты в реальность", "colored": false }
+        ]
+      },
+      {
+        "id": 154,
+        "text": [
+          { "content": "Мои", "colored": false },
+          { "content": "цели", "colored": true },
+          { "content": "вдохновляют меня двигаться вперёд", "colored": false }
+        ]
+      },
+      {
+        "id": 155,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "неудержим", "colored": true },
+          { "content": "в достижении целей", "colored": false }
+        ]
+      },
+      {
+        "id": 156,
+        "text": [
+          { "content": "Каждый шаг", "colored": false },
+          { "content": "приближает", "colored": true },
+          { "content": "меня к успеху", "colored": false }
+        ]
+      },
+      {
+        "id": 157,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "черпаю", "colored": true },
+          { "content": "силу из внутреннего источника", "colored": false }
+        ]
+      },
+      {
+        "id": 158,
+        "text": [
+          { "content": "Мой", "colored": false },
+          { "content": "энтузиазм", "colored": true },
+          { "content": "заразителен", "colored": true }
+        ]
+      },
+      {
+        "id": 159,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "превосхожу", "colored": true },
+          { "content": "свои прежние достижения", "colored": false }
+        ]
+      },
+      {
+        "id": 160,
+        "text": [
+          { "content": "Каждое препятствие", "colored": false },
+          { "content": "усиливает", "colored": true },
+          { "content": "мою решимость", "colored": false }
+        ]
+      },
+      {
+        "id": 161,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "горю", "colored": true },
+          { "content": "желанием действовать", "colored": false }
+        ]
+      },
+      {
+        "id": 162,
+        "text": [
+          { "content": "Моя", "colored": false },
+          { "content": "страсть", "colored": true },
+          { "content": "движет горами", "colored": false }
+        ]
+      },
+      {
+        "id": 163,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "использую", "colored": true },
+          { "content": "каждую возможность для роста", "colored": false }
+        ]
+      },
+      {
+        "id": 164,
+        "text": [
+          { "content": "Мой", "colored": false },
+          { "content": "внутренний огонь", "colored": true },
+          { "content": "никогда не гаснет", "colored": false }
+        ]
+      },
+      {
+        "id": 165,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "вдохновляю", "colored": true },
+          { "content": "себя и других на подвиги", "colored": false }
+        ]
+      },
+      {
+        "id": 166,
+        "text": [
+          { "content": "Каждая неудача", "colored": false },
+          { "content": "закаляет", "colored": true },
+          { "content": "мой характер", "colored": false }
+        ]
+      },
+      {
+        "id": 167,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "нахожу", "colored": true },
+          { "content": "мотивацию в каждом дне", "colored": false }
+        ]
+      },
+      {
+        "id": 168,
+        "text": [
+          { "content": "Мой", "colored": false },
+          { "content": "дух", "colored": true },
+          { "content": "непобедим", "colored": true }
+        ]
+      },
+      {
+        "id": 169,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "создаю", "colored": true },
+          { "content": "momentum для успеха", "colored": false }
+        ]
+      },
+      {
+        "id": 170,
+        "text": [
+          { "content": "Каждое действие", "colored": false },
+          { "content": "наполнено", "colored": true },
+          { "content": "целеустремлённостью", "colored": false }
+        ]
+      },
+      {
+        "id": 171,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "поднимаюсь", "colored": true },
+          { "content": "после каждого падения", "colored": false }
+        ]
+      },
+      {
+        "id": 172,
+        "text": [
+          { "content": "Мои", "colored": false },
+          { "content": "амбиции", "colored": true },
+          { "content": "не знают границ", "colored": false }
+        ]
+      },
+      {
+        "id": 173,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "превращаю", "colored": true },
+          { "content": "давление в алмазы", "colored": false }
+        ]
+      },
+      {
+        "id": 174,
+        "text": [
+          { "content": "Каждый вызов", "colored": false },
+          { "content": "пробуждает", "colored": true },
+          { "content": "во мне силу", "colored": false }
+        ]
+      },
+      {
+        "id": 175,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "программирую", "colored": true },
+          { "content": "себя на победу", "colored": false }
+        ]
+      },
+      {
+        "id": 176,
+        "text": [
+          { "content": "Мой", "colored": false },
+          { "content": "боевой дух", "colored": true },
+          { "content": "растёт с каждым днём", "colored": false }
+        ]
+      },
+      {
+        "id": 177,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "источник", "colored": true },
+          { "content": "собственной мотивации", "colored": false }
+        ]
+      },
+      {
+        "id": 178,
+        "text": [
+          { "content": "Каждая мысль", "colored": false },
+          { "content": "направлена", "colored": true },
+          { "content": "на достижение целей", "colored": false }
+        ]
+      },
+      {
+        "id": 179,
+        "text": [
+          { "content": "Я", "colored": false },
+          { "content": "превосхожу", "colored": true },
+          { "content": "все ожидания", "colored": false }
+        ]
+      },
+      {
+        "id": 180,
+        "text": [
+          { "content": "Мой", "colored": false },
+          { "content": "энтузиазм", "colored": true },
+          { "content": "заражает весь мир", "colored": false }
+        ]
+      }
+    ]
+  }
+}

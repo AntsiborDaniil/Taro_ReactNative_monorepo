@@ -1,0 +1,52 @@
+{
+  "banner.title": "Unlock the \nPractitioner's Path",
+  "banner.action": "Try for Free",
+
+  "subscriptionModal.title": "Unlock the Practitioner's Path",
+  "subscriptionModal.practiceTitle": "Choose a New Path of Tarot Practice",
+  "subscriptionModal.restore": "Restore",
+
+  "subscriptionModal.benefit.description1": "",
+  "subscriptionModal.benefit.description2": "more profitable",
+
+  "subscriptionModal.benefits.noAdd": "Ad-Free",
+  "subscriptionModal.benefits.allSpreads": "All Spreads Available",
+  "subscriptionModal.benefits.zeroLimits": "Unlimited daily layouts",
+  "subscriptionModal.benefits.freePeriod": "First 3 days free",
+  "subscriptionModal.benefits.design": "Unique Card design",
+  "subscriptionModal.benefits.allCards": "Unlimited Card Interpretations",
+  "subscriptionModal.benefits.summary": "Access to detailed card reviews",
+
+  "subscriptionModal.freeDays": "3 Days Free",
+
+  "subscriptionModal.$rc_weekly": "Weekly Path",
+  "subscriptionModal.$rc_monthly": "Monthly Path",
+  "subscriptionModal.$rc_annual": "Annual Path",
+
+  "subscriptionModal.period.$rc_weekly": "week",
+  "subscriptionModal.period.$rc_monthly": "month",
+  "subscriptionModal.period.$rc_annual": "year",
+
+  "subscriptionModal.subStatus.willRenew": "The subscription is active. Will last",
+  "subscriptionModal.subStatus.notRenew": "The subscription is active. Will finish",
+
+  "subscriptionModal.saveMonth": "Save 62%",
+  "subscriptionModal.saveYear": "Save 87%",
+
+  "subscriptionModal.continue": "Continue",
+  "subscriptionModal.practiceContinue": "Change Plan",
+  "subscriptionModal.cancel": "cancel anytime",
+
+  "subscriptionModal.successPurchase": "Success",
+  "subscriptionModal.errorPurchase": "Error",
+  "subscriptionModal.cancelPurchase": "Cancel",
+
+  "subscriptionModal.restorePurchaseSuccess": "Your Tarot practitioner path has been successfully restored!",
+  "subscriptionModal.restorePurchaseCancel": "No active subscriptions to restore.",
+  "subscriptionModal.restorePurchaseError": "Error restoring Tarot practitioner path.",
+
+  "subscriptionModal.successPurchaseDescription": "Purchase completed successfully! You have unlocked the Tarot practitioner path.",
+  "subscriptionModal.errorPurchaseNotActivatedDescription": "Purchase completed, but subscription not activated.",
+  "subscriptionModal.errorPurchaseDescription": "An error occurred during purchase, please try again later.",
+  "subscriptionModal.cancelPurchaseDescription": "Purchase was cancelled."
+}

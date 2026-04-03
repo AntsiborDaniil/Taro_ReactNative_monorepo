@@ -1,0 +1,14 @@
+{
+  "welcome.title": "Welcome to Tarot!",
+  "welcome.description": "Discover the magic of Tarot! Get daily inspiration and answers to your questions with the cards",
+  "cardOfDay.title": "Card of the Day",
+  "cardOfDay.description": "Start your day with a single card that offers wisdom and guidance. Simply open and get inspired",
+  "themedSpreads.title": "Themed Spreads",
+  "themedSpreads.description": "Ask a question about love, career, or the future. Choose a spread and receive deep insights from the cards",
+  "cardMeanings.title": "Explore Card Meanings",
+  "cardMeanings.description": "Read card meanings in the Library section, add your favorite cards to bookmarks",
+  "cardDesigns.title": "Card Customization",
+  "cardDesigns.description": "Make Tarot your own! Choose unique card styles that reflect your taste and mood",
+  "unlockPractice.title": "Unlock the Practice Path",
+  "unlockPractice.description": "Subscribe to unlock unlimited access to all features! Only {{price}} per year, with a 3-day free trial"
+}

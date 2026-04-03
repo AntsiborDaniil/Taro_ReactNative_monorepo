@@ -1,0 +1,29 @@
+{
+  "settings": "Settings",
+
+  "sound": "Sound and notifications",
+  "sound.vibration": "Vibration",
+  "sound.notifications": "Notifications",
+  "sound.moon.notifications": "Moon phase notifications",
+
+  "language": "App language",
+
+  "hasReversed": "Reversed cards",
+
+  "payments": "Subscription and purchases",
+  "payments.restore": "Restore purchases",
+
+  "deck.style": "Deck style",
+
+  "deck.style.flat": "Flat",
+  "deck.style.classic": "Classic",
+  "deck.style.modern": "Modern Art",
+
+  "share": "Share",
+
+  "rate.app": "Rate the app",
+
+  "terms.of.use": "Terms of use",
+
+  "privacy.policy": "Privacy policy"
+}

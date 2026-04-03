@@ -1,0 +1,11 @@
+{
+  "datesPeriod.week": "7 дней",
+  "datesPeriod.month": "30 дней",
+  "datesPeriod.year": "1 год",
+  "name.stress": "Стресс",
+  "name.mood": "Настроение",
+  "name.energy": "Энергия",
+  "progress.howAreYou": "Узнайте, что с вами сегодня",
+  "progress.assess": "Оцените свое состояние",
+  "progress": "Выполнено"
+}

@@ -1,0 +1,1454 @@
+{
+  "affirmations": "Affirmations",
+  "hasAffirmation": "There is an affirmation for you",
+  "tomorrowAffirmation": "A new affirmation will be available tomorrow",
+  "general": "General",
+  "career": "Career & Success",
+  "love": "Love & Relationships",
+  "purpose": "Life Purpose",
+  "health": "Health & Wellness",
+  "motivation": "Motivation & Energy",
+  "affirmationsItems": {
+    "general": [
+      {
+        "id": 1,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "deserve", "colored": true },
+          { "content": "all the good things in life", "colored": false }
+        ]
+      },
+      {
+        "id": 2,
+        "text": [
+          { "content": "Every day I become", "colored": false },
+          { "content": "better and stronger", "colored": true }
+        ]
+      },
+      {
+        "id": 3,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "possibilities", "colored": true },
+          { "content": "are limitless", "colored": true }
+        ]
+      },
+      {
+        "id": 4,
+        "text": [
+          { "content": "I accept myself", "colored": false },
+          { "content": "completely", "colored": true },
+          { "content": "and unconditionally", "colored": false }
+        ]
+      },
+      {
+        "id": 5,
+        "text": [
+          { "content": "I have", "colored": false },
+          { "content": "inner wisdom", "colored": true },
+          { "content": "and strength", "colored": true }
+        ]
+      },
+      {
+        "id": 6,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "attract", "colored": true },
+          { "content": "positive events", "colored": false }
+        ]
+      },
+      {
+        "id": 7,
+        "text": [
+          { "content": "My life is filled with", "colored": false },
+          { "content": "joy", "colored": true },
+          { "content": "and gratitude", "colored": true }
+        ]
+      },
+      {
+        "id": 8,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "believe", "colored": true },
+          { "content": "in my abilities", "colored": false }
+        ]
+      },
+      {
+        "id": 9,
+        "text": [
+          { "content": "Every obstacle is an", "colored": false },
+          { "content": "opportunity for growth", "colored": true }
+        ]
+      },
+      {
+        "id": 10,
+        "text": [
+          { "content": "I am surrounded by", "colored": false },
+          { "content": "love", "colored": true },
+          { "content": "and support", "colored": true }
+        ]
+      },
+      {
+        "id": 11,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "inner world", "colored": true },
+          { "content": "is peaceful and harmonious", "colored": false }
+        ]
+      },
+      {
+        "id": 12,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "create", "colored": true },
+          { "content": "my own reality", "colored": false }
+        ]
+      },
+      {
+        "id": 13,
+        "text": [
+          { "content": "Everything comes to me", "colored": false },
+          { "content": "at the right time", "colored": true }
+        ]
+      },
+      {
+        "id": 14,
+        "text": [
+          { "content": "I am", "colored": false },
+          { "content": "open", "colored": true },
+          { "content": "to new opportunities", "colored": false }
+        ]
+      },
+      {
+        "id": 15,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "confidence", "colored": true },
+          { "content": "grows every day", "colored": false }
+        ]
+      },
+      {
+        "id": 16,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "deserve", "colored": true },
+          { "content": "happiness and success", "colored": false }
+        ]
+      },
+      {
+        "id": 17,
+        "text": [
+          { "content": "My thoughts are", "colored": false },
+          { "content": "positive", "colored": true },
+          { "content": "and creative", "colored": true }
+        ]
+      },
+      {
+        "id": 18,
+        "text": [
+          { "content": "I am", "colored": false },
+          { "content": "grateful", "colored": true },
+          { "content": "for each day", "colored": false }
+        ]
+      },
+      {
+        "id": 19,
+        "text": [
+          { "content": "Within me lives an", "colored": false },
+          { "content": "inexhaustible source", "colored": true },
+          { "content": "of energy and inspiration", "colored": false }
+        ]
+      },
+      {
+        "id": 20,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "make", "colored": true },
+          { "content": "the right decisions", "colored": false }
+        ]
+      },
+      {
+        "id": 21,
+        "text": [
+          { "content": "My life is an", "colored": false },
+          { "content": "amazing journey", "colored": true }
+        ]
+      },
+      {
+        "id": 22,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "radiate", "colored": true },
+          { "content": "positive energy", "colored": false }
+        ]
+      },
+      {
+        "id": 23,
+        "text": [
+          { "content": "All my", "colored": false },
+          { "content": "dreams are achievable", "colored": true }
+        ]
+      },
+      {
+        "id": 24,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "live", "colored": true },
+          { "content": "in harmony with myself", "colored": false }
+        ]
+      },
+      {
+        "id": 25,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "presence", "colored": true },
+          { "content": "brings joy to others", "colored": false }
+        ]
+      },
+      {
+        "id": 26,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "trust", "colored": true },
+          { "content": "the flow of life", "colored": false }
+        ]
+      },
+      {
+        "id": 27,
+        "text": [
+          { "content": "Every moment of my life is", "colored": false },
+          { "content": "valuable and meaningful", "colored": true }
+        ]
+      },
+      {
+        "id": 28,
+        "text": [
+          { "content": "I am", "colored": false },
+          { "content": "filled", "colored": true },
+          { "content": "with inner light", "colored": false }
+        ]
+      },
+      {
+        "id": 29,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "intuition", "colored": true },
+          { "content": "always guides me correctly", "colored": false }
+        ]
+      },
+      {
+        "id": 30,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "create", "colored": true },
+          { "content": "a beautiful future", "colored": false }
+        ]
+      }
+    ],
+    "career": [
+      {
+        "id": 31,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "career", "colored": true },
+          { "content": "flourishes", "colored": true }
+        ]
+      },
+      {
+        "id": 32,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "attract", "colored": true },
+          { "content": "perfect opportunities", "colored": false }
+        ]
+      },
+      {
+        "id": 33,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "professional skills", "colored": true },
+          { "content": "constantly develop", "colored": false }
+        ]
+      },
+      {
+        "id": 34,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "confidently", "colored": true },
+          { "content": "achieve my goals", "colored": false }
+        ]
+      },
+      {
+        "id": 35,
+        "text": [
+          { "content": "My work brings me", "colored": false },
+          { "content": "joy and satisfaction", "colored": true }
+        ]
+      },
+      {
+        "id": 36,
+        "text": [
+          { "content": "I am a", "colored": false },
+          { "content": "valuable specialist", "colored": true },
+          { "content": "in my field", "colored": false }
+        ]
+      },
+      {
+        "id": 37,
+        "text": [
+          { "content": "Every day I", "colored": false },
+          { "content": "get closer", "colored": true },
+          { "content": "to professional success", "colored": false }
+        ]
+      },
+      {
+        "id": 38,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "ideas and solutions", "colored": true },
+          { "content": "are highly valued", "colored": false }
+        ]
+      },
+      {
+        "id": 39,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "easily", "colored": true },
+          { "content": "handle any challenges", "colored": false }
+        ]
+      },
+      {
+        "id": 40,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "career", "colored": true },
+          { "content": "develops rapidly", "colored": false }
+        ]
+      },
+      {
+        "id": 41,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "attract", "colored": true },
+          { "content": "successful partners and colleagues", "colored": false }
+        ]
+      },
+      {
+        "id": 42,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "professional growth", "colored": true },
+          { "content": "knows no bounds", "colored": false }
+        ]
+      },
+      {
+        "id": 43,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "deserve", "colored": true },
+          { "content": "high compensation", "colored": false }
+        ]
+      },
+      {
+        "id": 44,
+        "text": [
+          { "content": "Every project brings me", "colored": false },
+          { "content": "new experience", "colored": true },
+          { "content": "and recognition", "colored": true }
+        ]
+      },
+      {
+        "id": 45,
+        "text": [
+          { "content": "I am a", "colored": false },
+          { "content": "leader", "colored": true },
+          { "content": "in my field", "colored": false }
+        ]
+      },
+      {
+        "id": 46,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "achievements", "colored": true },
+          { "content": "inspire others", "colored": false }
+        ]
+      },
+      {
+        "id": 47,
+        "text": [
+          { "content": "I am", "colored": false },
+          { "content": "open", "colored": true },
+          { "content": "to new challenges", "colored": false }
+        ]
+      },
+      {
+        "id": 48,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "work", "colored": true },
+          { "content": "changes the world for the better", "colored": false }
+        ]
+      },
+      {
+        "id": 49,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "create", "colored": true },
+          { "content": "innovative solutions", "colored": false }
+        ]
+      },
+      {
+        "id": 50,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "talent", "colored": true },
+          { "content": "is recognized and rewarded", "colored": false }
+        ]
+      },
+      {
+        "id": 51,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "find", "colored": true },
+          { "content": "perfect work-life balance", "colored": false }
+        ]
+      },
+      {
+        "id": 52,
+        "text": [
+          { "content": "Every obstacle makes me", "colored": false },
+          { "content": "stronger and wiser", "colored": true }
+        ]
+      },
+      {
+        "id": 53,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "attract", "colored": true },
+          { "content": "favorable circumstances", "colored": false }
+        ]
+      },
+      {
+        "id": 54,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "reputation", "colored": true },
+          { "content": "is impeccable", "colored": true }
+        ]
+      },
+      {
+        "id": 55,
+        "text": [
+          { "content": "I am a", "colored": false },
+          { "content": "master", "colored": true },
+          { "content": "of my craft", "colored": false }
+        ]
+      },
+      {
+        "id": 56,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "ambitions", "colored": true },
+          { "content": "become reality", "colored": false }
+        ]
+      },
+      {
+        "id": 57,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "build", "colored": true },
+          { "content": "a successful empire", "colored": false }
+        ]
+      },
+      {
+        "id": 58,
+        "text": [
+          { "content": "Each day brings", "colored": false },
+          { "content": "new opportunities", "colored": true },
+          { "content": "for growth", "colored": false }
+        ]
+      },
+      {
+        "id": 59,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "inspire", "colored": true },
+          { "content": "my team to achieve greatness", "colored": false }
+        ]
+      },
+      {
+        "id": 60,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "professional future", "colored": true },
+          { "content": "is bright and limitless", "colored": false }
+        ]
+      }
+    ],
+    "love": [
+      {
+        "id": 61,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "deserve", "colored": true },
+          { "content": "true love", "colored": false }
+        ]
+      },
+      {
+        "id": 62,
+        "text": [
+          { "content": "My heart is", "colored": false },
+          { "content": "open", "colored": true },
+          { "content": "to love", "colored": false }
+        ]
+      },
+      {
+        "id": 63,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "attract", "colored": true },
+          { "content": "harmonious relationships", "colored": false }
+        ]
+      },
+      {
+        "id": 64,
+        "text": [
+          { "content": "Love", "colored": true },
+          { "content": "surrounds me everywhere", "colored": false }
+        ]
+      },
+      {
+        "id": 65,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "radiate", "colored": true },
+          { "content": "love and attract it", "colored": false }
+        ]
+      },
+      {
+        "id": 66,
+        "text": [
+          { "content": "My relationships are", "colored": false },
+          { "content": "filled", "colored": true },
+          { "content": "with understanding", "colored": false }
+        ]
+      },
+      {
+        "id": 67,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "meet", "colored": true },
+          { "content": "my soulmate", "colored": false }
+        ]
+      },
+      {
+        "id": 68,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "self-love", "colored": true },
+          { "content": "grows every day", "colored": false }
+        ]
+      },
+      {
+        "id": 69,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "create", "colored": true },
+          { "content": "happy relationships", "colored": false }
+        ]
+      },
+      {
+        "id": 70,
+        "text": [
+          { "content": "Love", "colored": true },
+          { "content": "comes to me", "colored": false },
+          { "content": "easily and naturally", "colored": true }
+        ]
+      },
+      {
+        "id": 71,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "accept", "colored": true },
+          { "content": "love in all its forms", "colored": false }
+        ]
+      },
+      {
+        "id": 72,
+        "text": [
+          { "content": "My relationships are", "colored": false },
+          { "content": "based", "colored": true },
+          { "content": "on trust and respect", "colored": false }
+        ]
+      },
+      {
+        "id": 73,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "deserve", "colored": true },
+          { "content": "deep and sincere love", "colored": false }
+        ]
+      },
+      {
+        "id": 74,
+        "text": [
+          { "content": "Every day my", "colored": false },
+          { "content": "ability to love", "colored": true },
+          { "content": "becomes stronger", "colored": false }
+        ]
+      },
+      {
+        "id": 75,
+        "text": [
+          { "content": "I am", "colored": false },
+          { "content": "surrounded", "colored": true },
+          { "content": "by people who value me", "colored": false }
+        ]
+      },
+      {
+        "id": 76,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "soul", "colored": true },
+          { "content": "sings with happiness in love", "colored": false }
+        ]
+      },
+      {
+        "id": 77,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "forgive", "colored": true },
+          { "content": "past hurts", "colored": false }
+        ]
+      },
+      {
+        "id": 78,
+        "text": [
+          { "content": "Love", "colored": true },
+          { "content": "heals", "colored": true },
+          { "content": "my heart", "colored": false }
+        ]
+      },
+      {
+        "id": 79,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "attract", "colored": true },
+          { "content": "the person of my dreams", "colored": false }
+        ]
+      },
+      {
+        "id": 80,
+        "text": [
+          { "content": "My relationships", "colored": false },
+          { "content": "grow", "colored": true },
+          { "content": "in love and harmony", "colored": false }
+        ]
+      },
+      {
+        "id": 81,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "give", "colored": true },
+          { "content": "and receive unconditional love", "colored": false }
+        ]
+      },
+      {
+        "id": 82,
+        "text": [
+          { "content": "Every moment in love is", "colored": false },
+          { "content": "precious", "colored": true },
+          { "content": "and unique", "colored": true }
+        ]
+      },
+      {
+        "id": 83,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "open", "colored": true },
+          { "content": "my heart to happiness", "colored": false }
+        ]
+      },
+      {
+        "id": 84,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "love life", "colored": true },
+          { "content": "is full of joy", "colored": false }
+        ]
+      },
+      {
+        "id": 85,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "know how", "colored": true },
+          { "content": "to love and be loved", "colored": false }
+        ]
+      },
+      {
+        "id": 86,
+        "text": [
+          { "content": "The universe", "colored": false },
+          { "content": "connects", "colored": true },
+          { "content": "me with my other half", "colored": false }
+        ]
+      },
+      {
+        "id": 87,
+        "text": [
+          { "content": "I am", "colored": false },
+          { "content": "grateful", "colored": true },
+          { "content": "for love in my life", "colored": false }
+        ]
+      },
+      {
+        "id": 88,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "heart", "colored": true },
+          { "content": "overflows with love", "colored": false }
+        ]
+      },
+      {
+        "id": 89,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "build", "colored": true },
+          { "content": "strong and lasting relationships", "colored": false }
+        ]
+      },
+      {
+        "id": 90,
+        "text": [
+          { "content": "Love", "colored": true },
+          { "content": "is", "colored": false },
+          { "content": "my natural essence", "colored": true }
+        ]
+      }
+    ],
+    "purpose": [
+      {
+        "id": 91,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "know", "colored": true },
+          { "content": "my purpose", "colored": false }
+        ]
+      },
+      {
+        "id": 92,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "life mission", "colored": true },
+          { "content": "unfolds before me", "colored": false }
+        ]
+      },
+      {
+        "id": 93,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "follow", "colored": true },
+          { "content": "my true path", "colored": false }
+        ]
+      },
+      {
+        "id": 94,
+        "text": [
+          { "content": "Every step brings me closer to", "colored": false },
+          { "content": "my goal", "colored": true }
+        ]
+      },
+      {
+        "id": 95,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "live", "colored": true },
+          { "content": "according to my values", "colored": false }
+        ]
+      },
+      {
+        "id": 96,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "purpose", "colored": true },
+          { "content": "serves the greater good", "colored": false }
+        ]
+      },
+      {
+        "id": 97,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "make", "colored": true },
+          { "content": "a unique contribution to the world", "colored": false }
+        ]
+      },
+      {
+        "id": 98,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "soul", "colored": true },
+          { "content": "knows the right direction", "colored": false }
+        ]
+      },
+      {
+        "id": 99,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "fulfill", "colored": true },
+          { "content": "my life role", "colored": false }
+        ]
+      },
+      {
+        "id": 100,
+        "text": [
+          { "content": "Each day", "colored": false },
+          { "content": "reveals", "colored": true },
+          { "content": "new aspects of my calling", "colored": false }
+        ]
+      },
+      {
+        "id": 101,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "trust", "colored": true },
+          { "content": "my inner wisdom", "colored": false }
+        ]
+      },
+      {
+        "id": 102,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "life path", "colored": true },
+          { "content": "is illuminated from within", "colored": false }
+        ]
+      },
+      {
+        "id": 103,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "help", "colored": true },
+          { "content": "others find their path", "colored": false }
+        ]
+      },
+      {
+        "id": 104,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "calling", "colored": true },
+          { "content": "brings joy to people", "colored": false }
+        ]
+      },
+      {
+        "id": 105,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "create", "colored": true },
+          { "content": "meaningful changes", "colored": false }
+        ]
+      },
+      {
+        "id": 106,
+        "text": [
+          { "content": "Every action I take", "colored": false },
+          { "content": "has deep meaning", "colored": true }
+        ]
+      },
+      {
+        "id": 107,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "inspire", "colored": true },
+          { "content": "others with my example", "colored": false }
+        ]
+      },
+      {
+        "id": 108,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "mission", "colored": true },
+          { "content": "fills life with meaning", "colored": false }
+        ]
+      },
+      {
+        "id": 109,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "serve", "colored": true },
+          { "content": "something greater than myself", "colored": false }
+        ]
+      },
+      {
+        "id": 110,
+        "text": [
+          { "content": "The universe", "colored": false },
+          { "content": "supports", "colored": true },
+          { "content": "my purpose", "colored": false }
+        ]
+      },
+      {
+        "id": 111,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "leave", "colored": true },
+          { "content": "a positive impact", "colored": false }
+        ]
+      },
+      {
+        "id": 112,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "heart", "colored": true },
+          { "content": "knows the true direction", "colored": false }
+        ]
+      },
+      {
+        "id": 113,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "live", "colored": true },
+          { "content": "a conscious life", "colored": false }
+        ]
+      },
+      {
+        "id": 114,
+        "text": [
+          { "content": "Every experience", "colored": false },
+          { "content": "leads", "colored": true },
+          { "content": "to my purpose", "colored": false }
+        ]
+      },
+      {
+        "id": 115,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "manifest", "colored": true },
+          { "content": "my unique gifts", "colored": false }
+        ]
+      },
+      {
+        "id": 116,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "path", "colored": true },
+          { "content": "lights the way for others", "colored": false }
+        ]
+      },
+      {
+        "id": 117,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "feel", "colored": true },
+          { "content": "a deep connection with life", "colored": false }
+        ]
+      },
+      {
+        "id": 118,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "purpose", "colored": true },
+          { "content": "is bigger than my fears", "colored": false }
+        ]
+      },
+      {
+        "id": 119,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "boldly", "colored": true },
+          { "content": "move toward my dreams", "colored": false }
+        ]
+      },
+      {
+        "id": 120,
+        "text": [
+          { "content": "Each day", "colored": false },
+          { "content": "brings me closer", "colored": true },
+          { "content": "to fulfilling my mission", "colored": false }
+        ]
+      }
+    ],
+    "health": [
+      {
+        "id": 121,
+        "text": [
+          { "content": "My body is", "colored": false },
+          { "content": "healthy", "colored": true },
+          { "content": "and full of energy", "colored": false }
+        ]
+      },
+      {
+        "id": 122,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "take care", "colored": true },
+          { "content": "of my health every day", "colored": false }
+        ]
+      },
+      {
+        "id": 123,
+        "text": [
+          { "content": "Every cell in my body", "colored": false },
+          { "content": "heals", "colored": true },
+          { "content": "and renews", "colored": true }
+        ]
+      },
+      {
+        "id": 124,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "choose", "colored": true },
+          { "content": "healthy foods", "colored": false }
+        ]
+      },
+      {
+        "id": 125,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "immune system", "colored": true },
+          { "content": "is strong and reliable", "colored": false }
+        ]
+      },
+      {
+        "id": 126,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "enjoy", "colored": true },
+          { "content": "an active lifestyle", "colored": false }
+        ]
+      },
+      {
+        "id": 127,
+        "text": [
+          { "content": "My body", "colored": false },
+          { "content": "quickly", "colored": true },
+          { "content": "recovers", "colored": true }
+        ]
+      },
+      {
+        "id": 128,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "listen", "colored": true },
+          { "content": "to my body's needs", "colored": false }
+        ]
+      },
+      {
+        "id": 129,
+        "text": [
+          { "content": "Every breath", "colored": false },
+          { "content": "fills", "colored": true },
+          { "content": "me with life force", "colored": false }
+        ]
+      },
+      {
+        "id": 130,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "sleep", "colored": true },
+          { "content": "is deep and restorative", "colored": false }
+        ]
+      },
+      {
+        "id": 131,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "radiate", "colored": true },
+          { "content": "health and vitality", "colored": false }
+        ]
+      },
+      {
+        "id": 132,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "heart", "colored": true },
+          { "content": "beats rhythmically and strongly", "colored": false }
+        ]
+      },
+      {
+        "id": 133,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "make", "colored": true },
+          { "content": "wise decisions about health", "colored": false }
+        ]
+      },
+      {
+        "id": 134,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "energy", "colored": true },
+          { "content": "is inexhaustible", "colored": true }
+        ]
+      },
+      {
+        "id": 135,
+        "text": [
+          { "content": "I am", "colored": false },
+          { "content": "grateful", "colored": true },
+          { "content": "to my body for its service", "colored": false }
+        ]
+      },
+      {
+        "id": 136,
+        "text": [
+          { "content": "Every movement", "colored": false },
+          { "content": "strengthens", "colored": true },
+          { "content": "my health", "colored": false }
+        ]
+      },
+      {
+        "id": 137,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "create", "colored": true },
+          { "content": "harmony between body and mind", "colored": false }
+        ]
+      },
+      {
+        "id": 138,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "breathing", "colored": true },
+          { "content": "is calm and deep", "colored": false }
+        ]
+      },
+      {
+        "id": 139,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "attract", "colored": true },
+          { "content": "healing in all forms", "colored": false }
+        ]
+      },
+      {
+        "id": 140,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "life force", "colored": true },
+          { "content": "grows stronger each day", "colored": false }
+        ]
+      },
+      {
+        "id": 141,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "surround", "colored": true },
+          { "content": "myself with healing energy", "colored": false }
+        ]
+      },
+      {
+        "id": 142,
+        "text": [
+          { "content": "My body", "colored": false },
+          { "content": "knows", "colored": true },
+          { "content": "how to heal itself", "colored": false }
+        ]
+      },
+      {
+        "id": 143,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "maintain", "colored": true },
+          { "content": "my ideal weight", "colored": false }
+        ]
+      },
+      {
+        "id": 144,
+        "text": [
+          { "content": "Every muscle", "colored": false },
+          { "content": "becomes", "colored": true },
+          { "content": "stronger and more flexible", "colored": false }
+        ]
+      },
+      {
+        "id": 145,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "feel", "colored": true },
+          { "content": "a surge of strength and vigor", "colored": false }
+        ]
+      },
+      {
+        "id": 146,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "mind", "colored": true },
+          { "content": "is clear and focused", "colored": false }
+        ]
+      },
+      {
+        "id": 147,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "live", "colored": true },
+          { "content": "in harmony with nature", "colored": false }
+        ]
+      },
+      {
+        "id": 148,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "health", "colored": true },
+          { "content": "is my top priority", "colored": false }
+        ]
+      },
+      {
+        "id": 149,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "radiate", "colored": true },
+          { "content": "youth and beauty", "colored": false }
+        ]
+      },
+      {
+        "id": 150,
+        "text": [
+          { "content": "Each day", "colored": false },
+          { "content": "brings", "colored": true },
+          { "content": "new strength and health", "colored": false }
+        ]
+      }
+    ],
+    "motivation": [
+      {
+        "id": 151,
+        "text": [
+          { "content": "I am", "colored": false },
+          { "content": "full", "colored": true },
+          { "content": "of energy and motivation", "colored": false }
+        ]
+      },
+      {
+        "id": 152,
+        "text": [
+          { "content": "Every morning", "colored": false },
+          { "content": "ignites", "colored": true },
+          { "content": "the fire of action within me", "colored": false }
+        ]
+      },
+      {
+        "id": 153,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "turn", "colored": true },
+          { "content": "dreams into reality", "colored": false }
+        ]
+      },
+      {
+        "id": 154,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "goals", "colored": true },
+          { "content": "inspire me to move forward", "colored": false }
+        ]
+      },
+      {
+        "id": 155,
+        "text": [
+          { "content": "I am", "colored": false },
+          { "content": "unstoppable", "colored": true },
+          { "content": "in achieving my goals", "colored": false }
+        ]
+      },
+      {
+        "id": 156,
+        "text": [
+          { "content": "Every step", "colored": false },
+          { "content": "brings me closer", "colored": true },
+          { "content": "to success", "colored": false }
+        ]
+      },
+      {
+        "id": 157,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "draw", "colored": true },
+          { "content": "strength from my inner source", "colored": false }
+        ]
+      },
+      {
+        "id": 158,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "enthusiasm", "colored": true },
+          { "content": "is contagious", "colored": true }
+        ]
+      },
+      {
+        "id": 159,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "surpass", "colored": true },
+          { "content": "my previous achievements", "colored": false }
+        ]
+      },
+      {
+        "id": 160,
+        "text": [
+          { "content": "Every obstacle", "colored": false },
+          { "content": "strengthens", "colored": true },
+          { "content": "my determination", "colored": false }
+        ]
+      },
+      {
+        "id": 161,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "burn", "colored": true },
+          { "content": "with desire to take action", "colored": false }
+        ]
+      },
+      {
+        "id": 162,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "passion", "colored": true },
+          { "content": "moves mountains", "colored": false }
+        ]
+      },
+      {
+        "id": 163,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "use", "colored": true },
+          { "content": "every opportunity for growth", "colored": false }
+        ]
+      },
+      {
+        "id": 164,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "inner fire", "colored": true },
+          { "content": "never goes out", "colored": false }
+        ]
+      },
+      {
+        "id": 165,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "inspire", "colored": true },
+          { "content": "myself and others to greatness", "colored": false }
+        ]
+      },
+      {
+        "id": 166,
+        "text": [
+          { "content": "Every failure", "colored": false },
+          { "content": "strengthens", "colored": true },
+          { "content": "my character", "colored": false }
+        ]
+      },
+      {
+        "id": 167,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "find", "colored": true },
+          { "content": "motivation in every day", "colored": false }
+        ]
+      },
+      {
+        "id": 168,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "spirit", "colored": true },
+          { "content": "is invincible", "colored": true }
+        ]
+      },
+      {
+        "id": 169,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "create", "colored": true },
+          { "content": "momentum for success", "colored": false }
+        ]
+      },
+      {
+        "id": 170,
+        "text": [
+          { "content": "Every action", "colored": false },
+          { "content": "is filled", "colored": true },
+          { "content": "with purpose", "colored": false }
+        ]
+      },
+      {
+        "id": 171,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "rise", "colored": true },
+          { "content": "after every fall", "colored": false }
+        ]
+      },
+      {
+        "id": 172,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "ambitions", "colored": true },
+          { "content": "know no bounds", "colored": false }
+        ]
+      },
+      {
+        "id": 173,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "turn", "colored": true },
+          { "content": "pressure into diamonds", "colored": false }
+        ]
+      },
+      {
+        "id": 174,
+        "text": [
+          { "content": "Every challenge", "colored": false },
+          { "content": "awakens", "colored": true },
+          { "content": "strength within me", "colored": false }
+        ]
+      },
+      {
+        "id": 175,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "program", "colored": true },
+          { "content": "myself for victory", "colored": false }
+        ]
+      },
+      {
+        "id": 176,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "fighting spirit", "colored": true },
+          { "content": "grows stronger every day", "colored": false }
+        ]
+      },
+      {
+        "id": 177,
+        "text": [
+          { "content": "I am the", "colored": false },
+          { "content": "source", "colored": true },
+          { "content": "of my own motivation", "colored": false }
+        ]
+      },
+      {
+        "id": 178,
+        "text": [
+          { "content": "Every thought is", "colored": false },
+          { "content": "directed", "colored": true },
+          { "content": "toward achieving my goals", "colored": false }
+        ]
+      },
+      {
+        "id": 179,
+        "text": [
+          { "content": "I", "colored": false },
+          { "content": "exceed", "colored": true },
+          { "content": "all expectations", "colored": false }
+        ]
+      },
+      {
+        "id": 180,
+        "text": [
+          { "content": "My", "colored": false },
+          { "content": "enthusiasm", "colored": true },
+          { "content": "infects the whole world", "colored": false }
+        ]
+      }
+    ]
+  }
+}

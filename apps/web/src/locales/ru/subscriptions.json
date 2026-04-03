@@ -1,0 +1,53 @@
+{
+  "banner.title": "Откройте \nпуть Практика",
+  "banner.action": "Попробовать бесплатно",
+
+  "subscriptionModal.title": "Разблокируйте путь Практика",
+  "subscriptionModal.practiceTitle": "Выберите новый путь Практика",
+  "subscriptionModal.restore": "Восстановить",
+
+  "subscriptionModal.benefits.noAdd": "Без рекламы",
+  "subscriptionModal.benefits.allSpreads": "Доступны все расклады",
+  "subscriptionModal.benefits.zeroLimits": "Безлимит раскладов на день",
+  "subscriptionModal.benefits.design": "Уникальный дизайн карт",
+  "subscriptionModal.benefits.allCards": "Неограниченные объяснения карт",
+  "subscriptionModal.benefits.freePeriod": "Первые 3 дня бесплатно",
+  "subscriptionModal.benefits.summary": "Детальный разборов раскладов",
+
+  "subscriptionModal.benefit.description1": "На ",
+  "subscriptionModal.benefit.description2": "выгоднее",
+
+  "subscriptionModal.subStatus.willRenew": "Подписка активна. Продлится",
+  "subscriptionModal.subStatus.notRenew": "Подписка активна. Завершится",
+
+  "subscriptionModal.freeDays": "3 дня бесплатно",
+
+  "subscriptionModal.$rc_weekly": "Путь на неделю",
+  "subscriptionModal.$rc_monthly": "Путь на месяц",
+  "subscriptionModal.$rc_annual": "Путь на год",
+
+  "subscriptionModal.period.$rc_weekly": "неделя",
+  "subscriptionModal.period.$rc_monthly": "месяц",
+  "subscriptionModal.period.$rc_annual": "год",
+
+  "subscriptionModal.saveMonth": "Экономия 62%",
+  "subscriptionModal.saveYear": "Экономия 87%",
+
+
+  "subscriptionModal.continue": "Продолжить",
+  "subscriptionModal.practiceContinue": "Сменить план",
+  "subscriptionModal.cancel": "отмена в любое время",
+
+  "subscriptionModal.successPurchase": "Успех",
+  "subscriptionModal.errorPurchase": "Ошибка",
+  "subscriptionModal.cancelPurchase": "Отмена",
+
+  "subscriptionModal.restorePurchaseSuccess": "Ваш путь практика Таро успешно восстановлен!",
+  "subscriptionModal.restorePurchaseCancel": "Нет активных подписок для восстановления.",
+  "subscriptionModal.restorePurchaseError": "Ошибка при восстановлении пути практика Таро.",
+
+  "subscriptionModal.successPurchaseDescription": "Покупка успешно завершена! Вы разблокировали путь практика Таро.",
+  "subscriptionModal.errorPurchaseNotActivatedDescription": "Покупка завершена, но подписка не активирована.",
+  "subscriptionModal.errorPurchaseDescription": "Произошла ошибка при покупке, пожалуйста, попробуйте позже.",
+  "subscriptionModal.cancelPurchaseDescription": "Покупка была отменена."
+}

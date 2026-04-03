@@ -1,0 +1,73 @@
+{
+  "tab.home": "Главная",
+  "tab.spreads": "Расклады",
+  "tab.library": "Библиотека",
+  "button.makeSpread": "Сделать расклад",
+
+  "card": "Карта",
+  "card.upright": "Обычное",
+  "card.reversed": "Перевернутое",
+  "card.added1": "Карта Таро добавлена в избранное.",
+  "card.added2": "Нажми, чтобы посмотреть",
+
+  "ai.error1": "Туман судьбы скрыл карты Таро.",
+  "ai.error2": "Дайте звездам время и попробуйте вновь.",
+
+  "ai.copy.success": "Скопировано в буфер обмена",
+
+  "button.prev": "Предыдущая",
+  "button.next": "Следующая",
+
+  "choice.tapToChoice": "Нажми, чтобы выбрать карту",
+  "choice.scrollCards": "Листай",
+  "choice.completed": "Читать объяснение",
+
+  "dailyCard.title": "Карта дня",
+
+  "today": "Сегодня",
+  "yesterday": "Вчера",
+
+  "page.dictionary": "Значение \nкарт",
+  "page.history": "История \nраскладов",
+  "page.favorite": "Избранные \nкарты",
+  "page.spreadsGroups": "Расклады Таро",
+  "page.spreadsHistory": "История раскладов",
+  "page.favouriteCards": "Избранные карты",
+
+  "library": "Библиотека",
+
+  "save": "Сохранить",
+
+  "errorBoundary.title": "Упс!",
+  "errorBoundary.alternativeTitle": "Приложение устарело",
+  "errorBoundary.description": "Попробуйте обновить приложение",
+  "errorBoundary.button": "Обновить",
+
+  "history.noSpreads": "Вы еще не делали расклады",
+  "favoriteCards.noCards": "Вы еще не добавили карты в избранное",
+
+  "action.makeSpread": "Сделать расклад",
+
+  "question": "Вопрос",
+
+  "finish": "Завершить",
+  "yourState": "Ваше состояние",
+  "continue": "Продолжить",
+
+  "pressToOpen": "Вы достигли лимита\nразборов. Нажми,\nчтобы разблокировать",
+
+  "downloadAppStore": "Скачать в App Store",
+  "downloadGooglePlay": "Скачать в Google Play",
+  "generateMeaning": "Получить объяснение\nрасклада",
+
+  "loading.default": "Подождите чуть-чуть",
+  "loading.1": "Вселенная отвечает",
+  "loading.2": "Энергия собирается",
+  "loading.3": "Путь расклада формируется",
+  "loading.4": "Туман рассеивается",
+  "loading.5": "Магия в движении",
+
+  "share.message.ios": "Загляни в будущее с нашим приложением Таро! Расклады, которые раскроют твои скрытые пути.",
+  "share.message.android": "Загляни в будущее с нашим приложением Таро! Расклады, которые раскроют твои скрытые пути. Скачай сейчас",
+  "share.title": "Открой тайны судьбы с Таро!"
+}

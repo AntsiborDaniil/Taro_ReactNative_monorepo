@@ -1,0 +1,76 @@
+{
+  "tab.home": "Home",
+  "tab.spreads": "Spreads",
+  "tab.library": "Library",
+  "button.makeSpread": "Make Spread",
+
+  "card": "Card",
+  "card.upright": "Default",
+  "card.reversed": "Reversed",
+  "card.added1": "Tarot card added to favorites.",
+  "card.added2": "Press to view",
+
+  "ai.error1": "The mists of fate have veiled the Tarot cards.",
+  "ai.error2": "Let the stars align and try again.",
+
+  "ai.copy.success": "Copied to clipboard",
+
+  "button.prev": "Previous",
+  "button.next": "Next",
+
+  "choice.tapToChoice": "Tap to choose a card",
+  "choice.scrollCards": "Scroll",
+  "choice.completed": "Read interpretation",
+
+  "dailyCard.title": "Card of the Day",
+
+  "dayAdvice.title": "Daily Advice",
+
+  "today": "Today",
+  "yesterday": "Yesterday",
+
+  "page.dictionary": "Card \nMeanings",
+  "page.history": "Spread \nHistory",
+  "page.favorite": "Favorite \nCards",
+  "page.spreadsGroups": "Tarot Spreads",
+  "page.spreadsHistory": "Spread History",
+  "page.favouriteCards": "Favorite Cards",
+  "page.habitCreate": "Create Habits",
+
+  "library": "Library",
+
+  "save": "Save",
+
+  "errorBoundary.title": "Oops!",
+  "errorBoundary.alternativeTitle": "App is outdated",
+  "errorBoundary.description": "Try updating the app",
+  "errorBoundary.button": "Update",
+
+  "history.noSpreads": "You haven't made any spreads yet",
+  "favoriteCards.noCards": "You haven't added any cards to your favorites yet",
+
+  "action.makeSpread": "Make a spread",
+
+  "question": "Question",
+
+  "finish": "Finish",
+  "yourState": "Your state",
+  "continue": "Continue",
+
+  "pressToOpen": "You have reached the limit.\nPress to unlock",
+
+  "downloadAppStore": "Download on the App Store",
+  "downloadGooglePlay": "Get it on Google Play",
+  "generateMeaning": "Get an explanation\nof the Tarot reading",
+
+  "loading.default": "Please wait a moment",
+  "loading.1": "The Universe is responding",
+  "loading.2": "Energy is gathering",
+  "loading.3": "The Tarot spread path is forming",
+  "loading.4": "Тhe fog is clearing",
+  "loading.5": "Magic is in motion",
+
+  "share.message.ios": "Discover what the cards hold for you! Dive into mystical Tarot readings and unlock your path.",
+  "share.message.android": "Discover what the cards hold for you! Dive into mystical Tarot readings and unlock your path. Get the app now",
+  "share.title": "Unveil Your Destiny with Tarot!"
+}

@@ -1,0 +1,12 @@
+{
+  "header": "Milestone unlocked",
+  "title": "You're unstoppable!",
+  "badge": "Weekly streak completed",
+  "description": "You reached every habit goal this week. Feel the momentum and keep charging toward your next breakthrough.",
+  "cta": "Claim reward",
+  "alert": {
+    "title": "Reward saved",
+    "description": "We noted your achievement and will add the surprise in the next update."
+  }
+}
+

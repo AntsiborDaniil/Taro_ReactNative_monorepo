@@ -1,0 +1,1 @@
+export const ANIMATED_CARD_TIMEOUT = 600;
