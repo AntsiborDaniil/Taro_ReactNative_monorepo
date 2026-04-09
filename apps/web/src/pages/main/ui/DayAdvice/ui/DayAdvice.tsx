@@ -1,9 +1,10 @@
-import { ImageBackground, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
+import Video from 'react-native-video';
 import { simpleSpreads } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
@@ -47,23 +48,32 @@ function DayAdvice() {
   };
 
   return (
-    <ImageBackground
-      source={getImage(['core', 'girl'])}
-      resizeMode="cover"
-      style={styles.container}
-    >
+    <View style={styles.container}>
+      <Video
+        style={styles.video}
+        muted={true} // Отключить звук, если видео используется как фон
+        repeat={true} // Зациклить воспроизведение
+        resizeMode="cover" // Аналогично ImageBackground, растягивает видео
+        rate={1.0} // Скорость воспроизведения
+        ignoreSilentSwitch="obey"
+        source={getImage(['videos', 'girl'])}
+      />
+
       <TouchableOpacity
         style={styles.button}
         onPress={handleSelectDayAdvice}
-        activeOpacity={0.85}
+        activeOpacity={0.7}
       >
         <LinearGradient
           colors={[
-            'rgba(0,0,0,0)',
-            'rgba(0,0,0,0)',
-            'rgba(0,0,0,0)',
-            'rgba(24,24,24,0.33)',
-            'rgba(30,30,30,0.7)',
+            'rgba(0, 0, 0, 0)',
+            'rgba(0, 0, 0, 0)',
+            'rgba(0, 0, 0, 0)',
+            'rgba(0, 0, 0, 0)',
+            'rgba(0, 0, 0, 0)',
+            'rgba(0, 0, 0, 0)',
+            'rgba(24, 24, 24, 0.334474)',
+            'rgba(30, 30, 30, 0.41)',
             '#1E1E1E',
           ]}
           style={StyleSheet.absoluteFill}
@@ -77,19 +87,20 @@ function DayAdvice() {
           </Text>
         </View>
       </TouchableOpacity>
-    </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    height: verticalScale(isTablet ? 600 : 410),
-    maxHeight: 460,
+    height: isTablet ? verticalScale(600) : verticalScale(410),
     borderRadius: 16,
     overflow: 'hidden',
+    position: 'relative',
   },
   button: {
+    position: 'absolute',
     width: '100%',
     height: '100%',
   },
@@ -97,6 +108,10 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     alignItems: 'center',
     paddingBottom: 29,
+  },
+  video: {
+    width: '100%',
+    height: '100%',
   },
 });
 

@@ -88,7 +88,7 @@ function TarotCard({
           `card${cardId}`,
         ])}
         resizeMode="cover"
-        style={[styles.imageBackground, { width, height }]}
+        style={{ ...styles.imageBackground, width, height }}
       >
         {!!isSelected && (
           <Animated.View
@@ -127,8 +127,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   imageBackground: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    objectFit: 'cover',
+    aspectRatio: 9 / 16,
+    width: null,
+    height: null,
+    padding: 16,
   },
   iconWrapper: {
     backgroundColor: COLORS.Accent,

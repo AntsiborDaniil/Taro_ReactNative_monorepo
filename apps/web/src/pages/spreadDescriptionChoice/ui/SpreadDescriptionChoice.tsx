@@ -94,11 +94,7 @@ function SpreadDescriptionChoice() {
   }, []);
 
   if (!spread) {
-    return (
-      <ScreenLayout>
-        <Header title="" />
-      </ScreenLayout>
-    );
+    return null;
   }
 
   if (isSimpleSpread || isSelectingCards) {

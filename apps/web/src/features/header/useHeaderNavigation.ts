@@ -1,9 +1,8 @@
-import { useContext } from 'react';
-import { NavigationContext } from '@react-navigation/core';
-import type { NavigationProp, ParamListBase } from '@react-navigation/native';
+import { useNavigationState } from '@react-navigation/native';
 import { SpreadContext } from 'entities/Spread';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
+import { useNativeNavigation } from 'shared/hooks';
 import { NavigationRoute } from 'shared/types';
 import { getNavigationRules } from './getNavigationRules';
 
@@ -20,15 +19,11 @@ export function useHeaderNavigation({
   backAction,
   showBackButton,
 }: THeaderNavigationParameters): THeaderNavigationHookResult {
-  // Use NavigationContext directly (from @react-navigation/core) instead of
-  // useNavigation() / useNavigationState() — those two hooks throw when called
-  // outside a Navigator (e.g. inside a modal overlay that is a sibling of the
-  // navigator tree). useContext() safely returns undefined in that case.
-  const navContext = useContext(NavigationContext) as
-    | NavigationProp<ParamListBase>
-    | undefined;
+  const navigation = useNativeNavigation();
 
-  const state = navContext?.getState();
+  const router = useNativeNavigation();
+
+  const state = useNavigationState((state) => state);
 
   const { spread } = useData({ Context: SpreadContext });
   const { selectedTab } = useData({ Context: TabsAndRoutesContext });
@@ -36,6 +31,7 @@ export function useHeaderNavigation({
   const selectedRoute = state?.routes?.[state?.index ?? 0]
     ?.name as NavigationRoute;
 
+  // Обработчик нажатия на кнопку "Назад"
   const handleBackPress = () => {
     if (!showBackButton) {
       return;
@@ -43,10 +39,7 @@ export function useHeaderNavigation({
 
     if (backAction) {
       backAction();
-      return;
-    }
 
-    if (!navContext) {
       return;
     }
 
@@ -57,11 +50,12 @@ export function useHeaderNavigation({
     });
 
     if (!navigationRules) {
-      navContext.goBack();
+      router.goBack(); // Возвращаемся назад по умолчанию
+
       return;
     }
 
-    navContext.navigate(navigationRules.tabRoute as any, {
+    navigation.navigate(navigationRules.tabRoute, {
       screen: navigationRules.navigationRoute,
       params: navigationRules.params,
     });

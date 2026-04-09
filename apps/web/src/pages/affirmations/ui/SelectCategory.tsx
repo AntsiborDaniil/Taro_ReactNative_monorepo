@@ -114,10 +114,7 @@ const SelectCategory = () => {
   };
 
   return (
-    <Animated.View
-      style={[styles.container, animatedStyle]}
-      pointerEvents={isOpen ? 'auto' : 'box-none'}
-    >
+    <Animated.View style={[styles.container, animatedStyle]}>
       <View style={styles.header}>
         <View style={styles.headerButtonWrapper}>
           <Pressable onPress={toggleSheet} style={styles.headerButton}>
@@ -129,11 +126,7 @@ const SelectCategory = () => {
           </Pressable>
         </View>
       </View>
-      <View
-        style={styles.content}
-        onLayout={onContentLayout}
-        pointerEvents={isOpen ? 'auto' : 'none'}
-      >
+      <View style={styles.content} onLayout={onContentLayout}>
         <FlatList
           data={CATEGORIES}
           keyExtractor={(item) => item.category.toString()}
@@ -178,11 +171,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10, // Ensure it appears above other elements
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 8,
+    boxShadow: '0px -5px 14.8px 0px #00000040',
   },
   cardText: {
     padding: 12,

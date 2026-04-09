@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
@@ -9,63 +9,75 @@ import { PaidContent } from 'features/paidContent';
 import { DeckStyle } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { getImage, verticalScale, getBreakpoint, SIDEBAR_WIDTH, SHELL_MAX_WIDTH } from 'shared/lib';
+import { getImage, isTablet, verticalScale, width } from 'shared/lib';
 import {
   AnalyticAction,
   ImagePosition,
   NavigationRoute,
+  TabRoute,
 } from 'shared/types';
 import { ScreenLayout, Text, TEXT_TAGS, TileCard } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 
-const PADDING = 16;
+const PADDING = 8;
 const GAP = 16;
+
+const cardWidth = isTablet
+  ? (width - 2 * PADDING) / 2 - GAP
+  : width - 4 * PADDING;
 
 export default function Spreads() {
   const { showModal } = useData({ Context: ModalsContext });
   const { subscriptionType } = useData({ Context: UserContext });
-  const { selectSpread, spreadsSections } = useData({ Context: SpreadContext });
-  const { handleVibrationClick } = useData({ Context: ApplicationConfigContext });
+  const { selectSpread, spreadsSections } = useData({
+    Context: SpreadContext,
+  });
+  const { handleVibrationClick } = useData({
+    Context: ApplicationConfigContext,
+  });
 
   const { t } = useTranslation();
+
   const navigation = useNativeNavigation();
-
-  const { width: winWidth } = useWindowDimensions();
-  const bp = getBreakpoint(winWidth);
-  const sidebarW = bp === 'mobile' ? 0 : SIDEBAR_WIDTH[bp];
-  const shellW = Math.min(winWidth, SHELL_MAX_WIDTH[bp]);
-  const contentW = shellW - sidebarW - PADDING * 2;
-
-  // Scale columns by available content width for a balanced grid
-  const cols = contentW >= 1200 ? 4 : contentW >= 700 ? 3 : contentW >= 400 ? 2 : 1;
-  const cardW = (contentW - GAP * (cols - 1)) / cols;
-  const cardH = verticalScale(bp === 'mobile' ? 200 : 180);
 
   return (
     <ScreenLayout>
-      <Header showBackButton={false} title={t('core:page.spreadsGroups')} />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <Header showBackButton={true} title={t('core:page.spreadsGroups')} />
+      <ScrollView>
         <View style={styles.spreads}>
           {!!spreadsSections?.length &&
             spreadsSections.map((data) => (
               <View style={styles.spreads} key={data.title}>
                 <Text category={TEXT_TAGS.h3}>{t(data.title)}</Text>
 
-                <View style={[styles.grid, { gap: GAP }]}>
+                <View
+                  style={
+                    isTablet ? styles.columnWrapper : styles.flatListContainer
+                  }
+                >
                   {data.data.map((item) => {
                     const isLocked = !item.availableSubscriptions.some(
-                      (sub) => sub === subscriptionType
+                      (subscriptionItem) =>
+                        subscriptionItem === subscriptionType
                     );
 
                     return (
                       <TileCard
-                        imageSource={getImage(['spreads', DeckStyle.FlatIllustration, item.id])}
+                        imageSource={getImage([
+                          'spreads',
+                          DeckStyle.FlatIllustration,
+                          item.id,
+                        ])}
                         isLocked={isLocked}
                         onPress={async () => {
-                          AppMetrica.reportEvent(AnalyticAction.ClickSpreadInCategory, {
-                            spread: item.name,
-                            isLocked,
-                          });
+                          AppMetrica.reportEvent(
+                            AnalyticAction.ClickSpreadInCategory,
+                            {
+                              spread: item.name,
+                              isLocked,
+                            }
+                          );
+
                           await handleVibrationClick?.();
 
                           if (isLocked) {
@@ -76,17 +88,24 @@ export default function Spreads() {
                           const { shouldRedirectToSpreadReading } =
                             (await selectSpread?.(item)) || {};
 
-                          navigation.navigate(
-                            (shouldRedirectToSpreadReading
-                              ? NavigationRoute.SpreadReadings
-                              : NavigationRoute.SpreadDescriptionChoice) as any
-                          );
+                          if (shouldRedirectToSpreadReading) {
+                            navigation.navigate(TabRoute.MainTab, {
+                              screen: NavigationRoute.SpreadReadings,
+                            });
+                            return;
+                          }
+
+                          navigation.navigate(TabRoute.MainTab, {
+                            screen: NavigationRoute.SpreadDescriptionChoice,
+                          });
                         }}
                         imageResizeMode="cover"
                         textStyles={styles.spreadNameStyle}
                         key={item.id}
-                        height={cardH}
-                        width={cardW}
+                        height={
+                          isTablet ? verticalScale(150) : verticalScale(200)
+                        }
+                        width={cardWidth}
                         imagePosition={ImagePosition.Background}
                       >
                         {t(item.name)}
@@ -106,14 +125,17 @@ const styles = StyleSheet.create({
   spreadNameStyle: {
     margin: 4,
   },
-  scrollContent: {
-    paddingBottom: 32,
-  },
   spreads: {
     gap: 16,
     padding: PADDING,
+    paddingBottom: 24,
   },
-  grid: {
+  flatListContainer: {
+    gap: GAP,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    gap: GAP,
     flexDirection: 'row',
     flexWrap: 'wrap',
   },

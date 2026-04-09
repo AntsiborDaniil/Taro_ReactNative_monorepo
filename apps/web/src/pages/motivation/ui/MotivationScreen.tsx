@@ -43,11 +43,7 @@ function MoticationScreen(
   const card = selectedMotivation?.cards[0];
 
   if (!card) {
-    return (
-      <ScreenLayout>
-        <Header title="" />
-      </ScreenLayout>
-    );
+    return null;
   }
 
   const splittedTitle = t(card.name).split(' ');

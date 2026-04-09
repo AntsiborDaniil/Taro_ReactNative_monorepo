@@ -89,7 +89,8 @@ const FlippableTarotCard = ({
             <ImageBackground
               source={getImage(['core', 'cardBack'])}
               resizeMode="cover"
-              style={[styles.imageBackground, { width, height }]}
+              // resizeMethod="scale"
+              style={{ ...styles.imageBackground, width, height }}
             />
           </View>
         ) : (
@@ -107,7 +108,8 @@ const FlippableTarotCard = ({
             <ImageBackground
               source={getImage(['core', 'cardBack'])}
               resizeMode="cover"
-              style={[styles.imageBackground, { width, height }]}
+              // resizeMethod="scale"
+              style={{ ...styles.imageBackground }}
             />
           </View>
         ) : (
@@ -145,6 +147,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     aspectRatio: 9 / 16,
+    padding: 16,
   },
 });
 

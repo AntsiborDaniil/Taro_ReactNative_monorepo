@@ -63,10 +63,10 @@ const styles = StyleSheet.create({
     gap: 48,
   },
   left: {
-    transform: [{ translateX: 25 }, { rotate: '-25deg' }],
+    transform: 'translateX(25px) rotate(-25deg)',
   },
   right: {
-    transform: [{ translateX: -25 }, { rotate: '25deg' }],
+    transform: 'translateX(-25px) rotate(25deg)',
   },
 });
 

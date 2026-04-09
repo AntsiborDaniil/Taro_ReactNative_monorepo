@@ -1,9 +1,9 @@
 import React from 'react';
-import { StyleProp, View, ViewStyle } from 'react-native';
+import { View } from 'react-native';
 
 type VideoProps = {
   source?: unknown;
-  style?: StyleProp<ViewStyle>;
+  style?: object;
   muted?: boolean;
   repeat?: boolean;
   resizeMode?: string;
@@ -11,6 +11,7 @@ type VideoProps = {
   ignoreSilentSwitch?: string;
   controls?: boolean;
   controlsStyles?: object;
+  [key: string]: unknown;
 };
 
 const Video = React.forwardRef<View, VideoProps>(({ style }, ref) => (

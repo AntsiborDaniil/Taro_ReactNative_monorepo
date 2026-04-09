@@ -16,16 +16,7 @@ const Purchases = {
   setLogLevel: (_level: unknown) => {},
   configure: (_config: unknown) => {},
   getOfferings: async () => ({ current: null }),
-  purchasePackage: async (_pkg: unknown) => ({
-    customerInfo: {
-      activeSubscriptions: [] as string[],
-      entitlements: { active: {} as Record<string, unknown> },
-    },
-  }),
-  restorePurchases: async (): Promise<CustomerInfo> => ({
-    activeSubscriptions: [],
-    entitlements: { active: {} },
-  }),
+  purchasePackage: async (_pkg: unknown) => ({}),
   getCustomerInfo: async (): Promise<CustomerInfo> => ({
     activeSubscriptions: [],
     entitlements: { active: {} },

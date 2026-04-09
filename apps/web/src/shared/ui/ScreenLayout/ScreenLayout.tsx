@@ -1,5 +1,4 @@
 import {
-  Platform,
   StatusBar,
   StyleProp,
   StyleSheet,
@@ -19,12 +18,6 @@ type ScreenLayoutProps = {
 function ScreenLayout({ children, style }: ScreenLayoutProps): ReactNode {
   const insets = useSafeAreaInsets();
 
-  // On web, safe-area insets are effectively 0 from the viewport edge,
-  // but our app shell is already a constrained 430px container so we
-  // skip the top inset padding that would otherwise look like dead space.
-  const topPad = Platform.OS === 'web' ? 0 : insets.top;
-  const bottomPad = Platform.OS === 'web' ? 0 : insets.bottom;
-
   return (
     <>
       <View style={styles.bar}>
@@ -35,11 +28,12 @@ function ScreenLayout({ children, style }: ScreenLayoutProps): ReactNode {
       </View>
       <View style={styles.wrapper}>
         <Layout
-          style={[
-            styles.layout,
-            { paddingTop: topPad + 8, paddingBottom: bottomPad },
-            style as StyleProp<ViewStyle>,
-          ]}
+          style={{
+            ...insets,
+            ...styles.layout,
+            paddingBottom: insets.bottom,
+            ...(style as any),
+          }}
         >
           {children}
         </Layout>
@@ -55,12 +49,11 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     backgroundColor: COLORS.Background,
-    overflow: 'hidden',
   },
   layout: {
-    flex: 1,
+    height: '100%',
+    paddingTop: 8,
     gap: 16,
-    overflow: 'hidden',
   },
 });
 

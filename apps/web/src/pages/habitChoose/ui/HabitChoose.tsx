@@ -23,7 +23,11 @@ function HabitChoose() {
     <ScreenLayout>
       <Header showBackButton title="" />
       <ScrollView style={styles.wrapper} contentContainerStyle={styles.buttons}>
-        <Image style={styles.image} source={getImage(['core', 'paidGirl'])} />
+        <Image
+          style={styles.image}
+          resizeMode="contain"
+          source={getImage(['core', 'paidGirl'])}
+        />
         <Button
           style={styles.button}
           onPress={async () => {
@@ -94,7 +98,6 @@ const styles = StyleSheet.create({
   },
   image: {
     position: 'absolute',
-    resizeMode: 'contain',
     height: 400,
     width: '100%',
     top: -330,

@@ -330,11 +330,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.Background,
     borderTopRightRadius: 44,
     borderTopLeftRadius: 44,
-    shadowColor: '#fff',
-    shadowOffset: { width: 0, height: -6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 6,
+    boxShadow: '0px -10px 10px rgba(255, 255, 255, 0.2)',
   },
   continueButton: {
     width: '100%',

@@ -55,7 +55,7 @@ function MainScreen() {
         <DataProvider
           Context={SpreadContext}
           value={spreadContextData}
-          key="SpreadContext"
+          key="ApplicationConfigContext"
         />,
         <DataProvider
           Context={AffirmationsContext}
@@ -65,7 +65,7 @@ function MainScreen() {
         <DataProvider
           Context={MoodAndEnergyContext}
           value={moodAndEnergyContextData}
-          key="MoodAndEnergyContext"
+          key="AffirmationsContext"
         />,
       ]}
     >

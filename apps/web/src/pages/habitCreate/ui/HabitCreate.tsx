@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     color: COLORS.Background,
   },
   emojiButton: {
-    aspectRatio: 1,
+    aspectRatio: '1/1',
     height: 100,
     borderRadius: 10,
     backgroundColor: 'transparent',
@@ -407,14 +407,7 @@ const styles = StyleSheet.create({
   sliderStyle: {
     borderRadius: 20,
     marginTop: 4,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.25)',
   },
   dayButton: {
     width: 50,

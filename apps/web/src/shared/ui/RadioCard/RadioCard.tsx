@@ -1,5 +1,5 @@
 import { ReactElement, useEffect } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useAnimatedStyle,
@@ -37,23 +37,8 @@ function RadioCard({
     opacityProgress.value = withTiming(checked ? 1 : 0, { duration: 300 });
   }, [checked, opacityProgress]);
 
-  const handleKeyDown = Platform.OS === 'web'
-    ? (e: any) => {
-        const key = e?.nativeEvent?.key ?? e?.key;
-        if (key === 'Enter' || key === ' ') { e?.preventDefault?.(); onPress?.(); }
-      }
-    : undefined;
-
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="radio"
-      accessibilityState={{ checked: !!checked }}
-      accessibilityLabel={title}
-      // @ts-ignore
-      onKeyDown={handleKeyDown}
-      style={styles.card}
-    >
+    <TouchableOpacity onPress={onPress} activeOpacity={1} style={styles.card}>
       <Animated.View style={[styles.gradientWrapper, animatedGradient]}>
         <LinearGradient
           start={{ x: 0, y: 0 }}
@@ -81,7 +66,7 @@ function RadioCard({
           </Text>
         </View>
       )}
-    </Pressable>
+    </TouchableOpacity>
   );
 }
 

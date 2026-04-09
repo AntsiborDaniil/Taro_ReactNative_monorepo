@@ -3,17 +3,14 @@ import {
   Image,
   ImageBackground,
   ImageStyle,
-  Platform,
-  Pressable,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { Layout, StyleService } from '@ui-kitten/components';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { ImagePosition, TextPosition, TileCardProps } from 'shared/types';
-// Import directly to avoid the barrel-index require cycle:
-// shared/ui/index.ts → TileCard → shared/ui/index.ts
 import { OverlayIcon } from '../OverlayIcon';
 import { Text, TEXT_TAGS } from '../Text';
 import { LockIcon } from '../../icons';
@@ -46,36 +43,20 @@ function TileCard({
 }: TileCardProps) {
   const { t } = useTranslation();
 
-  const handlePress = () => { onPress?.(); };
+  // Обработчик нажатия
+  const handlePress = () => {
+    if (onPress) {
+      onPress();
 
-  // On web, Pressable/div[role="button"] doesn't fire onClick on Enter/Space
-  // natively — handle keydown ourselves.
-  const handleKeyDown = Platform.OS === 'web' && onPress
-    ? (e: any) => {
-        const key = e?.nativeEvent?.key ?? e?.key;
-        if ((key === 'Enter' || key === ' ') && !disabled) {
-          e?.preventDefault?.();
-          handlePress();
-        }
-      }
-    : undefined;
-
-  const cardLabel = typeof children === 'string' ? children : undefined;
+      return;
+    }
+  };
 
   return (
-    <Pressable
+    <TouchableOpacity
       onPress={handlePress}
       disabled={disabled}
-      accessibilityRole={onPress ? 'button' : undefined}
-      accessibilityLabel={isLocked ? `${cardLabel ?? ''} (locked)` : cardLabel}
-      accessibilityState={{ disabled: !!disabled || isLocked }}
-      // @ts-ignore – web-only
-      onKeyDown={handleKeyDown}
-      style={({ pressed }: any) =>
-        Platform.OS === 'web' && pressed && onPress
-          ? { opacity: 0.8, transform: [{ scale: 0.98 }] }
-          : undefined
-      }
+      activeOpacity={0.7}
     >
       <Layout style={[{ width, backgroundColor: 'transparent' }]}>
         <Layout
@@ -91,7 +72,7 @@ function TileCard({
             <ImageBackground
               source={imageSource}
               style={styles.backgroundImage}
-              resizeMode={imageResizeMode ?? 'cover'}
+              resizeMode={imageResizeMode ?? 'stretch'}
             >
               {/* Контент поверх фона */}
 
@@ -126,6 +107,7 @@ function TileCard({
               )}
               <Image
                 source={imageSource}
+                resizeMode="contain"
                 style={
                   [
                     styles.cornerImage,
@@ -179,7 +161,7 @@ function TileCard({
             children
           ))}
       </Layout>
-    </Pressable>
+    </TouchableOpacity>
   );
 }
 
@@ -217,7 +199,6 @@ const styles = StyleService.create({
   },
   cornerImage: {
     position: 'absolute',
-    resizeMode: 'contain',
     zIndex: 2,
   },
   blurOverlay: {

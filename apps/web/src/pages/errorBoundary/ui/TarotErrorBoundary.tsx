@@ -24,18 +24,10 @@ type TarotErrorBoundaryProps = {
 export default function TarotErrorBoundary({
   title,
   error,
-  resetError,
 }: TarotErrorBoundaryProps) {
   const { top } = useSafeAreaInsets();
 
   const { t } = useTranslation();
-
-  useEffect(() => {
-    if (error) {
-      // eslint-disable-next-line no-console
-      console.error('[TarotErrorBoundary]', error);
-    }
-  }, [error]);
 
   const handleClickUpgrade = async () => {
     const storeUrl =
@@ -61,6 +53,7 @@ export default function TarotErrorBoundary({
     if (!error) {
       return;
     }
+
     AppMetrica.reportError('Error Boundary', error?.message);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -80,21 +73,8 @@ export default function TarotErrorBoundary({
               </Text>
             </View>
           </View>
-          {__DEV__ && error && (
-            <View style={styles.devError}>
-              <Text category={TEXT_TAGS.label} style={styles.devErrorText}>
-                {`${error.name}: ${error.message}`}
-              </Text>
-            </View>
-          )}
           <Button
-            onPress={() => {
-              if (resetError) {
-                resetError();
-              } else {
-                void handleClickUpgrade();
-              }
-            }}
+            onPress={handleClickUpgrade}
             size="giant"
             appearance="outline"
             status="primary"
@@ -145,15 +125,5 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '65%',
-  },
-  devError: {
-    backgroundColor: 'rgba(255,0,0,0.15)',
-    borderRadius: 8,
-    padding: 8,
-    marginTop: 8,
-  },
-  devErrorText: {
-    color: '#ff6b6b',
-    fontSize: 11,
   },
 });

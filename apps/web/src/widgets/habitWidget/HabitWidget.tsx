@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     backgroundColor: COLORS.SpbSky3,
-    borderRadius: 26,
+    borderRadius: '100%',
     padding: 12,
     alignItems: 'center',
   },

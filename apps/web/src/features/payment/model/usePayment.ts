@@ -64,7 +64,7 @@ export function usePayment({
 
   const handlePurchase = useCallback(
     async (checkedId: string) => {
-      const pack = offerings?.current?.availablePackages?.find(
+      const pack = offerings?.current?.availablePackages.find(
         (item) => item.identifier === checkedId
       );
 

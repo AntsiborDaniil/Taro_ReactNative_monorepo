@@ -1,10 +1,12 @@
 import { ReactElement } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { LinearGradient, useFont, vec } from '@shopify/react-native-skia';
-import { Area, CartesianChart, Line } from 'victory-native';
-import { InputFields, NumericalFields } from 'victory-native/src/types';
+import { Area, CartesianChart, Line } from 'shared/stubs/victory';
 import montserat from '../../../../../assets/fonts/Montserrat-Black.ttf';
 import { COLORS } from '../../../themes';
+
+type InputFields<T> = Extract<keyof T, string>;
+type NumericalFields<T> = Extract<keyof T, string>;
 
 export type AreaGraphsProps<T> = {
   data: T[];
@@ -66,7 +68,7 @@ function AreaGraphs<T extends Record<string, unknown>>({
         >
           {({ points, chartBounds }) =>
             yAxisKeys.map((item) => (
-              <>
+              <View key={String(item)}>
                 <Line
                   points={points[item]}
                   color={design?.[item].color ?? COLORS_GRAPHS.red}
@@ -85,16 +87,15 @@ function AreaGraphs<T extends Record<string, unknown>>({
                   animate={{ type: 'timing', duration: 300 }}
                 >
                   <LinearGradient
-                    start={vec(0, 0)} // 👈 The start and end are vectors that represent the direction of the gradient.
+                    start={vec(0, 0)}
                     end={vec(0, 400)}
                     colors={[
-                      // 👈 The colors are an array of strings that represent the colors of the gradient.
                       `${design?.[item].color ?? COLORS_GRAPHS.red}40`,
                       `${design?.[item].color ?? COLORS_GRAPHS.red}00`,
                     ]}
                   />
                 </Area>
-              </>
+              </View>
             ))
           }
         </CartesianChart>

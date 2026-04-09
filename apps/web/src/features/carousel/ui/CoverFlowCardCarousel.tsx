@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { Platform, StyleSheet, View, ViewStyle, useWindowDimensions } from 'react-native';
+import { useRef } from 'react';
+import { Dimensions, StyleSheet, View, ViewStyle } from 'react-native';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { useTranslation } from 'react-i18next';
 import { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
@@ -15,14 +15,13 @@ import SlideItem from './SlideItem';
 
 const defaultDataWith6Colors = [...Array(11)];
 
-// Computed ONCE outside the worklet — Platform.OS is not accessible inside worklets on native
-const isWeb = Platform.OS === 'web';
-
 type TCoverFlowCardCarouselProps = {
   hasImmediateAnimation?: boolean;
   style?: StyleProp<ViewStyle>;
   onAdditionalClick?: () => void;
 };
+
+const screen = Dimensions.get('screen');
 
 function CoverFlowCardCarousel({
   style,
@@ -30,32 +29,29 @@ function CoverFlowCardCarousel({
   onAdditionalClick,
 }: TCoverFlowCardCarouselProps) {
   const { t } = useTranslation();
-  // Reactive window width so the carousel adapts when the window is resized
-  const { width: windowWidth } = useWindowDimensions();
 
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
   });
 
   const ref = useRef<ICarouselInstance>(null);
-  // Track current index reactively so SlideItem.isSelected updates correctly
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   const baseOptions = {
     vertical: false,
     ...SLIDER_CARD_SIZE,
   } as const;
 
-  const prevIndexRef = useRef(0);
+  let prevIndex = 0;
 
   const handleAdditionalClick = () => {
     ref.current?.next();
+
     onAdditionalClick?.();
   };
 
   return (
-    <View style={[styles.container, { width: windowWidth }, style]}>
-      <View style={[styles.text, { width: windowWidth }]}>
+    <View style={[styles.container, style]}>
+      <View style={styles.text}>
         <Text>{t('core:choice.tapToChoice')}</Text>
         <ChoiceTriangle />
       </View>
@@ -81,20 +77,15 @@ function CoverFlowCardCarousel({
             [-size * 1.45, -size * 0.85, 0, size * 0.85, size * 1.45]
           );
 
-          const rotateYDeg = interpolate(
-            value,
-            [-1, 0, 1],
-            [30, 0, -30],
-            Extrapolation.CLAMP
-          );
-
-          // isWeb is a plain boolean captured via closure — safe inside worklet
           const transform = {
             transform: [
-              ...(isWeb ? [{ perspective: 800 }] as any : []),
               { scale },
-              { translateX: translate },
-              { rotateY: `${rotateYDeg}deg` },
+              {
+                translateX: translate,
+              },
+              {
+                rotateY: `${interpolate(value, [-1, 0, 1], [30, 0, -30], Extrapolation.CLAMP)}deg`,
+              },
             ],
           };
 
@@ -112,27 +103,28 @@ function CoverFlowCardCarousel({
         pagingEnabled={false}
         snapEnabled={false}
         onProgressChange={async () => {
-          const idx = ref.current?.getCurrentIndex() ?? 0;
+          const currentIndex = ref.current?.getCurrentIndex();
 
-          if (idx === prevIndexRef.current) return;
-
-          prevIndexRef.current = idx;
-          setCurrentIndex(idx);
+          if (!currentIndex || currentIndex === prevIndex) {
+            return;
+          }
 
           await handleVibrationClick?.();
+
+          prevIndex = currentIndex;
         }}
         renderItem={({ index }) => {
           return (
             <SlideItem
               index={index}
               hasImmediateAnimation={hasImmediateAnimation}
-              isSelected={index === currentIndex}
+              isSelected={index === ref.current?.getCurrentIndex()}
               onAdditionalClick={handleAdditionalClick}
             />
           );
         }}
       />
-      <View style={[styles.text, { width: windowWidth }]}>
+      <View style={styles.text}>
         <Text>{t('core:choice.scrollCards')}</Text>
         <ArrowsIcon />
       </View>
@@ -141,8 +133,9 @@ function CoverFlowCardCarousel({
 }
 
 const styles = StyleSheet.create({
-  container: {},
+  container: { width: screen.width },
   text: {
+    width: screen.width,
     alignItems: 'center',
     gap: 8,
   },

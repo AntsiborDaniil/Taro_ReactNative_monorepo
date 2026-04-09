@@ -52,8 +52,9 @@ export interface TranslationResources {
   hello: {
     [key: string]: string;
   };
-  /** Includes nested objects (e.g. affirmationsItems) — not only strings */
-  affirmations: Record<string, unknown>;
+  affirmations: {
+    [key: string]: string;
+  };
   moodAndEnergy: {
     [key: string]: string;
   };

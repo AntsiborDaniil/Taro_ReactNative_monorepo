@@ -57,12 +57,12 @@ function GlobalProvider({ children }: GlobalProviderProps) {
         <DataProvider
           Context={FavoritesContext}
           value={favoritesContextData}
-          key="FavoritesContext"
+          key=" FavoritesContext"
         />,
         <DataProvider
           Context={MotivationContext}
           value={motivationContextData}
-          key="MotivationContext"
+          key=" FavoritesContext"
         />,
         <DataProvider
           Context={ModalsContext}

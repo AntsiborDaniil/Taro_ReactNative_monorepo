@@ -46,7 +46,11 @@ function SubscriptionsBanner() {
         </View>
 
         <View style={styles.imageContainer}>
-          <Image style={styles.image} source={getImage(['core', 'paidGirl'])} />
+          <Image
+            style={styles.image}
+            resizeMode="contain"
+            source={getImage(['core', 'paidGirl'])}
+          />
         </View>
       </LinearGradient>
     </TouchableOpacity>
@@ -70,7 +74,6 @@ const styles = StyleSheet.create({
     color: COLORS.Content,
   },
   image: {
-    resizeMode: 'contain',
     width: horizontalScale(120),
     height: verticalScale(200),
   },

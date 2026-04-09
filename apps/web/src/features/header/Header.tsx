@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { Platform, TouchableOpacity, ViewStyle } from 'react-native';
+import React from 'react';
+import { TouchableOpacity, ViewStyle } from 'react-native';
 import { Layout, StyleService, useStyleSheet } from '@ui-kitten/components';
-import { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
+import { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet'; // Импортируем универсальный текстовый компонент
 import { ChevronLeftIcon, SettingsIcon } from 'shared/icons';
 import { isTablet } from 'shared/lib';
 import { Text } from 'shared/ui/Text';
@@ -33,22 +33,6 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
     backAction,
     showBackButton,
   });
-
-  // Esc → назад (только на веб, только когда кнопка "назад" видна)
-  useEffect(() => {
-    if (Platform.OS !== 'web' || !showBackButton) return;
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        // Не перехватываем Escape если открыт диалог поверх нас
-        const hasOpenDialog = !!document.querySelector('[role="dialog"]');
-        if (!hasOpenDialog) handleBackPress();
-      }
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [showBackButton, handleBackPress]);
 
   return (
     <Layout style={[styles.header, stylesWrapper]}>
@@ -95,25 +79,20 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   );
 };
 
+// Темированные стили с UI Kitten
 const themedStyles = StyleService.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     position: 'relative',
     justifyContent: 'space-between',
-    minHeight: 52,
-    paddingHorizontal: 4,
-    paddingVertical: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(119,127,133,0.14)',
   },
   backButton: {
     padding: 8,
-    paddingRight: 12,
+    paddingRight: 16,
   },
   rightButton: {
-    padding: 8,
-    paddingLeft: 12,
+    // marginRight: 16,
   },
   title: {
     flex: 1,

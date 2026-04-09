@@ -8,8 +8,7 @@ import { Text, TEXT_TAGS } from '../Text';
 
 type NoContentProps = {
   title: string;
-  /** Defaults to core:action.makeSpread */
-  buttonText?: string;
+  buttonText: string;
   onPress?: () => void;
 };
 

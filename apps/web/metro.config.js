@@ -4,38 +4,6 @@ const {
 } = require('react-native-reanimated/metro-config');
 const path = require('path');
 
-// Packages that don't work in the browser → replaced with stubs via resolveRequest
-// (resolveRequest has priority over extraNodeModules and node_modules lookup)
-const STUB_MODULES = {
-  'expo-secure-store': 'expo-secure-store.ts',
-  'expo-haptics': 'expo-haptics.ts',
-  'expo-navigation-bar': 'expo-navigation-bar.ts',
-  'expo-screen-orientation': 'expo-screen-orientation.ts',
-  'expo-notifications': 'noop.ts',
-  'expo-dev-client': 'noop.ts',
-  '@appmetrica/react-native-analytics': 'appmetrica.ts',
-  'react-native-purchases': 'purchases.ts',
-  'react-native-purchases-ui': 'purchases-ui.ts',
-  'react-native-onesignal': 'onesignal.ts',
-  'onesignal-expo-plugin': 'noop.ts',
-  'react-native-in-app-review': 'noop.ts',
-  'sp-react-native-in-app-updates': 'in-app-updates.ts',
-  'react-native-video': 'react-native-video.tsx',
-  '@react-native-community/blur': 'blur.tsx',
-  '@react-native-community/slider': 'slider.tsx',
-  '@react-native-clipboard/clipboard': 'noop.ts',
-  'react-native-date-picker': 'date-picker.tsx',
-  'rn-emoji-keyboard': 'emoji-keyboard.tsx',
-  'react-native-device-detection': 'noop.ts',
-  'react-native-walkthrough-tooltip': 'walkthrough-tooltip.tsx',
-  // Skia and victory-native must be overridden via resolveRequest
-  // because extraNodeModules does NOT override already-installed packages
-  '@shopify/react-native-skia': 'skia.ts',
-  'victory-native': 'victory.tsx',
-};
-
-const stubsDir = path.resolve(__dirname, 'src/shared/stubs');
-
 module.exports = wrapWithReanimatedMetroConfig(
   (() => {
     const config = getDefaultConfig(__dirname);
@@ -56,24 +24,105 @@ module.exports = wrapWithReanimatedMetroConfig(
       sourceExts: [...resolver.sourceExts, 'svg'],
     };
 
-    // resolveRequest takes priority over installed node_modules,
-    // unlike extraNodeModules which is only a fallback
-    config.resolver.resolveRequest = function webStubsResolver(
+    // Map native-only packages to web stubs
+    config.resolver.extraNodeModules = {
+      ...config.resolver.extraNodeModules,
+      'expo-secure-store': path.resolve(
+        __dirname,
+        'src/shared/stubs/expo-secure-store.ts'
+      ),
+      'expo-haptics': path.resolve(
+        __dirname,
+        'src/shared/stubs/expo-haptics.ts'
+      ),
+      'expo-navigation-bar': path.resolve(
+        __dirname,
+        'src/shared/stubs/expo-navigation-bar.ts'
+      ),
+      'expo-screen-orientation': path.resolve(
+        __dirname,
+        'src/shared/stubs/expo-screen-orientation.ts'
+      ),
+      'expo-notifications': path.resolve(
+        __dirname,
+        'src/shared/stubs/noop.ts'
+      ),
+      '@appmetrica/react-native-analytics': path.resolve(
+        __dirname,
+        'src/shared/stubs/appmetrica.ts'
+      ),
+      'react-native-purchases': path.resolve(
+        __dirname,
+        'src/shared/stubs/purchases.ts'
+      ),
+      'react-native-purchases-ui': path.resolve(
+        __dirname,
+        'src/shared/stubs/purchases-ui.ts'
+      ),
+      'react-native-onesignal': path.resolve(
+        __dirname,
+        'src/shared/stubs/onesignal.ts'
+      ),
+      'onesignal-expo-plugin': path.resolve(
+        __dirname,
+        'src/shared/stubs/noop.ts'
+      ),
+      'react-native-in-app-review': path.resolve(
+        __dirname,
+        'src/shared/stubs/noop.ts'
+      ),
+      'sp-react-native-in-app-updates': path.resolve(
+        __dirname,
+        'src/shared/stubs/in-app-updates.ts'
+      ),
+      'react-native-video': path.resolve(
+        __dirname,
+        'src/shared/stubs/react-native-video.tsx'
+      ),
+      '@react-native-community/blur': path.resolve(
+        __dirname,
+        'src/shared/stubs/blur.tsx'
+      ),
+      '@react-native-clipboard/clipboard': path.resolve(
+        __dirname,
+        'src/shared/stubs/noop.ts'
+      ),
+      '@react-native-community/slider': path.resolve(
+        __dirname,
+        'src/shared/stubs/noop.ts'
+      ),
+      'react-native-date-picker': path.resolve(
+        __dirname,
+        'src/shared/stubs/noop.ts'
+      ),
+      'react-native-device-detection': path.resolve(
+        __dirname,
+        'src/shared/stubs/noop.ts'
+      ),
+      'expo-dev-client': path.resolve(
+        __dirname,
+        'src/shared/stubs/noop.ts'
+      ),
+      'react-native-walkthrough-tooltip': path.resolve(
+        __dirname,
+        'src/shared/stubs/walkthrough-tooltip.tsx'
+      ),
+      '@shopify/react-native-skia': path.resolve(
+        __dirname,
+        'src/shared/stubs/skia.ts'
+      ),
+      'victory-native': path.resolve(
+        __dirname,
+        'src/shared/stubs/victory.tsx'
+      ),
+    };
+
+    // axios browser build (same as native)
+    config.resolver.resolveRequest = function packageExportsResolver(
       context,
       moduleImport,
       platform
     ) {
-      // Stub native-only packages — match exact name AND subpaths (e.g. 'victory-native/src/types')
-      const stubKey = Object.keys(STUB_MODULES).find(
-        (key) => moduleImport === key || moduleImport.startsWith(key + '/')
-      );
-      if (stubKey) {
-        const filePath = path.join(stubsDir, STUB_MODULES[stubKey]);
-        console.log(`[web-stubs] ${moduleImport} → stubs/${STUB_MODULES[stubKey]}`);
-        return { type: 'sourceFile', filePath };
-      }
-
-      // Use the browser build of axios
       if (moduleImport === 'axios' || moduleImport.startsWith('axios/')) {
         return context.resolveRequest(
           { ...context, unstable_conditionNames: ['browser'] },

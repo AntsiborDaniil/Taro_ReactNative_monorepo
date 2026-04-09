@@ -1,4 +1,4 @@
-import { StyleSheet, StyleProp } from 'react-native';
+import { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
 import { TextStyle } from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
 import { moderateScale } from 'shared/lib';
 import { TEXT_TAGS, TEXT_WEIGHT } from './constants';
@@ -45,10 +45,7 @@ export function getTextStyles({
   style,
   category,
 }: TTextStylesParameters): StyleProp<TextStyle> {
-  // StyleSheet.flatten handles arrays → plain object to avoid spreading
-  // an array (which would create numeric keys like {0: style1, 1: style2}
-  // and crash React DOM with "Indexed property setter is not supported")
-  let textStyle: Record<string, unknown> = (StyleSheet.flatten(style as any) as Record<string, unknown>) || {};
+  let textStyle = style || {};
 
   // делаем это из-за ошибки в деве про immutable obj
   textStyle = {
@@ -58,12 +55,12 @@ export function getTextStyles({
 
   textStyle = {
     ...textStyle,
-    fontSize: moderateScale((textStyle.fontSize as number) || DEFAULT_TEXT_SIZES[category!]),
+    fontSize: moderateScale(style?.fontSize || DEFAULT_TEXT_SIZES[category!]),
   };
 
   textStyle = {
     ...textStyle,
-    fontWeight: (textStyle.fontWeight as string) || TEXT_WEIGHT[weight!],
+    fontWeight: style?.fontWeight || TEXT_WEIGHT[weight!],
   };
 
   return textStyle;

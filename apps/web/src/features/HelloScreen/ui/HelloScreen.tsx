@@ -107,7 +107,7 @@ function HelloScreen() {
     carouselRef.current?.next();
   };
 
-  const priceString = offerings?.current?.availablePackages?.find(
+  const priceString = offerings?.current?.availablePackages.find(
     (item) => item.identifier === '$rc_annual'
   )?.product.priceString;
 

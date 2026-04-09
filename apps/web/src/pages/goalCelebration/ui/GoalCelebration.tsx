@@ -138,14 +138,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 4,
     borderColor: COLORS.Primary200,
-    shadowColor: COLORS.Primary,
-    shadowOpacity: 0.5,
-    shadowOffset: {
-      width: 0,
-      height: 12,
-    },
-    shadowRadius: 24,
-    elevation: 6,
+    boxShadow: `0 12px 24px ${COLORS.Primary}80`,
   },
   title: {
     textAlign: 'center',

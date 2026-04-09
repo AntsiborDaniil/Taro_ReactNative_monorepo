@@ -18,15 +18,15 @@ function SpreadsScreen() {
   });
 
   return (
-      <MultiProvider
-        providers={[
-          <DataProvider
-            Context={SpreadContext}
-            value={spreadContextData}
-            key="SpreadContext"
-          />,
-        ]}
-      >
+    <MultiProvider
+      providers={[
+        <DataProvider
+          Context={SpreadContext}
+          value={spreadContextData}
+          key="ApplicationConfigContext"
+        />,
+      ]}
+    >
       <SpreadsStack.Navigator
         initialRouteName={NavigationRoute.Spreads}
         screenOptions={{ headerShown: false }}
