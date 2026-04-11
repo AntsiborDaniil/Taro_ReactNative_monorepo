@@ -28,6 +28,8 @@
   "page.history": "История \nраскладов",
   "page.favorite": "Избранные \nкарты",
   "page.spreadsGroups": "Расклады Таро",
+  "spreads.catalog.hint": "Нажми, чтобы открыть расклад →",
+  "spreads.catalog.hintLocked": "С замком — в подписке. Нажми, чтобы узнать больше",
   "page.spreadsHistory": "История раскладов",
   "page.favouriteCards": "Избранные карты",
 

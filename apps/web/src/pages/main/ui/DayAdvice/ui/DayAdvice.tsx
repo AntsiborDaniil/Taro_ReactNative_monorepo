@@ -1,14 +1,25 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  ImageBackground,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
-import Video from 'react-native-video';
 import { simpleSpreads } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { getCurrentDate, getImage, isTablet, verticalScale } from 'shared/lib';
+import {
+  getCurrentDate,
+  getImage,
+  isTablet,
+  moderateScale,
+  verticalScale,
+} from 'shared/lib';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 
@@ -49,22 +60,19 @@ function DayAdvice() {
 
   return (
     <View style={styles.container}>
-      <Video
+      <ImageBackground
         style={styles.video}
-        muted={true} // Отключить звук, если видео используется как фон
-        repeat={true} // Зациклить воспроизведение
-        resizeMode="cover" // Аналогично ImageBackground, растягивает видео
-        rate={1.0} // Скорость воспроизведения
-        ignoreSilentSwitch="obey"
-        source={getImage(['videos', 'girl'])}
+        resizeMode="cover"
+        source={getImage(['core', 'girlCard'])}
       />
-
-      <TouchableOpacity
+      <Pressable
         style={styles.button}
         onPress={handleSelectDayAdvice}
-        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={t('core:dailyCard.title')}
       >
         <LinearGradient
+          pointerEvents="none"
           colors={[
             'rgba(0, 0, 0, 0)',
             'rgba(0, 0, 0, 0)',
@@ -76,17 +84,25 @@ function DayAdvice() {
             'rgba(30, 30, 30, 0.41)',
             '#1E1E1E',
           ]}
-          style={StyleSheet.absoluteFill}
+          style={styles.gradient}
         />
         <View style={styles.wrapper}>
-          <Text category={TEXT_TAGS.h3} weight={TEXT_WEIGHT.medium}>
+          <Text
+            category={TEXT_TAGS.h3}
+            weight={TEXT_WEIGHT.medium}
+            style={styles.date}
+          >
             {date ?? ''}
           </Text>
-          <Text category={TEXT_TAGS.h1} weight={TEXT_WEIGHT.medium}>
+          <Text
+            category={TEXT_TAGS.h1}
+            weight={TEXT_WEIGHT.medium}
+            style={styles.title}
+          >
             {t('core:dailyCard.title')}
           </Text>
         </View>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 }
@@ -103,11 +119,42 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
+    overflow: 'visible',
+  },
+  gradient: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 0,
   },
   wrapper: {
     marginTop: 'auto',
-    alignItems: 'center',
-    paddingBottom: 29,
+    alignSelf: 'stretch',
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 32,
+    gap: 10,
+    zIndex: 1,
+    position: 'relative',
+    overflow: 'visible',
+  },
+  date: {
+    textAlign: 'center',
+    lineHeight: moderateScale(26),
+    paddingVertical: 4,
+  },
+  title: {
+    textAlign: 'center',
+    // запас выше кегля: иначе на web ascenders обрезаются родителем с overflow:hidden
+    lineHeight: moderateScale(42),
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingHorizontal: 4,
+    minHeight: moderateScale(48),
+    ...(Platform.OS === 'android' ? { includeFontPadding: false } : null),
+    ...Platform.select({
+      web: { overflow: 'visible' },
+      default: {},
+    }),
   },
   video: {
     width: '100%',

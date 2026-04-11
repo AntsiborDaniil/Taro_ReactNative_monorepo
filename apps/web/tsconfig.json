@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
+      "@appmetrica/react-native-analytics": ["./shared/stubs/appmetrica"],
       "app/*": ["./app/*"],
       "pages/*": ["./pages/*"],
       "features/*": ["./features/*"],

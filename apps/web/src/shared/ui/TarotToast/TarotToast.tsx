@@ -1,28 +1,31 @@
-import { StyleSheet } from 'react-native';
-import type { ToastConfig } from 'react-native-toast-message';
-import Toast, { BaseToast } from 'react-native-toast-message';
+import { Platform, StyleSheet } from 'react-native';
 import { COLORS } from '../../themes';
 
-const toastConfig: ToastConfig = {
-  success: (props) => (
-    <BaseToast
-      {...props}
-      style={[styles.baseToast, styles.success]}
-      text1Style={styles.text}
-      text2Style={styles.smallText}
-    />
-  ),
-  error: (props) => (
-    <BaseToast
-      {...props}
-      style={[styles.baseToast, styles.error]}
-      text1Style={styles.text}
-      text2Style={styles.smallText}
-    />
-  ),
-};
-
 function TarotToast() {
+  if (Platform.OS === 'web') {
+    return null;
+  }
+
+  const { default: Toast, BaseToast } = require('react-native-toast-message');
+  const toastConfig = {
+    success: (props: any) => (
+      <BaseToast
+        {...props}
+        style={[styles.baseToast, styles.success]}
+        text1Style={styles.text}
+        text2Style={styles.smallText}
+      />
+    ),
+    error: (props: any) => (
+      <BaseToast
+        {...props}
+        style={[styles.baseToast, styles.error]}
+        text1Style={styles.text}
+        text2Style={styles.smallText}
+      />
+    ),
+  };
+
   return <Toast topOffset={56} visibilityTime={2500} config={toastConfig} />;
 }
 

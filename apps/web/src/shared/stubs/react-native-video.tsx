@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Image, View } from 'react-native';
 
 type VideoProps = {
   source?: unknown;
@@ -14,8 +14,14 @@ type VideoProps = {
   [key: string]: unknown;
 };
 
-const Video = React.forwardRef<View, VideoProps>(({ style }, ref) => (
-  <View ref={ref} style={style} />
+const Video = React.forwardRef<View, VideoProps>(({ style, source }, ref) => (
+  <View ref={ref} style={style}>
+    <Image
+      source={source as any}
+      resizeMode="cover"
+      style={{ width: '100%', height: '100%' }}
+    />
+  </View>
 ));
 
 Video.displayName = 'Video';

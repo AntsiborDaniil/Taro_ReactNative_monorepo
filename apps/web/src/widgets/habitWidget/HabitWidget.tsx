@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ProgressBar } from '@ui-kitten/components';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { HabitsContext } from 'entities/habits';
@@ -52,9 +52,9 @@ function HabitWidget() {
       }}
     >
       <View style={styles.container}>
-        <View style={[styles.row, { justifyContent: 'flex-start' }]}>
+        <View style={styles.topRow}>
           <View style={styles.main}>
-            <View style={styles.row}>
+            <View style={styles.headerRow}>
               <Text category={TEXT_TAGS.h4} weight={TEXT_WEIGHT.medium}>
                 {`${date[0].toUpperCase()}${date.slice(1)}`}
               </Text>
@@ -80,8 +80,7 @@ function HabitWidget() {
               </Text>
             )}
           </View>
-          <TouchableOpacity
-            activeOpacity={0.7}
+          <Pressable
             style={styles.image}
             onPress={async (e) => {
               e.stopPropagation();
@@ -94,7 +93,7 @@ function HabitWidget() {
             }}
           >
             <Text style={styles.plus}>+</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     </TouchableOpacity>
@@ -107,8 +106,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderColor: COLORS.Primary600,
     marginHorizontal: 16,
-    padding: 8,
-    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
   },
   row: {
     flexDirection: 'row',
@@ -116,30 +116,57 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    width: '100%',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
   plus: {
-    fontSize: 48,
-    lineHeight: 43,
+    fontSize: 32,
+    lineHeight: 32,
+    fontWeight: 700,
     textAlign: 'center',
+    color: COLORS.Content,
   },
   image: {
-    width: 52,
-    height: 52,
-    backgroundColor: COLORS.SpbSky3,
-    borderRadius: '100%',
-    padding: 12,
+    width: 82,
+    height: 82,
+    backgroundColor: COLORS.Background2,
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: COLORS.Primary,
     alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    padding: 20,
+    marginLeft: 18,
   },
-  description: { width: '100%', textAlign: 'center' },
+  description: {
+    width: '100%',
+    textAlign: 'center',
+    lineHeight: 20,
+    fontSize: 16,
+    paddingHorizontal: 4,
+    marginTop: 10,
+  },
   percent: {
     backgroundColor: COLORS.Success700,
-    padding: 4,
-    paddingHorizontal: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
     borderRadius: 16,
   },
   main: {
-    justifyContent: 'space-between',
-    height: 80,
+    justifyContent: 'center',
+    gap: 10,
     flex: 1,
+    minWidth: 0,
   },
   progress: {
     height: 12,

@@ -3,6 +3,7 @@ import {
   Animated,
   DimensionValue,
   ImageBackground,
+  Platform,
   StyleProp,
   StyleSheet,
   View,
@@ -62,7 +63,7 @@ const FlippableTarotCard = ({
     Animated.timing(flipAnimation, {
       toValue: 360,
       duration: 1000,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start(() => {
       setDisplayedIndex(toIndex);
       setShowBack(fromBack ? false : true); // Переключаем между рубашкой и лицом
@@ -90,7 +91,7 @@ const FlippableTarotCard = ({
               source={getImage(['core', 'cardBack'])}
               resizeMode="cover"
               // resizeMethod="scale"
-              style={{ ...styles.imageBackground, width, height }}
+              style={[styles.imageBackground, { width, height }]}
             />
           </View>
         ) : (
@@ -109,7 +110,7 @@ const FlippableTarotCard = ({
               source={getImage(['core', 'cardBack'])}
               resizeMode="cover"
               // resizeMethod="scale"
-              style={{ ...styles.imageBackground }}
+              style={styles.imageBackground}
             />
           </View>
         ) : (

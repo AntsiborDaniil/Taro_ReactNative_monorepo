@@ -3,17 +3,16 @@ import {
   Image,
   Linking,
   Platform,
-  SafeAreaView,
+  Pressable,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertIcon } from 'shared/icons';
 import { getImage } from 'shared/lib';
 import { COLORS } from 'shared/themes';
-import { Button, Text, TEXT_TAGS } from 'shared/ui';
+import { Text, TEXT_TAGS } from 'shared/ui';
 
 type TarotErrorBoundaryProps = {
   title?: string;
@@ -22,30 +21,31 @@ type TarotErrorBoundaryProps = {
 };
 
 export default function TarotErrorBoundary({
-  title,
   error,
+  resetError,
 }: TarotErrorBoundaryProps) {
-  const { top } = useSafeAreaInsets();
-
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
+  const compact = width < 900;
 
-  const handleClickUpgrade = async () => {
-    const storeUrl =
-      Platform.OS === 'ios'
-        ? 'https://apps.apple.com/app/id6749576474'
-        : 'https://play.google.com/store/apps/details?id=com.melexp.tarotmobile';
+  const handleGoBack = async () => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      if (window.history.length > 1) {
+        window.history.back();
+        return;
+      }
+      resetError?.();
+      return;
+    }
 
     try {
-      const supported = await Linking.canOpenURL(storeUrl);
-
-      if (supported) {
-        await Linking.openURL(storeUrl);
-      }
+      await Linking.openURL('tarotmobile://');
     } catch (openUrlError) {
       AppMetrica.reportError(
-        'Can not open URL',
+        'Can not open deep link',
         (openUrlError as Error).message
       );
+      resetError?.();
     }
   };
 
@@ -59,71 +59,147 @@ export default function TarotErrorBoundary({
   }, []);
 
   return (
-    <SafeAreaView style={styles.wrapper}>
-      <View style={[styles.container, { top }]}>
-        <View style={styles.action}>
-          <View style={styles.warning}>
-            <AlertIcon style={styles.icon} />
-            <View style={styles.textBlock}>
-              <Text category={TEXT_TAGS.h1}>
-                {title ? t(title) : t('core:errorBoundary.title')}
-              </Text>
-              <Text category={TEXT_TAGS.h3}>
-                {t('core:errorBoundary.description')}
-              </Text>
-            </View>
-          </View>
-          <Button
-            onPress={handleClickUpgrade}
-            size="giant"
-            appearance="outline"
-            status="primary"
-          >
-            {t('core:errorBoundary.button')}
-          </Button>
-        </View>
+    <View style={styles.wrapper}>
+      <View style={styles.imageFrame}>
         <Image
           style={styles.image}
+          resizeMode="contain"
           source={getImage(['core', 'errorBoundary'])}
         />
       </View>
-    </SafeAreaView>
+      <View style={styles.overlayAction}>
+        <View style={styles.card}>
+          <Text category={TEXT_TAGS.h2} style={styles.cardTitle}>
+            {t('core:errorBoundary.title')}
+          </Text>
+          <Text
+            category={TEXT_TAGS.h4}
+            style={[
+              styles.cardDescription,
+              compact ? styles.cardDescriptionCompact : null,
+            ]}
+          >
+            Произошла техническая проблема. Мы уже получили отчёт и работаем над
+            исправлением.
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('core:button.prev')}
+            onPress={handleGoBack}
+            style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
+              styles.goBackButton,
+              Platform.OS === 'web' && hovered ? styles.goBackButtonHover : null,
+              pressed ? styles.goBackButtonPressed : null,
+            ]}
+          >
+            <Text category={TEXT_TAGS.h4} style={styles.goBackButtonText}>
+              {t('core:button.prev')}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   wrapper: {
+    flex: 1,
     backgroundColor: COLORS.Background,
-    height: '100%',
-  },
-  action: {
-    height: '35%',
     justifyContent: 'center',
-    paddingHorizontal: 16,
-    gap: 32,
-  },
-  icon: {
-    // @ts-expect-error fill
-    fill: COLORS.Primary,
-    flexShrink: 0,
-    width: 80,
-    height: 80,
-  },
-  warning: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
   },
-  textBlock: {
-    gap: 16,
-    alignItems: 'flex-start',
-  },
-  container: {
+  imageFrame: {
+    width: '100%',
+    maxWidth: '100%',
     height: '100%',
-    justifyContent: 'flex-end',
+    borderRadius: 0,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.22)',
+    backgroundColor: '#0C1421',
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '0 16px 42px rgba(0, 0, 0, 0.4)',
+        } as object)
+      : {}),
   },
   image: {
     width: '100%',
-    height: '65%',
+    height: '100%',
+  },
+  overlayAction: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    bottom: 34,
+    alignItems: 'center',
+  },
+  card: {
+    width: '100%',
+    maxWidth: 620,
+    borderRadius: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    gap: 12,
+    backgroundColor: 'rgba(9, 15, 24, 0.78)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.24)',
+    ...(Platform.OS === 'web'
+      ? ({
+          backdropFilter: 'blur(6px)',
+          boxShadow: '0 14px 34px rgba(0, 0, 0, 0.38)',
+        } as object)
+      : {}),
+  },
+  cardTitle: {
+    textAlign: 'left',
+    color: COLORS.Content,
+    fontSize: 34,
+    lineHeight: 38,
+  },
+  cardDescription: {
+    textAlign: 'left',
+    color: COLORS.SpbSky1,
+    fontSize: 18,
+    lineHeight: 24,
+    maxWidth: 560,
+  },
+  cardDescriptionCompact: {
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  goBackButton: {
+    alignSelf: 'flex-start',
+    minHeight: 46,
+    paddingHorizontal: 18,
+    borderRadius: 12,
+    backgroundColor: COLORS.Primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+          transition:
+            'transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease',
+          boxShadow: '0 8px 22px rgba(246, 192, 27, 0.32)',
+        } as object)
+      : {}),
+  },
+  goBackButtonHover: {
+    backgroundColor: '#FFD24D',
+    ...(Platform.OS === 'web'
+      ? ({
+          transform: 'translateY(-1px)',
+          boxShadow: '0 12px 26px rgba(246, 192, 27, 0.45)',
+        } as object)
+      : {}),
+  },
+  goBackButtonPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  goBackButtonText: {
+    color: COLORS.Background,
   },
 });

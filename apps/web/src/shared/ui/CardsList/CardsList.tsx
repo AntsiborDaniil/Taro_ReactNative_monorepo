@@ -9,11 +9,12 @@ import {
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { useTranslation } from 'react-i18next';
 import { DeckStyle } from 'shared/api';
+import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { NavigationRoute, TabRoute } from 'shared/types';
-import { TarotCard, Text, TEXT_TAGS } from 'shared/ui';
-import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
+import { Text, TEXT_TAGS } from '../Text';
+import TarotCard from '../TarotCard/TarotCard';
 
 type BaseTarotCardProps = {
   id: string;

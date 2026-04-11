@@ -1,0 +1,283 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.UserProfile = exports.StringAttribute = exports.NumberAttribute = exports.NotificationsEnabledAttribute = exports.NameAttribute = exports.GenderAttribute = exports.CounterAttribute = exports.BooleanAttribute = exports.BirthDateAttribute = exports.Attributes = void 0;
+class UserProfile {
+  constructor() {
+    this.attributes = [];
+  }
+  apply(attribute) {
+    this.attributes.push(attribute);
+    return this;
+  }
+}
+exports.UserProfile = UserProfile;
+class Attributes {
+  static birthDate() {
+    return new BirthDateAttribute();
+  }
+  static customBoolean(key) {
+    return new BooleanAttribute(key);
+  }
+  static customCounter(key) {
+    return new CounterAttribute(key);
+  }
+  static customNumber(key) {
+    return new NumberAttribute(key);
+  }
+  static customString(key) {
+    return new StringAttribute(key);
+  }
+  static gender() {
+    return new GenderAttribute();
+  }
+  static userName() {
+    return new NameAttribute();
+  }
+  static notificationsEnabled() {
+    return new NotificationsEnabledAttribute();
+  }
+}
+exports.Attributes = Attributes;
+class BirthDateAttribute {
+  withAge(age) {
+    return {
+      type: 'BirthDateWithAge',
+      age: age,
+      ifUndefined: false
+    };
+  }
+  withAgeIfUndefined(age) {
+    return {
+      type: 'BirthDateWithAge',
+      age: age,
+      ifUndefined: true
+    };
+  }
+  withYear(year) {
+    return {
+      type: 'BirthDateWithYear',
+      year: year,
+      ifUndefined: false
+    };
+  }
+  withYearIfUndefined(year) {
+    return {
+      type: 'BirthDateWithYear',
+      year: year,
+      ifUndefined: true
+    };
+  }
+  withMonth(year, month) {
+    return {
+      type: 'BirthDateWithMonth',
+      year: year,
+      month: month,
+      ifUndefined: false
+    };
+  }
+  withMonthIfUndefined(year, month) {
+    return {
+      type: 'BirthDateWithMonth',
+      year: year,
+      month: month,
+      ifUndefined: true
+    };
+  }
+  withDay(year, month, day) {
+    return {
+      type: 'BirthDateWithDay',
+      year: year,
+      month: month,
+      day: day,
+      ifUndefined: false
+    };
+  }
+  withDayIfUndefined(year, month, day) {
+    return {
+      type: 'BirthDateWithDay',
+      year: year,
+      month: month,
+      day: day,
+      ifUndefined: true
+    };
+  }
+  withDate(date) {
+    return this.withDay(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+  withDateIfUndefined(date) {
+    return this.withDayIfUndefined(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+  withValueReset() {
+    return {
+      type: 'BirthDateValueReset'
+    };
+  }
+}
+exports.BirthDateAttribute = BirthDateAttribute;
+class BooleanAttribute {
+  constructor(key) {
+    this.key = key;
+  }
+  withValue(value) {
+    return {
+      type: 'BooleanValue',
+      key: this.key,
+      value: value,
+      ifUndefined: false
+    };
+  }
+  withValueIfUndefined(value) {
+    return {
+      type: 'BooleanValue',
+      key: this.key,
+      value: value,
+      ifUndefined: true
+    };
+  }
+  withValueReset() {
+    return {
+      type: 'BooleanValueReset',
+      key: this.key
+    };
+  }
+}
+exports.BooleanAttribute = BooleanAttribute;
+class CounterAttribute {
+  constructor(key) {
+    this.key = key;
+  }
+  withDelta(delta) {
+    return {
+      type: 'Counter',
+      key: this.key,
+      delta: delta
+    };
+  }
+}
+exports.CounterAttribute = CounterAttribute;
+class GenderAttribute {
+  withValue(gender) {
+    return {
+      type: 'GenderValue',
+      value: gender,
+      ifUndefined: false
+    };
+  }
+  withValueIfUndefined(gender) {
+    return {
+      type: 'GenderValue',
+      value: gender,
+      ifUndefined: true
+    };
+  }
+  withValueReset() {
+    return {
+      type: 'GenderValueReset'
+    };
+  }
+}
+exports.GenderAttribute = GenderAttribute;
+class NameAttribute {
+  withValue(value) {
+    return {
+      type: 'NameValue',
+      value: value,
+      ifUndefined: false
+    };
+  }
+  withValueIfUndefined(value) {
+    return {
+      type: 'NameValue',
+      value: value,
+      ifUndefined: true
+    };
+  }
+  withValueReset() {
+    return {
+      type: 'NameValueReset'
+    };
+  }
+}
+exports.NameAttribute = NameAttribute;
+class NotificationsEnabledAttribute {
+  withValue(value) {
+    return {
+      type: 'NotificationsEnabledValue',
+      value: value,
+      ifUndefined: false
+    };
+  }
+  withValueIfUndefined(value) {
+    return {
+      type: 'NotificationsEnabledValue',
+      value: value,
+      ifUndefined: true
+    };
+  }
+  withValueReset() {
+    return {
+      type: 'NotificationsEnabledValueReset'
+    };
+  }
+}
+exports.NotificationsEnabledAttribute = NotificationsEnabledAttribute;
+class NumberAttribute {
+  constructor(key) {
+    this.key = key;
+  }
+  withValue(value) {
+    return {
+      type: 'NumberValue',
+      key: this.key,
+      value: value,
+      ifUndefined: false
+    };
+  }
+  withValueIfUndefined(value) {
+    return {
+      type: 'NumberValue',
+      key: this.key,
+      value: value,
+      ifUndefined: true
+    };
+  }
+  withValueReset() {
+    return {
+      type: 'NumberValueReset',
+      key: this.key
+    };
+  }
+}
+exports.NumberAttribute = NumberAttribute;
+class StringAttribute {
+  constructor(key) {
+    this.key = key;
+  }
+  withValue(value) {
+    return {
+      type: 'StringValue',
+      key: this.key,
+      value: value,
+      ifUndefined: false
+    };
+  }
+  withValueIfUndefined(value) {
+    return {
+      type: 'StringValue',
+      key: this.key,
+      value: value,
+      ifUndefined: true
+    };
+  }
+  withValueReset() {
+    return {
+      type: 'StringValueReset',
+      key: this.key
+    };
+  }
+}
+exports.StringAttribute = StringAttribute;
+//# sourceMappingURL=userProfile.js.map

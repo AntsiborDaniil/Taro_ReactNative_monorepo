@@ -1,0 +1,61 @@
+function convertMap(map) {
+  return map !== undefined ? Object.fromEntries(map) : undefined;
+}
+export function normalizeECommerceOrder(order) {
+  const newOrder = {
+    ...order
+  };
+  if (order.payload instanceof Map) {
+    newOrder.payload = convertMap(order.payload);
+  }
+  newOrder.products = order.products.map(normalizeECommerceCartItem);
+  return newOrder;
+}
+export function normalizeECommerceCartItem(item) {
+  const newItem = {
+    ...item
+  };
+  newItem.product = normalizeECommerceProduct(item.product);
+  newItem.referrer = normalizeECommerceReferrer(item.referrer);
+  return newItem;
+}
+export function normalizeECommerceProduct(product) {
+  const newProduct = {
+    ...product
+  };
+  if (product.payload instanceof Map) {
+    newProduct.payload = convertMap(product.payload);
+  }
+  return newProduct;
+}
+export function normalizeECommerceReferrer(referrer) {
+  if (referrer === undefined) {
+    return undefined;
+  }
+  const newReferrer = {
+    ...referrer
+  };
+  if (referrer.screen != undefined) {
+    newReferrer.screen = normalizeECommerceScreen(referrer.screen);
+  }
+  return newReferrer;
+}
+export function normalizeECommerceScreen(screen) {
+  const newScreen = {
+    ...screen
+  };
+  if (screen.payload instanceof Map) {
+    newScreen.payload = convertMap(screen.payload);
+  }
+  return newScreen;
+}
+export function normalizeAdRevenue(adRevenue) {
+  const newAdRevenue = {
+    ...adRevenue
+  };
+  if (adRevenue.payload instanceof Map) {
+    newAdRevenue.payload = convertMap(adRevenue.payload);
+  }
+  return newAdRevenue;
+}
+//# sourceMappingURL=utils.js.map

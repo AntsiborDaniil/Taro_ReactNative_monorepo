@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   },
   block: {
     width: '100%',
-    minHeight: 110,
+    minHeight: 120,
     backgroundColor: COLORS.Background,
     borderWidth: 1,
     borderColor: COLORS.Primary,
@@ -124,7 +124,9 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    gap: 14,
   },
   texts: {
     flex: 1,

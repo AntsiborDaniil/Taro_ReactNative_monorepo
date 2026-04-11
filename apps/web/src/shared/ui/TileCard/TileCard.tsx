@@ -2,7 +2,6 @@ import { memo } from 'react';
 import {
   Image,
   ImageBackground,
-  ImageStyle,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -58,14 +57,14 @@ function TileCard({
       disabled={disabled}
       activeOpacity={0.7}
     >
-      <Layout style={[{ width, backgroundColor: 'transparent' }]}>
+      <Layout style={StyleSheet.flatten([{ width, backgroundColor: 'transparent' }])}>
         <Layout
-          style={[
+          style={StyleSheet.flatten([
             styles.container,
             { width, height },
             !!hasOutline && styles.outlined,
             !!isSelected && styles.selected,
-          ]}
+          ])}
         >
           {/* Изображение как фон или в углу */}
           {imagePosition === ImagePosition.Background ? (
@@ -108,16 +107,14 @@ function TileCard({
               <Image
                 source={imageSource}
                 resizeMode="contain"
-                style={
-                  [
-                    styles.cornerImage,
-                    { width: imageWidth, height: imageHeight },
-                    {
-                      right: imageOffsetX,
-                      bottom: imageOffsetY,
-                    },
-                  ] as ImageStyle
-                }
+                style={[
+                  styles.cornerImage,
+                  { width: imageWidth, height: imageHeight },
+                  {
+                    right: imageOffsetX,
+                    bottom: imageOffsetY,
+                  },
+                ]}
               />
               {textPosition === TextPosition.Inner &&
                 (typeof children === 'string' ? (

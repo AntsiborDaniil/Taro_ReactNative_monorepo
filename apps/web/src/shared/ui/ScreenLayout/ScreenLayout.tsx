@@ -28,12 +28,14 @@ function ScreenLayout({ children, style }: ScreenLayoutProps): ReactNode {
       </View>
       <View style={styles.wrapper}>
         <Layout
-          style={{
-            ...insets,
-            ...styles.layout,
-            paddingBottom: insets.bottom,
-            ...(style as any),
-          }}
+          style={StyleSheet.flatten([
+            styles.layout,
+            {
+              ...insets,
+              paddingBottom: insets.bottom,
+            },
+            style as StyleProp<ViewStyle>,
+          ])}
         >
           {children}
         </Layout>

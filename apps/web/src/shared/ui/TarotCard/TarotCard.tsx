@@ -3,6 +3,7 @@ import {
   Animated,
   DimensionValue,
   ImageBackground,
+  Platform,
   StyleSheet,
   ViewStyle,
 } from 'react-native';
@@ -13,7 +14,7 @@ import { useData } from 'shared/DataProvider';
 import { Checked, LockIcon } from 'shared/icons';
 import { getImage } from 'shared/lib';
 import { COLORS } from 'shared/themes';
-import { OverlayIcon } from 'shared/ui';
+import { OverlayIcon } from '../OverlayIcon';
 
 type TarotCardProps = {
   cardId: string;
@@ -55,7 +56,7 @@ function TarotCard({
       Animated.timing(iconOpacityAnim, {
         toValue: isSelected ? 1 : 0,
         duration: 250,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }),
     ]).start();
   }, [borderColorAnim, iconOpacityAnim, isSelected]);
@@ -88,7 +89,7 @@ function TarotCard({
           `card${cardId}`,
         ])}
         resizeMode="cover"
-        style={{ ...styles.imageBackground, width, height }}
+        style={[styles.imageBackground, { width, height }]}
       >
         {!!isSelected && (
           <Animated.View

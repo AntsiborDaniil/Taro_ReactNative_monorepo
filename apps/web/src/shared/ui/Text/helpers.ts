@@ -1,4 +1,4 @@
-import { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
+import { StyleProp, StyleSheet } from 'react-native';
 import { TextStyle } from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
 import { moderateScale } from 'shared/lib';
 import { TEXT_TAGS, TEXT_WEIGHT } from './constants';
@@ -45,9 +45,11 @@ export function getTextStyles({
   style,
   category,
 }: TTextStylesParameters): StyleProp<TextStyle> {
-  let textStyle = style || {};
+  // Style может быть массивом; spread массива даёт ключи 0,1 — на web это ломает CSSStyleDeclaration
+  const base = StyleSheet.flatten(style) ?? {};
 
-  // делаем это из-за ошибки в деве про immutable obj
+  let textStyle: TextStyle = { ...base };
+
   textStyle = {
     ...textStyle,
     fontFamily: fontFamilyMap[weight || DEFAULT_TEXT_WEIGHTS[category!]],
@@ -55,12 +57,12 @@ export function getTextStyles({
 
   textStyle = {
     ...textStyle,
-    fontSize: moderateScale(style?.fontSize || DEFAULT_TEXT_SIZES[category!]),
+    fontSize: moderateScale(base.fontSize || DEFAULT_TEXT_SIZES[category!]),
   };
 
   textStyle = {
     ...textStyle,
-    fontWeight: style?.fontWeight || TEXT_WEIGHT[weight!],
+    fontWeight: base.fontWeight || TEXT_WEIGHT[weight!],
   };
 
   return textStyle;

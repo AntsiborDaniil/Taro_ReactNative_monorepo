@@ -1,0 +1,211 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var _exportNames = {
+  DEVICE_ID_HASH_KEY: true,
+  DEVICE_ID_KEY: true,
+  UUID_KEY: true
+};
+exports.default = exports.UUID_KEY = exports.DEVICE_ID_KEY = exports.DEVICE_ID_HASH_KEY = void 0;
+var _reactNative = require("react-native");
+var _utils = require("./utils");
+var _error = require("./error");
+var _reporter = require("./reporter");
+var _ecommerce = require("./ecommerce");
+Object.keys(_ecommerce).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  if (key in exports && exports[key] === _ecommerce[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _ecommerce[key];
+    }
+  });
+});
+var _revenue = require("./revenue");
+Object.keys(_revenue).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  if (key in exports && exports[key] === _revenue[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _revenue[key];
+    }
+  });
+});
+var _userProfile = require("./userProfile");
+Object.keys(_userProfile).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  if (key in exports && exports[key] === _userProfile[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _userProfile[key];
+    }
+  });
+});
+var _externalAttribution = require("./externalAttribution");
+Object.keys(_externalAttribution).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  if (key in exports && exports[key] === _externalAttribution[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _externalAttribution[key];
+    }
+  });
+});
+var _deferredDeeplink = require("./deferredDeeplink");
+Object.keys(_deferredDeeplink).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  if (key in exports && exports[key] === _deferredDeeplink[key]) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _deferredDeeplink[key];
+    }
+  });
+});
+const LINKING_ERROR = `The package '@appmetrica/react-native-analytics' doesn't seem to be linked. Make sure: \n\n` + _reactNative.Platform.select({
+  ios: "- You have run 'pod install'\n",
+  default: ''
+}) + '- You rebuilt the app after installing the package\n' + '- You are not using Expo Go\n';
+const AppMetricaNative = _reactNative.NativeModules.AppMetrica ? _reactNative.NativeModules.AppMetrica : new Proxy({}, {
+  get() {
+    throw new Error(LINKING_ERROR);
+  }
+});
+var activated = false;
+function appOpenTracking() {
+  const getUrlAsync = async () => {
+    const initialUrl = await _reactNative.Linking.getInitialURL();
+    if (initialUrl != null) {
+      AppMetricaNative.reportAppOpen(initialUrl);
+    }
+  };
+  const callback = event => {
+    AppMetricaNative.reportAppOpen(event.url);
+  };
+  getUrlAsync();
+  _reactNative.Linking.addEventListener('url', callback);
+}
+const DEVICE_ID_HASH_KEY = exports.DEVICE_ID_HASH_KEY = 'appmetrica_device_id_hash';
+const DEVICE_ID_KEY = exports.DEVICE_ID_KEY = 'appmetrica_device_id';
+const UUID_KEY = exports.UUID_KEY = 'appmetrica_uuid';
+class AppMetrica {
+  static reporters = new Map();
+  static activate(config) {
+    if (!activated) {
+      AppMetricaNative.activate(config);
+      if (config.appOpenTrackingEnabled !== false) {
+        appOpenTracking();
+      }
+      activated = true;
+    }
+  }
+
+  // Android only
+  static async getLibraryApiLevel() {
+    return AppMetricaNative.getLibraryApiLevel();
+  }
+  static async getLibraryVersion() {
+    return AppMetricaNative.getLibraryVersion();
+  }
+  static pauseSession() {
+    AppMetricaNative.pauseSession();
+  }
+  static reportAppOpen(deeplink) {
+    AppMetricaNative.reportAppOpen(deeplink);
+  }
+  static reportError(identifier, message, _reason) {
+    AppMetricaNative.reportError(identifier, message, _reason instanceof Error ? _error.AppMetricaError.withError(_reason) : _error.AppMetricaError.withObject(_reason));
+  }
+  static reportUnhandledException(error) {
+    AppMetricaNative.reportUnhandledException(_error.AppMetricaError.withError(error));
+  }
+  static reportErrorWithoutIdentifier(message, error) {
+    AppMetricaNative.reportErrorWithoutIdentifier(message, _error.AppMetricaError.withError(error));
+  }
+  static reportEvent(eventName, attributes) {
+    AppMetricaNative.reportEvent(eventName, attributes);
+  }
+  static requestStartupParams(listener, identifiers) {
+    AppMetricaNative.requestStartupParams(identifiers, listener);
+  }
+  static resumeSession() {
+    AppMetricaNative.resumeSession();
+  }
+  static sendEventsBuffer() {
+    AppMetricaNative.sendEventsBuffer();
+  }
+  static setLocation(location) {
+    AppMetricaNative.setLocation(location);
+  }
+  static setLocationTracking(enabled) {
+    AppMetricaNative.setLocationTracking(enabled);
+  }
+  static setDataSendingEnabled(enabled) {
+    AppMetricaNative.setDataSendingEnabled(enabled);
+  }
+  static setUserProfileID(userProfileID) {
+    AppMetricaNative.setUserProfileID(userProfileID);
+  }
+  static reportECommerce(event) {
+    AppMetricaNative.reportECommerce(event);
+  }
+  static reportRevenue(revenue) {
+    AppMetricaNative.reportRevenue(revenue);
+  }
+  static reportAdRevenue(adRevenue) {
+    AppMetricaNative.reportAdRevenue((0, _utils.normalizeAdRevenue)(adRevenue));
+  }
+  static reportUserProfile(userProfile) {
+    AppMetricaNative.reportUserProfile(userProfile);
+  }
+  static putErrorEnvironmentValue(key, value) {
+    AppMetricaNative.putErrorEnvironmentValue(key, value);
+  }
+  static reportExternalAttribution(attribution) {
+    AppMetricaNative.reportExternalAttribution(attribution);
+  }
+  static putAppEnvironmentValue(key, value) {
+    AppMetricaNative.putAppEnvironmentValue(key, value);
+  }
+  static clearAppEnvironment() {
+    AppMetricaNative.clearAppEnvironment();
+  }
+  static getReporter(apiKey) {
+    if (AppMetrica.reporters.has(apiKey)) {
+      return AppMetrica.reporters.get(apiKey);
+    } else {
+      AppMetricaNative.touchReporter(apiKey);
+      const reporter = new _reporter.Reporter(apiKey);
+      AppMetrica.reporters.set(apiKey, reporter);
+      return reporter;
+    }
+  }
+  static activateReporter(config) {
+    AppMetricaNative.activateReporter(config);
+  }
+  static getDeviceId() {
+    return AppMetricaNative.getDeviceId();
+  }
+  static getUuid() {
+    return AppMetricaNative.getUuid();
+  }
+  static requestDeferredDeeplink(listener) {
+    AppMetricaNative.requestDeferredDeeplink(listener.onFailure, listener.onSuccess);
+  }
+  static requestDeferredDeeplinkParameters(listener) {
+    AppMetricaNative.requestDeferredDeeplinkParameters(listener.onFailure, listener.onSuccess);
+  }
+}
+exports.default = AppMetrica;
+//# sourceMappingURL=index.js.map

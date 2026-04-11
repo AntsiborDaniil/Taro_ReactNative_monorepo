@@ -1,0 +1,15 @@
+type ExternalAttributionSource = 'Adjust' | 'Airbridge' | 'AppsFlyer' | 'Kochava' | 'Singular' | 'Tenjin';
+export interface ExternalAttribution {
+    source: ExternalAttributionSource;
+    value: Record<string, object>;
+}
+export declare class ExternalAttributions {
+    static adjust(data: Record<string, any>): ExternalAttribution;
+    static airbridge(data: Record<string, any>): ExternalAttribution;
+    static appsflyer(data: Record<string, any>): ExternalAttribution;
+    static kochava(data: Record<string, any>): ExternalAttribution;
+    static singular(data: Map<string, object>): ExternalAttribution;
+    static tenjin(data: Record<string, any>): ExternalAttribution;
+}
+export {};
+//# sourceMappingURL=externalAttribution.d.ts.map

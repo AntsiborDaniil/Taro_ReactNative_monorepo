@@ -89,11 +89,15 @@ module.exports = wrapWithReanimatedMetroConfig(
       ),
       '@react-native-community/slider': path.resolve(
         __dirname,
-        'src/shared/stubs/noop.ts'
+        'src/shared/stubs/slider.tsx'
       ),
       'react-native-date-picker': path.resolve(
         __dirname,
-        'src/shared/stubs/noop.ts'
+        'src/shared/stubs/date-picker.tsx'
+      ),
+      'rn-emoji-keyboard': path.resolve(
+        __dirname,
+        'src/shared/stubs/emoji-keyboard.tsx'
       ),
       'react-native-device-detection': path.resolve(
         __dirname,
@@ -123,6 +127,26 @@ module.exports = wrapWithReanimatedMetroConfig(
       moduleImport,
       platform
     ) {
+      if (
+        moduleImport === '@shopify/react-native-skia' ||
+        moduleImport.startsWith('@shopify/react-native-skia/')
+      ) {
+        return {
+          type: 'sourceFile',
+          filePath: path.resolve(__dirname, 'src/shared/stubs/skia.ts'),
+        };
+      }
+
+      if (
+        moduleImport === 'victory-native' ||
+        moduleImport.startsWith('victory-native/')
+      ) {
+        return {
+          type: 'sourceFile',
+          filePath: path.resolve(__dirname, 'src/shared/stubs/victory.tsx'),
+        };
+      }
+
       if (moduleImport === 'axios' || moduleImport.startsWith('axios/')) {
         return context.resolveRequest(
           { ...context, unstable_conditionNames: ['browser'] },

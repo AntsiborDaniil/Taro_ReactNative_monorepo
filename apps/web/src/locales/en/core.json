@@ -30,6 +30,8 @@
   "page.history": "Spread \nHistory",
   "page.favorite": "Favorite \nCards",
   "page.spreadsGroups": "Tarot Spreads",
+  "spreads.catalog.hint": "Tap to open this spread →",
+  "spreads.catalog.hintLocked": "Locked — included in subscription. Tap to learn more",
   "page.spreadsHistory": "Spread History",
   "page.favouriteCards": "Favorite Cards",
   "page.habitCreate": "Create Habits",

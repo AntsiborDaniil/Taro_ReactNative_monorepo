@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, ViewStyle } from 'react-native';
+import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { Layout, StyleService, useStyleSheet } from '@ui-kitten/components';
 import { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet'; // Импортируем универсальный текстовый компонент
 import { ChevronLeftIcon, SettingsIcon } from 'shared/icons';
@@ -35,7 +35,9 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   });
 
   return (
-    <Layout style={[styles.header, stylesWrapper]}>
+    <Layout
+      style={StyleSheet.flatten([styles.header, stylesWrapper as StyleProp<ViewStyle>])}
+    >
       {/* Левая кнопка "Назад" (опционально) */}
 
       {leftContent}

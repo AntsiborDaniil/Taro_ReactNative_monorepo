@@ -9,24 +9,17 @@ import { PaidContent } from 'features/paidContent';
 import { DeckStyle } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { getImage, isTablet, verticalScale, width } from 'shared/lib';
-import {
-  AnalyticAction,
-  ImagePosition,
-  NavigationRoute,
-  TabRoute,
-} from 'shared/types';
-import { ScreenLayout, Text, TEXT_TAGS, TileCard } from 'shared/ui';
+import { getImage } from 'shared/lib';
+import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
+import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 
-const PADDING = 8;
-const GAP = 16;
-
-const cardWidth = isTablet
-  ? (width - 2 * PADDING) / 2 - GAP
-  : width - 4 * PADDING;
+import SpreadCatalogCard from './SpreadCatalogCard';
+import { useSpreadsLayout } from './useSpreadsLayout';
 
 export default function Spreads() {
+  const layout = useSpreadsLayout();
+
   const { showModal } = useData({ Context: ModalsContext });
   const { subscriptionType } = useData({ Context: UserContext });
   const { selectSpread, spreadsSections } = useData({
@@ -43,17 +36,47 @@ export default function Spreads() {
   return (
     <ScreenLayout>
       <Header showBackButton={true} title={t('core:page.spreadsGroups')} />
-      <ScrollView>
-        <View style={styles.spreads}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollInner,
+          { paddingBottom: layout.scrollBottomPad },
+        ]}
+      >
+        <View
+          style={[
+            styles.spreads,
+            {
+              width: layout.contentWidth,
+              alignSelf: 'center',
+              paddingHorizontal: layout.padding,
+              paddingTop: layout.padding,
+              gap: layout.gap + 4,
+            },
+          ]}
+        >
           {!!spreadsSections?.length &&
             spreadsSections.map((data) => (
-              <View style={styles.spreads} key={data.title}>
-                <Text category={TEXT_TAGS.h3}>{t(data.title)}</Text>
+              <View style={{ gap: layout.gap - 2 }} key={data.title}>
+                <Text
+                  category={TEXT_TAGS.h4}
+                  style={[
+                    styles.sectionTitle,
+                    {
+                      fontSize: layout.sectionTitleSize,
+                      lineHeight: layout.sectionTitleLine,
+                    },
+                  ]}
+                >
+                  {t(data.title)}
+                </Text>
 
                 <View
-                  style={
-                    isTablet ? styles.columnWrapper : styles.flatListContainer
-                  }
+                  style={[
+                    layout.columns > 1
+                      ? styles.columnWrapper
+                      : styles.flatListContainer,
+                    { gap: layout.gap },
+                  ]}
                 >
                   {data.data.map((item) => {
                     const isLocked = !item.availableSubscriptions.some(
@@ -62,13 +85,18 @@ export default function Spreads() {
                     );
 
                     return (
-                      <TileCard
+                      <SpreadCatalogCard
+                        key={item.id}
+                        layout={layout}
+                        title={t(item.name)}
                         imageSource={getImage([
                           'spreads',
                           DeckStyle.FlatIllustration,
                           item.id,
                         ])}
                         isLocked={isLocked}
+                        width={layout.cardWidth}
+                        imageAreaHeight={layout.previewHeight}
                         onPress={async () => {
                           AppMetrica.reportEvent(
                             AnalyticAction.ClickSpreadInCategory,
@@ -99,17 +127,7 @@ export default function Spreads() {
                             screen: NavigationRoute.SpreadDescriptionChoice,
                           });
                         }}
-                        imageResizeMode="cover"
-                        textStyles={styles.spreadNameStyle}
-                        key={item.id}
-                        height={
-                          isTablet ? verticalScale(150) : verticalScale(200)
-                        }
-                        width={cardWidth}
-                        imagePosition={ImagePosition.Background}
-                      >
-                        {t(item.name)}
-                      </TileCard>
+                      />
                     );
                   })}
                 </View>
@@ -122,20 +140,22 @@ export default function Spreads() {
 }
 
 const styles = StyleSheet.create({
-  spreadNameStyle: {
-    margin: 4,
+  scrollInner: {
+    flexGrow: 1,
   },
   spreads: {
-    gap: 16,
-    padding: PADDING,
-    paddingBottom: 24,
+    maxWidth: '100%',
+  },
+  sectionTitle: {
+    marginBottom: 4,
+    letterSpacing: 0.15,
   },
   flatListContainer: {
-    gap: GAP,
+    width: '100%',
   },
   columnWrapper: {
-    justifyContent: 'space-between',
-    gap: GAP,
+    width: '100%',
+    justifyContent: 'flex-start',
     flexDirection: 'row',
     flexWrap: 'wrap',
   },

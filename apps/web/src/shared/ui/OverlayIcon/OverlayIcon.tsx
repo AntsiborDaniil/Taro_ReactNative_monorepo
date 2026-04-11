@@ -29,10 +29,10 @@ function OverlayIcon({
     <>
       <View style={styles.blurOverlay} />
       <Layout
-        style={[
+        style={StyleSheet.flatten([
           styles.lockOverlay,
           isBottom ? styles.bottomPosition : styles.centerPosition,
-        ]}
+        ])}
       >
         <View
           style={[

@@ -3,9 +3,10 @@ import {
   ImageSourcePropType,
   type ImageStyle,
   LayoutChangeEvent,
+  Pressable,
   type StyleProp,
   StyleSheet,
-  TouchableWithoutFeedback,
+  Platform,
   type ViewProps,
 } from 'react-native';
 import { SpreadContext } from 'entities/Spread';
@@ -73,13 +74,52 @@ function SlideItem({
       return;
     }
 
-    event.target.measure((x, y, width, height, pageX, pageY) => {
+    if (Platform.OS === 'web') {
+      const node = event.currentTarget as unknown as HTMLElement | null;
+      const rect = node?.getBoundingClientRect?.();
+      if (!rect) {
+        return;
+      }
+      handleGetCenterCardPosition?.(rect.left, rect.top);
+      return;
+    }
+
+    const measuredNode = event.target as unknown as {
+      measure?: (
+        cb: (
+          x: number,
+          y: number,
+          width: number,
+          height: number,
+          pageX: number,
+          pageY: number
+        ) => void
+      ) => void;
+    };
+    measuredNode.measure?.((x, y, width, height, pageX, pageY) => {
       handleGetCenterCardPosition?.(pageX, pageY);
     });
   };
 
+  const onKeyDown =
+    Platform.OS === 'web'
+      ? (event: any) => {
+          const key = event?.nativeEvent?.key ?? event?.key;
+          if (key === 'Enter' || key === ' ') {
+            event?.preventDefault?.();
+            handlePress();
+          }
+        }
+      : undefined;
+
   return (
-    <TouchableWithoutFeedback onLayout={handleLayoutCard} onPress={handlePress}>
+    <Pressable
+      onLayout={handleLayoutCard}
+      onPress={handlePress}
+      accessibilityRole="button"
+      // @ts-ignore web-only keyboard event
+      onKeyDown={onKeyDown}
+    >
       <Animated.View style={styles.container} {...animatedViewProps}>
         <Animated.View style={isSelected ? null : styles.overlay} />
         <Animated.Image
@@ -88,7 +128,7 @@ function SlideItem({
           resizeMode="cover"
         />
       </Animated.View>
-    </TouchableWithoutFeedback>
+    </Pressable>
   );
 }
 

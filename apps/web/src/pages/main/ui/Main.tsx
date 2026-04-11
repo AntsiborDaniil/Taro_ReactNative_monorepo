@@ -54,6 +54,7 @@ const styles = StyleService.create({
     flexDirection: 'column',
     gap: 36,
     marginBottom: 48,
+    width: '100%',
   },
   padding: {
     paddingLeft: 16,

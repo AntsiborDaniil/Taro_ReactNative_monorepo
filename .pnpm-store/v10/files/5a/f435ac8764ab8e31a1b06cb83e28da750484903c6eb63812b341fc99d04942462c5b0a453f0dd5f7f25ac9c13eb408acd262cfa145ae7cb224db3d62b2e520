@@ -1,0 +1,39 @@
+export class ExternalAttributions {
+  static adjust(data) {
+    return {
+      source: 'Adjust',
+      value: data
+    };
+  }
+  static airbridge(data) {
+    return {
+      source: 'Airbridge',
+      value: data
+    };
+  }
+  static appsflyer(data) {
+    return {
+      source: 'AppsFlyer',
+      value: data.data
+    };
+  }
+  static kochava(data) {
+    return {
+      source: 'Kochava',
+      value: data.raw
+    };
+  }
+  static singular(data) {
+    return {
+      source: 'Singular',
+      value: Object.fromEntries(data)
+    };
+  }
+  static tenjin(data) {
+    return {
+      source: 'Tenjin',
+      value: data
+    };
+  }
+}
+//# sourceMappingURL=externalAttribution.js.map

@@ -79,70 +79,74 @@ function MoodDashboard({ isWidget }: MoodDashboardProps): ReactElement | null {
   return (
     <>
       <View style={styles.wrapper}>
-        <View style={styles.header}>
-          <View style={styles.dateActionWrapper}>
-            <TouchableOpacity
-              style={styles.dateAction}
-              onPress={() => setVisible((prevState) => !prevState)}
-            >
-              <Text>{t(`datesPeriod.${dateMode}`)}</Text>
-            </TouchableOpacity>
+        {!isWidget && (
+          <View style={styles.header}>
+            <View style={styles.dateActionWrapper}>
+              <TouchableOpacity
+                style={styles.dateAction}
+                onPress={() => setVisible((prevState) => !prevState)}
+              >
+                <Text>{t(`datesPeriod.${dateMode}`)}</Text>
+              </TouchableOpacity>
 
-            {visible && (
-              <View style={styles.dates}>
-                <TouchableOpacity
-                  onPress={selectDateMode(MoodDisplayMode.Week)}
-                >
-                  <Text
-                    style={
-                      dateMode === MoodDisplayMode.Week
-                        ? styles.activeDate
-                        : undefined
-                    }
+              {visible && (
+                <View style={styles.dates}>
+                  <TouchableOpacity
+                    onPress={selectDateMode(MoodDisplayMode.Week)}
                   >
-                    {t(`datesPeriod.${MoodDisplayMode.Week}`)}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={selectDateMode(MoodDisplayMode.Month)}
-                >
-                  <Text
-                    style={
-                      dateMode === MoodDisplayMode.Month
-                        ? styles.activeDate
-                        : undefined
-                    }
+                    <Text
+                      style={
+                        dateMode === MoodDisplayMode.Week
+                          ? styles.activeDate
+                          : undefined
+                      }
+                    >
+                      {t(`datesPeriod.${MoodDisplayMode.Week}`)}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={selectDateMode(MoodDisplayMode.Month)}
                   >
-                    {t(`datesPeriod.${MoodDisplayMode.Month}`)}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={selectDateMode(MoodDisplayMode.Year)}
-                >
-                  <Text
-                    style={
-                      dateMode === MoodDisplayMode.Year
-                        ? styles.activeDate
-                        : undefined
-                    }
+                    <Text
+                      style={
+                        dateMode === MoodDisplayMode.Month
+                          ? styles.activeDate
+                          : undefined
+                      }
+                    >
+                      {t(`datesPeriod.${MoodDisplayMode.Month}`)}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={selectDateMode(MoodDisplayMode.Year)}
                   >
-                    {t(`datesPeriod.${MoodDisplayMode.Year}`)}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
+                    <Text
+                      style={
+                        dateMode === MoodDisplayMode.Year
+                          ? styles.activeDate
+                          : undefined
+                      }
+                    >
+                      {t(`datesPeriod.${MoodDisplayMode.Year}`)}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
           </View>
-        </View>
-        <AreaGraphs
-          data={displayData ?? []}
-          yAxisKeys={usedMoods}
-          xAxisKey="date"
-          formatYLabel={() => {
-            return '';
-          }}
-          design={DESIGN}
-          {...CONFIG[dateMode ?? MoodDisplayMode.Week]}
-        />
+        )}
+        {!isWidget && (
+          <AreaGraphs
+            data={displayData ?? []}
+            yAxisKeys={usedMoods}
+            xAxisKey="date"
+            formatYLabel={() => {
+              return '';
+            }}
+            design={DESIGN}
+            {...CONFIG[dateMode ?? MoodDisplayMode.Week]}
+          />
+        )}
         <View style={styles.moodsActions}>
           {moodsActionConfig.map((item) => (
             <TouchableOpacity
@@ -155,11 +159,11 @@ function MoodDashboard({ isWidget }: MoodDashboardProps): ReactElement | null {
                 switchMood(item.name);
               }}
             >
-              <Text>{item.translation}</Text>
+              <Text style={styles.moodActionText}>{item.translation}</Text>
             </TouchableOpacity>
           ))}
         </View>
-        {isWidget && <MoodProgress isWidget={isWidget} />}
+        <MoodProgress isWidget={isWidget} />
       </View>
     </>
   );
@@ -171,31 +175,52 @@ const styles = StyleSheet.create({
     boxShadow: '0 0 20px rgba(67, 35, 212, 1)',
     borderRadius: 16,
     marginHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
   },
   moodsActions: {
     flex: 1,
     flexDirection: 'row',
-    gap: 8,
+    gap: 12,
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingTop: 18,
+    paddingBottom: 18,
   },
   moodAction: {
-    padding: 4,
+    minWidth: 130,
+    paddingVertical: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 8,
-    paddingHorizontal: 8,
+    borderRadius: 12,
+    paddingHorizontal: 14,
     backgroundColor: COLORS.SpbSky4,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.16)',
+    ...(globalThis?.window
+      ? ({
+          boxShadow: '0 4px 10px rgba(0, 0, 0, 0.22)',
+        } as object)
+      : {}),
+  },
+  moodActionText: {
+    color: '#F5F7FF',
+    fontSize: 16,
+    lineHeight: 20,
+    fontWeight: 600,
+    textAlign: 'center',
   },
   moodActionMood: {
     backgroundColor: DESIGN.mood.color,
+    borderColor: '#4A7FE6',
   },
   moodActionEnergy: {
     backgroundColor: DESIGN.energy.color,
+    borderColor: '#7ED04F',
   },
   moodActionStress: {
     backgroundColor: DESIGN.stress.color,
+    borderColor: '#E35557',
   },
   header: {
     justifyContent: 'flex-end',

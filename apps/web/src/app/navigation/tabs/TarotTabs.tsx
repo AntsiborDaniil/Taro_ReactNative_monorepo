@@ -11,7 +11,7 @@ import { AnalyticAction, TabRoute } from 'shared/types';
 import { TarotToast } from 'shared/ui';
 import LibraryScreen from '../library/LibraryScreen';
 import MainScreen from '../main/MainScreen';
-// import SpreadsScreen from '../spreads/SpreadsScreen';
+import SpreadsScreen from '../spreads/SpreadsScreen';
 
 const TAB_ICON = {
   [TabRoute.MainTab]: PlanetIcon,
@@ -70,7 +70,7 @@ function TarotTabs() {
         })}
       >
         <Tabs.Screen name={TabRoute.MainTab} component={MainScreen} />
-        {/*<Tabs.Screen name={TabRoute.SpreadsTab} component={SpreadsScreen} />*/}
+        <Tabs.Screen name={TabRoute.SpreadsTab} component={SpreadsScreen} />
         <Tabs.Screen name={TabRoute.LibraryTab} component={LibraryScreen} />
       </Tabs.Navigator>
       <TarotToast />
