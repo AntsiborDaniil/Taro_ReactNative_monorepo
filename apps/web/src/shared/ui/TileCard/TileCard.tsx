@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from 'react-native';
 import { Layout, StyleService } from '@ui-kitten/components';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -41,6 +42,8 @@ function TileCard({
   imageResizeMode,
 }: TileCardProps) {
   const { t } = useTranslation();
+  const { width: winW } = useWindowDimensions();
+  const lockIconSize = Math.round(Math.min(40, Math.max(28, winW * 0.07)));
 
   // Обработчик нажатия
   const handlePress = () => {
@@ -133,10 +136,13 @@ function TileCard({
           {isLocked && (
             <OverlayIcon>
               <LockIcon
-                width={36}
-                height={36}
+                width={lockIconSize}
+                height={lockIconSize}
                 fill={COLORS.Content}
-                style={styles.lockIcon}
+                style={{
+                  width: lockIconSize + 8,
+                  height: lockIconSize + 8,
+                }}
                 {...iconProps}
               />
             </OverlayIcon>
@@ -217,10 +223,6 @@ const styles = StyleService.create({
     width: 50,
     height: 50,
     borderRadius: 50,
-  },
-  lockIcon: {
-    width: 50,
-    height: 50,
   },
   outlined: {
     borderWidth: 1,

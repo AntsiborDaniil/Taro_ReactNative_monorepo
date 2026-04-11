@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import {
   Canvas,
   LinearGradient,
@@ -18,15 +18,18 @@ import {
   withTiming,
 } from 'react-native-reanimated';
 import { useData } from 'shared/DataProvider';
+import { COLORS } from 'shared/themes';
 import { Text, TEXT_TAGS } from 'shared/ui';
-
-const screen = Dimensions.get('screen');
-
-const SIZE = screen.width;
 
 const DEFAULT_PALETTE = ['#667eea', '#764ba2'];
 
-const MeditativeVisualizer = () => {
+type MeditativeVisualizerProps = {
+  visualSize: number;
+};
+
+function MeditativeVisualizer({ visualSize }: MeditativeVisualizerProps) {
+  const SIZE = visualSize;
+
   const { selectedAffirmation, selectedAffirmationCategory } = useData({
     Context: AffirmationsContext,
   });
@@ -87,21 +90,20 @@ const MeditativeVisualizer = () => {
 
     const breathScale =
       breathScaleValues.base +
-      Math.sin(breath.value * Math.PI) * breathScaleValues.multiplier; // дыхание мягкое
+      Math.sin(breath.value * Math.PI) * breathScaleValues.multiplier;
     const points = 128;
 
     path.reset();
     for (let i = 0; i <= points; i++) {
       const angle = (i / points) * Math.PI * 2;
 
-      // очень маленькие волны (форма почти круглая)
       const wave =
         Math.sin(angle * 2 + morph.value * Math.PI * 2) * wavesScale.sin +
         Math.cos(angle * 3 + morph.value * Math.PI * 1.7) * wavesScale.cos;
 
       const r = baseR * breathScale * (1 + wave);
 
-      const x = cx + Math.cos(angle) * r * radiusScale.x; // сильная овальность
+      const x = cx + Math.cos(angle) * r * radiusScale.x;
       const y = cy + Math.sin(angle) * r * radiusScale.y;
 
       if (i === 0) {
@@ -113,7 +115,6 @@ const MeditativeVisualizer = () => {
     path.close();
   }
 
-  // --- Верхний слой (главный круг) ---
   const path1 = usePathValue((path) => {
     'worklet';
     getPath({
@@ -131,7 +132,6 @@ const MeditativeVisualizer = () => {
     });
   }, Skia.Path.Make());
 
-  // --- Нижний слой (более крупный, подложка) ---
   const path2 = usePathValue((path) => {
     'worklet';
 
@@ -150,7 +150,6 @@ const MeditativeVisualizer = () => {
     });
   }, Skia.Path.Make());
 
-  // --- Нижний слой (более крупный, подложка) ---
   const path3 = usePathValue((path) => {
     'worklet';
 
@@ -180,10 +179,17 @@ const MeditativeVisualizer = () => {
     (item) => item.id === selectedAffirmation?.texts.id
   );
 
+  const baseTextColor =
+    selectedAffirmation?.colors?.texts?.base ?? COLORS.Content;
+  const coloredTextColor =
+    selectedAffirmation?.colors?.texts?.colored ?? COLORS.Primary;
+
   return (
-    <View style={styles.container}>
+    <View
+      key={SIZE}
+      style={[styles.container, { width: SIZE, height: SIZE }]}
+    >
       <Canvas style={{ width: SIZE, height: SIZE + 100 }}>
-        {/* Нижний слой (размытая подложка) */}
         <Path path={path3} opacity={0.2}>
           <LinearGradient
             start={vec(SIZE * 0.4, SIZE * 0.1)}
@@ -192,7 +198,6 @@ const MeditativeVisualizer = () => {
           />
         </Path>
 
-        {/* Нижний слой (размытая подложка) */}
         <Path path={path2} opacity={0.4}>
           <LinearGradient
             start={vec(SIZE * 0.3, SIZE * 0.3)}
@@ -200,7 +205,6 @@ const MeditativeVisualizer = () => {
             colors={gradient}
           />
         </Path>
-        {/* Верхний слой (основной круг) */}
         <Path path={path1}>
           <LinearGradient
             start={vec(SIZE * 0.4, SIZE * 0.2)}
@@ -215,9 +219,7 @@ const MeditativeVisualizer = () => {
           <Text
             category={TEXT_TAGS.h3}
             style={{
-              color: item.colored
-                ? selectedAffirmation?.colors.texts.colored
-                : selectedAffirmation?.colors?.texts?.base,
+              color: item.colored ? coloredTextColor : baseTextColor,
               textAlign: 'center',
             }}
             key={`${item.content}-${index}`}
@@ -228,10 +230,14 @@ const MeditativeVisualizer = () => {
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: { marginTop: 32, width: SIZE, height: SIZE, position: 'relative' },
+  container: {
+    marginTop: 32,
+    position: 'relative',
+    alignSelf: 'center',
+  },
   texts: {
     position: 'absolute',
     top: '50%',

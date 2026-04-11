@@ -15,11 +15,12 @@ import Animated, {
 import { PaidContent } from 'features/paidContent';
 import { useData } from 'shared/DataProvider';
 import { DownIcon, UpIcon } from 'shared/icons';
-import { isTablet, width } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { ImagePosition } from 'shared/types';
 import { TileCard } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
+
+import type { AffirmationsLayout } from './useAffirmationsLayout';
 
 const CATEGORIES = [
   {
@@ -60,9 +61,11 @@ const CATEGORIES = [
   },
 ];
 
-const cardWidth = isTablet ? (width - 16 - 16) / 2 - 16 : (width - 32 - 16) / 2;
+type SelectCategoryProps = {
+  layout: AffirmationsLayout;
+};
 
-const SelectCategory = () => {
+const SelectCategory = ({ layout }: SelectCategoryProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
   const translateY = useSharedValue(1000);
@@ -115,49 +118,64 @@ const SelectCategory = () => {
 
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
-      <View style={styles.header}>
-        <View style={styles.headerButtonWrapper}>
-          <Pressable onPress={toggleSheet} style={styles.headerButton}>
-            {isOpen ? (
-              <DownIcon width={50} height={50} />
-            ) : (
-              <UpIcon width={50} height={50} />
-            )}
-          </Pressable>
+      <View
+        style={[
+          styles.sheetInner,
+          {
+            width: layout.contentWidth,
+            maxWidth: '100%',
+            alignSelf: 'center',
+            paddingHorizontal: layout.padding,
+          },
+        ]}
+      >
+        <View style={styles.header}>
+          <View style={styles.headerButtonWrapper}>
+            <Pressable onPress={toggleSheet} style={styles.headerButton}>
+              {isOpen ? (
+                <DownIcon width={50} height={50} />
+              ) : (
+                <UpIcon width={50} height={50} />
+              )}
+            </Pressable>
+          </View>
         </View>
-      </View>
-      <View style={styles.content} onLayout={onContentLayout}>
-        <FlatList
-          data={CATEGORIES}
-          keyExtractor={(item) => item.category.toString()}
-          numColumns={2}
-          contentContainerStyle={styles.listContainer}
-          columnWrapperStyle={styles.row}
-          renderItem={({ item }) => (
-            <TileCard
-              id={item.category}
-              textStyles={styles.cardText}
-              isSelected={selectedAffirmationCategory === item.category}
-              width={cardWidth}
-              isLocked={!isPractitioner && item.hasLock}
-              height={100}
-              imagePosition={ImagePosition.Corner}
-              gradient={item.gradient as [string, string]}
-              onPress={() => {
-                if (!isPractitioner && item.hasLock) {
-                  showModal?.(<PaidContent />);
+        <View style={styles.content} onLayout={onContentLayout}>
+          <FlatList
+            data={CATEGORIES}
+            keyExtractor={(item) => item.category.toString()}
+            numColumns={2}
+            contentContainerStyle={styles.listContainer}
+            columnWrapperStyle={[
+              styles.row,
+              { marginBottom: layout.listPaddingBottom },
+            ]}
+            renderItem={({ item }) => (
+              <TileCard
+                id={item.category}
+                textStyles={styles.cardText}
+                isSelected={selectedAffirmationCategory === item.category}
+                width={layout.affirmationCardWidth}
+                isLocked={!isPractitioner && item.hasLock}
+                height={layout.affirmationCardHeight}
+                imagePosition={ImagePosition.Corner}
+                gradient={item.gradient as [string, string]}
+                onPress={() => {
+                  if (!isPractitioner && item.hasLock) {
+                    showModal?.(<PaidContent />);
 
-                  return;
-                }
+                    return;
+                  }
 
-                handleSelectedAffirmationCategory?.(item.category);
-                toggleSheet();
-              }}
-            >
-              {t(item.name)}
-            </TileCard>
-          )}
-        />
+                  handleSelectedAffirmationCategory?.(item.category);
+                  toggleSheet();
+                }}
+              >
+                {t(item.name)}
+              </TileCard>
+            )}
+          />
+        </View>
       </View>
     </Animated.View>
   );
@@ -173,17 +191,19 @@ const styles = StyleSheet.create({
     zIndex: 10, // Ensure it appears above other elements
     boxShadow: '0px -5px 14.8px 0px #00000040',
   },
+  sheetInner: {
+    width: '100%',
+  },
   cardText: {
     padding: 12,
   },
   listContainer: {
     justifyContent: 'space-between',
     paddingTop: 16,
-    paddingHorizontal: 16,
+    paddingBottom: 8,
   },
   row: {
     justifyContent: 'space-between',
-    marginBottom: 24,
   },
   header: {
     alignItems: 'center',
