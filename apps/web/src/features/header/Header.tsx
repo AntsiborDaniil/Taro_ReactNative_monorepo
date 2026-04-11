@@ -1,7 +1,12 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import {
+  StyleSheet,
+  TextStyle,
+  TouchableOpacity,
+  ViewStyle,
+} from 'react-native';
 import { Layout, StyleService, useStyleSheet } from '@ui-kitten/components';
-import { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet'; // Импортируем универсальный текстовый компонент
+import type { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
 import { ChevronLeftIcon, SettingsIcon } from 'shared/icons';
 import { isTablet } from 'shared/lib';
 import { Text } from 'shared/ui/Text';
@@ -16,6 +21,8 @@ interface CustomHeaderProps {
   leftContent?: React.ReactNode;
   rightIconName?: string; // Имя иконки для правого действия (из пакета eva)
   stylesWrapper?: StyleProp<ViewStyle>;
+  /** Доп. стили заголовка (например меньший кегль на узком экране) */
+  titleStyle?: StyleProp<TextStyle>;
 }
 
 const CustomHeader: React.FC<CustomHeaderProps> = ({
@@ -26,6 +33,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   leftContent,
   rightContent,
   stylesWrapper,
+  titleStyle,
 }) => {
   const styles = useStyleSheet(themedStyles);
 
@@ -56,7 +64,10 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       </TouchableOpacity>
 
       {/* Текст заголовка посередине */}
-      <Text category="h3" style={styles.title}>
+      <Text
+        category="h3"
+        style={StyleSheet.flatten([styles.title, titleStyle])}
+      >
         {title}
       </Text>
 

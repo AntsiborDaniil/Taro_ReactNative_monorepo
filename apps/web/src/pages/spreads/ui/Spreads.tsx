@@ -35,7 +35,11 @@ export default function Spreads() {
 
   return (
     <ScreenLayout>
-      <Header showBackButton={true} title={t('core:page.spreadsGroups')} />
+      <Header
+        showBackButton={true}
+        title={t('core:page.spreadsGroups')}
+        titleStyle={layout.columns === 1 ? spreadsHeaderTitle.mobile : undefined}
+      />
       <ScrollView
         contentContainerStyle={[
           styles.scrollInner,
@@ -138,6 +142,11 @@ export default function Spreads() {
     </ScreenLayout>
   );
 }
+
+const spreadsHeaderTitle = {
+  /** чуть меньше дефолтного h3 (~21), только одна колонка */
+  mobile: { fontSize: 22 },
+};
 
 const styles = StyleSheet.create({
   scrollInner: {

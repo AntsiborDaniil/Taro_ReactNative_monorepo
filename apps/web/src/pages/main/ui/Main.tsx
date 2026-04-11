@@ -1,44 +1,40 @@
-import { SafeAreaView, ScrollView, View } from 'react-native';
-import { Button, StyleService } from '@ui-kitten/components';
-// import { useTranslation } from 'react-i18next';
+import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
 import { MoodDashboard } from 'features/MoodDashboard';
-import { clearAllData } from 'shared/lib';
-// import { AnalyticAction } from 'shared/types';
 import { ScreenLayout } from 'shared/ui';
 import { HabitWidget } from 'widgets/habitWidget';
-// import { FAVORITE_SPREADS } from '../lib';
 import { AffirmationsBlock } from './AffirmationsBlock';
-// import { Categories } from './Categories';
 import { DayAdvice } from './DayAdvice';
-// import { TarotSpreadsCarousel } from './TarotSpreadsCarousel';
+import { useMainLayout } from './useMainLayout';
 
 function Main() {
-  // const { t } = useTranslation();
+  const layout = useMainLayout();
 
   return (
     <ScreenLayout>
-      <ScrollView>
-        <SafeAreaView style={styles.container}>
-          <View style={styles.padding}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: layout.scrollBottomPad },
+        ]}
+      >
+        <SafeAreaView
+          style={[styles.safe, { marginBottom: layout.bottomMargin }]}
+        >
+          <View
+            style={[
+              styles.column,
+              {
+                maxWidth: layout.contentWidth,
+                paddingHorizontal: layout.padding,
+                gap: layout.sectionGap,
+              },
+            ]}
+          >
             <DayAdvice />
+            <HabitWidget />
+            <MoodDashboard isWidget horizontalInset={0} />
+            <AffirmationsBlock />
           </View>
-          <HabitWidget />
-          <MoodDashboard isWidget />
-          <AffirmationsBlock />
-          {/*<Categories />*/}
-          {/*<TarotSpreadsCarousel*/}
-          {/*  analyticAction={AnalyticAction.ClickPopularMainPage}*/}
-          {/*  spreads={FAVORITE_SPREADS}*/}
-          {/*  title={t('main:popularSpreads')}*/}
-          {/*  spaceBetween={22}*/}
-          {/*/>*/}
-          {/*<Button*/}
-          {/*  onPress={() => {*/}
-          {/*    clearAllData();*/}
-          {/*  }}*/}
-          {/*>*/}
-          {/*  Очистка памяти*/}
-          {/*</Button>*/}
         </SafeAreaView>
       </ScrollView>
     </ScreenLayout>
@@ -47,17 +43,16 @@ function Main() {
 
 export default Main;
 
-const styles = StyleService.create({
-  container: {
-    display: 'flex',
-    height: 'auto',
-    flexDirection: 'column',
-    gap: 36,
-    marginBottom: 48,
-    width: '100%',
+const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
   },
-  padding: {
-    paddingLeft: 16,
-    paddingRight: 16,
+  safe: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  column: {
+    width: '100%',
+    flexDirection: 'column',
   },
 });

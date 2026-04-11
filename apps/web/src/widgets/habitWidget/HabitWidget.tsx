@@ -1,4 +1,10 @@
-import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { ProgressBar } from '@ui-kitten/components';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { HabitsContext } from 'entities/habits';
@@ -12,6 +18,10 @@ import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 
 function HabitWidget() {
   const date = getCurrentDate();
+  const { width: winW } = useWindowDimensions();
+  const plusSize = Math.round(Math.min(72, Math.max(52, winW * 0.14)));
+  const plusRadius = Math.round(plusSize * 0.32);
+  const plusFont = Math.round(plusSize * 0.42);
 
   const navigation = useNativeNavigation();
 
@@ -81,7 +91,15 @@ function HabitWidget() {
             )}
           </View>
           <Pressable
-            style={styles.image}
+            style={[
+              styles.image,
+              {
+                width: plusSize,
+                height: plusSize,
+                borderRadius: plusRadius,
+                marginLeft: winW < 400 ? 10 : 14,
+              },
+            ]}
             onPress={async (e) => {
               e.stopPropagation();
 
@@ -92,7 +110,7 @@ function HabitWidget() {
               });
             }}
           >
-            <Text style={styles.plus}>+</Text>
+            <Text style={[styles.plus, { fontSize: plusFont, lineHeight: plusFont }]}>+</Text>
           </Pressable>
         </View>
       </View>
@@ -105,7 +123,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 16,
     borderColor: COLORS.Primary600,
-    marginHorizontal: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
     gap: 12,
@@ -129,24 +146,17 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   plus: {
-    fontSize: 32,
-    lineHeight: 32,
     fontWeight: 700,
     textAlign: 'center',
     color: COLORS.Content,
   },
   image: {
-    width: 82,
-    height: 82,
     backgroundColor: COLORS.Background2,
-    borderRadius: 26,
     borderWidth: 1,
     borderColor: COLORS.Primary,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-    padding: 20,
-    marginLeft: 18,
   },
   description: {
     width: '100%',

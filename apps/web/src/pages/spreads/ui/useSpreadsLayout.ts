@@ -46,8 +46,6 @@ export function useSpreadsLayout(): SpreadsLayout {
     if (W >= 640) columns = 2;
     if (W >= 1040) columns = 3;
 
-    const isMobileLayout = columns === 1;
-
     const inner = contentWidth - 2 * padding;
     const cardWidth =
       columns <= 1
@@ -61,10 +59,11 @@ export function useSpreadsLayout(): SpreadsLayout {
     const previewHeight = Math.min(cap, Math.max(floor, byAspect));
 
     const sectionTitleSize = Math.round(
-      Math.min(
-        isMobileLayout ? 21 : 19,
-        Math.max(isMobileLayout ? 16 : 14, ms(W, isMobileLayout ? 17 : 16))
-      )
+      columns === 1
+        ? Math.min(21, Math.max(18, ms(W, 19)))
+        : columns === 2
+          ? Math.min(20, Math.max(16, ms(W, 18)))
+          : Math.min(19, Math.max(15, ms(W, 17)))
     );
     const sectionTitleLine = Math.round(sectionTitleSize * 1.35);
 
@@ -76,16 +75,18 @@ export function useSpreadsLayout(): SpreadsLayout {
     const textPadBottom = Math.round(Math.min(30, Math.max(18, v(24))));
     const textBlockGap = Math.round(Math.min(16, Math.max(8, v(10))));
     const titleFontSize = Math.round(
-      Math.min(
-        isMobileLayout ? 17 : 15,
-        Math.max(isMobileLayout ? 14 : 12, ms(W, isMobileLayout ? 14 : 13))
-      )
+      columns === 1
+        ? Math.min(18, Math.max(16, ms(W, 16)))
+        : columns === 2
+          ? Math.min(16, Math.max(14, ms(W, 15)))
+          : Math.min(15, Math.max(13, ms(W, 14)))
     );
     const hintFontSize = Math.round(
-      Math.min(
-        isMobileLayout ? 14 : 13,
-        Math.max(isMobileLayout ? 11 : 10, ms(W, isMobileLayout ? 12 : 11))
-      )
+      columns === 1
+        ? Math.min(15, Math.max(13, ms(W, 14)))
+        : columns === 2
+          ? Math.min(14, Math.max(12, ms(W, 13)))
+          : Math.min(13, Math.max(11, ms(W, 12)))
     );
     const lockIconSize = Math.round(Math.min(40, Math.max(28, W * 0.07)));
     const imageFadeHeight = Math.round(Math.min(56, Math.max(36, v(44))));

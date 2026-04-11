@@ -1,5 +1,5 @@
 import { ReactElement, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { MoodAndEnergyContext } from 'entities/moodAndEnergy';
 import { useTranslation } from 'react-i18next';
 import { MoodDisplayMode } from 'shared/api';
@@ -11,6 +11,8 @@ import MoodProgress from './MoodProgress';
 
 export type MoodDashboardProps = {
   isWidget?: boolean;
+  /** Горизонтальные поля снаружи блока; на главной 0 — отступ даёт родитель */
+  horizontalInset?: number;
 };
 
 const CONFIG = {
@@ -31,8 +33,12 @@ const DESIGN = {
   stress: { color: '#AC2224' },
 };
 
-function MoodDashboard({ isWidget }: MoodDashboardProps): ReactElement | null {
+function MoodDashboard({
+  isWidget,
+  horizontalInset = 16,
+}: MoodDashboardProps): ReactElement | null {
   const { t } = useTranslation('moodAndEnergy');
+  const { width: winW } = useWindowDimensions();
   const [visible, setVisible] = useState(false);
 
   const { displayData, updateTodayMood, setDateMode, dateMode } = useData({
@@ -78,7 +84,7 @@ function MoodDashboard({ isWidget }: MoodDashboardProps): ReactElement | null {
 
   return (
     <>
-      <View style={styles.wrapper}>
+      <View style={[styles.wrapper, { marginHorizontal: horizontalInset }]}>
         {!isWidget && (
           <View style={styles.header}>
             <View style={styles.dateActionWrapper}>
@@ -147,19 +153,33 @@ function MoodDashboard({ isWidget }: MoodDashboardProps): ReactElement | null {
             {...CONFIG[dateMode ?? MoodDisplayMode.Week]}
           />
         )}
-        <View style={styles.moodsActions}>
+        <View
+          style={[
+            styles.moodsActions,
+            isWidget && styles.moodsActionsWidget,
+            { paddingHorizontal: isWidget ? Math.min(16, Math.max(8, winW * 0.03)) : 20 },
+          ]}
+        >
           {moodsActionConfig.map((item) => (
             <TouchableOpacity
               key={item.name}
               style={[
                 styles.moodAction,
+                isWidget && styles.moodActionWidget,
                 usedMoods.includes(item.name) ? item.activeStyle : undefined,
               ]}
               onPress={() => {
                 switchMood(item.name);
               }}
             >
-              <Text style={styles.moodActionText}>{item.translation}</Text>
+              <Text
+                style={[styles.moodActionText, isWidget && styles.moodActionTextWidget]}
+                numberOfLines={2}
+                adjustsFontSizeToFit={isWidget}
+                minimumFontScale={isWidget ? 0.82 : 1}
+              >
+                {item.translation}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -174,26 +194,30 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.Background,
     boxShadow: '0 0 20px rgba(67, 35, 212, 1)',
     borderRadius: 16,
-    marginHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 8,
   },
   moodsActions: {
     flex: 1,
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
     paddingTop: 18,
     paddingBottom: 18,
   },
+  moodsActionsWidget: {
+    gap: 6,
+    paddingTop: 14,
+    paddingBottom: 14,
+  },
   moodAction: {
-    minWidth: 130,
+    flex: 1,
+    minWidth: 0,
     paddingVertical: 8,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 12,
-    paddingHorizontal: 14,
+    paddingHorizontal: 8,
     backgroundColor: COLORS.SpbSky4,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.16)',
@@ -203,12 +227,22 @@ const styles = StyleSheet.create({
         } as object)
       : {}),
   },
+  moodActionWidget: {
+    paddingHorizontal: 4,
+    paddingVertical: 10,
+    minHeight: 44,
+  },
   moodActionText: {
     color: '#F5F7FF',
-    fontSize: 16,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 19,
     fontWeight: 600,
     textAlign: 'center',
+    width: '100%',
+  },
+  moodActionTextWidget: {
+    fontSize: 13,
+    lineHeight: 16,
   },
   moodActionMood: {
     backgroundColor: DESIGN.mood.color,
