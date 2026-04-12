@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.SpbSky1,
     borderRadius: 12,
     color: COLORS.Content,
-    fontSize: 14,
+    fontSize: 22,
     paddingHorizontal: 12,
     backgroundColor: COLORS.Background2,
   },

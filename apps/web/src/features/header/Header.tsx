@@ -95,6 +95,9 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
 // Темированные стили с UI Kitten
 const themedStyles = StyleService.create({
   header: {
+    width: '100%',
+    maxWidth: '100%',
+    alignSelf: 'stretch',
     flexDirection: 'row',
     alignItems: 'center',
     position: 'relative',
@@ -105,7 +108,9 @@ const themedStyles = StyleService.create({
     paddingRight: 16,
   },
   rightButton: {
-    // marginRight: 16,
+    paddingVertical: 8,
+    paddingLeft: 8,
+    marginRight: 14,
   },
   title: {
     flex: 1,

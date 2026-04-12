@@ -66,8 +66,8 @@ const styleSheet = StyleService.create({
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'center',
-    gap: 26,
-    padding: 16,
+    gap: 18,
+    padding: 14,
   },
   item: {
     flexDirection: 'row',
@@ -75,7 +75,7 @@ const styleSheet = StyleService.create({
     justifyContent: 'space-between',
   },
   iconWrapper: {
-    gap: 26,
+    gap: 18,
     alignItems: 'center',
     display: 'flex',
     flexDirection: 'row',

@@ -5,13 +5,19 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { PaidContent } from 'features/paidContent';
 import { useData } from 'shared/DataProvider';
-import { getImage, horizontalScale, verticalScale } from 'shared/lib';
+import { getImage } from 'shared/lib';
 import { COLORS, getColorOpacity } from 'shared/themes';
 import { AnalyticAction } from 'shared/types';
 import { Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 
-function SubscriptionsBanner() {
+import type { LibraryLayout } from './useLibraryLayout';
+
+type SubscriptionsBannerProps = {
+  layout: LibraryLayout;
+};
+
+function SubscriptionsBanner({ layout }: SubscriptionsBannerProps) {
   const { showModal } = useData({ Context: ModalsContext });
 
   const { handleVibrationClick } = useData({
@@ -22,7 +28,7 @@ function SubscriptionsBanner() {
 
   return (
     <TouchableOpacity
-      activeOpacity={1}
+      activeOpacity={0.96}
       onPress={async () => {
         AppMetrica.reportEvent(AnalyticAction.ClickPaidContent);
 
@@ -30,27 +36,64 @@ function SubscriptionsBanner() {
 
         showModal?.(<PaidContent />);
       }}
-      style={styles.banner}
+      style={[
+        styles.banner,
+        {
+          minHeight: layout.bannerHeight,
+          borderRadius: layout.bannerBorderRadius,
+        },
+      ]}
     >
       <LinearGradient
-        start={{ x: 0, y: 0.3 }}
-        end={{ x: 0.2, y: 0.8 }}
-        style={styles.gradient}
-        colors={['#023549', '#001c27']}
+        start={{ x: 0, y: 0.35 }}
+        end={{ x: 0.85, y: 0.65 }}
+        style={[
+          styles.gradient,
+          {
+            flex: 1,
+            width: '100%',
+            minHeight: layout.bannerHeight,
+            borderRadius: layout.bannerBorderRadius,
+            paddingHorizontal: layout.bannerPadding,
+            paddingVertical: layout.bannerPadding,
+          },
+        ]}
+        colors={['#06354a', '#001a24']}
       >
-        <View style={styles.paidContentInnerTexts}>
-          <Text category={TEXT_TAGS.h3} style={styles.title}>
-            {t('subscriptions:banner:title')}
-          </Text>
-          <Text style={styles.action}>{t('subscriptions:banner.action')}</Text>
-        </View>
-
-        <View style={styles.imageContainer}>
-          <Image
-            style={styles.image}
-            resizeMode="contain"
-            source={getImage(['core', 'paidGirl'])}
-          />
+        <View style={styles.row}>
+          <View style={styles.textColumn}>
+            <Text
+              category={TEXT_TAGS.h3}
+              style={[
+                styles.title,
+                { fontSize: layout.bannerTitleFontSize },
+              ]}
+            >
+              {t('subscriptions:banner:title')}
+            </Text>
+            <Text style={styles.action} category={TEXT_TAGS.label}>
+              {t('subscriptions:banner.action')}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.imageColumn,
+              { maxHeight: layout.bannerImageMaxHeight },
+            ]}
+          >
+            <Image
+              style={{
+                width: layout.bannerImageWidth,
+                height: Math.min(
+                  layout.bannerImageHeight,
+                  layout.bannerImageMaxHeight
+                ),
+                maxHeight: layout.bannerImageMaxHeight,
+              }}
+              resizeMode="contain"
+              source={getImage(['core', 'paidGirl'])}
+            />
+          </View>
         </View>
       </LinearGradient>
     </TouchableOpacity>
@@ -58,47 +101,46 @@ function SubscriptionsBanner() {
 }
 
 const styles = StyleSheet.create({
-  action: {
-    padding: 8,
-    borderRadius: 16,
-    color: COLORS.Primary,
-    backgroundColor: getColorOpacity(COLORS.Background2, 60),
+  banner: {
+    backgroundColor: COLORS.Background2,
+    overflow: 'hidden',
+    width: '100%',
+    alignSelf: 'stretch',
   },
-  imageContainer: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    alignSelf: 'flex-end',
+  gradient: {
+    alignSelf: 'stretch',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 14,
+    width: '100%',
+  },
+  textColumn: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: 'center',
+    gap: 12,
+    paddingRight: 4,
+  },
+  imageColumn: {
+    flexShrink: 0,
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
   },
   title: {
     color: COLORS.Content,
   },
-  image: {
-    width: horizontalScale(120),
-    height: verticalScale(200),
-  },
-  banner: {
-    backgroundColor: COLORS.Background2,
-    borderRadius: 16,
-    height: verticalScale(160),
+  action: {
+    alignSelf: 'flex-start',
+    paddingVertical: 9,
+    paddingHorizontal: 13,
+    borderRadius: 18,
     overflow: 'hidden',
-    display: 'flex',
-    justifyContent: 'space-between',
-  },
-  gradient: {
-    flex: 1,
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
-  },
-  paidContentInnerTexts: {
-    position: 'absolute',
-    zIndex: 3,
-    height: '100%',
-    top: 16,
-    left: 16,
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    fontSize: 22,
+    color: COLORS.Primary,
+    backgroundColor: getColorOpacity(COLORS.Background2, 72),
   },
 });
 

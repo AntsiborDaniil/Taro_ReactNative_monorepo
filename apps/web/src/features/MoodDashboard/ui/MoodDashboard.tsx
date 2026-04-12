@@ -1,5 +1,13 @@
 import { ReactElement, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text as RNText,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { MoodAndEnergyContext } from 'entities/moodAndEnergy';
 import { useTranslation } from 'react-i18next';
 import { MoodDisplayMode } from 'shared/api';
@@ -40,6 +48,8 @@ function MoodDashboard({
   const { t } = useTranslation('moodAndEnergy');
   const { width: winW } = useWindowDimensions();
   const [visible, setVisible] = useState(false);
+  const [hoveredMoodChip, setHoveredMoodChip] = useState<string | null>(null);
+  const [dateHovered, setDateHovered] = useState(false);
 
   const { displayData, updateTodayMood, setDateMode, dateMode } = useData({
     Context: MoodAndEnergyContext,
@@ -84,16 +94,31 @@ function MoodDashboard({
 
   return (
     <>
-      <View style={[styles.wrapper, { marginHorizontal: horizontalInset }]}>
+      <View
+        style={[
+          styles.wrapper,
+          isWidget && styles.wrapperWidget,
+          !isWidget && styles.wrapperScreen,
+          { marginHorizontal: horizontalInset },
+        ]}
+      >
         {!isWidget && (
           <View style={styles.header}>
             <View style={styles.dateActionWrapper}>
-              <TouchableOpacity
-                style={styles.dateAction}
+              <Pressable
+                style={({ pressed }) => [
+                  styles.dateAction,
+                  dateHovered && styles.dateActionHover,
+                  pressed && styles.dateActionPressed,
+                ]}
+                onHoverIn={() => setDateHovered(true)}
+                onHoverOut={() => setDateHovered(false)}
                 onPress={() => setVisible((prevState) => !prevState)}
               >
-                <Text>{t(`datesPeriod.${dateMode}`)}</Text>
-              </TouchableOpacity>
+                <Text style={styles.dateActionText}>
+                  {t(`datesPeriod.${dateMode}`)}
+                </Text>
+              </Pressable>
 
               {visible && (
                 <View style={styles.dates}>
@@ -157,30 +182,43 @@ function MoodDashboard({
           style={[
             styles.moodsActions,
             isWidget && styles.moodsActionsWidget,
-            { paddingHorizontal: isWidget ? Math.min(16, Math.max(8, winW * 0.03)) : 20 },
+            !isWidget && styles.moodsActionsScreen,
+            {
+              paddingHorizontal: isWidget
+                ? Math.min(18, Math.max(12, winW * 0.035))
+                : Math.min(22, Math.max(16, winW * 0.04)),
+            },
           ]}
         >
           {moodsActionConfig.map((item) => (
-            <TouchableOpacity
+            <Pressable
               key={item.name}
-              style={[
+              onHoverIn={() => setHoveredMoodChip(item.name)}
+              onHoverOut={() => setHoveredMoodChip(null)}
+              style={({ pressed }) => [
                 styles.moodAction,
                 isWidget && styles.moodActionWidget,
+                !isWidget && styles.moodActionScreen,
                 usedMoods.includes(item.name) ? item.activeStyle : undefined,
+                hoveredMoodChip === item.name &&
+                  (isWidget ? styles.moodChipHoverWidget : styles.moodChipHoverScreen),
+                pressed && styles.moodChipPressed,
               ]}
               onPress={() => {
                 switchMood(item.name);
               }}
             >
-              <Text
-                style={[styles.moodActionText, isWidget && styles.moodActionTextWidget]}
-                numberOfLines={2}
-                adjustsFontSizeToFit={isWidget}
-                minimumFontScale={isWidget ? 0.82 : 1}
+              <RNText
+                style={[
+                  styles.moodActionText,
+                  isWidget && styles.moodActionTextWidget,
+                  !isWidget && styles.moodActionTextScreen,
+                ]}
+                numberOfLines={isWidget ? 2 : 1}
               >
                 {item.translation}
-              </Text>
-            </TouchableOpacity>
+              </RNText>
+            </Pressable>
           ))}
         </View>
         <MoodProgress isWidget={isWidget} />
@@ -191,11 +229,30 @@ function MoodDashboard({
 
 const styles = StyleSheet.create({
   wrapper: {
+    width: '100%',
+    maxWidth: '100%',
+    alignSelf: 'stretch',
+    alignItems: 'stretch',
     backgroundColor: COLORS.Background,
     boxShadow: '0 0 20px rgba(67, 35, 212, 1)',
     borderRadius: 16,
     paddingTop: 8,
     paddingBottom: 8,
+  },
+  wrapperWidget: {
+    paddingTop: 12,
+    paddingBottom: 10,
+  },
+  wrapperScreen: {
+    paddingTop: 4,
+    paddingBottom: 4,
+    borderRadius: 18,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow:
+            '0 0 0 1px rgba(132, 176, 230, 0.12), 0 12px 40px rgba(0, 0, 0, 0.35)',
+        } as object)
+      : {}),
   },
   moodsActions: {
     flex: 1,
@@ -206,9 +263,14 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
   },
   moodsActionsWidget: {
-    gap: 6,
-    paddingTop: 14,
-    paddingBottom: 14,
+    gap: 10,
+    paddingTop: 16,
+    paddingBottom: 18,
+  },
+  moodsActionsScreen: {
+    gap: 12,
+    paddingTop: 22,
+    paddingBottom: 22,
   },
   moodAction: {
     flex: 1,
@@ -228,21 +290,46 @@ const styles = StyleSheet.create({
       : {}),
   },
   moodActionWidget: {
-    paddingHorizontal: 4,
-    paddingVertical: 10,
-    minHeight: 44,
+    paddingHorizontal: 8,
+    paddingVertical: 14,
+    minHeight: 52,
+  },
+  moodActionScreen: {
+    minHeight: 54,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+  },
+  moodChipHoverScreen:
+    Platform.OS === 'web'
+      ? ({ transform: [{ translateY: -2 }] } as object)
+      : {},
+  moodChipHoverWidget:
+    Platform.OS === 'web'
+      ? ({ transform: [{ translateY: -1 }] } as object)
+      : {},
+  moodChipPressed: {
+    opacity: 0.9,
   },
   moodActionText: {
     color: '#F5F7FF',
-    fontSize: 15,
-    lineHeight: 19,
-    fontWeight: 600,
+    fontSize: 22,
+    fontFamily: 'Montserrat-SemiBold',
     textAlign: 'center',
     width: '100%',
+    ...(Platform.OS === 'web' ? ({ lineHeight: 22 } as object) : {}),
+    ...(Platform.OS === 'android'
+      ? { includeFontPadding: false, textAlignVertical: 'center' }
+      : {}),
   },
   moodActionTextWidget: {
-    fontSize: 13,
-    lineHeight: 16,
+    fontSize: 22,
+    ...(Platform.OS === 'web' ? ({ lineHeight: 22 } as object) : {}),
+  },
+  moodActionTextScreen: {
+    fontSize: 22,
+    letterSpacing: 0.2,
+    ...(Platform.OS === 'web' ? ({ lineHeight: 22 } as object) : {}),
   },
   moodActionMood: {
     backgroundColor: DESIGN.mood.color,
@@ -258,20 +345,35 @@ const styles = StyleSheet.create({
   },
   header: {
     justifyContent: 'flex-end',
-    paddingTop: 8,
+    paddingTop: 12,
+    paddingBottom: 4,
     alignItems: 'flex-end',
   },
   dateActionWrapper: {
     position: 'relative',
   },
   dateAction: {
-    padding: 4,
-    paddingRight: 16,
-    paddingBottom: 0,
-    width: 100,
-    height: 32,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    minHeight: 40,
     alignItems: 'flex-end',
     justifyContent: 'center',
+    borderRadius: 12,
+  },
+  dateActionText: {
+    color: COLORS.Content,
+    fontSize: 22,
+    fontWeight: '600',
+    ...(Platform.OS === 'web' ? ({ lineHeight: 22 } as object) : {}),
+  },
+  dateActionHover:
+    Platform.OS === 'web'
+      ? ({
+          backgroundColor: 'rgba(255, 255, 255, 0.06)',
+        } as object)
+      : {},
+  dateActionPressed: {
+    opacity: 0.85,
   },
   dates: {
     backgroundColor: COLORS.Background2,

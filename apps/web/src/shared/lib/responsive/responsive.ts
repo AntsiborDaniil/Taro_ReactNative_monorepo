@@ -12,5 +12,6 @@ export const horizontalScale = (size: number) => (width / BASE_WIDTH) * size;
 
 export const verticalScale = (size: number) => (height / BASE_HEIGHT) * size;
 
-export const moderateScale = (size: number, factor = 0.5) =>
+/** Один общий коэффициент масштаба текста; кегли задаются в `shared/themes/typography.ts`. */
+export const moderateScale = (size: number, factor = 0.42) =>
   size + (horizontalScale(size) - size) * factor;

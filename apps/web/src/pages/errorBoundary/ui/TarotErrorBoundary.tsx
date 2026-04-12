@@ -155,19 +155,19 @@ const styles = StyleSheet.create({
   cardTitle: {
     textAlign: 'left',
     color: COLORS.Content,
-    fontSize: 34,
-    lineHeight: 38,
+    fontSize: 22,
+    lineHeight: 26,
   },
   cardDescription: {
     textAlign: 'left',
     color: COLORS.SpbSky1,
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: 22,
+    lineHeight: 26,
     maxWidth: 560,
   },
   cardDescriptionCompact: {
-    fontSize: 16,
-    lineHeight: 22,
+    fontSize: 22,
+    lineHeight: 26,
   },
   goBackButton: {
     alignSelf: 'flex-start',

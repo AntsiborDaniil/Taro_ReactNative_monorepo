@@ -11,6 +11,7 @@ import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { ChevronRightIcon, ReverseIcon } from 'shared/icons';
 import { AsyncMemorySettingKey, isTablet, moderateScale } from 'shared/lib';
+import { SETTINGS_TYPOGRAPHY } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { ScreenLayout, SwitchElement, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
@@ -65,14 +66,18 @@ function Settings() {
 
   return (
     <ScreenLayout style={styles.container}>
-      <Header title={t('settings:settings')} />
+      <Header
+        title={t('settings:settings')}
+        titleStyle={styles.settingsBody}
+      />
       <ScrollView contentContainerStyle={styles.wrapper}>
         <SwitchElement
           name="settings:hasReversed"
+          labelStyle={styles.settingsBody}
           icon={
             <ReverseIcon
-              width={isTablet ? 37 : 27}
-              height={isTablet ? 36 : 26}
+              width={isTablet ? 34 : 24}
+              height={isTablet ? 33 : 23}
             />
           }
           value={spreadSettings?.hasReversed}
@@ -90,11 +95,13 @@ function Settings() {
               <View style={styles.item}>
                 <View style={styles.iconWrapper}>
                   <View style={styles.icon}>{icon}</View>
-                  <Text style={styles.text}>{t(`settings:${title}`)}</Text>
+                  <Text category={TEXT_TAGS.h4} style={[styles.text, styles.settingsBody]}>
+                    {t(`settings:${title}`)}
+                  </Text>
                 </View>
                 <ChevronRightIcon
-                  width={isTablet ? 28 : 18}
-                  height={isTablet ? 28 : 18}
+                  width={isTablet ? 26 : 17}
+                  height={isTablet ? 26 : 17}
                 />
               </View>
             </TouchableOpacity>
@@ -107,7 +114,7 @@ function Settings() {
       <View style={styles.agreements}>
         {APP_AGREEMENTS.map(({ title, url }) => (
           <Text
-            style={styles.agreement}
+            style={[styles.agreement, styles.settingsFootnote]}
             key={title}
             category={TEXT_TAGS.h5}
             onPress={() => handlePress(url)}
@@ -121,24 +128,30 @@ function Settings() {
 }
 
 const styleSheet = StyleService.create({
+  /** Кегли экрана — значения из `SETTINGS_TYPOGRAPHY` в `shared/themes/typography.ts`. */
+  settingsBody: {
+    fontSize: SETTINGS_TYPOGRAPHY.body,
+  },
+  settingsFootnote: {
+    fontSize: SETTINGS_TYPOGRAPHY.footnote,
+  },
   container: {
     flex: 1,
   },
   wrapper: {
     flex: 1,
     justifyContent: 'center',
-    gap: moderateScale(16),
-    padding: 16,
+    gap: moderateScale(14),
+    padding: moderateScale(14),
   },
   icon: {
-    width: 32,
+    width: 30,
   },
   item: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 6,
-    paddingBottom: 6,
+    paddingVertical: 8,
   },
   divider: {
     height: 1,
@@ -148,17 +161,17 @@ const styleSheet = StyleService.create({
   iconWrapper: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 32,
+    gap: moderateScale(14),
   },
   text: {
     alignItems: 'flex-start',
   },
   agreements: {
     flexDirection: 'row',
-    gap: 8,
+    gap: moderateScale(8),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 50,
+    marginBottom: moderateScale(44),
   },
   agreement: {
     textDecorationLine: 'underline',

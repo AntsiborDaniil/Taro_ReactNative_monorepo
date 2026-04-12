@@ -50,8 +50,8 @@ const styleSheet = StyleService.create({
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'center',
-    gap: 24,
-    padding: 16,
+    gap: 16,
+    padding: 14,
   },
   element: {
     alignItems: 'center',

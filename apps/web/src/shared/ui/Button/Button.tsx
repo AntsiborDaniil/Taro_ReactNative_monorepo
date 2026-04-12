@@ -6,7 +6,6 @@ import {
 } from 'react-native';
 import type { ButtonProps as KittenButtonProps } from '@ui-kitten/components';
 import type { CSSProperties, ReactNode } from 'react';
-import { moderateScale } from 'shared/lib';
 import { COLORS } from '../../themes';
 import { Text, TEXT_TAGS } from '../Text';
 
@@ -48,7 +47,6 @@ const styles = StyleSheet.create({
   },
   text: {
     color: COLORS.Background,
-    fontSize: moderateScale(14),
   },
 });
 

@@ -9,27 +9,27 @@ export const SETTINGS_ROUTES = [
   //   title: 'payments',
   // },
   {
-    icon: <Lang width={isTablet ? 37 : 27} height={isTablet ? 37 : 27} />,
+    icon: <Lang width={isTablet ? 34 : 24} height={isTablet ? 34 : 24} />,
     title: 'language',
     url: NavigationRoute.Language,
   },
   {
-    icon: <Bell width={isTablet ? 37 : 27} height={isTablet ? 36 : 26} />,
+    icon: <Bell width={isTablet ? 34 : 24} height={isTablet ? 33 : 23} />,
     title: 'sound',
     url: NavigationRoute.Sound,
   },
   {
-    icon: <Paint width={isTablet ? 37 : 27} height={isTablet ? 37 : 27} />,
+    icon: <Paint width={isTablet ? 34 : 24} height={isTablet ? 34 : 24} />,
     title: 'deck.style',
     url: NavigationRoute.DeckStyle,
   },
   {
-    icon: <Share width={isTablet ? 32 : 22} height={isTablet ? 34 : 24} />,
+    icon: <Share width={isTablet ? 30 : 20} height={isTablet ? 31 : 21} />,
     title: 'share',
     onPress: shareApp,
   },
   {
-    icon: <Star width={isTablet ? 35 : 25} height={isTablet ? 34 : 24} />,
+    icon: <Star width={isTablet ? 32 : 22} height={isTablet ? 31 : 21} />,
     title: 'rate.app',
     onPress: rateApp,
   },

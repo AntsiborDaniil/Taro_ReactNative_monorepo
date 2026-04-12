@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: COLORS.Background,
     fontWeight: 'semibold',
-    fontSize: 12,
+    fontSize: 22,
   },
   texts: {
     justifyContent: 'space-between',

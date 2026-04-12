@@ -3,7 +3,6 @@ import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { horizontalScale, isTablet, verticalScale, width } from 'shared/lib';
 import {
   AnalyticAction,
   ImagePosition,
@@ -14,11 +13,22 @@ import { TEXT_WEIGHT, TileCard } from 'shared/ui';
 
 type CategoryCardProps = {
   card?: TRedirectPlate;
+  tileWidth: number;
+  tileHeight: number;
+  cornerImageWidth: number;
+  cornerImageHeight: number;
+  /** Кегль заголовка на плитке (библиотека). */
+  titleFontSize?: number;
 };
 
-const cardWidth = isTablet ? (width - 16 - 16) / 2 - 16 : (width - 32 - 16) / 2;
-
-function CategoryCard({ card }: CategoryCardProps) {
+function CategoryCard({
+  card,
+  tileWidth,
+  tileHeight,
+  cornerImageWidth,
+  cornerImageHeight,
+  titleFontSize,
+}: CategoryCardProps) {
   const { img, id, name, navigationRoute, gradient, tabRoute } = card ?? {};
 
   const navigation = useNativeNavigation();
@@ -44,17 +54,20 @@ function CategoryCard({ card }: CategoryCardProps) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={{ width: tileWidth }}>
       <TileCard
         id={id}
         imageSource={img}
-        width={cardWidth}
-        height={verticalScale(150)}
-        imageWidth={horizontalScale(100)}
-        imageHeight={verticalScale(100)}
+        width={tileWidth}
+        height={tileHeight}
+        imageWidth={cornerImageWidth}
+        imageHeight={cornerImageHeight}
         imagePosition={ImagePosition.Corner}
         fontWeight={TEXT_WEIGHT.regular}
-        textStyles={styles.text}
+        textStyles={[
+          styles.text,
+          titleFontSize != null ? { fontSize: titleFontSize } : null,
+        ]}
         onPress={handlePress}
         gradient={gradient}
       >
@@ -67,9 +80,6 @@ function CategoryCard({ card }: CategoryCardProps) {
 export default CategoryCard;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   text: {
     padding: 12,
   },

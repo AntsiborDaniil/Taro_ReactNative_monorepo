@@ -79,6 +79,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#333A43',
   },
   emoji: {
-    fontSize: 24,
+    fontSize: 22,
   },
 });

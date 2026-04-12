@@ -88,7 +88,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           border: '2px solid rgba(246, 192, 27, 0.45)',
         }}
       >
-        <h2 style={{ margin: 0, color: '#F4F4F5', fontSize: 18 }}>{title}</h2>
+        <h2 style={{ margin: 0, color: '#F4F4F5', fontSize: 22 }}>{title}</h2>
         <input
           ref={inputRef}
           type="date"
@@ -97,7 +97,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           max={toInputValue(maximumDate)}
           onChange={(e) => setVal(e.target.value)}
           style={{
-            fontSize: 17,
+            fontSize: 22,
             padding: '14px 16px',
             borderRadius: 12,
             border: '1px solid rgba(246, 192, 27, 0.35)',

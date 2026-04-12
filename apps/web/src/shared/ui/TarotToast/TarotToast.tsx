@@ -32,11 +32,11 @@ function TarotToast() {
 const styles = StyleSheet.create({
   text: {
     color: COLORS.Content,
-    fontSize: 15,
+    fontSize: 22,
     fontWeight: '400',
   },
   smallText: {
-    fontSize: 15,
+    fontSize: 22,
   },
   baseToast: {
     borderLeftColor: COLORS.Primary,

@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inner: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
   },
 });
 

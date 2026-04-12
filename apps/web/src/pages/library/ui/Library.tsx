@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { UserContext } from 'entities/user';
@@ -15,9 +15,11 @@ import { ScreenLayout, Text, TEXT_WEIGHT } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { LIBRARY_PLATES } from '../lib';
 import SubscriptionsBanner from './SubscriptionsBanner';
+import { useLibraryLayout } from './useLibraryLayout';
 
 function Library() {
   const { t } = useTranslation();
+  const layout = useLibraryLayout();
 
   const { isPractitioner } = useData({ Context: UserContext });
 
@@ -40,7 +42,7 @@ function Library() {
   };
 
   return (
-    <ScreenLayout style={styles.wrapper}>
+    <ScreenLayout>
       <Header
         leftContent={
           isPractitioner ? (
@@ -59,30 +61,65 @@ function Library() {
         title={t('core:library')}
         rightAction={handlePress}
       />
-      {!isPractitioner && <SubscriptionsBanner />}
-      <FlatList
-        data={LIBRARY_PLATES}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        contentContainerStyle={styles.listContainer}
-        columnWrapperStyle={styles.row}
-        renderItem={({ item }) => (
-          <View>
-            <CategoryCard card={item} />
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollInner,
+          { paddingBottom: layout.scrollBottomPad },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View
+          style={[
+            styles.column,
+            {
+              width: layout.contentWidth,
+              maxWidth: '100%',
+              alignSelf: 'center',
+              paddingHorizontal: layout.padding,
+              gap: layout.gap + 4,
+            },
+          ]}
+        >
+          {!isPractitioner && <SubscriptionsBanner layout={layout} />}
+          <View
+            style={[
+              styles.grid,
+              {
+                gap: layout.gap,
+                justifyContent: layout.gridJustifyContent,
+              },
+            ]}
+          >
+            {LIBRARY_PLATES.map((item) => (
+              <CategoryCard
+                key={item.id}
+                card={item}
+                tileWidth={layout.cardWidth}
+                tileHeight={layout.cardHeight}
+                cornerImageWidth={layout.cornerImageWidth}
+                cornerImageHeight={layout.cornerImageHeight}
+                titleFontSize={layout.cardTitleFontSize}
+              />
+            ))}
           </View>
-        )}
-      />
+        </View>
+      </ScrollView>
     </ScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    padding: 16,
+  scrollInner: {
+    flexGrow: 1,
   },
-  listContainer: {
-    justifyContent: 'space-between',
-    paddingTop: 16,
+  column: {
+    paddingTop: 8,
+    width: '100%',
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    width: '100%',
   },
   proWrapper: {
     display: 'flex',
@@ -95,10 +132,7 @@ const styles = StyleSheet.create({
   },
   pro: {
     color: COLORS.Background,
-  },
-  row: {
-    justifyContent: 'space-between',
-    marginBottom: 24,
+    fontSize: 22,
   },
 });
 

@@ -394,14 +394,14 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     paddingLeft: 0,
     backgroundColor: 'transparent',
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 500,
   },
   radioButton: {
     width: '50%',
   },
   smallInput: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 400,
   },
   sliderStyle: {

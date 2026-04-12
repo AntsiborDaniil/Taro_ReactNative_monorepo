@@ -1,5 +1,5 @@
 import { ReactElement, ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleProp, StyleSheet, TextStyle, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Switch, SwitchProps } from 'react-native-paper';
 import { COLORS } from 'shared/themes';
@@ -8,11 +8,14 @@ import { Text, TEXT_TAGS } from '../Text';
 export type SwitchElementProps = SwitchProps & {
   name: string;
   icon?: ReactNode;
+  /** Подпись рядом со свитчем (например компактнее на экране настроек). */
+  labelStyle?: StyleProp<TextStyle>;
 };
 
 function SwitchElement({
   name,
   icon,
+  labelStyle,
   ...props
 }: SwitchElementProps): ReactElement {
   const { t } = useTranslation();
@@ -21,7 +24,9 @@ function SwitchElement({
     <View style={[styles.element, props.style]}>
       <View style={styles.textWrapper}>
         {!!icon && <View style={styles.icon}>{icon}</View>}
-        <Text category={TEXT_TAGS.h4}>{t(name)}</Text>
+        <Text category={TEXT_TAGS.h4} style={labelStyle}>
+          {t(name)}
+        </Text>
       </View>
       <Switch
         {...props}
@@ -37,10 +42,10 @@ const styles = StyleSheet.create({
   textWrapper: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 32,
+    gap: 28,
   },
   icon: {
-    width: 32,
+    width: 30,
   },
   element: {
     alignItems: 'center',

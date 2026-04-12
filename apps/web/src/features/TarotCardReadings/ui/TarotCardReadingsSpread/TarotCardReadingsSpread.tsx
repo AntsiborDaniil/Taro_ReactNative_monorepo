@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  Dimensions,
   InteractionManager,
   SafeAreaView,
   StyleSheet,
@@ -24,6 +23,7 @@ import Carousel, {
   ICarouselInstance,
   Pagination,
 } from 'react-native-reanimated-carousel';
+import { useTabRailLayout } from 'app/navigation/tabs/TabRailLayoutContext';
 import { SpreadName, SpreadsCategory, TarotCardDirection } from 'shared/api';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
@@ -40,8 +40,6 @@ import { SpreadScheme } from '../../../scheme';
 import { TarotCharacteristics } from '../TarotCharacteristics';
 import TarotMeanings from '../TarotMeanings/TarotMeanings';
 
-const screen = Dimensions.get('screen');
-
 const NAVIGATION_ROUTES: Record<TabRoute, NavigationRoute> = {
   [TabRoute.LibraryTab]: NavigationRoute.SpreadsHistory,
   [TabRoute.MainTab]: NavigationRoute.Main,
@@ -54,6 +52,9 @@ type Props = {
 
 function TarotCardReadingsSpread({ cardIndex }: Props) {
   let isViewedLastCard = false;
+
+  const { sceneContentWidth } = useTabRailLayout();
+  const carouselWidth = sceneContentWidth;
 
   const { selectedTab } = useData({ Context: TabsAndRoutesContext });
 
@@ -181,13 +182,13 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
     : [];
 
   return (
-    <GestureHandlerRootView>
+    <GestureHandlerRootView style={styles.gestureRoot}>
       {spread.category !== SpreadsCategory.Simple && (
         <Pagination.Basic
           progress={progress}
           data={carouselData}
           dotStyle={{
-            width: screen.width / cardsCount - 4 - 16 / (cardsCount - 2),
+            width: carouselWidth / cardsCount - 4 - 16 / (cardsCount - 2),
             height: 8,
             borderRadius: 6,
             backgroundColor: COLORS.SpbSky3,
@@ -218,7 +219,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
           gesture.activeOffsetY([-1000, 1000]);
           gesture.simultaneousWithExternalGesture(flatListRef);
         }}
-        width={screen.width}
+        width={carouselWidth}
         renderItem={({ index }) => {
           const card = spread?.selectedCards?.[index - (hasSummary ? 1 : 0)];
 
@@ -286,8 +287,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
             );
           }
 
-          const { width } = Dimensions.get('window');
-
           const handleLayout = (event: any) => {
             const { width, height } = event.nativeEvent.layout;
 
@@ -303,7 +302,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
           const middleIndex = Math.floor(splittedTitle.length / 2);
 
           const resultedTitle =
-            width - dimensions.width < 32
+            carouselWidth - dimensions.width < 32
               ? `${splittedTitle.slice(0, middleIndex).join(' ')}\n${splittedTitle.slice(middleIndex).join(' ')}`
               : t(card.name);
 
@@ -435,6 +434,12 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
 }
 
 const styles = StyleSheet.create({
+  gestureRoot: {
+    flex: 1,
+    overflow: 'hidden',
+    alignSelf: 'stretch',
+    width: '100%',
+  },
   paddingWrapper: {
     paddingHorizontal: 16,
     gap: 20,

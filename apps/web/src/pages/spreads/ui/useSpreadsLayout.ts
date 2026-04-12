@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
+import { GLOBAL_UI_TEXT_PX } from 'shared/themes/typography';
 
 const MAX_CONTENT_WIDTH = 1280;
 const BASE_W = 375;
@@ -58,13 +59,7 @@ export function useSpreadsLayout(): SpreadsLayout {
     const cap = v(480);
     const previewHeight = Math.min(cap, Math.max(floor, byAspect));
 
-    const sectionTitleSize = Math.round(
-      columns === 1
-        ? Math.min(21, Math.max(18, ms(W, 19)))
-        : columns === 2
-          ? Math.min(20, Math.max(16, ms(W, 18)))
-          : Math.min(19, Math.max(15, ms(W, 17)))
-    );
+    const sectionTitleSize = GLOBAL_UI_TEXT_PX;
     const sectionTitleLine = Math.round(sectionTitleSize * 1.35);
 
     const scrollBottomPad = Math.round(Math.max(24, v(32)));
@@ -74,20 +69,8 @@ export function useSpreadsLayout(): SpreadsLayout {
     const textPadTop = Math.round(Math.min(22, Math.max(12, v(16))));
     const textPadBottom = Math.round(Math.min(30, Math.max(18, v(24))));
     const textBlockGap = Math.round(Math.min(16, Math.max(8, v(10))));
-    const titleFontSize = Math.round(
-      columns === 1
-        ? Math.min(18, Math.max(16, ms(W, 16)))
-        : columns === 2
-          ? Math.min(16, Math.max(14, ms(W, 15)))
-          : Math.min(15, Math.max(13, ms(W, 14)))
-    );
-    const hintFontSize = Math.round(
-      columns === 1
-        ? Math.min(15, Math.max(13, ms(W, 14)))
-        : columns === 2
-          ? Math.min(14, Math.max(12, ms(W, 13)))
-          : Math.min(13, Math.max(11, ms(W, 12)))
-    );
+    const titleFontSize = GLOBAL_UI_TEXT_PX;
+    const hintFontSize = GLOBAL_UI_TEXT_PX;
     const lockIconSize = Math.round(Math.min(40, Math.max(28, W * 0.07)));
     const imageFadeHeight = Math.round(Math.min(56, Math.max(36, v(44))));
 

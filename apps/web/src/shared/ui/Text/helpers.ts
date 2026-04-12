@@ -1,6 +1,6 @@
 import { StyleProp, StyleSheet } from 'react-native';
 import { TextStyle } from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
-import { moderateScale } from 'shared/lib';
+import { TYPOGRAPHY_CATEGORY_PX } from 'shared/themes/typography';
 import { TEXT_TAGS, TEXT_WEIGHT } from './constants';
 
 const fontFamilyMap: Record<string, string> = {
@@ -24,16 +24,6 @@ const DEFAULT_TEXT_WEIGHTS = {
   [TEXT_TAGS.label]: TEXT_WEIGHT.regular,
 };
 
-const DEFAULT_TEXT_SIZES = {
-  [TEXT_TAGS.h1]: 32,
-  [TEXT_TAGS.h2]: 26,
-  [TEXT_TAGS.h3]: 21,
-  [TEXT_TAGS.h4]: 16,
-  [TEXT_TAGS.h5]: 12,
-  [TEXT_TAGS.p1]: 16,
-  [TEXT_TAGS.label]: 14,
-};
-
 type TTextStylesParameters = {
   category?: keyof typeof TEXT_TAGS;
   weight?: keyof typeof TEXT_WEIGHT;
@@ -55,9 +45,16 @@ export function getTextStyles({
     fontFamily: fontFamilyMap[weight || DEFAULT_TEXT_WEIGHTS[category!]],
   };
 
+  const defaultSize = TYPOGRAPHY_CATEGORY_PX[category!];
+  const explicitSize = base.fontSize;
+  const resolvedFontSize =
+    typeof explicitSize === 'number' && !Number.isNaN(explicitSize)
+      ? explicitSize
+      : defaultSize;
+
   textStyle = {
     ...textStyle,
-    fontSize: moderateScale(base.fontSize || DEFAULT_TEXT_SIZES[category!]),
+    fontSize: resolvedFontSize,
   };
 
   textStyle = {

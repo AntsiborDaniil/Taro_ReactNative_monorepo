@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Dimensions, SafeAreaView, StyleSheet, View } from 'react-native';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
+import { useTabRailLayout } from 'app/navigation/tabs/TabRailLayoutContext';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { LikeCard } from 'entities/favorites';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +18,7 @@ type TarotCardReadingsDefaultProps = {
 
 function TarotCardReadingsDefault({ card }: TarotCardReadingsDefaultProps) {
   const { t } = useTranslation();
-  const { width } = Dimensions.get('window');
+  const { sceneContentWidth } = useTabRailLayout();
 
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
@@ -40,7 +41,7 @@ function TarotCardReadingsDefault({ card }: TarotCardReadingsDefaultProps) {
   const middleIndex = Math.floor(splittedTitle.length / 2);
 
   const resultedTitle =
-    width - dimensions.width < 32
+    sceneContentWidth - dimensions.width < 32
       ? `${splittedTitle.slice(0, middleIndex).join(' ')}\n${splittedTitle.slice(middleIndex).join(' ')}`
       : t(card.name);
 

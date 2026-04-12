@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
+import { GLOBAL_UI_TEXT_PX } from 'shared/themes/typography';
 
 const MAX_CONTENT_WIDTH = 1280;
 const BASE_W = 375;
@@ -59,7 +60,7 @@ export function useAffirmationsLayout(): AffirmationsLayout {
       listPaddingBottom,
       visualSize,
       isNarrow: W < 640,
-      labelFontSize: Math.round(Math.min(15, Math.max(13, ms(W, 14)))),
+      labelFontSize: GLOBAL_UI_TEXT_PX,
     };
   }, [W]);
 }

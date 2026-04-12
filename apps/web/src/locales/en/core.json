@@ -71,5 +71,12 @@
 
   "share.message.ios": "Discover what the cards hold for you! Dive into mystical Tarot readings and unlock your path.",
   "share.message.android": "Discover what the cards hold for you! Dive into mystical Tarot readings and unlock your path. Get the app now",
-  "share.title": "Unveil Your Destiny with Tarot!"
+  "share.title": "Unveil Your Destiny with Tarot!",
+
+  "nav.tab.main": "Home",
+  "nav.tab.spreads": "Spreads",
+  "nav.tab.library": "Library",
+
+  "nav.rail.collapse": "Collapse sidebar",
+  "nav.rail.expand": "Expand sidebar"
 }

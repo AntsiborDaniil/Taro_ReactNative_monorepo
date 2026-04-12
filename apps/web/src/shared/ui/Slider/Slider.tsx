@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { Platform, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { Text } from '../Text';
+import { Text, TEXT_TAGS, TEXT_WEIGHT } from '../Text';
 import { COLORS } from '../../themes';
 
 type Props = {
@@ -14,7 +14,7 @@ type Props = {
   onChange(value: number): void;
 };
 
-export const InputSlider = ({
+export function InputSlider({
   label,
   maxValue,
   minValue,
@@ -22,31 +22,91 @@ export const InputSlider = ({
   value,
   onChange,
   color,
-}: Props) => (
-  <View style={{ marginVertical: 10 }}>
-    <Text style={{ fontWeight: 'bold' }}>{label}</Text>
+}: Props) {
+  const [hovered, setHovered] = React.useState(false);
+
+  const display =
+    String(value % 1 === 0 ? value : value.toFixed(1));
+
+  return (
     <View
-      style={{
-        width: '100%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-      }}
+      style={[styles.card, hovered && styles.cardHover]}
+      {...(Platform.OS === 'web'
+        ? {
+            onPointerEnter: () => setHovered(true),
+            onPointerLeave: () => setHovered(false),
+          }
+        : {})}
     >
-      <Slider
-        onResponderGrant={() => Platform.select({ android: true, ios: false })}
-        style={{ width: '90%', height: 40 }}
-        minimumValue={minValue}
-        maximumValue={maxValue}
-        maximumTrackTintColor={COLORS.SpbSky2}
-        minimumTrackTintColor={color ?? COLORS.Primary}
-        thumbTintColor={color ?? COLORS.Primary}
-        step={step}
-        value={value}
-        onValueChange={onChange}
-      />
-      <Text style={{ alignSelf: 'center' }}>
-        {String(value % 1 === 0 ? value : value.toFixed(1))}
+      <Text
+        category={TEXT_TAGS.h5}
+        weight={TEXT_WEIGHT.semibold}
+        style={styles.label}
+      >
+        {label}
       </Text>
+      <View style={styles.row}>
+        <Slider
+          onResponderGrant={() =>
+            Platform.select({ android: true, ios: false })
+          }
+          style={styles.slider}
+          minimumValue={minValue}
+          maximumValue={maxValue}
+          maximumTrackTintColor={COLORS.SpbSky2}
+          minimumTrackTintColor={color ?? COLORS.Primary}
+          thumbTintColor={color ?? COLORS.Primary}
+          step={step}
+          value={value}
+          onValueChange={onChange}
+        />
+        <Text
+          category={TEXT_TAGS.h5}
+          weight={TEXT_WEIGHT.semibold}
+          style={styles.value}
+        >
+          {display}
+        </Text>
+      </View>
     </View>
-  </View>
-);
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    marginBottom: 14,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.045)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  cardHover:
+    Platform.OS === 'web'
+      ? ({
+          backgroundColor: 'rgba(255, 255, 255, 0.08)',
+          borderColor: 'rgba(255, 255, 255, 0.16)',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.28)',
+        } as object)
+      : {},
+  label: {
+    marginBottom: 14,
+    color: COLORS.Content,
+    letterSpacing: 0.2,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  slider: {
+    flex: 1,
+    height: 44,
+  },
+  value: {
+    minWidth: 36,
+    textAlign: 'right',
+    color: COLORS.Content,
+  },
+});

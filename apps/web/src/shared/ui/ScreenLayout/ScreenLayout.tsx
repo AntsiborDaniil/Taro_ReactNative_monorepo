@@ -50,9 +50,15 @@ const styles = StyleSheet.create({
   },
   wrapper: {
     flex: 1,
+    width: '100%',
+    alignSelf: 'stretch',
     backgroundColor: COLORS.Background,
   },
   layout: {
+    width: '100%',
+    maxWidth: '100%',
+    alignSelf: 'stretch',
+    alignItems: 'stretch',
     height: '100%',
     paddingTop: 8,
     gap: 16,

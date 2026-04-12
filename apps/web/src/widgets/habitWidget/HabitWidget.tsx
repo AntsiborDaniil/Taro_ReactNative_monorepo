@@ -161,8 +161,8 @@ const styles = StyleSheet.create({
   description: {
     width: '100%',
     textAlign: 'center',
-    lineHeight: 20,
-    fontSize: 16,
+    lineHeight: 22,
+    fontSize: 22,
     paddingHorizontal: 4,
     marginTop: 10,
   },
