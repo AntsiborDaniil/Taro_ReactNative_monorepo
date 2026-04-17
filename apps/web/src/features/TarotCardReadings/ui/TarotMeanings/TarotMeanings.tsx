@@ -111,17 +111,20 @@ function TarotMeanings({
 const styles = StyleSheet.create({
   content: {
     gap: 20,
-    alignItems: 'center',
+    alignItems: 'stretch',
+    width: '100%',
   },
   adviceContainer: {
     backgroundColor: COLORS.Primary,
     padding: 16,
     borderRadius: 16,
-    alignItems: 'center',
+    alignItems: 'stretch',
     gap: 8,
+    width: '100%',
   },
   adviceText: {
     color: COLORS.Background,
+    textAlign: 'center',
   },
   adviceTextCommon: {
     color: COLORS.Background,
@@ -136,10 +139,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderRadius: 16,
     gap: 16,
-    alignItems: 'center',
+    alignItems: 'stretch',
+    width: '100%',
   },
   textTitle: {
     color: COLORS.Primary,
+    textAlign: 'center',
   },
 });
 

@@ -6,6 +6,7 @@ const path = require('path');
 
 module.exports = wrapWithReanimatedMetroConfig(
   (() => {
+    const workspaceRoot = path.resolve(__dirname, '../..');
     const config = getDefaultConfig(__dirname);
 
     const { transformer, resolver } = config;
@@ -22,7 +23,14 @@ module.exports = wrapWithReanimatedMetroConfig(
       ...resolver,
       assetExts: resolver.assetExts.filter((ext) => ext !== 'svg'),
       sourceExts: [...resolver.sourceExts, 'svg'],
+      // Монорепо: единая резолюция и слежение за пакетами/симлинками.
+      nodeModulesPaths: [
+        path.resolve(__dirname, 'node_modules'),
+        path.resolve(workspaceRoot, 'node_modules'),
+      ],
+      unstable_enableSymlinks: true,
     };
+    config.watchFolders = [workspaceRoot];
 
     // Map native-only packages to web stubs
     config.resolver.extraNodeModules = {

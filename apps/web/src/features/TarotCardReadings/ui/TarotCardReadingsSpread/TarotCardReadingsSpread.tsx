@@ -305,6 +305,11 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
             carouselWidth - dimensions.width < 32
               ? `${splittedTitle.slice(0, middleIndex).join(' ')}\n${splittedTitle.slice(middleIndex).join(' ')}`
               : t(card.name);
+          const navArrowSize = carouselWidth < 620 ? 48 : 70;
+          const readingCardWidth = Math.max(
+            140,
+            Math.min(300, carouselWidth - navArrowSize * 2 - 56)
+          );
 
           return (
             <ScrollView key={index}>
@@ -321,16 +326,20 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
 
                     <SafeAreaView style={styles.navigationContainer}>
                       <ChevronLeftIcon
-                        width={70}
-                        height={70}
+                        width={navArrowSize}
+                        height={navArrowSize}
                         style={styles.chevron}
                         strokeOpacity={isFirstCard ? 0 : 1}
                         onPress={isFirstCard ? undefined : viewPrevCard}
                       />
-                      <TarotCard cardId={card?.id} direction={card.direction} />
+                      <TarotCard
+                        cardId={card?.id}
+                        direction={card.direction}
+                        styleCard={[styles.readingCard, { width: readingCardWidth }]}
+                      />
                       <ChevronLeftIcon
-                        width={70}
-                        height={70}
+                        width={navArrowSize}
+                        height={navArrowSize}
                         style={styles.rightChevron}
                         strokeOpacity={isLastCard ? 0 : 1}
                         onPress={isLastCard ? undefined : viewNextCard}
@@ -490,8 +499,15 @@ const styles = StyleSheet.create({
   },
   navigationContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
+    gap: 6,
+    width: '100%',
+    overflow: 'hidden',
+  },
+  readingCard: {
+    maxWidth: '100%',
+    flexShrink: 1,
   },
   summaryContainer: {
     backgroundColor: COLORS.Primary,
@@ -503,8 +519,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   chevron: {
-    width: 70,
-    height: 70,
+    flexShrink: 0,
   },
   spreadSchemeContainer: {
     paddingHorizontal: 16,

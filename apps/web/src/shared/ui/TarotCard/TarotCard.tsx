@@ -3,6 +3,7 @@ import {
   Animated,
   DimensionValue,
   ImageBackground,
+  ImageResizeMode,
   Platform,
   StyleSheet,
   ViewStyle,
@@ -24,6 +25,7 @@ type TarotCardProps = {
   styleCard?: StyleProp<ViewStyle>;
   width?: DimensionValue;
   height?: DimensionValue;
+  imageResizeMode?: ImageResizeMode;
   direction?: TarotCardDirection;
 };
 
@@ -33,11 +35,18 @@ function TarotCard({
   isSelected,
   isLocked,
   height,
+  imageResizeMode = 'cover',
   customAppearance,
   styleCard,
   direction = TarotCardDirection.Upright,
 }: TarotCardProps) {
   const { appearance } = useData({ Context: ApplicationConfigContext });
+  const selectedAppearance =
+    customAppearance ?? appearance?.deckStyle ?? DeckStyle.FlatIllustration;
+  const imageSource =
+    getImage(['tarotCards', selectedAppearance, `card${cardId}`]) ||
+    getImage(['tarotCards', DeckStyle.FlatIllustration, `card${cardId}`]) ||
+    getImage(['core', 'cardBack']);
 
   const borderColorAnim = useRef(
     new Animated.Value(isSelected ? 1 : 0)
@@ -81,14 +90,8 @@ function TarotCard({
       ]}
     >
       <ImageBackground
-        source={getImage([
-          'tarotCards',
-          customAppearance ??
-            appearance?.deckStyle ??
-            DeckStyle.FlatIllustration,
-          `card${cardId}`,
-        ])}
-        resizeMode="cover"
+        source={imageSource}
+        resizeMode={imageResizeMode}
         style={[styles.imageBackground, { width, height }]}
       >
         {!!isSelected && (

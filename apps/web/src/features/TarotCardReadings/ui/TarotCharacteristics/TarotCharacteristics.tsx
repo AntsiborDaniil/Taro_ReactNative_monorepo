@@ -1,10 +1,11 @@
 import { RefObject, useMemo } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
+import { useTabRailLayout } from 'app/navigation/tabs/TabRailLayoutContext';
 import { useTranslation } from 'react-i18next';
 import { ICarouselInstance } from 'react-native-reanimated-carousel';
 import { TSelectedTarotCard } from 'shared/api';
 import { COLORS } from 'shared/themes';
-import { Carousel, Text, TEXT_TAGS } from 'shared/ui';
+import { Text, TEXT_TAGS } from 'shared/ui';
 import {
   ARCANAS,
   ELEMENTS,
@@ -22,10 +23,11 @@ type TarotCharacteristicsProps = {
 
 function TarotCharacteristics({
   card,
-  outerCarouselRef,
-  flatListRef,
+  outerCarouselRef: _outerCarouselRef,
+  flatListRef: _flatListRef,
 }: TarotCharacteristicsProps) {
   const { t } = useTranslation();
+  const { sceneContentWidth } = useTabRailLayout();
 
   const content = useMemo(() => {
     const libraryItems: {
@@ -67,55 +69,65 @@ function TarotCharacteristics({
     card.suit,
   ]);
 
+  const horizontalPad = 32;
+  const gap = 16;
+  const containerWidth = Math.max(220, sceneContentWidth - horizontalPad);
+  const columns = containerWidth >= 920 ? 4 : containerWidth >= 520 ? 2 : 1;
+  const itemWidth = Math.max(
+    180,
+    Math.floor((containerWidth - gap * (columns - 1)) / columns)
+  );
+
   return (
     <SafeAreaView style={styles.content}>
-      <Carousel<TCharacteristicsContent>
-        ref={flatListRef}
-        outerCarouselRef={outerCarouselRef}
-        data={content}
-        spaceBetween={20}
-        renderItem={({ item, index }) => (
-          <SafeAreaView
-            style={[
-              styles.item,
-              {
-                marginLeft: index === 0 ? 16 : undefined,
-                marginRight: index === content.length - 1 ? 16 : undefined,
-              },
-            ]}
-            key={item.subtitle}
-          >
+      <View style={[styles.grid, { maxWidth: containerWidth }]}>
+        {content.map((item) => (
+          <SafeAreaView style={[styles.item, { width: itemWidth }]} key={item.subtitle}>
             {item.icon}
             <View style={styles.texts}>
               <Text category={TEXT_TAGS.label} style={styles.label}>
                 {t(item.subtitle)}
               </Text>
-              <Text>{t(item.title)}</Text>
+              <Text style={styles.title}>{t(item.title)}</Text>
             </View>
           </SafeAreaView>
-        )}
-      />
+        ))}
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   content: {
-    gap: 20,
+    width: '100%',
+    alignItems: 'center',
+  },
+  grid: {
+    width: '100%',
     flexDirection: 'row',
-    maxHeight: 130,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 16,
   },
   item: {
     alignItems: 'center',
-    gap: 8,
-    minWidth: 100,
+    justifyContent: 'flex-start',
+    gap: 10,
+    paddingVertical: 6,
+    minHeight: 130,
   },
   label: {
     color: COLORS.SpbSky1,
     fontWeight: 'regular',
+    textAlign: 'center',
   },
   texts: {
     alignItems: 'center',
+    gap: 2,
+    width: '100%',
+  },
+  title: {
+    textAlign: 'center',
   },
 });
 

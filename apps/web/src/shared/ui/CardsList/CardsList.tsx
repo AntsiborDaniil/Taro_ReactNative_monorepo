@@ -1,11 +1,13 @@
 import {
-  Dimensions,
   FlatList,
   SafeAreaView,
   StyleSheet,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
+import { useMemo } from 'react';
+import { useTabRailLayout } from 'app/navigation/tabs/TabRailLayoutContext';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { useTranslation } from 'react-i18next';
 import { DeckStyle } from 'shared/api';
@@ -31,11 +33,9 @@ type CardsListProps<T> = {
   onPressLocked?: () => void;
 };
 
-const { width } = Dimensions.get('window');
-
-const cardWidth = (width - 4 * 20) / 3;
-
 const LOCKED_DECK_STYLES = ['settings:deck.style.modern'];
+const GRID_GAP = 14;
+const CARD_ASPECT_RATIO = 9 / 16;
 
 function CardsList<T extends BaseTarotCardProps>({
   cards,
@@ -46,6 +46,8 @@ function CardsList<T extends BaseTarotCardProps>({
   onPressLocked,
 }: CardsListProps<T>) {
   const { t } = useTranslation();
+  const { width: windowWidth } = useWindowDimensions();
+  const { sceneContentWidth } = useTabRailLayout();
 
   const { appearance, handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
@@ -54,14 +56,30 @@ function CardsList<T extends BaseTarotCardProps>({
   const { selectedTab } = useData({ Context: TabsAndRoutesContext });
 
   const navigation = useNativeNavigation();
+  const containerWidth = Math.max(260, Math.min(windowWidth, sceneContentWidth) - 32);
+  const numColumns = useMemo(() => {
+    if (containerWidth >= 1100) return 4;
+    if (containerWidth >= 760) return 3;
+    return 2;
+  }, [containerWidth]);
 
+  const cardWidth = useMemo(
+    () => Math.floor((containerWidth - GRID_GAP * (numColumns - 1)) / numColumns),
+    [containerWidth, numColumns]
+  );
+  const cardHeight = useMemo(
+    () => Math.round(cardWidth / CARD_ASPECT_RATIO),
+    [cardWidth]
+  );
   return (
     <SafeAreaView style={styles.wrapper}>
       <FlatList
+        key={`cards-grid-${numColumns}`}
         data={cards}
-        numColumns={3}
+        numColumns={numColumns}
         scrollEnabled={false}
-        columnWrapperStyle={styles.row}
+        columnWrapperStyle={numColumns > 1 ? styles.row : undefined}
+        contentContainerStyle={styles.listContent}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
           const isLocked = isAllUnlocked
@@ -98,7 +116,15 @@ function CardsList<T extends BaseTarotCardProps>({
               style={styles.item}
             >
               <TarotCard
-                styleCard={styles.card}
+                styleCard={[
+                  styles.card,
+                  {
+                    width: cardWidth,
+                    height: cardHeight,
+                  },
+                ]}
+                width={cardWidth}
+                height={cardHeight}
                 isLocked={isLocked}
                 isSelected={
                   hasSelectStatus &&
@@ -132,19 +158,25 @@ const styles = StyleSheet.create({
   wrapper: {
     marginBottom: 32,
   },
+  listContent: {
+    gap: 16,
+  },
   item: {
-    width: cardWidth,
-    gap: 4,
+    gap: 10,
+    alignItems: 'center',
+    flex: 1,
   },
   textWrapper: {
-    height: 30,
+    minHeight: 56,
+    width: '100%',
+    alignItems: 'center',
   },
 
   text: {
     textAlign: 'center',
   },
   row: {
-    marginTop: 16,
+    gap: GRID_GAP,
     justifyContent: 'space-between',
   },
 });
