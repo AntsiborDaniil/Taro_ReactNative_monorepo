@@ -22,7 +22,7 @@ import {
 } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction } from 'shared/types';
-import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
+import { Button, NoContent, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { CardDescription } from './CardDescription';
 import { SpreadCardsChoice } from './SpreadCardsChoice';
@@ -94,7 +94,15 @@ function SpreadDescriptionChoice() {
   }, []);
 
   if (!spread) {
-    return null;
+    return (
+      <ScreenLayout>
+        <Header title="" />
+        <NoContent
+          title={t('core:stub.missingData.title')}
+          buttonText={t('core:stub.missingData.button')}
+        />
+      </ScreenLayout>
+    );
   }
 
   if (isSimpleSpread || isSelectingCards) {

@@ -75,5 +75,9 @@
   "nav.tab.library": "Библиотека",
 
   "nav.rail.collapse": "Свернуть боковую панель",
-  "nav.rail.expand": "Развернуть боковую панель"
+  "nav.rail.expand": "Развернуть боковую панель",
+
+  "stub.missingData.title": "Данные не найдены или устарели",
+  "stub.missingData.button": "К раскладам",
+  "stub.emptyResults": "Ничего не найдено"
 }

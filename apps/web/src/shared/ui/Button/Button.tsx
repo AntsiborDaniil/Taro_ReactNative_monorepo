@@ -1,25 +1,41 @@
 import {
+  Platform,
+  Pressable,
   StyleProp,
   StyleSheet,
-  TouchableOpacity,
   ViewStyle,
 } from 'react-native';
-import type { ButtonProps as KittenButtonProps } from '@ui-kitten/components';
+import type { PressableProps } from 'react-native';
 import type { CSSProperties, ReactNode } from 'react';
 import { COLORS } from '../../themes';
 import { Text, TEXT_TAGS } from '../Text';
 
-type TButtonProps = {
+type TButtonProps = Omit<PressableProps, 'style' | 'children'> & {
   children: ReactNode;
   style?: CSSProperties | StyleProp<ViewStyle>;
-} & KittenButtonProps;
+};
 
-function Button({ children, style, ...rest }: TButtonProps) {
+function Button({ children, style, disabled, ...rest }: TButtonProps) {
   return (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      style={[styles.button, rest.disabled ? styles.disabled : null, style]}
+    <Pressable
+      accessibilityRole="button"
+      disabled={disabled}
       {...rest}
+      style={(state) => {
+        const hovered =
+          Platform.OS === 'web' &&
+          (state as { hovered?: boolean }).hovered &&
+          !disabled;
+
+        return [
+          styles.button,
+          disabled ? styles.disabled : null,
+          Platform.OS === 'web' && !disabled ? styles.cursorPointer : null,
+          hovered ? styles.buttonHover : null,
+          state.pressed && !disabled ? styles.buttonPressed : null,
+          style,
+        ];
+      }}
     >
       {typeof children === 'string' ? (
         <Text category={TEXT_TAGS.h3} style={styles.text}>
@@ -28,7 +44,7 @@ function Button({ children, style, ...rest }: TButtonProps) {
       ) : (
         children
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -41,6 +57,20 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  cursorPointer: Platform.select({
+    web: { cursor: 'pointer' } as object,
+    default: {},
+  }),
+  buttonHover: Platform.select({
+    web: {
+      boxShadow: '0 6px 20px rgba(0, 0, 0, 0.28)',
+      filter: 'brightness(1.07)',
+    } as object,
+    default: {},
+  }),
+  buttonPressed: {
+    opacity: 0.92,
   },
   disabled: {
     opacity: 0.3,

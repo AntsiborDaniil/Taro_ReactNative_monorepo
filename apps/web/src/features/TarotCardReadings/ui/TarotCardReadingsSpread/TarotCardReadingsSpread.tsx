@@ -32,7 +32,7 @@ import { ChevronLeftIcon, LeafIcon, ReverseIcon } from 'shared/icons';
 import { moderateScale } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
-import { Button, TarotCard, Text, TEXT_TAGS } from 'shared/ui';
+import { Button, NoContent, TarotCard, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { rateAppAfterFinishedSpreads } from 'shared/utils';
 import { PaidContent } from '../../../paidContent';
@@ -159,7 +159,12 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
   }, [currentIndex]);
 
   if (!spread) {
-    return null;
+    return (
+      <NoContent
+        title={t('core:stub.missingData.title')}
+        buttonText={t('core:stub.missingData.button')}
+      />
+    );
   }
 
   const interpretation =

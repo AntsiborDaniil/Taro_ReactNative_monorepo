@@ -5,3 +5,4 @@ export * from './random';
 export * from './tarotCardReadings';
 export * from './responsive';
 export * from './habits';
+export * from './web';

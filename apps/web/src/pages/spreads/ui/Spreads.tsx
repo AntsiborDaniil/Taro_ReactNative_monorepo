@@ -9,7 +9,7 @@ import { PaidContent } from 'features/paidContent';
 import { DeckStyle } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { getImage } from 'shared/lib';
+import { blurActiveElement, getImage } from 'shared/lib';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
@@ -110,6 +110,7 @@ export default function Spreads() {
                             }
                           );
 
+                          blurActiveElement();
                           await handleVibrationClick?.();
 
                           if (isLocked) {

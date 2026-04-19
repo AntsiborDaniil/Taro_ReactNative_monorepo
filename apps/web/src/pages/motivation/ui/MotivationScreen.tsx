@@ -9,7 +9,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
 import { useData } from 'shared/DataProvider';
-import { Button, ScreenLayout, TarotCard, Text, TEXT_TAGS } from 'shared/ui';
+import { Button, NoContent, ScreenLayout, TarotCard, Text, TEXT_TAGS } from 'shared/ui';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { LikeCard } from 'entities/favorites';
 import { MotivationContext } from 'entities/tarotMotivation';
@@ -27,7 +27,7 @@ const { width } = Dimensions.get('window');
 
 function MoticationScreen(
   props: MoticationScreenScreenProps
-): ReactElement | null {
+): ReactElement {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   const { t } = useTranslation();
@@ -43,7 +43,15 @@ function MoticationScreen(
   const card = selectedMotivation?.cards[0];
 
   if (!card) {
-    return null;
+    return (
+      <ScreenLayout>
+        <Header title="" />
+        <NoContent
+          title={t('core:stub.missingData.title')}
+          buttonText={t('core:stub.missingData.button')}
+        />
+      </ScreenLayout>
+    );
   }
 
   const splittedTitle = t(card.name).split(' ');

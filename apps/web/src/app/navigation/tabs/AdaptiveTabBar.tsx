@@ -15,6 +15,7 @@ import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
 import { BookIcon, CardsIcon, ChevronLeftIcon, ChevronRightIcon, PlanetIcon } from 'shared/icons';
+import { blurActiveElement } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, TabRoute } from 'shared/types';
 import {
@@ -57,6 +58,7 @@ export function AdaptiveTabBar({
 
   const onRailPress = useCallback(
     async (routeName: TabRoute) => {
+      blurActiveElement();
       await handleVibrationClick?.();
       if (routeName === selectedTab) {
         navigation.dispatch(
@@ -95,7 +97,10 @@ export function AdaptiveTabBar({
             <View style={styles.railBrandDot} />
             {onToggleRailCollapsed ? (
               <Pressable
-                onPress={onToggleRailCollapsed}
+                onPress={() => {
+                  blurActiveElement();
+                  onToggleRailCollapsed();
+                }}
                 style={(state) => {
                   const hovered =
                     Platform.OS === 'web' &&

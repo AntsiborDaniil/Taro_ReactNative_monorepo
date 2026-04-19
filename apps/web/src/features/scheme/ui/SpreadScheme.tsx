@@ -1,9 +1,11 @@
-import { ViewStyle } from 'react-native';
+import { StyleSheet, View, ViewStyle } from 'react-native';
 import { SpreadContext } from 'entities/Spread';
+import { useTranslation } from 'react-i18next';
 import { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
 // import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SpreadName } from 'shared/api';
 import { DataProvider, useData } from 'shared/DataProvider';
+import { Text, TEXT_TAGS } from 'shared/ui';
 import { SchemeContext, TSchemeMapping } from '../model';
 import { ChoicePerspective } from './ChoicePerspective';
 import { ChoiceTwoPaths } from './ChoiceTwoPaths';
@@ -46,18 +48,31 @@ function SpreadScheme({
   isChoicePage,
   style,
 }: TSpreadSchemeProps) {
+  const { t } = useTranslation('core');
   const { spread, handleLayoutCard } = useData({ Context: SpreadContext });
 
   // const insets = useSafeAreaInsets();
 
   if (!spread?.id) {
-    return null;
+    return (
+      <View style={styles.stub}>
+        <Text category={TEXT_TAGS.p1} style={styles.stubText}>
+          {t('stub.missingData.title')}
+        </Text>
+      </View>
+    );
   }
 
   const Scheme = SchemeMapping[spread.id];
 
   if (!Scheme) {
-    return null;
+    return (
+      <View style={styles.stub}>
+        <Text category={TEXT_TAGS.p1} style={styles.stubText}>
+          {t('stub.missingData.title')}
+        </Text>
+      </View>
+    );
   }
 
   return (
@@ -96,5 +111,18 @@ function SpreadScheme({
     </DataProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  stub: {
+    minHeight: 120,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  stubText: {
+    textAlign: 'center',
+  },
+});
 
 export default SpreadScheme;

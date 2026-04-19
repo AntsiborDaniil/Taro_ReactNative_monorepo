@@ -8,6 +8,7 @@ import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
 import { BookIcon, CardsIcon, PlanetIcon } from 'shared/icons';
+import { blurActiveElement } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, TabRoute } from 'shared/types';
 import { TarotToast } from 'shared/ui';
@@ -134,7 +135,12 @@ function TarotTabs() {
             railWidth={effectiveRailWidth}
             railCollapsed={railCollapsed}
             onToggleRailCollapsed={
-              isRail ? () => setRailCollapsed((c) => !c) : undefined
+              isRail
+                ? () => {
+                    blurActiveElement();
+                    setRailCollapsed((c) => !c);
+                  }
+                : undefined
             }
             collapseLabel={t('nav.rail.collapse')}
             expandLabel={t('nav.rail.expand')}
@@ -142,6 +148,7 @@ function TarotTabs() {
         )}
         screenListeners={({ navigation }) => ({
           tabPress: async (e) => {
+            blurActiveElement();
             await handleVibrationClick?.();
 
             const tabName = e.target?.split('-')[0];

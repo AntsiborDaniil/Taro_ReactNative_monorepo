@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { PressToUnlock } from 'entities/Spread';
 import { useTranslation } from 'react-i18next';
@@ -24,11 +24,12 @@ function TarotMeanings({
   const { t } = useTranslation();
 
   const content = useMemo(() => {
-    const texts = [];
+    const texts: ReactElement[] = [];
 
     if (interpretation) {
       texts.push(
         <TouchableOpacity
+          key="summary"
           onPress={onPressInterpretation}
           style={styles.textContainer}
           activeOpacity={1}
@@ -36,7 +37,7 @@ function TarotMeanings({
           <Text category={TEXT_TAGS.h3} style={styles.textTitle}>
             {t('spread:summaryTitle')}
           </Text>
-          <Text style={styles.commonText} key="advice">
+          <Text style={styles.commonText}>
             {interpretation}
           </Text>
           {hasBlur && <PressToUnlock />}
@@ -46,11 +47,11 @@ function TarotMeanings({
 
     if (card.advice) {
       texts.push(
-        <View style={styles.textContainer}>
+        <View key="advice" style={styles.textContainer}>
           <Text category={TEXT_TAGS.h3} style={styles.textTitle}>
             {t('spread:card.advice.title')}
           </Text>
-          <Text style={styles.commonText} key="advice">
+          <Text style={styles.commonText}>
             {t(card.advice)}
           </Text>
         </View>
@@ -59,18 +60,18 @@ function TarotMeanings({
 
     if (card.description) {
       texts.push(
-        <View style={styles.textContainer}>
+        <View key="description" style={styles.textContainer}>
           <Text category={TEXT_TAGS.h3} style={styles.textTitle}>
             {t('spread:card.description.title')}
           </Text>
-          <Text style={styles.commonText} key="description">
+          <Text style={styles.commonText}>
             {t(card.description)}
           </Text>
         </View>
       );
     }
 
-    return texts.reduce((acc: any[], cur, currentIndex) => {
+    return texts.reduce((acc: ReactElement[], cur, currentIndex) => {
       if (!acc.length) {
         return [cur];
       }
@@ -91,17 +92,17 @@ function TarotMeanings({
   return (
     <View style={styles.content}>
       {card.advice && (
-        <>
+        <View key="meaning-block">
           <View style={styles.adviceContainer}>
             <Text category={TEXT_TAGS.h3} style={styles.adviceText}>
               {t('spread:card.meaning.title')}
             </Text>
-            <Text style={styles.adviceTextCommon} key="meaning">
+            <Text style={styles.adviceTextCommon}>
               {t(card.meaning)}
             </Text>
           </View>
           <SeparatorIcon fill={COLORS.Content} width={40} height={40} />
-        </>
+        </View>
       )}
       {content}
     </View>

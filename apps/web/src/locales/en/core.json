@@ -78,5 +78,9 @@
   "nav.tab.library": "Library",
 
   "nav.rail.collapse": "Collapse sidebar",
-  "nav.rail.expand": "Expand sidebar"
+  "nav.rail.expand": "Expand sidebar",
+
+  "stub.missingData.title": "Data not found or outdated",
+  "stub.missingData.button": "Go to spreads",
+  "stub.emptyResults": "Nothing found"
 }

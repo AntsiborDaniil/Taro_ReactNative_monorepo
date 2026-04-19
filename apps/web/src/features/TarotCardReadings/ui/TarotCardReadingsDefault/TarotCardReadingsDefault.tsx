@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { useTabRailLayout } from 'app/navigation/tabs/TabRailLayoutContext';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
@@ -19,6 +19,11 @@ type TarotCardReadingsDefaultProps = {
 function TarotCardReadingsDefault({ card }: TarotCardReadingsDefaultProps) {
   const { t } = useTranslation();
   const { sceneContentWidth } = useTabRailLayout();
+  const cardWidth = useMemo(
+    () => Math.max(180, Math.min(320, Math.round(sceneContentWidth * 0.36))),
+    [sceneContentWidth]
+  );
+  const cardHeight = useMemo(() => Math.round((cardWidth / 9) * 16), [cardWidth]);
 
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
@@ -51,10 +56,15 @@ function TarotCardReadingsDefault({ card }: TarotCardReadingsDefaultProps) {
         <View style={styles.paddingWrapper}>
           <SafeAreaView style={styles.imageWrapper}>
             <TarotCard
-              styleCard={{
-                width: '50%',
-                maxWidth: 300,
-              }}
+              styleCard={[
+                styles.detailCard,
+                {
+                  width: cardWidth,
+                  height: cardHeight,
+                },
+              ]}
+              width={cardWidth}
+              height={cardHeight}
               cardId={card.id}
               direction={card.direction}
             />
@@ -100,9 +110,12 @@ const styles = StyleSheet.create({
   },
   imageWrapper: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
-    width: '50%',
+    width: '100%',
+  },
+  detailCard: {
+    maxWidth: '100%',
   },
   leftLeaf: {
     transform: [{ scaleX: -1 }],

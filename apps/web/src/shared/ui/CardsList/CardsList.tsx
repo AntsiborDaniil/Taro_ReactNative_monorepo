@@ -15,6 +15,7 @@ import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { NavigationRoute, TabRoute } from 'shared/types';
+import { COLORS } from '../../themes';
 import { Text, TEXT_TAGS } from '../Text';
 import TarotCard from '../TarotCard/TarotCard';
 
@@ -71,6 +72,18 @@ function CardsList<T extends BaseTarotCardProps>({
     () => Math.round(cardWidth / CARD_ASPECT_RATIO),
     [cardWidth]
   );
+  const listEmpty =
+    cards.length === 0 ? (
+      <View style={styles.emptyResults}>
+        <Text
+          category={TEXT_TAGS.p1}
+          style={styles.emptyResultsText}
+        >
+          {t('core:stub.emptyResults')}
+        </Text>
+      </View>
+    ) : null;
+
   return (
     <SafeAreaView style={styles.wrapper}>
       <FlatList
@@ -80,6 +93,7 @@ function CardsList<T extends BaseTarotCardProps>({
         scrollEnabled={false}
         columnWrapperStyle={numColumns > 1 ? styles.row : undefined}
         contentContainerStyle={styles.listContent}
+        ListEmptyComponent={listEmpty}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
           const isLocked = isAllUnlocked
@@ -178,6 +192,18 @@ const styles = StyleSheet.create({
   row: {
     gap: GRID_GAP,
     justifyContent: 'space-between',
+  },
+  emptyResults: {
+    width: '100%',
+    paddingVertical: 28,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyResultsText: {
+    textAlign: 'center',
+    color: COLORS.Content,
+    opacity: 0.82,
   },
 });
 

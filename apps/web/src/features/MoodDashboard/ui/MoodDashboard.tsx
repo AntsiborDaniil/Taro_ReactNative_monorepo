@@ -44,8 +44,9 @@ const DESIGN = {
 function MoodDashboard({
   isWidget,
   horizontalInset = 16,
-}: MoodDashboardProps): ReactElement | null {
+}: MoodDashboardProps): ReactElement {
   const { t } = useTranslation('moodAndEnergy');
+  const { t: tCore } = useTranslation('core');
   const { width: winW } = useWindowDimensions();
   const [visible, setVisible] = useState(false);
   const [hoveredMoodChip, setHoveredMoodChip] = useState<string | null>(null);
@@ -72,7 +73,23 @@ function MoodDashboard({
     setDateMode?.(dateMode);
   };
 
-  if (!displayData?.length) return null;
+  if (!displayData?.length) {
+    return (
+      <View
+        style={[
+          styles.wrapper,
+          isWidget && styles.wrapperWidget,
+          !isWidget && styles.wrapperScreen,
+          { marginHorizontal: horizontalInset },
+          styles.emptyStub,
+        ]}
+      >
+        <Text style={styles.emptyStubText}>
+          {tCore('stub.emptyResults')}
+        </Text>
+      </View>
+    );
+  }
 
   const moodsActionConfig = [
     {
@@ -253,6 +270,20 @@ const styles = StyleSheet.create({
             '0 0 0 1px rgba(132, 176, 230, 0.12), 0 12px 40px rgba(0, 0, 0, 0.35)',
         } as object)
       : {}),
+  },
+  emptyStub: {
+    minHeight: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+  },
+  emptyStubText: {
+    color: COLORS.Content,
+    fontSize: 16,
+    textAlign: 'center',
+    opacity: 0.85,
+    ...(Platform.OS === 'web' ? ({ lineHeight: 22 } as object) : {}),
   },
   moodsActions: {
     flex: 1,

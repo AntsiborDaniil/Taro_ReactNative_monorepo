@@ -14,7 +14,7 @@ import { TarotCardDirection, tarotCards } from 'shared/api';
 import { TNavigationParams } from 'shared/hooks';
 import { getTarotCardReadings } from 'shared/lib';
 import { COLORS } from 'shared/themes';
-import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
+import { NoContent, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 
 export default function DetailCard() {
   const [direction, setDirection] = useState<TarotCardDirection>(
@@ -29,7 +29,15 @@ export default function DetailCard() {
   const card = tarotCards[id ?? ''] || null;
 
   if (!card) {
-    return null;
+    return (
+      <ScreenLayout>
+        <Header title="" />
+        <NoContent
+          title={t('core:stub.missingData.title')}
+          buttonText={t('core:stub.missingData.button')}
+        />
+      </ScreenLayout>
+    );
   }
 
   return (
