@@ -1,0 +1,84 @@
+export declare class UserProfile {
+    private attributes;
+    constructor();
+    apply(attribute: UserProfileUpdate): UserProfile;
+}
+type UserProfileUpdateType = 'BirthDateWithAge' | 'BirthDateWithYear' | 'BirthDateWithMonth' | 'BirthDateWithDay' | 'BirthDateValueReset' | 'BooleanValue' | 'BooleanValueReset' | 'Counter' | 'GenderValue' | 'GenderValueReset' | 'NameValue' | 'NameValueReset' | 'NotificationsEnabledValue' | 'NotificationsEnabledValueReset' | 'NumberValue' | 'NumberValueReset' | 'StringValue' | 'StringValueReset';
+export interface UserProfileUpdate {
+    type: UserProfileUpdateType;
+    key?: string;
+    value?: any;
+    ifUndefined?: boolean;
+    age?: number;
+    year?: number;
+    month?: number;
+    day?: number;
+    delta?: number;
+}
+export type UserProfileGender = 'male' | 'female' | 'other';
+export declare class Attributes {
+    static birthDate(): BirthDateAttribute;
+    static customBoolean(key: string): BooleanAttribute;
+    static customCounter(key: string): CounterAttribute;
+    static customNumber(key: string): NumberAttribute;
+    static customString(key: string): StringAttribute;
+    static gender(): GenderAttribute;
+    static userName(): NameAttribute;
+    static notificationsEnabled(): NotificationsEnabledAttribute;
+}
+export declare class BirthDateAttribute {
+    withAge(age: number): UserProfileUpdate;
+    withAgeIfUndefined(age: number): UserProfileUpdate;
+    withYear(year: number): UserProfileUpdate;
+    withYearIfUndefined(year: number): UserProfileUpdate;
+    withMonth(year: number, month: number): UserProfileUpdate;
+    withMonthIfUndefined(year: number, month: number): UserProfileUpdate;
+    withDay(year: number, month: number, day: number): UserProfileUpdate;
+    withDayIfUndefined(year: number, month: number, day: number): UserProfileUpdate;
+    withDate(date: Date): UserProfileUpdate;
+    withDateIfUndefined(date: Date): UserProfileUpdate;
+    withValueReset(): UserProfileUpdate;
+}
+export declare class BooleanAttribute {
+    private readonly key;
+    constructor(key: string);
+    withValue(value: boolean): UserProfileUpdate;
+    withValueIfUndefined(value: boolean): UserProfileUpdate;
+    withValueReset(): UserProfileUpdate;
+}
+export declare class CounterAttribute {
+    private readonly key;
+    constructor(key: string);
+    withDelta(delta: number): UserProfileUpdate;
+}
+export declare class GenderAttribute {
+    withValue(gender: UserProfileGender): UserProfileUpdate;
+    withValueIfUndefined(gender: UserProfileGender): UserProfileUpdate;
+    withValueReset(): UserProfileUpdate;
+}
+export declare class NameAttribute {
+    withValue(value: string): UserProfileUpdate;
+    withValueIfUndefined(value: string): UserProfileUpdate;
+    withValueReset(): UserProfileUpdate;
+}
+export declare class NotificationsEnabledAttribute {
+    withValue(value: boolean): UserProfileUpdate;
+    withValueIfUndefined(value: boolean): UserProfileUpdate;
+    withValueReset(): UserProfileUpdate;
+}
+export declare class NumberAttribute {
+    private readonly key;
+    constructor(key: string);
+    withValue(value: number): UserProfileUpdate;
+    withValueIfUndefined(value: number): UserProfileUpdate;
+    withValueReset(): UserProfileUpdate;
+}
+export declare class StringAttribute {
+    private readonly key;
+    constructor(key: string);
+    withValue(value: string): UserProfileUpdate;
+    withValueIfUndefined(value: string): UserProfileUpdate;
+    withValueReset(): UserProfileUpdate;
+}
+export {};
+//# sourceMappingURL=userProfile.d.ts.map

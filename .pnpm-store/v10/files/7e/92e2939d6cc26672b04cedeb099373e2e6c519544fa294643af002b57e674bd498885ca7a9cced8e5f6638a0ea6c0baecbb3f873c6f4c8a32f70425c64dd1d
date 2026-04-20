@@ -1,0 +1,48 @@
+import { normalizeECommerceCartItem, normalizeECommerceOrder, normalizeECommerceProduct, normalizeECommerceReferrer, normalizeECommerceScreen } from './utils';
+export class ECommerce {
+  static showScreenEvent(screen) {
+    return {
+      ecommerceEvent: 'showSceenEvent',
+      ecommerceScreen: normalizeECommerceScreen(screen)
+    };
+  }
+  static showProductCardEvent(product, screen) {
+    return {
+      ecommerceEvent: 'showProductCardEvent',
+      ecommerceScreen: normalizeECommerceScreen(screen),
+      product: normalizeECommerceProduct(product)
+    };
+  }
+  static showProductDetailsEvent(product, referrer) {
+    return {
+      ecommerceEvent: 'showProductDetailsEvent',
+      product: normalizeECommerceProduct(product),
+      referrer: normalizeECommerceReferrer(referrer)
+    };
+  }
+  static addCartItemEvent(item) {
+    return {
+      ecommerceEvent: 'addCartItemEvent',
+      cartItem: normalizeECommerceCartItem(item)
+    };
+  }
+  static removeCartItemEvent(item) {
+    return {
+      ecommerceEvent: 'removeCartItemEvent',
+      cartItem: normalizeECommerceCartItem(item)
+    };
+  }
+  static beginCheckoutEvent(order) {
+    return {
+      ecommerceEvent: 'beginCheckoutEvent',
+      order: normalizeECommerceOrder(order)
+    };
+  }
+  static purchaseEvent(order) {
+    return {
+      ecommerceEvent: 'purchaseEvent',
+      order: normalizeECommerceOrder(order)
+    };
+  }
+}
+//# sourceMappingURL=ecommerce.js.map

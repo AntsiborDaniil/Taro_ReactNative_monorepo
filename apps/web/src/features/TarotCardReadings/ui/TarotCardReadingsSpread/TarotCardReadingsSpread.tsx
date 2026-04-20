@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   InteractionManager,
+  Pressable,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
@@ -13,11 +14,6 @@ import { PressToUnlock, SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
 import { LoremIpsum } from 'lorem-ipsum';
 import { useTranslation } from 'react-i18next';
-import {
-  GestureHandlerRootView,
-  GestureType,
-  ScrollView,
-} from 'react-native-gesture-handler';
 import { useSharedValue } from 'react-native-reanimated';
 import Carousel, {
   ICarouselInstance,
@@ -67,7 +63,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   const carouselRef = useRef<ICarouselInstance>(null);
-  const flatListRef = useRef<GestureType | undefined>(undefined);
   const navigation = useNativeNavigation();
 
   const viewNextCard = async () => {
@@ -83,6 +78,9 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
   };
 
   const { spread, handleGetAIInterpretation } = useData({
+    Context: SpreadContext,
+  });
+  const { handleResetDaySuggest } = useData({
     Context: SpreadContext,
   });
 
@@ -112,10 +110,12 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
     });
   };
 
-  const onPressPagination = (index: number) => {
-    carouselRef.current?.scrollTo({
-      count: index - progress.value,
-      animated: true,
+  const handleResetDayCard = async () => {
+    await handleVibrationClick?.();
+    await handleResetDaySuggest?.();
+
+    navigation.navigate(TabRoute.MainTab, {
+      screen: NavigationRoute.DayAdvice,
     });
   };
 
@@ -167,6 +167,23 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
     );
   }
 
+  if (
+    spread.id === SpreadName.Simple_DaySuggest &&
+    !spread.selectedCards?.length
+  ) {
+    return (
+      <NoContent
+        title={t('core:dailyCard.empty.title')}
+        buttonText={t('core:dailyCard.empty.button')}
+        onPress={() =>
+          navigation.navigate(TabRoute.MainTab, {
+            screen: NavigationRoute.DayAdvice,
+          })
+        }
+      />
+    );
+  }
+
   const interpretation =
     spread.interpretation ||
     new LoremIpsum({
@@ -187,7 +204,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
     : [];
 
   return (
-    <GestureHandlerRootView style={styles.gestureRoot}>
+    <View style={styles.gestureRoot}>
       {spread.category !== SpreadsCategory.Simple && (
         <Pagination.Basic
           progress={progress}
@@ -209,7 +226,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
             paddingBottom: 16,
           }}
           horizontal
-          onPress={onPressPagination}
         />
       )}
       <Carousel
@@ -218,12 +234,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
         onProgressChange={progress}
         vertical={false}
         loop={false}
-        onConfigurePanGesture={(gesture) => {
-          'worklet';
-          gesture.activeOffsetX([-10, 10]);
-          gesture.activeOffsetY([-1000, 1000]);
-          gesture.simultaneousWithExternalGesture(flatListRef);
-        }}
         width={carouselWidth}
         renderItem={({ index }) => {
           const card = spread?.selectedCards?.[index - (hasSummary ? 1 : 0)];
@@ -245,16 +255,15 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                       <SpreadScheme hasRotation={false} isChoicePage />
                     </View>
                     <View style={styles.paddingWrapper}>
-                      <TouchableOpacity
+                      <Pressable
                         style={styles.summaryContainer}
                         onPress={handlePressToUnlock}
-                        activeOpacity={1}
                       >
                         <Text style={styles.summaryText} key="meaning">
                           {interpretation ?? ''}
                         </Text>
                         {!spread?.interpretation && <PressToUnlock />}
-                      </TouchableOpacity>
+                      </Pressable>
 
                       {!!spread?.cardsOrder?.length && (
                         <View style={styles.buttons}>
@@ -330,25 +339,45 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                     )}
 
                     <SafeAreaView style={styles.navigationContainer}>
-                      <ChevronLeftIcon
-                        width={navArrowSize}
-                        height={navArrowSize}
-                        style={styles.chevron}
-                        strokeOpacity={isFirstCard ? 0 : 1}
-                        onPress={isFirstCard ? undefined : viewPrevCard}
-                      />
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('core:button.prev')}
+                        disabled={isFirstCard}
+                        onPress={viewPrevCard}
+                        style={[
+                          styles.navArrowButton,
+                          isFirstCard && styles.navArrowButtonDisabled,
+                        ]}
+                      >
+                        <ChevronLeftIcon
+                          width={navArrowSize}
+                          height={navArrowSize}
+                          style={styles.chevron}
+                          strokeOpacity={isFirstCard ? 0 : 1}
+                        />
+                      </Pressable>
                       <TarotCard
                         cardId={card?.id}
                         direction={card.direction}
                         styleCard={[styles.readingCard, { width: readingCardWidth }]}
                       />
-                      <ChevronLeftIcon
-                        width={navArrowSize}
-                        height={navArrowSize}
-                        style={styles.rightChevron}
-                        strokeOpacity={isLastCard ? 0 : 1}
-                        onPress={isLastCard ? undefined : viewNextCard}
-                      />
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('core:button.next')}
+                        disabled={isLastCard}
+                        onPress={viewNextCard}
+                        style={[
+                          styles.navArrowButton,
+                          isLastCard && styles.navArrowButtonDisabled,
+                        ]}
+                      >
+                        <ChevronLeftIcon
+                          width={navArrowSize}
+                          height={navArrowSize}
+                          style={styles.rightChevron}
+                          strokeOpacity={isLastCard ? 0 : 1}
+                        />
+                      </Pressable>
                     </SafeAreaView>
                     {spread?.id === SpreadName.Simple_YesNo && (
                       <Text category={TEXT_TAGS.h2} style={styles.title}>
@@ -430,7 +459,12 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                     )}
 
                     {isLastCard && (
-                      <View>
+                      <View style={styles.lastActions}>
+                        {spread?.id === SpreadName.Simple_DaySuggest && (
+                          <Button style={styles.resetDayButton} onPress={handleResetDayCard}>
+                            {t('core:button.resetDayCard')}
+                          </Button>
+                        )}
                         <Button style={styles.doneButton} onPress={handleDone}>
                           {t('core:finish')}
                         </Button>
@@ -443,7 +477,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
           );
         }}
       />
-    </GestureHandlerRootView>
+    </View>
   );
 }
 
@@ -499,6 +533,14 @@ const styles = StyleSheet.create({
   doneButton: {
     color: COLORS.Background,
   },
+  lastActions: {
+    gap: 12,
+  },
+  resetDayButton: {
+    backgroundColor: COLORS.Background2,
+    borderWidth: 1,
+    borderColor: COLORS.Primary,
+  },
   orderMeaning: {
     textAlign: 'center',
   },
@@ -525,6 +567,14 @@ const styles = StyleSheet.create({
   },
   chevron: {
     flexShrink: 0,
+  },
+  navArrowButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 999,
+  },
+  navArrowButtonDisabled: {
+    opacity: 0.6,
   },
   spreadSchemeContainer: {
     paddingHorizontal: 16,

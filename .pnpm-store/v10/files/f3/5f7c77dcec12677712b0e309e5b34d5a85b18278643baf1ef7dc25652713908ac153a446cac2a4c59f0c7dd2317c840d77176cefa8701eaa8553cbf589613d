@@ -1,0 +1,19 @@
+type StackTraceItem = {
+    fileName?: string;
+    className?: string;
+    methodName?: string;
+    line?: string;
+    column?: string;
+};
+export declare class AppMetricaError {
+    message?: string;
+    stackTrace?: Array<StackTraceItem>;
+    errorName?: string;
+    pluginEnvironment?: Record<string, string>;
+    virtualMachineVersion?: string;
+    constructor(errorName?: string, message?: string);
+    static withError(error: Error): AppMetricaError;
+    static withObject(error?: Object): AppMetricaError;
+}
+export {};
+//# sourceMappingURL=error.d.ts.map

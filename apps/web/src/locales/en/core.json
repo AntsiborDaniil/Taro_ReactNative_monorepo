@@ -14,12 +14,15 @@
 
   "button.prev": "Previous",
   "button.next": "Next",
+  "button.resetDayCard": "Reset day card",
 
   "choice.tapToChoice": "Tap to choose a card",
   "choice.scrollCards": "Scroll",
   "choice.completed": "Read interpretation",
 
   "dailyCard.title": "Card of the Day",
+  "dailyCard.empty.title": "Pick your day card first",
+  "dailyCard.empty.button": "Pick day card",
 
   "dayAdvice.title": "Daily Advice",
 
@@ -82,5 +85,8 @@
 
   "stub.missingData.title": "Data not found or outdated",
   "stub.missingData.button": "Go to spreads",
-  "stub.emptyResults": "Nothing found"
+  "stub.emptyResults": "Nothing found",
+  "stub.emptyResultsModal.subtitle": "Change your filters or try again later.",
+  "stub.emptyResultsModal.button": "OK",
+  "stub.emptyResultsModal.closeBackdrop": "Close"
 }

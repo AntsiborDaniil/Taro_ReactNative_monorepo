@@ -1,0 +1,55 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ECommerce = void 0;
+var _utils = require("./utils");
+class ECommerce {
+  static showScreenEvent(screen) {
+    return {
+      ecommerceEvent: 'showSceenEvent',
+      ecommerceScreen: (0, _utils.normalizeECommerceScreen)(screen)
+    };
+  }
+  static showProductCardEvent(product, screen) {
+    return {
+      ecommerceEvent: 'showProductCardEvent',
+      ecommerceScreen: (0, _utils.normalizeECommerceScreen)(screen),
+      product: (0, _utils.normalizeECommerceProduct)(product)
+    };
+  }
+  static showProductDetailsEvent(product, referrer) {
+    return {
+      ecommerceEvent: 'showProductDetailsEvent',
+      product: (0, _utils.normalizeECommerceProduct)(product),
+      referrer: (0, _utils.normalizeECommerceReferrer)(referrer)
+    };
+  }
+  static addCartItemEvent(item) {
+    return {
+      ecommerceEvent: 'addCartItemEvent',
+      cartItem: (0, _utils.normalizeECommerceCartItem)(item)
+    };
+  }
+  static removeCartItemEvent(item) {
+    return {
+      ecommerceEvent: 'removeCartItemEvent',
+      cartItem: (0, _utils.normalizeECommerceCartItem)(item)
+    };
+  }
+  static beginCheckoutEvent(order) {
+    return {
+      ecommerceEvent: 'beginCheckoutEvent',
+      order: (0, _utils.normalizeECommerceOrder)(order)
+    };
+  }
+  static purchaseEvent(order) {
+    return {
+      ecommerceEvent: 'purchaseEvent',
+      order: (0, _utils.normalizeECommerceOrder)(order)
+    };
+  }
+}
+exports.ECommerce = ECommerce;
+//# sourceMappingURL=ecommerce.js.map

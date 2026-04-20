@@ -69,6 +69,7 @@ export type TSpreadHookResult = {
   handlePreSelectTarotCard: () => TTarotCard;
   handleSelectTarotCard: (card?: TTarotCard) => void;
   handleClearSelectedCards: () => void;
+  handleResetDaySuggest: () => Promise<void>;
   handleCopySpreadInterpretation: () => void;
 };
 
@@ -258,6 +259,38 @@ export function useSpread({
     setSelectedCardsIds({});
   };
 
+  const handleResetDaySuggest = async () => {
+    const daysSuggests = await getValueForAsyncDeviceMemoryKey<
+      Record<string, TSpread>
+    >(AsyncMemoryKey.SelectedCardsOfTheDay);
+
+    if (daysSuggests?.[getTodayISO()]) {
+      const nextDaysSuggests = { ...daysSuggests };
+      delete nextDaysSuggests[getTodayISO()];
+
+      await saveAsyncDeviceMemoryKey<Record<string, TSpread>>(
+        AsyncMemoryKey.SelectedCardsOfTheDay,
+        nextDaysSuggests
+      );
+    }
+
+    setSelectedCardsIds({});
+    setPreSelectedTarotCard(null);
+    setQuestion('');
+    setErrors({});
+    setSpread((prevState) => {
+      if (!prevState || prevState.id !== SpreadName.Simple_DaySuggest) {
+        return prevState;
+      }
+
+      return {
+        ...prevState,
+        selectedCards: [],
+        interpretation: '',
+      };
+    });
+  };
+
   const isSpreadCompleted = useMemo(
     () => spread?.selectedCards?.length === spread?.cardsCount,
     [spread?.cardsCount, spread?.selectedCards?.length]
@@ -368,6 +401,7 @@ export function useSpread({
     handleGetAIInterpretation,
     handleSelectTarotCard,
     handleClearSelectedCards,
+    handleResetDaySuggest,
     handlePreSelectTarotCard,
     handleCopySpreadInterpretation,
   };

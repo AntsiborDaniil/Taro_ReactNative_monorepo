@@ -1,13 +1,13 @@
 import React, { memo, useRef } from 'react';
 import {
   ImageSourcePropType,
-  type ImageStyle,
   LayoutChangeEvent,
   Pressable,
   type StyleProp,
   StyleSheet,
   Platform,
   type ViewProps,
+  type ViewStyle,
 } from 'react-native';
 import { SpreadContext } from 'entities/Spread';
 import type { AnimatedProps } from 'react-native-reanimated';
@@ -21,7 +21,7 @@ interface Props extends AnimatedProps<ViewProps> {
   index: number;
   isSelected?: boolean;
   hasImmediateAnimation?: boolean;
-  style?: StyleProp<ImageStyle>;
+  style?: StyleProp<ViewStyle>;
   source?: ImageSourcePropType;
   onAdditionalClick?: () => void;
 }
@@ -58,8 +58,8 @@ function SlideItem({
     flip?.();
 
     setTimeout(
-      () => {
-        handleSelectTarotCard?.(preSelectedTarotCard);
+      async () => {
+        await handleSelectTarotCard?.(preSelectedTarotCard);
 
         onAdditionalClick?.();
 
@@ -119,11 +119,12 @@ function SlideItem({
       accessibilityRole="button"
       // @ts-ignore web-only keyboard event
       onKeyDown={onKeyDown}
+      style={styles.pressable}
     >
-      <Animated.View style={styles.container} {...animatedViewProps}>
+      <Animated.View style={[styles.container, style]} {...animatedViewProps}>
         <Animated.View style={isSelected ? null : styles.overlay} />
         <Animated.Image
-          style={[style, styles.card]}
+          style={styles.card}
           source={getImage(['core', `cardBack`])}
           resizeMode="cover"
         />
@@ -133,8 +134,17 @@ function SlideItem({
 }
 
 const styles = StyleSheet.create({
+  pressable: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   container: {
     position: 'relative',
+    borderRadius: 12,
+    overflow: 'hidden',
+    ...({
+      boxShadow: '0 18px 28px rgba(0,0,0,0.35)',
+    } as object),
   },
   overlay: {
     position: 'absolute',

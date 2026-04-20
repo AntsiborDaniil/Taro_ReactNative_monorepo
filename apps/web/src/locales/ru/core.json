@@ -14,12 +14,15 @@
 
   "button.prev": "Предыдущая",
   "button.next": "Следующая",
+  "button.resetDayCard": "Сбросить карту дня",
 
   "choice.tapToChoice": "Нажми, чтобы выбрать карту",
   "choice.scrollCards": "Листай",
   "choice.completed": "Читать объяснение",
 
   "dailyCard.title": "Карта дня",
+  "dailyCard.empty.title": "Сначала выберите карту дня",
+  "dailyCard.empty.button": "Выбрать карту дня",
 
   "today": "Сегодня",
   "yesterday": "Вчера",
@@ -79,5 +82,8 @@
 
   "stub.missingData.title": "Данные не найдены или устарели",
   "stub.missingData.button": "К раскладам",
-  "stub.emptyResults": "Ничего не найдено"
+  "stub.emptyResults": "Ничего не найдено",
+  "stub.emptyResultsModal.subtitle": "Измените условия или попробуйте позже.",
+  "stub.emptyResultsModal.button": "Понятно",
+  "stub.emptyResultsModal.closeBackdrop": "Закрыть"
 }

@@ -5,7 +5,6 @@ import { GLOBAL_UI_TEXT_PX } from 'shared/themes/typography';
 const MAX_CONTENT_WIDTH = 1280;
 const BASE_W = 375;
 
-/** moderateScale от текущей ширины окна (импорт из lib использует «замороженный» width) */
 function ms(screenW: number, size: number, factor = 0.5) {
   return size + ((screenW / BASE_W) * size - size) * factor;
 }
@@ -32,9 +31,6 @@ export type SpreadsLayout = {
   imageFadeHeight: number;
 };
 
-/**
- * Сетка и отступы страницы раскладов от реальной ширины/высоты окна (resize, планшеты, ультраширокие мониторы).
- */
 export function useSpreadsLayout(): SpreadsLayout {
   const { width: W, height: H } = useWindowDimensions();
 

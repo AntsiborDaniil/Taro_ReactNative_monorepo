@@ -1,0 +1,71 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.AppMetricaError = void 0;
+var _reactNative = require("react-native");
+var _react = _interopRequireDefault(require("react"));
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+const traceRegex = /^\s*at (.*?) ?\((.*?)(?::(\d+))?(?::(\d+))?\)?\s*$/i;
+function parseTraceLine(line) {
+  const parts = traceRegex.exec(line);
+  if (parts === null) {
+    return undefined;
+  }
+  return {
+    fileName: parts[2],
+    methodName: parts[1],
+    column: parts[3],
+    line: parts[4]
+  };
+}
+function getRNVersion() {
+  const versions = _reactNative.Platform.constants.reactNativeVersion;
+  return versions.major + '.' + versions.minor + '.' + versions.patch;
+}
+function getReactVersion() {
+  return _react.default.version;
+}
+function getPluginEnvironment() {
+  return {
+    reactVersion: getReactVersion()
+  };
+}
+function parseStackTrace(stackTrace) {
+  if (stackTrace === undefined) {
+    return undefined;
+  }
+  try {
+    const lines = stackTrace.split('\n');
+    const array = [];
+    lines === null || lines === void 0 || lines.forEach(line => {
+      const item = parseTraceLine(line);
+      if (item !== undefined) {
+        array.push(item);
+      }
+    });
+    return array;
+  } catch (e) {
+    console.log(e);
+    return undefined;
+  }
+}
+class AppMetricaError {
+  constructor(errorName, message) {
+    this.errorName = errorName;
+    this.message = message;
+    this.pluginEnvironment = getPluginEnvironment();
+    this.virtualMachineVersion = getRNVersion();
+  }
+  static withError(error) {
+    const newError = new AppMetricaError(error.name, error.message);
+    newError.stackTrace = parseStackTrace(error.stack);
+    return newError;
+  }
+  static withObject(error) {
+    return new AppMetricaError(undefined, JSON.stringify(error));
+  }
+}
+exports.AppMetricaError = AppMetricaError;
+//# sourceMappingURL=error.js.map

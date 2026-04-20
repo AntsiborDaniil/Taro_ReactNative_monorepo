@@ -47,9 +47,6 @@ export function InputSlider({
       </Text>
       <View style={styles.row}>
         <Slider
-          onResponderGrant={() =>
-            Platform.select({ android: true, ios: false })
-          }
           style={styles.slider}
           minimumValue={minValue}
           maximumValue={maxValue}

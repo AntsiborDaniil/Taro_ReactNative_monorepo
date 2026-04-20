@@ -1,0 +1,72 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.normalizeAdRevenue = normalizeAdRevenue;
+exports.normalizeECommerceCartItem = normalizeECommerceCartItem;
+exports.normalizeECommerceOrder = normalizeECommerceOrder;
+exports.normalizeECommerceProduct = normalizeECommerceProduct;
+exports.normalizeECommerceReferrer = normalizeECommerceReferrer;
+exports.normalizeECommerceScreen = normalizeECommerceScreen;
+function convertMap(map) {
+  return map !== undefined ? Object.fromEntries(map) : undefined;
+}
+function normalizeECommerceOrder(order) {
+  const newOrder = {
+    ...order
+  };
+  if (order.payload instanceof Map) {
+    newOrder.payload = convertMap(order.payload);
+  }
+  newOrder.products = order.products.map(normalizeECommerceCartItem);
+  return newOrder;
+}
+function normalizeECommerceCartItem(item) {
+  const newItem = {
+    ...item
+  };
+  newItem.product = normalizeECommerceProduct(item.product);
+  newItem.referrer = normalizeECommerceReferrer(item.referrer);
+  return newItem;
+}
+function normalizeECommerceProduct(product) {
+  const newProduct = {
+    ...product
+  };
+  if (product.payload instanceof Map) {
+    newProduct.payload = convertMap(product.payload);
+  }
+  return newProduct;
+}
+function normalizeECommerceReferrer(referrer) {
+  if (referrer === undefined) {
+    return undefined;
+  }
+  const newReferrer = {
+    ...referrer
+  };
+  if (referrer.screen != undefined) {
+    newReferrer.screen = normalizeECommerceScreen(referrer.screen);
+  }
+  return newReferrer;
+}
+function normalizeECommerceScreen(screen) {
+  const newScreen = {
+    ...screen
+  };
+  if (screen.payload instanceof Map) {
+    newScreen.payload = convertMap(screen.payload);
+  }
+  return newScreen;
+}
+function normalizeAdRevenue(adRevenue) {
+  const newAdRevenue = {
+    ...adRevenue
+  };
+  if (adRevenue.payload instanceof Map) {
+    newAdRevenue.payload = convertMap(adRevenue.payload);
+  }
+  return newAdRevenue;
+}
+//# sourceMappingURL=utils.js.map

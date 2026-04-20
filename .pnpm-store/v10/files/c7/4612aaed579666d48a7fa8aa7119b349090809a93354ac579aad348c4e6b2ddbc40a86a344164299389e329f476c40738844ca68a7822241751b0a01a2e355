@@ -1,0 +1,62 @@
+import { NativeModules, Platform } from 'react-native';
+import { AppMetricaError } from './error';
+const LINKING_ERROR = `The package '@appmetrica/react-native-analytics' doesn't seem to be linked. Make sure: \n\n` + Platform.select({
+  ios: "- You have run 'pod install'\n",
+  default: ''
+}) + '- You rebuilt the app after installing the package\n' + '- You are not using Expo Go\n';
+const ReporterNativeModule = NativeModules.AppMetricaReporter ? NativeModules.AppMetricaReporter : new Proxy({}, {
+  get() {
+    throw new Error(LINKING_ERROR);
+  }
+});
+export class Reporter {
+  constructor(apiKey) {
+    this.apiKey = apiKey;
+  }
+  reportError(identifier, message, _reason) {
+    ReporterNativeModule.reportError(this.apiKey, identifier, message, _reason instanceof Error ? AppMetricaError.withError(_reason) : AppMetricaError.withObject(_reason));
+  }
+  reportErrorWithoutIdentifier(message, error) {
+    ReporterNativeModule.reportErrorWithoutIdentifier(this.apiKey, message, AppMetricaError.withError(error));
+  }
+  reportUnhandledException(error) {
+    ReporterNativeModule.reportUnhandledException(this.apiKey, AppMetricaError.withError(error));
+  }
+  reportEvent(eventName, attributes) {
+    ReporterNativeModule.reportEvent(this.apiKey, eventName, attributes);
+  }
+  pauseSession() {
+    ReporterNativeModule.pauseSession(this.apiKey);
+  }
+  resumeSession() {
+    ReporterNativeModule.resumeSession(this.apiKey);
+  }
+  sendEventsBuffer() {
+    ReporterNativeModule.sendEventsBuffer(this.apiKey);
+  }
+  clearAppEnvironment() {
+    ReporterNativeModule.clearAppEnvironment(this.apiKey);
+  }
+  putAppEnvironmentValue(key, value) {
+    ReporterNativeModule.putAppEnvironmentValue(this.apiKey, key, value);
+  }
+  setUserProfileID(userProfileID) {
+    ReporterNativeModule.setUserProfileID(this.apiKey, userProfileID);
+  }
+  setDataSendingEnabled(enabled) {
+    ReporterNativeModule.setDataSendingEnabled(this.apiKey, enabled);
+  }
+  reportUserProfile(profile) {
+    ReporterNativeModule.reportUserProfile(this.apiKey, profile);
+  }
+  reportAdRevenue(adRevenue) {
+    ReporterNativeModule.reportAdRevenue(this.apiKey, adRevenue);
+  }
+  reportECommerce(ecommerce) {
+    ReporterNativeModule.reportECommerce(this.apiKey, ecommerce);
+  }
+  reportRevenue(revenue) {
+    ReporterNativeModule.reportRevenue(this.apiKey, revenue);
+  }
+}
+//# sourceMappingURL=reporter.js.map

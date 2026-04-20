@@ -6,6 +6,11 @@ import { ApplicationProvider } from '@ui-kitten/components';
 import { useFonts } from 'expo-font';
 import { TarotErrorBoundary } from 'pages/errorBoundary';
 import ErrorBoundary from 'react-native-error-boundary';
+import { LogBox, Platform } from 'react-native';
+import {
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
+} from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { COLORS, myTheme } from 'shared/themes';
 import RootNavigator from './src/app/navigation/RootNavigator';
@@ -22,6 +27,37 @@ import { DataProvider } from './src/shared/DataProvider';
 import { AIAnimation } from './src/shared/ui';
 
 import './i18n';
+
+if (__DEV__ && Platform.OS === 'web') {
+  const originalConsoleError = console.error.bind(console);
+  console.error = (...args: any[]) => {
+    const firstArg = args[0];
+    const message = typeof firstArg === 'string' ? firstArg : '';
+
+    if (message.includes('Accessing element.ref was removed in React 19')) {
+      return;
+    }
+
+    originalConsoleError(...args);
+  };
+
+  LogBox.ignoreLogs([
+    'Accessing element.ref was removed in React 19',
+    'props.pointerEvents is deprecated. Use style.pointerEvents',
+    'Unknown event handler property `onStartShouldSetResponder`',
+    'Unknown event handler property `onResponderTerminationRequest`',
+    'Unknown event handler property `onResponderGrant`',
+    'Unknown event handler property `onResponderMove`',
+    'Unknown event handler property `onResponderRelease`',
+    'Unknown event handler property `onResponderTerminate`',
+    'TouchableMixin is deprecated. Please use Pressable.',
+  ]);
+
+  configureReanimatedLogger({
+    level: ReanimatedLogLevel.error,
+    strict: false,
+  });
+}
 
 export default function RootLayout() {
   const [isAppLoading, setIsAppLoading] = useState<boolean>(true);

@@ -1,0 +1,9 @@
+import type { ECommerceCartItem, ECommerceOrder, ECommerceProduct, ECommerceReferrer, ECommerceScreen } from './ecommerce';
+import type { AdRevenue } from './revenue';
+export declare function normalizeECommerceOrder(order: ECommerceOrder): ECommerceOrder;
+export declare function normalizeECommerceCartItem(item: ECommerceCartItem): ECommerceCartItem;
+export declare function normalizeECommerceProduct(product: ECommerceProduct): ECommerceProduct;
+export declare function normalizeECommerceReferrer(referrer?: ECommerceReferrer): ECommerceReferrer | undefined;
+export declare function normalizeECommerceScreen(screen: ECommerceScreen): ECommerceScreen;
+export declare function normalizeAdRevenue(adRevenue: AdRevenue): AdRevenue;
+//# sourceMappingURL=utils.d.ts.map

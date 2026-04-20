@@ -1,19 +1,23 @@
-import { useRef } from 'react';
-import { Dimensions, StyleSheet, View, ViewStyle } from 'react-native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  ViewStyle,
+  useWindowDimensions,
+} from 'react-native';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { useTranslation } from 'react-i18next';
 import { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
-import { Extrapolation, interpolate } from 'react-native-reanimated';
 import type { ICarouselInstance } from 'react-native-reanimated-carousel';
 import Carousel from 'react-native-reanimated-carousel';
-import { SLIDER_CARD_SIZE } from 'shared/constants';
 import { useData } from 'shared/DataProvider';
-import { ArrowsIcon, ChoiceTriangle } from 'shared/icons';
+import { ChevronLeftIcon } from 'shared/icons';
+import { COLORS } from 'shared/themes';
 import { Text } from 'shared/ui';
-import { withAnchorPoint } from '../lib';
 import SlideItem from './SlideItem';
 
-const defaultDataWith6Colors = [...Array(11)];
+const CAROUSEL_DATA = [...Array(7)];
 
 type TCoverFlowCardCarouselProps = {
   hasImmediateAnimation?: boolean;
@@ -21,130 +25,147 @@ type TCoverFlowCardCarouselProps = {
   onAdditionalClick?: () => void;
 };
 
-const screen = Dimensions.get('screen');
-
 function CoverFlowCardCarousel({
   style,
   hasImmediateAnimation,
   onAdditionalClick,
 }: TCoverFlowCardCarouselProps) {
   const { t } = useTranslation();
+  const { width: screenWidth } = useWindowDimensions();
 
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
   });
 
   const ref = useRef<ICarouselInstance>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const prevIndexRef = useRef(0);
 
-  const baseOptions = {
-    vertical: false,
-    ...SLIDER_CARD_SIZE,
-  } as const;
+  const handleSnapToItem = useCallback(
+    async (index: number) => {
+      if (index === prevIndexRef.current) return;
+      prevIndexRef.current = index;
+      setCurrentIndex(index);
+      await handleVibrationClick?.();
+    },
+    [handleVibrationClick]
+  );
 
-  let prevIndex = 0;
+  const carouselWidth = useMemo(
+    () => Math.max(200, Math.min(360, screenWidth - 56)),
+    [screenWidth]
+  );
+  const cardWidth = useMemo(
+    () => Math.round(Math.max(150, carouselWidth * 0.62)),
+    [carouselWidth]
+  );
+  const cardHeight = useMemo(() => Math.round(cardWidth * 1.8), [cardWidth]);
 
   const handleAdditionalClick = () => {
-    ref.current?.next();
-
     onAdditionalClick?.();
+  };
+
+  const handlePrev = async () => {
+    await handleVibrationClick?.();
+    ref.current?.prev();
+  };
+
+  const handleNext = async () => {
+    await handleVibrationClick?.();
+    ref.current?.next();
   };
 
   return (
     <View style={[styles.container, style]}>
-      <View style={styles.text}>
-        <Text>{t('core:choice.tapToChoice')}</Text>
-        <ChoiceTriangle />
-      </View>
       <Carousel
-        {...baseOptions}
         ref={ref}
-        data={defaultDataWith6Colors}
+        data={CAROUSEL_DATA}
         loop={true}
-        style={styles.carousel}
-        customAnimation={(value: number) => {
-          'worklet';
-          const size = baseOptions.width;
-          const scale = interpolate(
-            value,
-            [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5],
-            [0.65, 0.7, 0.75, 0.8, 0.9, 1, 0.9, 0.8, 0.75, 0.7, 0.65],
-            Extrapolation.CLAMP
-          );
-
-          const translate = interpolate(
-            value,
-            [-2, -1, 0, 1, 2],
-            [-size * 1.45, -size * 0.85, 0, size * 0.85, size * 1.45]
-          );
-
-          const transform = {
-            transform: [
-              { scale },
-              {
-                translateX: translate,
-              },
-              {
-                rotateY: `${interpolate(value, [-1, 0, 1], [30, 0, -30], Extrapolation.CLAMP)}deg`,
-              },
-            ],
-          };
-
-          return {
-            ...withAnchorPoint(
-              transform,
-              { x: 0.5, y: 0.5 },
-              {
-                width: baseOptions.width,
-                height: baseOptions.height,
-              }
-            ),
-          };
-        }}
-        pagingEnabled={false}
-        snapEnabled={false}
-        onProgressChange={async () => {
-          const currentIndex = ref.current?.getCurrentIndex();
-
-          if (!currentIndex || currentIndex === prevIndex) {
-            return;
-          }
-
-          await handleVibrationClick?.();
-
-          prevIndex = currentIndex;
-        }}
+        width={carouselWidth}
+        height={cardHeight + 12}
+        style={[styles.carousel, { width: carouselWidth }]}
+        pagingEnabled={true}
+        snapEnabled={true}
+        onSnapToItem={handleSnapToItem}
         renderItem={({ index }) => {
           return (
             <SlideItem
               index={index}
               hasImmediateAnimation={hasImmediateAnimation}
-              isSelected={index === ref.current?.getCurrentIndex()}
+              isSelected={index === currentIndex}
               onAdditionalClick={handleAdditionalClick}
+              style={{ width: cardWidth, height: cardHeight }}
             />
           );
         }}
       />
-      <View style={styles.text}>
-        <Text>{t('core:choice.scrollCards')}</Text>
-        <ArrowsIcon />
+      <View style={styles.controls}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('core:button.prev')}
+          onPress={handlePrev}
+          style={styles.controlButton}
+        >
+          <ChevronLeftIcon width={28} height={28} />
+        </Pressable>
+        <Text style={styles.counter}>{`${currentIndex + 1} / ${CAROUSEL_DATA.length}`}</Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('core:button.next')}
+          onPress={handleNext}
+          style={styles.controlButton}
+        >
+          <ChevronLeftIcon width={28} height={28} style={styles.rightChevron} />
+        </Pressable>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { width: screen.width },
-  text: {
-    width: screen.width,
+  container: {
+    width: '100%',
+    maxWidth: 380,
     alignItems: 'center',
     gap: 8,
   },
   carousel: {
-    width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 16,
+    marginBottom: 6,
+  },
+  controls: {
+    width: '100%',
+    maxWidth: 320,
+    paddingHorizontal: 4,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  controlButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.28)',
+    backgroundColor: 'rgba(12,19,33,0.62)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...({
+      cursor: 'pointer',
+      boxShadow: '0 8px 16px rgba(0,0,0,0.32)',
+    } as object),
+  },
+  counter: {
+    color: 'rgba(255,255,255,0.9)',
+    letterSpacing: 0.4,
+    fontSize: 16,
+    minWidth: 68,
+    textAlign: 'center',
+  },
+  rightChevron: {
+    transform: [{ rotate: '180deg' }],
   },
 });
 

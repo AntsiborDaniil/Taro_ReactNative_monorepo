@@ -72,7 +72,6 @@ function DayAdvice() {
         accessibilityLabel={t('core:dailyCard.title')}
       >
         <LinearGradient
-          pointerEvents="none"
           colors={[
             'rgba(0, 0, 0, 0)',
             'rgba(0, 0, 0, 0)',
@@ -84,7 +83,7 @@ function DayAdvice() {
             'rgba(30, 30, 30, 0.41)',
             '#1E1E1E',
           ]}
-          style={styles.gradient}
+          style={[styles.gradient, styles.gradientNoPointerEvents]}
         />
         <View style={styles.wrapper}>
           <Text
@@ -124,6 +123,9 @@ const styles = StyleSheet.create({
   gradient: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 0,
+  },
+  gradientNoPointerEvents: {
+    pointerEvents: 'none',
   },
   wrapper: {
     marginTop: 'auto',

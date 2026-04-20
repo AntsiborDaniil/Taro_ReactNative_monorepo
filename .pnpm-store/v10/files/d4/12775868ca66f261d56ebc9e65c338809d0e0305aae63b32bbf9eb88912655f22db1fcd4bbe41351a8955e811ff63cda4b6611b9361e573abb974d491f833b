@@ -1,0 +1,63 @@
+import { Platform } from 'react-native';
+import React from 'react';
+const traceRegex = /^\s*at (.*?) ?\((.*?)(?::(\d+))?(?::(\d+))?\)?\s*$/i;
+function parseTraceLine(line) {
+  const parts = traceRegex.exec(line);
+  if (parts === null) {
+    return undefined;
+  }
+  return {
+    fileName: parts[2],
+    methodName: parts[1],
+    column: parts[3],
+    line: parts[4]
+  };
+}
+function getRNVersion() {
+  const versions = Platform.constants.reactNativeVersion;
+  return versions.major + '.' + versions.minor + '.' + versions.patch;
+}
+function getReactVersion() {
+  return React.version;
+}
+function getPluginEnvironment() {
+  return {
+    reactVersion: getReactVersion()
+  };
+}
+function parseStackTrace(stackTrace) {
+  if (stackTrace === undefined) {
+    return undefined;
+  }
+  try {
+    const lines = stackTrace.split('\n');
+    const array = [];
+    lines === null || lines === void 0 || lines.forEach(line => {
+      const item = parseTraceLine(line);
+      if (item !== undefined) {
+        array.push(item);
+      }
+    });
+    return array;
+  } catch (e) {
+    console.log(e);
+    return undefined;
+  }
+}
+export class AppMetricaError {
+  constructor(errorName, message) {
+    this.errorName = errorName;
+    this.message = message;
+    this.pluginEnvironment = getPluginEnvironment();
+    this.virtualMachineVersion = getRNVersion();
+  }
+  static withError(error) {
+    const newError = new AppMetricaError(error.name, error.message);
+    newError.stackTrace = parseStackTrace(error.stack);
+    return newError;
+  }
+  static withObject(error) {
+    return new AppMetricaError(undefined, JSON.stringify(error));
+  }
+}
+//# sourceMappingURL=error.js.map

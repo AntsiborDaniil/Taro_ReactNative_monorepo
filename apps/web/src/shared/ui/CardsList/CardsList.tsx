@@ -6,7 +6,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTabRailLayout } from 'app/navigation/tabs/TabRailLayoutContext';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,8 @@ import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { NavigationRoute, TabRoute } from 'shared/types';
 import { COLORS } from '../../themes';
+import { EmptyResultsModal } from '../EmptyResultsModal';
+import { ModalsContext } from '../ModalsProvider';
 import { Text, TEXT_TAGS } from '../Text';
 import TarotCard from '../TarotCard/TarotCard';
 
@@ -56,7 +58,25 @@ function CardsList<T extends BaseTarotCardProps>({
 
   const { selectedTab } = useData({ Context: TabsAndRoutesContext });
 
+  const { showModal } = useData({ Context: ModalsContext });
+  const emptyModalShownRef = useRef(false);
+
   const navigation = useNativeNavigation();
+
+  useEffect(() => {
+    if (cards.length > 0) {
+      emptyModalShownRef.current = false;
+
+      return;
+    }
+
+    if (emptyModalShownRef.current || !showModal) {
+      return;
+    }
+
+    emptyModalShownRef.current = true;
+    showModal(<EmptyResultsModal />);
+  }, [cards.length, showModal]);
   const containerWidth = Math.max(260, Math.min(windowWidth, sceneContentWidth) - 32);
   const numColumns = useMemo(() => {
     if (containerWidth >= 1100) return 4;

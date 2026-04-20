@@ -1,0 +1,11 @@
+export let AdType = /*#__PURE__*/function (AdType) {
+  AdType["NATIVE"] = "native";
+  AdType["BANNER"] = "banner";
+  AdType["MREC"] = "mrec";
+  AdType["INTERSTITIAL"] = "interstitial";
+  AdType["REWARDED"] = "rewarded";
+  AdType["APP_OPEN"] = "app_open";
+  AdType["OTHER"] = "other";
+  return AdType;
+}({});
+//# sourceMappingURL=revenue.js.map

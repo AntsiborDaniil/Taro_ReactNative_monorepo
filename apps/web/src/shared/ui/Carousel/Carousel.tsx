@@ -43,11 +43,12 @@ const Carousel = forwardRef(
       </View>
     );
 
-    const handleScroll = useCallback(() => {
+    const handleScroll = useCallback(
       Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
         useNativeDriver: false,
-      });
-    }, [scrollX]);
+      }),
+      [scrollX]
+    );
 
     return (
       <GestureHandlerRootView style={styles.container}>

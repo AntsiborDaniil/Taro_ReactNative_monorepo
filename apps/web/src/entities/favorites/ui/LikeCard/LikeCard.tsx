@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
@@ -29,12 +29,8 @@ function LikeCard({ card, onAdditionalPress }: LikeCardProps) {
 
   return (
     <View style={styles.wrapper}>
-      <HeartIcon
-        width={40}
-        height={40}
-        stroke={favoritesCardsIds?.[card.id] ? COLORS.Love : COLORS.SpbSky1}
-        strokeWidth={favoritesCardsIds?.[card.id] ? 1 : 1.8}
-        fill={favoritesCardsIds?.[card.id] ? COLORS.Love : COLORS.Background}
+      <Pressable
+        accessibilityRole="button"
         onPress={async () => {
           await onAdditionalPress?.();
 
@@ -57,7 +53,15 @@ function LikeCard({ card, onAdditionalPress }: LikeCardProps) {
             like: !favoritesCardsIds?.[card.id],
           });
         }}
-      />
+      >
+        <HeartIcon
+          width={40}
+          height={40}
+          stroke={favoritesCardsIds?.[card.id] ? COLORS.Love : COLORS.SpbSky1}
+          strokeWidth={favoritesCardsIds?.[card.id] ? 1 : 1.8}
+          fill={favoritesCardsIds?.[card.id] ? COLORS.Love : COLORS.Background}
+        />
+      </Pressable>
     </View>
   );
 }

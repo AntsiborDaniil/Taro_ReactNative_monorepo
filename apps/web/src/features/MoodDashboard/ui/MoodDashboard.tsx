@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useRef, useState } from 'react';
 import {
   Platform,
   Pressable,
@@ -14,7 +14,8 @@ import { MoodDisplayMode } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { getMonthDate, getMonthDayDate, getWeekDate } from 'shared/lib';
 import { COLORS } from 'shared/themes';
-import { AreaGraphs, Text } from 'shared/ui';
+import { AreaGraphs, EmptyResultsModal, Text } from 'shared/ui';
+import { ModalsContext } from 'shared/ui/ModalsProvider';
 import MoodProgress from './MoodProgress';
 
 export type MoodDashboardProps = {
@@ -52,11 +53,34 @@ function MoodDashboard({
   const [hoveredMoodChip, setHoveredMoodChip] = useState<string | null>(null);
   const [dateHovered, setDateHovered] = useState(false);
 
-  const { displayData, updateTodayMood, setDateMode, dateMode } = useData({
-    Context: MoodAndEnergyContext,
-  });
+  const { displayData, moodDataReady, updateTodayMood, setDateMode, dateMode } =
+    useData({
+      Context: MoodAndEnergyContext,
+    });
+
+  const { showModal } = useData({ Context: ModalsContext });
+  const emptyModalShownRef = useRef(false);
 
   const [usedMoods, setUsedMoods] = useState(['stress', 'energy', 'mood']);
+
+  useEffect(() => {
+    if (!moodDataReady) {
+      return;
+    }
+
+    if (displayData?.length) {
+      emptyModalShownRef.current = false;
+
+      return;
+    }
+
+    if (emptyModalShownRef.current || !showModal) {
+      return;
+    }
+
+    emptyModalShownRef.current = true;
+    showModal(<EmptyResultsModal />);
+  }, [displayData?.length, moodDataReady, showModal]);
 
   const switchMood = (moodName: string) => {
     setUsedMoods((prevState) => {

@@ -14,6 +14,8 @@ type TUpdateMoodItemParameters = {
 };
 
 export type TMoodAndEnergyHookResult = {
+  /** После первой попытки загрузки из памяти (успех или ошибка) */
+  moodDataReady: boolean;
   displayData: TMemoryMoodItem[];
   dateMode: MoodDisplayMode;
   todayProgress: {
@@ -32,6 +34,7 @@ const STORAGE_KEY: AsyncMemoryKey = AsyncMemoryKey.MoodData;
 
 export function useMoodAndEnergy(): TMoodAndEnergyHookResult {
   const [allMoods, setAllMoods] = useState<TMemoryMoodItem[]>([]);
+  const [moodDataReady, setMoodDataReady] = useState(false);
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
   const [dateMode, setDateMode] = useState<MoodDisplayMode>(
     MoodDisplayMode.Week
@@ -46,6 +49,8 @@ export function useMoodAndEnergy(): TMoodAndEnergyHookResult {
         setAllMoods(rangeValues);
       } catch (e) {
         console.log(e);
+      } finally {
+        setMoodDataReady(true);
       }
     })();
   }, []);
@@ -141,6 +146,7 @@ export function useMoodAndEnergy(): TMoodAndEnergyHookResult {
   }, []);
 
   return {
+    moodDataReady,
     displayData: displayMoods[dateMode],
     updateTodayMood,
     setDateMode,

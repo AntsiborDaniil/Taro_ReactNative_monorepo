@@ -11,7 +11,6 @@ module.exports = wrapWithReanimatedMetroConfig(
 
     const { transformer, resolver } = config;
 
-    // SVG transformer (same as native)
     config.transformer = {
       ...transformer,
       babelTransformerPath: require.resolve(
@@ -23,7 +22,6 @@ module.exports = wrapWithReanimatedMetroConfig(
       ...resolver,
       assetExts: resolver.assetExts.filter((ext) => ext !== 'svg'),
       sourceExts: [...resolver.sourceExts, 'svg'],
-      // Монорепо: единая резолюция и слежение за пакетами/симлинками.
       nodeModulesPaths: [
         path.resolve(__dirname, 'node_modules'),
         path.resolve(workspaceRoot, 'node_modules'),
@@ -32,7 +30,6 @@ module.exports = wrapWithReanimatedMetroConfig(
     };
     config.watchFolders = [workspaceRoot];
 
-    // Map native-only packages to web stubs
     config.resolver.extraNodeModules = {
       ...config.resolver.extraNodeModules,
       'expo-secure-store': path.resolve(
@@ -128,8 +125,9 @@ module.exports = wrapWithReanimatedMetroConfig(
         'src/shared/stubs/victory.tsx'
       ),
     };
+    config.resolver.blockList =
+      /(?:^|\/)(?:\.pnpm-store|\.turbo|\.git)(?:\/|$)/;
 
-    // axios browser build (same as native)
     config.resolver.resolveRequest = function packageExportsResolver(
       context,
       moduleImport,

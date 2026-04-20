@@ -2,6 +2,7 @@ export * from './AIAnimation';
 export * from './Button';
 export * from './CardsList';
 export * from './Carousel';
+export * from './EmptyResultsModal';
 export * from './Graphs';
 export * from './Input';
 export * from './NoContent';
