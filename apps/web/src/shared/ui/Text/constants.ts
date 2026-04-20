@@ -5,6 +5,7 @@ export const TEXT_TAGS = {
   h4: 'h4',
   h5: 'h5',
   p1: 'p1',
+  p2: 'p2',
   label: 'label',
 } as const;
 

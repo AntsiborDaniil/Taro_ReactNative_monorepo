@@ -1,7 +1,6 @@
 import {
   Pressable,
   StyleSheet,
-  TouchableOpacity,
   View,
   useWindowDimensions,
 } from 'react-native';
@@ -51,8 +50,8 @@ function HabitWidget() {
     }, 0) ?? 0;
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.7}
+    <Pressable
+      accessibilityRole="button"
       onPress={async () => {
         await handleVibrationClick?.();
 
@@ -60,6 +59,11 @@ function HabitWidget() {
           screen: NavigationRoute.HabitsWeek,
         });
       }}
+      style={(state) => [
+        styles.rootPressable,
+        (state as { hovered?: boolean }).hovered && styles.rootHovered,
+        state.pressed && styles.rootPressed,
+      ]}
     >
       <View style={styles.container}>
         <View style={styles.topRow}>
@@ -114,15 +118,32 @@ function HabitWidget() {
           </Pressable>
         </View>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    borderWidth: 2,
+  rootPressable: {
     borderRadius: 16,
-    borderColor: COLORS.Primary600,
+    ...({
+      cursor: 'pointer',
+      transition: 'transform 0.15s ease, box-shadow 0.2s ease',
+    } as object),
+  },
+  rootHovered: {
+    transform: [{ translateY: -2 }],
+    ...({
+      boxShadow: '0 10px 24px rgba(0,0,0,0.22)',
+    } as object),
+  },
+  rootPressed: {
+    opacity: 0.95,
+  },
+  container: {
+    borderWidth: 1,
+    borderRadius: 16,
+    borderColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: 'rgba(255,255,255,0.02)',
     paddingHorizontal: 16,
     paddingVertical: 14,
     gap: 12,
@@ -161,8 +182,9 @@ const styles = StyleSheet.create({
   description: {
     width: '100%',
     textAlign: 'center',
-    lineHeight: 22,
-    fontSize: 22,
+    lineHeight: 24,
+    fontSize: 20,
+    color: 'rgba(255,255,255,0.74)',
     paddingHorizontal: 4,
     marginTop: 10,
   },

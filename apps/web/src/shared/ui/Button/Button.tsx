@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
   text: {
-    color: COLORS.Background,
+    color: COLORS.Content,
   },
 });
 

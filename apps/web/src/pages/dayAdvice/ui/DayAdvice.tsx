@@ -17,14 +17,18 @@ function DayAdvice() {
   const { t } = useTranslation();
   const { bottom } = useSafeAreaInsets();
   const { navigate } = useNativeNavigation();
-  const { spread, handleResetDaySuggest } = useData({ Context: SpreadContext });
+  const { spread, dayCardHydrated, handleResetDaySuggest } = useData({
+    Context: SpreadContext,
+  });
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
   });
 
   const date = getCurrentDate();
   const hasSelectedDayCard =
-    spread?.id === SpreadName.Simple_DaySuggest && !!spread.selectedCards?.length;
+    dayCardHydrated &&
+    spread?.id === SpreadName.Simple_DaySuggest &&
+    !!spread.selectedCards?.length;
 
   const handleNavigate = () => {
     navigate(TabRoute.MainTab, {

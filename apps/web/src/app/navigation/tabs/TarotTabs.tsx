@@ -5,8 +5,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { CommonActions } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
+import { SpreadContext, useSpread } from 'entities/Spread';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
-import { useData } from 'shared/DataProvider';
+import { DataProvider, useData } from 'shared/DataProvider';
 import { BookIcon, CardsIcon, PlanetIcon } from 'shared/icons';
 import { blurActiveElement } from 'shared/lib';
 import { COLORS } from 'shared/themes';
@@ -76,15 +77,19 @@ function TarotTabs() {
 
   const { selectedTab } = useData({ Context: TabsAndRoutesContext });
 
-  const { handleVibrationClick } = useData({
+  const { spread, handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
+  });
+  const spreadContextData = useSpread({
+    hasReversedCards: spread?.hasReversed,
   });
 
   const iconSize = isLabeled ? 36 : 40;
 
   return (
-    <TabRailLayoutProvider value={railLayoutValue}>
-      <Tabs.Navigator
+    <DataProvider Context={SpreadContext} value={spreadContextData}>
+      <TabRailLayoutProvider value={railLayoutValue}>
+        <Tabs.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarPosition: isRail ? 'left' : 'bottom',
@@ -167,25 +172,26 @@ function TarotTabs() {
             });
           },
         })}
-      >
-        <Tabs.Screen
-          name={TabRoute.MainTab}
-          component={MainScreen}
-          options={{ title: t('nav.tab.main') }}
-        />
-        <Tabs.Screen
-          name={TabRoute.SpreadsTab}
-          component={SpreadsScreen}
-          options={{ title: t('nav.tab.spreads') }}
-        />
-        <Tabs.Screen
-          name={TabRoute.LibraryTab}
-          component={LibraryScreen}
-          options={{ title: t('nav.tab.library') }}
-        />
-      </Tabs.Navigator>
-      <TarotToast />
-    </TabRailLayoutProvider>
+        >
+          <Tabs.Screen
+            name={TabRoute.MainTab}
+            component={MainScreen}
+            options={{ title: t('nav.tab.main') }}
+          />
+          <Tabs.Screen
+            name={TabRoute.SpreadsTab}
+            component={SpreadsScreen}
+            options={{ title: t('nav.tab.spreads') }}
+          />
+          <Tabs.Screen
+            name={TabRoute.LibraryTab}
+            component={LibraryScreen}
+            options={{ title: t('nav.tab.library') }}
+          />
+        </Tabs.Navigator>
+        <TarotToast />
+      </TabRailLayoutProvider>
+    </DataProvider>
   );
 }
 

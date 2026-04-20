@@ -21,6 +21,7 @@ const DEFAULT_TEXT_WEIGHTS = {
   [TEXT_TAGS.h4]: TEXT_WEIGHT.regular,
   [TEXT_TAGS.h5]: TEXT_WEIGHT.regular,
   [TEXT_TAGS.p1]: TEXT_WEIGHT.regular,
+  [TEXT_TAGS.p2]: TEXT_WEIGHT.regular,
   [TEXT_TAGS.label]: TEXT_WEIGHT.regular,
 };
 

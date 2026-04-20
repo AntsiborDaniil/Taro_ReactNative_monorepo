@@ -123,14 +123,14 @@ function SpreadCatalogCard({
 
       <View style={[styles.textBlock, textBlockStyle]}>
         <Text
-          category={TEXT_TAGS.label}
+          category={TEXT_TAGS.h4}
           style={[styles.title, titleStyle]}
           numberOfLines={2}
         >
           {title}
         </Text>
         <Text
-          category={TEXT_TAGS.label}
+          category={TEXT_TAGS.p2}
           style={[
             styles.hint,
             hintStyle,
@@ -220,11 +220,13 @@ const styles = StyleSheet.create({
   },
   title: {
     letterSpacing: 0.12,
+    color: COLORS.Content,
   },
   hint: {
     marginBottom: 8,
-    color: getColorOpacity(COLORS.Content, 68),
+    color: getColorOpacity(COLORS.Content, 72),
     letterSpacing: 0.15,
+    lineHeight: 22,
   },
   hintActive: {
     color: COLORS.Primary,

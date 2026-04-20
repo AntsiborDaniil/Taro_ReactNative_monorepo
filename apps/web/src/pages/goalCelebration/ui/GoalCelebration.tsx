@@ -89,7 +89,11 @@ function GoalCelebration() {
           <Text category={TEXT_TAGS.label} style={styles.badge}>
             {t('achievements:badge')}
           </Text>
-          <Text category={TEXT_TAGS.p1} style={styles.description}>
+          <Text
+            category={TEXT_TAGS.p2}
+            weight={TEXT_WEIGHT.regular}
+            style={styles.description}
+          >
             {t('achievements:description')}
           </Text>
           <Button style={styles.button} onPress={handleClaimReward}>
@@ -153,7 +157,8 @@ const styles = StyleSheet.create({
   },
   description: {
     textAlign: 'center',
-    color: COLORS.SpbSky1,
+    color: 'rgba(255,255,255,0.74)',
+    lineHeight: 24,
   },
   button: {
     alignSelf: 'stretch',

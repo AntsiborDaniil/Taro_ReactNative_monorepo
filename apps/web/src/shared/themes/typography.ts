@@ -15,6 +15,7 @@ export const TYPOGRAPHY_CATEGORY_PX: Record<keyof typeof TEXT_TAGS, number> = {
   [TEXT_TAGS.h4]: GLOBAL_UI_TEXT_PX,
   [TEXT_TAGS.h5]: GLOBAL_UI_TEXT_PX,
   [TEXT_TAGS.p1]: GLOBAL_UI_TEXT_PX,
+  [TEXT_TAGS.p2]: GLOBAL_UI_TEXT_PX - 2,
   [TEXT_TAGS.label]: GLOBAL_UI_TEXT_PX,
 };
 

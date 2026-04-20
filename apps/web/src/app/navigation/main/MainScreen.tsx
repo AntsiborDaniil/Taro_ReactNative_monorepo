@@ -2,9 +2,7 @@ import { useEffect } from 'react';
 import { useNavigationState } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AffirmationsContext, useAffirmations } from 'entities/affirmations';
-import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { MoodAndEnergyContext, useMoodAndEnergy } from 'entities/moodAndEnergy';
-import { SpreadContext, useSpread } from 'entities/Spread';
 import { Affirmations } from 'pages/affirmations';
 import { CardsDictionary } from 'pages/cardsDictionary';
 import { DayAdvice } from 'pages/dayAdvice';
@@ -28,12 +26,6 @@ import { NavigationRoute, TabRoute } from 'shared/types';
 const MainStack = createNativeStackNavigator();
 
 function MainScreen() {
-  const { spread } = useData({ Context: ApplicationConfigContext });
-
-  const spreadContextData = useSpread({
-    hasReversedCards: spread?.hasReversed,
-  });
-
   const affrmationsContextData = useAffirmations();
 
   const moodAndEnergyContextData = useMoodAndEnergy();
@@ -52,11 +44,6 @@ function MainScreen() {
   return (
     <MultiProvider
       providers={[
-        <DataProvider
-          Context={SpreadContext}
-          value={spreadContextData}
-          key="ApplicationConfigContext"
-        />,
         <DataProvider
           Context={AffirmationsContext}
           value={affrmationsContextData}

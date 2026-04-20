@@ -20,7 +20,9 @@ const Input = ({ label, baseInputProps = {} }: InputProps) => {
       <TextInput
         {...baseInputProps}
         style={[styles.input, baseInputProps?.style]}
-        placeholderTextColor={COLORS.SpbSky1}
+        placeholderTextColor={
+          baseInputProps.placeholderTextColor ?? 'rgba(255,255,255,0.46)'
+        }
       />
     </View>
   );
@@ -31,12 +33,15 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderStyle: 'solid',
-    fontFamily: 'Montserrat',
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     borderColor: COLORS.SpbSky1,
     borderRadius: 12,
     color: COLORS.Content,
-    fontSize: 22,
+    fontSize: 14,
     paddingHorizontal: 12,
+    paddingVertical: 10,
+    minHeight: 52,
     backgroundColor: COLORS.Background2,
   },
 });

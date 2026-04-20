@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -20,16 +20,16 @@ import {
   DIRECTIONS,
   getRandomElementFromArray,
   getTarotCardReadings,
-  getTodayISO,
   isTablet,
 } from 'shared/lib';
-import {
-  AsyncMemoryKey,
-  getValueForAsyncDeviceMemoryKey,
-  saveAsyncDeviceMemoryKey,
-} from 'shared/lib/deviceMemory';
+import { AsyncMemoryKey } from 'shared/lib/deviceMemory';
 import { AnalyticAction } from 'shared/types';
 import { UserContext } from '../../user';
+import {
+  clearTodayDayCard,
+  getTodayDayCard,
+  saveTodayDayCard,
+} from './dayCardStore';
 import {
   getAIRequestBody,
   getRandomCardId,
@@ -49,6 +49,7 @@ type TSpreadHookParameters = {
 
 export type TSpreadHookResult = {
   spread: TSpread | null;
+  dayCardHydrated: boolean;
   question: string;
   interpretationLoading: boolean;
   errors: TErrors;
@@ -92,6 +93,7 @@ export function useSpread({
     Record<string, boolean>
   >({});
   const [errors, setErrors] = useState<TErrors>({});
+  const [dayCardHydrated, setDayCardHydrated] = useState<boolean>(false);
 
   const { setIsFullScreenLoading } = useData({ Context: LoadingsContext });
 
@@ -100,6 +102,48 @@ export function useSpread({
   const { t, i18n } = useTranslation();
 
   const insets = useSafeAreaInsets();
+
+  const getSelectedCardsIdsMap = (
+    selectedCards: Array<{ id?: string }> = []
+  ): Record<string, boolean> =>
+    selectedCards.reduce<Record<string, boolean>>((acc, card) => {
+      if (!card?.id) {
+        return acc;
+      }
+      acc[card.id] = true;
+      return acc;
+    }, {});
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const hydrateDayCard = async () => {
+      try {
+        const hydratedDaySpread = await getTodayDayCard();
+
+        if (!isMounted || !hydratedDaySpread) {
+          return;
+        }
+
+        setSpread((prevState) => prevState ?? hydratedDaySpread);
+        setSelectedCardsIds((prevState) =>
+          Object.keys(prevState).length
+            ? prevState
+            : getSelectedCardsIdsMap(hydratedDaySpread.selectedCards)
+        );
+      } finally {
+        if (isMounted) {
+          setDayCardHydrated(true);
+        }
+      }
+    };
+
+    hydrateDayCard();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const checkErrors = (): TErrors => {
     const newErrors: TErrors = {};
@@ -122,14 +166,13 @@ export function useSpread({
     setQuestion('');
 
     if (value.id === SpreadName.Simple_DaySuggest) {
-      const daysSuggests = await getValueForAsyncDeviceMemoryKey<
-        Record<string, TSpread>
-      >(AsyncMemoryKey.SelectedCardsOfTheDay);
-
-      const prevSelectedDaySuggest = daysSuggests?.[getTodayISO()];
+      const prevSelectedDaySuggest = await getTodayDayCard();
 
       if (prevSelectedDaySuggest) {
-        setSpread?.(prevSelectedDaySuggest);
+        setSpread(prevSelectedDaySuggest);
+        setSelectedCardsIds(
+          getSelectedCardsIdsMap(prevSelectedDaySuggest.selectedCards)
+        );
 
         return { shouldRedirectToSpreadReading: true };
       }
@@ -220,6 +263,8 @@ export function useSpread({
     const freeUseOfAI = await AsyncStorage.getItem(AsyncMemoryKey.FreeUseOfAI);
 
     if (newSelectedCards.length === spread.cardsCount) {
+      let completedSpread = newSpread;
+
       if (
         spread?.id === SpreadName.Simple_DaySuggest ||
         (!isPractitioner && freeUseOfAI)
@@ -228,22 +273,13 @@ export function useSpread({
 
         if (savedSpread) {
           setSpread(savedSpread);
+          completedSpread = savedSpread;
         }
       }
       setQuestion('');
 
       if (spread?.id === SpreadName.Simple_DaySuggest) {
-        const daysSuggests = await getValueForAsyncDeviceMemoryKey<
-          Record<string, TSpread>
-        >(AsyncMemoryKey.SelectedCardsOfTheDay);
-
-        await saveAsyncDeviceMemoryKey<Record<string, TSpread>>(
-          AsyncMemoryKey.SelectedCardsOfTheDay,
-          {
-            ...(daysSuggests || {}),
-            [getTodayISO()]: newSpread,
-          }
-        );
+        await saveTodayDayCard(completedSpread);
       }
     }
   };
@@ -260,19 +296,7 @@ export function useSpread({
   };
 
   const handleResetDaySuggest = async () => {
-    const daysSuggests = await getValueForAsyncDeviceMemoryKey<
-      Record<string, TSpread>
-    >(AsyncMemoryKey.SelectedCardsOfTheDay);
-
-    if (daysSuggests?.[getTodayISO()]) {
-      const nextDaysSuggests = { ...daysSuggests };
-      delete nextDaysSuggests[getTodayISO()];
-
-      await saveAsyncDeviceMemoryKey<Record<string, TSpread>>(
-        AsyncMemoryKey.SelectedCardsOfTheDay,
-        nextDaysSuggests
-      );
-    }
+    await clearTodayDayCard();
 
     setSelectedCardsIds({});
     setPreSelectedTarotCard(null);
@@ -385,6 +409,7 @@ export function useSpread({
   };
 
   return {
+    dayCardHydrated,
     question,
     interpretationLoading,
     selectedCardsIds,

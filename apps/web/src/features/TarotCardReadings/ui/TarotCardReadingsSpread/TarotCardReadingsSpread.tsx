@@ -77,7 +77,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
     carouselRef.current?.prev();
   };
 
-  const { spread, handleGetAIInterpretation } = useData({
+  const { spread, dayCardHydrated, handleGetAIInterpretation } = useData({
     Context: SpreadContext,
   });
   const { handleResetDaySuggest } = useData({
@@ -158,6 +158,10 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
     }
   }, [currentIndex]);
 
+  if (!spread && !dayCardHydrated) {
+    return <View style={styles.gestureRoot} />;
+  }
+
   if (!spread) {
     return (
       <NoContent
@@ -169,6 +173,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
 
   if (
     spread.id === SpreadName.Simple_DaySuggest &&
+    dayCardHydrated &&
     !spread.selectedCards?.length
   ) {
     return (
