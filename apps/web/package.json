@@ -5,6 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "dev": "expo start --web",
+    "dev:client": "expo start --dev-client",
     "build": "expo export --platform web",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
@@ -22,6 +23,7 @@
     "babel-plugin-module-resolver": "^5.0.2",
     "expo": "^53.0.9",
     "expo-constants": "^17.1.6",
+    "expo-dev-client": "~5.1.8",
     "expo-font": "~13.3.1",
     "expo-linear-gradient": "~14.1.4",
     "expo-linking": "~7.1.4",

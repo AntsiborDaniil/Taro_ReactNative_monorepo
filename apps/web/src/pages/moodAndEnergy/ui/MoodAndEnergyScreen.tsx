@@ -1,11 +1,15 @@
 import { ReactElement } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { MoodAndEnergyContext } from 'entities/moodAndEnergy';
+import { MotivationContext } from 'entities/tarotMotivation';
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
-import { MoodDashboard, MoodProgress } from 'features/MoodDashboard';
+import { MoodDashboard } from 'features/MoodDashboard';
 import { useData } from 'shared/DataProvider';
-import { ScreenLayout } from 'shared/ui';
+import { useNativeNavigation } from 'shared/hooks';
+import { MotivationKey } from 'shared/api';
+import { NavigationRoute, TabRoute } from 'shared/types';
+import { Button, ScreenLayout } from 'shared/ui';
 import { InputSlider } from 'shared/ui/Slider/Slider';
 
 import { useMoodAndEnergyLayout } from './useMoodAndEnergyLayout';
@@ -19,6 +23,28 @@ function MoodAndEnergyScreen(_props: MoodAndEnergyScreenProps): ReactElement {
   const { displayData, updateTodayMood } = useData({
     Context: MoodAndEnergyContext,
   });
+  const { todayProgress } = useData({
+    Context: MoodAndEnergyContext,
+  });
+  const { handleSelectMotivationItem } = useData({
+    Context: MotivationContext,
+  });
+  const navigation = useNativeNavigation();
+
+  const handleCreateMoodCard = async () => {
+    if (!todayProgress || todayProgress.percents !== 100) {
+      return;
+    }
+
+    await handleSelectMotivationItem?.({
+      key: MotivationKey.MoodAndEnergy,
+      parameters: todayProgress.values,
+    });
+
+    navigation.navigate(TabRoute.MainTab, {
+      screen: NavigationRoute.MotivationCard,
+    });
+  };
 
   return (
     <ScreenLayout>
@@ -81,7 +107,13 @@ function MoodAndEnergyScreen(_props: MoodAndEnergyScreenProps): ReactElement {
               </View>
             </View>
           )}
-          <MoodProgress />
+          <Button
+            style={styles.createCardButton}
+            disabled={todayProgress?.percents !== 100}
+            onPress={handleCreateMoodCard}
+          >
+            {t('progress.createCard')}
+          </Button>
         </View>
       </ScrollView>
     </ScreenLayout>
@@ -105,6 +137,9 @@ const styles = StyleSheet.create({
   sliders: {
     paddingTop: 8,
     paddingBottom: 4,
+  },
+  createCardButton: {
+    marginTop: 4,
   },
 });
 

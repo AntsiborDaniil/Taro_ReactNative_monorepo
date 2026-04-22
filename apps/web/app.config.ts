@@ -12,6 +12,7 @@ export default {
       bundler: 'metro',
     },
     plugins: [
+      'expo-dev-client',
       'expo-font',
       'expo-localization',
       [

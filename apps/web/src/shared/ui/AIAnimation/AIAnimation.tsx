@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { impactAsync, ImpactFeedbackStyle } from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import Video from 'react-native-video';
 import { getImage } from 'shared/lib';
+import { COLORS } from 'shared/themes';
 import { LoadingsContext } from '../../contexts/Loadings';
 import { useData } from '../../DataProvider';
-import { Text } from '../Text';
+import { Text, TEXT_TAGS, TEXT_WEIGHT } from '../Text';
 
 const LOADING_TEXTS = [
   'loading.1',
@@ -101,16 +102,30 @@ function AIAnimation({ hasVibration }: { hasVibration?: boolean }) {
           hideSettingButton: true,
         }}
       />
-      <View style={styles.textContainer}>
-        <BlurView
-          style={styles.blur}
-          blurType="dark"
-          blurAmount={1}
-          reducedTransparencyFallbackColor="white"
-        />
-        <Text
-          style={styles.text}
-        >{`${t('loading.default')}.\n${t(selectedLoadingText)}...`}</Text>
+      <View style={styles.overlay}>
+        <View style={[styles.glow, styles.glowLeft]} />
+        <View style={[styles.glow, styles.glowRight]} />
+        <View style={styles.card}>
+          <BlurView
+            style={styles.blur}
+            blurType="dark"
+            blurAmount={8}
+            reducedTransparencyFallbackColor="#131B2A"
+          />
+          <View style={styles.cardInner}>
+            <ActivityIndicator size="small" color={COLORS.Primary} />
+            <Text
+              category={TEXT_TAGS.h4}
+              weight={TEXT_WEIGHT.medium}
+              style={styles.title}
+            >
+              {`${t('loading.default')}...`}
+            </Text>
+            <Text category={TEXT_TAGS.p2} style={styles.subtitle}>
+              {t(selectedLoadingText)}
+            </Text>
+          </View>
+        </View>
       </View>
     </>
   );
@@ -121,17 +136,31 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  textContainer: {
+  overlay: {
     position: 'absolute',
-    backgroundColor: 'transparent',
-    overflow: 'hidden',
-    padding: 4,
-    bottom: 48,
+    top: 0,
     left: 0,
-    width: '100%',
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(9, 14, 24, 0.38)',
   },
-  text: {
-    textAlign: 'center',
+  card: {
+    width: '100%',
+    maxWidth: 520,
+    borderRadius: 18,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.16)',
+    ...(
+      Platform.OS === 'web'
+        ? ({
+            boxShadow: '0 18px 42px rgba(0,0,0,0.34)',
+          } as object)
+        : {}
+    ),
   },
   blur: {
     position: 'absolute',
@@ -139,6 +168,40 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 0,
     right: 0,
+  },
+  cardInner: {
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(16, 22, 34, 0.55)',
+  },
+  title: {
+    color: COLORS.Content,
+    textAlign: 'center',
+  },
+  subtitle: {
+    color: 'rgba(255,255,255,0.78)',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  glow: {
+    position: 'absolute',
+    width: 180,
+    height: 180,
+    borderRadius: 999,
+    opacity: 0.2,
+    pointerEvents: 'none',
+  },
+  glowLeft: {
+    backgroundColor: '#4BA6E8',
+    left: '20%',
+    top: '38%',
+  },
+  glowRight: {
+    backgroundColor: '#8F6AE5',
+    right: '18%',
+    bottom: '30%',
   },
 });
 

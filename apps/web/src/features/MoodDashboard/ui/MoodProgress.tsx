@@ -13,9 +13,13 @@ import { MotivationKey } from '../../../shared/api';
 
 export type MoodProgressProps = {
   isWidget?: boolean;
+  interactive?: boolean;
 };
 
-function MoodProgress({ isWidget }: MoodProgressProps): ReactElement {
+function MoodProgress({
+  isWidget,
+  interactive = true,
+}: MoodProgressProps): ReactElement {
   const { todayProgress } = useData({
     Context: MoodAndEnergyContext,
   });
@@ -34,10 +38,19 @@ function MoodProgress({ isWidget }: MoodProgressProps): ReactElement {
         styles.wrapper,
         !isWidget && styles.wrapperScreen,
         isWidget && styles.wrapperWidget,
-        hovered && !isWidget && Platform.OS === 'web' && styles.wrapperScreenHover,
-        pressed && styles.wrapperPressed,
+        interactive &&
+          hovered &&
+          !isWidget &&
+          Platform.OS === 'web' &&
+          styles.wrapperScreenHover,
+        interactive && pressed && styles.wrapperPressed,
+        !interactive && styles.wrapperStatic,
       ]}
       onPress={async () => {
+        if (!interactive) {
+          return;
+        }
+
         if (isWidget) {
           navigation.navigate(TabRoute.MainTab, {
             screen: NavigationRoute.MoodAndEnergy,
@@ -145,6 +158,16 @@ const styles = StyleSheet.create({
   wrapperPressed: {
     opacity: 0.94,
     transform: [{ scale: 0.995 }],
+  },
+  wrapperStatic: {
+    opacity: 0.98,
+    ...(
+      Platform.OS === 'web'
+        ? ({
+            cursor: 'default',
+          } as object)
+        : {}
+    ),
   },
   wrapperWidget: {
     width: '100%',

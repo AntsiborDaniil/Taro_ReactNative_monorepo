@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import {
   Canvas,
   LinearGradient,
@@ -19,7 +19,7 @@ import {
 } from 'react-native-reanimated';
 import { useData } from 'shared/DataProvider';
 import { COLORS } from 'shared/themes';
-import { Text, TEXT_TAGS } from 'shared/ui';
+import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 
 const DEFAULT_PALETTE = ['#667eea', '#764ba2'];
 
@@ -183,12 +183,23 @@ function MeditativeVisualizer({ visualSize }: MeditativeVisualizerProps) {
     selectedAffirmation?.colors?.texts?.base ?? COLORS.Content;
   const coloredTextColor =
     selectedAffirmation?.colors?.texts?.colored ?? COLORS.Primary;
+  const affirmationFontSize = Math.round(Math.max(18, Math.min(34, SIZE * 0.055)));
+  const affirmationLineHeight = Math.round(affirmationFontSize * 1.26);
 
   return (
-    <View
+    <Pressable
       key={SIZE}
-      style={[styles.container, { width: SIZE, height: SIZE }]}
+      accessibilityRole="button"
+      accessibilityLabel={t('affirmations:focusArea')}
+      style={(state) => [
+        styles.container,
+        { width: SIZE, height: SIZE },
+        (state as { hovered?: boolean }).hovered && styles.containerHovered,
+        state.pressed && styles.containerPressed,
+      ]}
     >
+      <View style={[styles.glow, styles.glowLeft]} />
+      <View style={[styles.glow, styles.glowRight]} />
       <Canvas style={{ width: SIZE, height: SIZE + 100 }}>
         <Path path={path3} opacity={0.2}>
           <LinearGradient
@@ -218,17 +229,23 @@ function MeditativeVisualizer({ visualSize }: MeditativeVisualizerProps) {
         {selectedTexts?.text?.map((item, index) => (
           <Text
             category={TEXT_TAGS.h3}
-            style={{
-              color: item.colored ? coloredTextColor : baseTextColor,
-              textAlign: 'center',
-            }}
+            weight={item.colored ? TEXT_WEIGHT.semibold : TEXT_WEIGHT.medium}
+            style={[
+              styles.affirmationText,
+              {
+                fontSize: affirmationFontSize,
+                lineHeight: affirmationLineHeight,
+                color: item.colored ? coloredTextColor : baseTextColor,
+              },
+              item.colored && styles.affirmationTextAccent,
+            ]}
             key={`${item.content}-${index}`}
           >
             {item.content}
           </Text>
         ))}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -237,6 +254,43 @@ const styles = StyleSheet.create({
     marginTop: 32,
     position: 'relative',
     alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    overflow: 'hidden',
+    ...({
+      transition: 'transform 0.16s ease, box-shadow 0.2s ease',
+      boxShadow: '0 14px 34px rgba(0,0,0,0.24)',
+    } as object),
+  },
+  containerHovered: {
+    transform: [{ translateY: -2 }],
+    ...({
+      boxShadow: '0 18px 40px rgba(0,0,0,0.30)',
+    } as object),
+  },
+  containerPressed: {
+    opacity: 0.96,
+  },
+  glow: {
+    position: 'absolute',
+    width: 180,
+    height: 180,
+    borderRadius: 999,
+    zIndex: 1,
+    opacity: 0.2,
+    pointerEvents: 'none',
+  },
+  glowLeft: {
+    left: -36,
+    top: 26,
+    backgroundColor: '#7A7DFF',
+  },
+  glowRight: {
+    right: -40,
+    bottom: 56,
+    backgroundColor: '#49D3C6',
   },
   texts: {
     position: 'absolute',
@@ -244,6 +298,20 @@ const styles = StyleSheet.create({
     left: '50%',
     transform: 'translate(-50%, -50%)',
     alignItems: 'center',
+    width: '84%',
+    gap: 2,
+  },
+  affirmationText: {
+    textAlign: 'center',
+    letterSpacing: 0.25,
+    textShadowColor: 'rgba(0,0,0,0.35)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 10,
+  },
+  affirmationTextAccent: {
+    textShadowColor: 'rgba(74, 225, 208, 0.42)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 12,
   },
 });
 

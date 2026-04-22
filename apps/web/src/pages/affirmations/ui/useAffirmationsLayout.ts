@@ -14,12 +14,15 @@ export type AffirmationsLayout = {
   padding: number;
   sectionGap: number;
   columnInner: number;
+  categoryColumns: 1 | 2;
+  categoryGap: number;
   affirmationCardWidth: number;
   affirmationCardHeight: number;
   listPaddingBottom: number;
   visualSize: number;
   isNarrow: boolean;
   labelFontSize: number;
+  categoryTitleSize: number;
 };
 
 /**
@@ -37,17 +40,23 @@ export function useAffirmationsLayout(): AffirmationsLayout {
       Math.min(18, Math.max(8, ms(W, 12)))
     );
     const columnInner = Math.round(contentWidth - 2 * padding);
-    const rowGap = 12;
+    const categoryColumns: 1 | 2 = W <= 1280 ? 1 : 2;
+    const categoryGap = W < 760 ? 10 : 12;
     const affirmationCardWidth = Math.max(
       120,
-      (columnInner - rowGap) / 2
+      categoryColumns === 1
+        ? columnInner
+        : (columnInner - categoryGap) / categoryColumns
     );
     const affirmationCardHeight = Math.round(
-      Math.min(108, Math.max(92, ms(W, 100)))
+      Math.min(116, Math.max(92, ms(W, categoryColumns === 1 ? 108 : 98)))
     );
-    const listPaddingBottom = 24;
+    const listPaddingBottom = W < 760 ? 10 : 14;
     const visualSize = Math.round(
       Math.min(560, Math.max(280, columnInner))
+    );
+    const categoryTitleSize = Math.round(
+      Math.min(34, Math.max(18, ms(W, categoryColumns === 1 ? 22 : 16)))
     );
 
     return {
@@ -55,12 +64,15 @@ export function useAffirmationsLayout(): AffirmationsLayout {
       padding,
       sectionGap,
       columnInner,
+      categoryColumns,
+      categoryGap,
       affirmationCardWidth,
       affirmationCardHeight,
       listPaddingBottom,
       visualSize,
       isNarrow: W < 640,
       labelFontSize: GLOBAL_UI_TEXT_PX,
+      categoryTitleSize,
     };
   }, [W]);
 }
