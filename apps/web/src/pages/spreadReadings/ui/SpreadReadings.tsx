@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
@@ -32,7 +32,7 @@ function SpreadReadings() {
 
   return (
     <ScreenLayout>
-      <View style={{ paddingRight: 16 }}>
+      <View style={styles.headerWrap}>
         <Header
           title={t(spread?.name ?? '')}
           rightContent={
@@ -41,9 +41,23 @@ function SpreadReadings() {
           rightAction={spread?.interpretation ? handlePressCopy : undefined}
         />
       </View>
-      <TarotCardReadingsSpread cardIndex={cardIndex} />
+      <View style={styles.contentWrap}>
+        <TarotCardReadingsSpread cardIndex={cardIndex} />
+      </View>
     </ScreenLayout>
   );
 }
+
+const styles = StyleSheet.create({
+  headerWrap: {
+    paddingRight: 16,
+    zIndex: 3,
+  },
+  contentWrap: {
+    flex: 1,
+    position: 'relative',
+    zIndex: 2,
+  },
+});
 
 export default SpreadReadings;

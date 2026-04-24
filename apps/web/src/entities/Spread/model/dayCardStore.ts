@@ -7,6 +7,7 @@ import {
 } from 'shared/lib/deviceMemory';
 
 type TDayCardsByDate = Record<string, TSpread>;
+const DAY_CARD_DEBUG = '[DayCardFlow]';
 
 function getLocalTodayISO(): string {
   const now = new Date();
@@ -59,15 +60,31 @@ export async function getTodayDayCard(): Promise<TSpread | null> {
   const dayCards = await getValueForAsyncDeviceMemoryKey<TDayCardsByDate>(
     AsyncMemoryKey.SelectedCardsOfTheDay
   );
+  const candidateKeys = getTodayCandidateKeys();
+  if (__DEV__) {
+    console.log(`${DAY_CARD_DEBUG} store:getTodayDayCard`, {
+      candidateKeys,
+      availableKeys: dayCards ? Object.keys(dayCards) : [],
+    });
+  }
 
-  for (const key of getTodayCandidateKeys()) {
+  for (const key of candidateKeys) {
     const todaySpread = normalizeDaySpread(dayCards?.[key]);
 
     if (todaySpread) {
+      if (__DEV__) {
+        console.log(`${DAY_CARD_DEBUG} store:getTodayDayCard:hit`, {
+          key,
+          selectedCardsLength: todaySpread.selectedCards?.length ?? 0,
+        });
+      }
       return todaySpread;
     }
   }
 
+  if (__DEV__) {
+    console.warn(`${DAY_CARD_DEBUG} store:getTodayDayCard:miss`);
+  }
   return null;
 }
 
@@ -79,6 +96,9 @@ export async function saveTodayDayCard(spread: TSpread): Promise<void> {
   const spreadToSave = normalizeDaySpread(spread);
 
   if (!spreadToSave) {
+    if (__DEV__) {
+      console.warn(`${DAY_CARD_DEBUG} store:saveTodayDayCard:skipInvalidSpread`);
+    }
     return;
   }
 
@@ -88,6 +108,12 @@ export async function saveTodayDayCard(spread: TSpread): Promise<void> {
 
   for (const key of getTodayCandidateKeys()) {
     nextDayCards[key] = spreadToSave;
+  }
+  if (__DEV__) {
+    console.log(`${DAY_CARD_DEBUG} store:saveTodayDayCard`, {
+      keys: getTodayCandidateKeys(),
+      selectedCardsLength: spreadToSave.selectedCards?.length ?? 0,
+    });
   }
 
   await saveAsyncDeviceMemoryKey<TDayCardsByDate>(
@@ -113,6 +139,12 @@ export async function clearTodayDayCard(): Promise<void> {
       delete nextDayCards[key];
       hasChanges = true;
     }
+  }
+  if (__DEV__) {
+    console.log(`${DAY_CARD_DEBUG} store:clearTodayDayCard`, {
+      keys: getTodayCandidateKeys(),
+      hasChanges,
+    });
   }
 
   if (!hasChanges) {

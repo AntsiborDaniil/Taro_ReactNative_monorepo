@@ -34,6 +34,7 @@ function SlideItem({
   hasImmediateAnimation,
   ...animatedViewProps
 }: Props) {
+  const DAY_CARD_DEBUG = '[DayCardFlow]';
   const { handleAnimate, handleGetCenterCardPosition, flip } = useData({
     Context: AnimationCarouselContext,
   });
@@ -46,12 +47,25 @@ function SlideItem({
 
   const handlePress = () => {
     if (!isSelected || isAnimating.current) {
+      if (__DEV__) {
+        console.log(`${DAY_CARD_DEBUG} slidePress:ignored`, {
+          isSelected,
+          isAnimating: isAnimating.current,
+        });
+      }
       return;
     }
 
     isAnimating.current = true;
 
     const preSelectedTarotCard = handlePreSelectTarotCard?.();
+    if (__DEV__) {
+      console.log(`${DAY_CARD_DEBUG} slidePress:start`, {
+        preSelectedCardId: preSelectedTarotCard?.id,
+        spreadId: spread?.id,
+        selectedCardsLength: spread?.selectedCards?.length ?? 0,
+      });
+    }
 
     handleAnimate?.(spread?.selectedCards.length);
 
@@ -59,9 +73,20 @@ function SlideItem({
 
     setTimeout(
       async () => {
-        await handleSelectTarotCard?.(preSelectedTarotCard);
-
-        onAdditionalClick?.();
+        const cardWasSelected = await handleSelectTarotCard?.(preSelectedTarotCard);
+        if (__DEV__) {
+          console.log(`${DAY_CARD_DEBUG} slidePress:afterSelect`, {
+            cardWasSelected: !!cardWasSelected,
+          });
+        }
+        if (cardWasSelected) {
+          onAdditionalClick?.();
+          if (__DEV__) {
+            console.log(`${DAY_CARD_DEBUG} slidePress:navigate`);
+          }
+        } else if (__DEV__) {
+          console.warn(`${DAY_CARD_DEBUG} slidePress:skipNavigate`);
+        }
 
         isAnimating.current = false;
       },

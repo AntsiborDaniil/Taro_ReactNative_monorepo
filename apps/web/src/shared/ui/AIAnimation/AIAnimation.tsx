@@ -179,6 +179,8 @@ const styles = StyleSheet.create({
   title: {
     color: COLORS.Content,
     textAlign: 'center',
+    fontSize: 18,
+    lineHeight: 22,
   },
   subtitle: {
     color: 'rgba(255,255,255,0.78)',

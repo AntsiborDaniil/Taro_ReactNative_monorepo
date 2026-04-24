@@ -68,11 +68,13 @@ export type TSpreadHookResult = {
   handleGetAIInterpretation: () => Promise<void>;
   handleLayoutCard: (index: number) => (event: LayoutChangeEvent) => void;
   handlePreSelectTarotCard: () => TTarotCard;
-  handleSelectTarotCard: (card?: TTarotCard) => void;
+  handleSelectTarotCard: (card?: TTarotCard) => Promise<boolean>;
   handleClearSelectedCards: () => void;
   handleResetDaySuggest: () => Promise<void>;
   handleCopySpreadInterpretation: () => void;
 };
+
+const DAY_CARD_DEBUG = '[DayCardFlow]';
 
 const appLink = {
   ios: 'https://apps.apple.com/app/id6749576474',
@@ -119,7 +121,18 @@ export function useSpread({
 
     const hydrateDayCard = async () => {
       try {
+        if (__DEV__) {
+          console.log(`${DAY_CARD_DEBUG} hydrate:start`);
+        }
         const hydratedDaySpread = await getTodayDayCard();
+
+        if (__DEV__) {
+          console.log(`${DAY_CARD_DEBUG} hydrate:result`, {
+            hasSpread: !!hydratedDaySpread,
+            spreadId: hydratedDaySpread?.id,
+            selectedCardsLength: hydratedDaySpread?.selectedCards?.length ?? 0,
+          });
+        }
 
         if (!isMounted || !hydratedDaySpread) {
           return;
@@ -134,6 +147,9 @@ export function useSpread({
       } finally {
         if (isMounted) {
           setDayCardHydrated(true);
+          if (__DEV__) {
+            console.log(`${DAY_CARD_DEBUG} hydrate:done`);
+          }
         }
       }
     };
@@ -160,6 +176,11 @@ export function useSpread({
   const selectSpread = async (
     value: TSpread
   ): Promise<{ shouldRedirectToSpreadReading: boolean }> => {
+    if (__DEV__) {
+      console.log(`${DAY_CARD_DEBUG} selectSpread:start`, {
+        spreadId: value.id,
+      });
+    }
     setSelectedCardsIds({});
     setSpread(value);
     setErrors({});
@@ -167,6 +188,12 @@ export function useSpread({
 
     if (value.id === SpreadName.Simple_DaySuggest) {
       const prevSelectedDaySuggest = await getTodayDayCard();
+      if (__DEV__) {
+        console.log(`${DAY_CARD_DEBUG} selectSpread:existingDayCard`, {
+          hasCard: !!prevSelectedDaySuggest,
+          selectedCardsLength: prevSelectedDaySuggest?.selectedCards?.length ?? 0,
+        });
+      }
 
       if (prevSelectedDaySuggest) {
         setSpread(prevSelectedDaySuggest);
@@ -223,8 +250,16 @@ export function useSpread({
   };
 
   // если не передаем, то выберется случайная карта
-  const handleSelectTarotCard = async (card?: TTarotCard) => {
+  const handleSelectTarotCard = async (card?: TTarotCard): Promise<boolean> => {
     const selectedCard = card ?? tarotCards[getRandomCardId(selectedCardsIds)];
+    if (__DEV__) {
+      console.log(`${DAY_CARD_DEBUG} handleSelectTarotCard:start`, {
+        incomingCardId: card?.id,
+        selectedCardId: selectedCard?.id,
+        spreadId: spread?.id,
+        spreadSelectedCardsLength: spread?.selectedCards?.length ?? 0,
+      });
+    }
 
     if (!selectedCard.direction) {
       selectedCard.direction = hasReversedCards
@@ -240,11 +275,20 @@ export function useSpread({
     setPreSelectedTarotCard(null);
 
     if (!spread) {
-      return;
+      if (__DEV__) {
+        console.warn(`${DAY_CARD_DEBUG} handleSelectTarotCard:abort:noSpread`);
+      }
+      return false;
     }
 
     if (spread.selectedCards.length >= spread.cardsCount) {
-      return;
+      if (__DEV__) {
+        console.warn(`${DAY_CARD_DEBUG} handleSelectTarotCard:abort:alreadyCompleted`, {
+          selectedCardsLength: spread.selectedCards.length,
+          cardsCount: spread.cardsCount,
+        });
+      }
+      return false;
     }
 
     const newCard = getTarotCardReadings({
@@ -259,6 +303,12 @@ export function useSpread({
     const newSpread = { ...spread, selectedCards: newSelectedCards, question };
 
     setSpread(newSpread);
+    if (__DEV__) {
+      console.log(`${DAY_CARD_DEBUG} handleSelectTarotCard:spreadUpdated`, {
+        spreadId: newSpread.id,
+        selectedCardsLength: newSelectedCards.length,
+      });
+    }
 
     const freeUseOfAI = await AsyncStorage.getItem(AsyncMemoryKey.FreeUseOfAI);
 
@@ -280,8 +330,17 @@ export function useSpread({
 
       if (spread?.id === SpreadName.Simple_DaySuggest) {
         await saveTodayDayCard(completedSpread);
+        if (__DEV__) {
+          console.log(`${DAY_CARD_DEBUG} handleSelectTarotCard:dayCardSaved`, {
+            selectedCardsLength: completedSpread.selectedCards?.length ?? 0,
+          });
+        }
       }
     }
+    if (__DEV__) {
+      console.log(`${DAY_CARD_DEBUG} handleSelectTarotCard:success`);
+    }
+    return true;
   };
 
   const handleClearSelectedCards = () => {
