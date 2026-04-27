@@ -1,4 +1,3 @@
-import { useNavigationState } from '@react-navigation/native';
 import { SpreadContext } from 'entities/Spread';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
@@ -23,7 +22,7 @@ export function useHeaderNavigation({
 
   const router = useNativeNavigation();
 
-  const state = useNavigationState((state) => state);
+  const state = navigation.getState?.();
 
   const { spread } = useData({ Context: SpreadContext });
   const { selectedTab } = useData({ Context: TabsAndRoutesContext });

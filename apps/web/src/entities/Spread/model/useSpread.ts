@@ -213,7 +213,7 @@ export function useSpread({
   };
 
   const handleLayoutCard = (index: number) => (event: LayoutChangeEvent) => {
-    event.target.measure((x, y, width, height, pageX, pageY) => {
+    const applyCardPosition = (pageX: number, pageY: number) => {
       setSpread((prevState) => {
         if (!prevState) {
           return prevState;
@@ -231,7 +231,26 @@ export function useSpread({
           cardsPosition,
         };
       });
-    });
+    };
+
+    const measurableTarget =
+      event.target && typeof event.target === 'object'
+        ? (event.target as { measure?: (...args: any[]) => void })
+        : null;
+
+    if (measurableTarget?.measure) {
+      measurableTarget.measure(
+        (_x: number, _y: number, _width: number, _height: number, pageX: number, pageY: number) => {
+          applyCardPosition(pageX, pageY);
+        }
+      );
+
+      return;
+    }
+
+    // Web fallback: target может быть undefined, используем локальные координаты layout.
+    const { x, y } = event.nativeEvent.layout;
+    applyCardPosition(x, y);
   };
 
   const handlePreSelectTarotCard = () => {
