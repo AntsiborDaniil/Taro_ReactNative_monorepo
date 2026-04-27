@@ -4,6 +4,7 @@ import { GLOBAL_UI_TEXT_PX } from 'shared/themes/typography';
 
 const MAX_CONTENT_WIDTH = 1280;
 const BASE_W = 375;
+const SECTION_CARD_HORIZONTAL_PADDING = 28;
 
 function ms(screenW: number, size: number, factor = 0.5) {
   return size + ((screenW / BASE_W) * size - size) * factor;
@@ -44,10 +45,11 @@ export function useSpreadsLayout(): SpreadsLayout {
     if (W >= 1040) columns = 3;
 
     const inner = contentWidth - 2 * padding;
+    const gridInner = Math.max(0, inner - SECTION_CARD_HORIZONTAL_PADDING);
     const cardWidth =
       columns <= 1
-        ? inner
-        : (inner - gap * (columns - 1)) / columns;
+        ? gridInner
+        : (gridInner - gap * (columns - 1)) / columns;
 
     const v = (n: number) => (H / 812) * n;
     const byAspect = Math.round(cardWidth * 0.82);
