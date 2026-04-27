@@ -11,6 +11,7 @@ import { LIBRARY_PLATES } from '../lib';
 const MAX_CONTENT_WIDTH = 1280;
 const BASE_W = 375;
 const LIBRARY_CARD_COUNT = LIBRARY_PLATES.length;
+const GRID_SHELL_HORIZONTAL_PADDING = 28;
 /** Минимальная ширина плитки до перехода на меньшее число колонок. */
 const MIN_CARD_W = 158;
 
@@ -64,17 +65,18 @@ export function useLibraryLayout(): LibraryLayout {
     );
 
     const inner = Math.max(0, contentWidth - 2 * padding);
+    const gridInner = Math.max(0, inner - GRID_SHELL_HORIZONTAL_PADDING);
 
     let columnCount = 1;
-    if (inner >= MIN_CARD_W * 3 + gap * 2) columnCount = 3;
-    else if (inner >= MIN_CARD_W * 2 + gap) columnCount = 2;
+    if (gridInner >= MIN_CARD_W * 3 + gap * 2) columnCount = 3;
+    else if (gridInner >= MIN_CARD_W * 2 + gap) columnCount = 2;
 
     columnCount = Math.min(columnCount, LIBRARY_CARD_COUNT);
 
     const cardWidth =
       columnCount <= 1
-        ? inner
-        : (inner - gap * (columnCount - 1)) / columnCount;
+        ? gridInner
+        : (gridInner - gap * (columnCount - 1)) / columnCount;
 
     const orphanLastRow =
       columnCount > 1 && LIBRARY_CARD_COUNT % columnCount !== 0;
@@ -83,7 +85,14 @@ export function useLibraryLayout(): LibraryLayout {
       : 'flex-start';
 
     const v = (n: number) => (H / 812) * n;
-    const cardHeight = Math.round(Math.min(196, Math.max(132, v(154))));
+    const singleColumnCardHeight = Math.round(
+      Math.min(164, Math.max(124, Math.min(v(138), inner * 0.4)))
+    );
+    const multiColumnCardHeight = Math.round(
+      Math.min(196, Math.max(132, v(154)))
+    );
+    const cardHeight =
+      columnCount === 1 ? singleColumnCardHeight : multiColumnCardHeight;
     const cornerImageWidth = Math.round(
       Math.min(152, Math.max(84, cardWidth * 0.54))
     );
