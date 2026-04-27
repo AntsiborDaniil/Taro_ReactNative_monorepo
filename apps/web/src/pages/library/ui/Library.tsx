@@ -80,27 +80,31 @@ function Library() {
             },
           ]}
         >
+          <View style={[styles.decorOrb, styles.decorOrbTop]} />
+          <View style={[styles.decorOrb, styles.decorOrbBottom]} />
           {!isPractitioner && <SubscriptionsBanner layout={layout} />}
-          <View
-            style={[
-              styles.grid,
-              {
-                gap: layout.gap,
-                justifyContent: layout.gridJustifyContent,
-              },
-            ]}
-          >
-            {LIBRARY_PLATES.map((item) => (
-              <CategoryCard
-                key={item.id}
-                card={item}
-                tileWidth={layout.cardWidth}
-                tileHeight={layout.cardHeight}
-                cornerImageWidth={layout.cornerImageWidth}
-                cornerImageHeight={layout.cornerImageHeight}
-                titleFontSize={layout.cardTitleFontSize}
-              />
-            ))}
+          <View style={styles.gridShell}>
+            <View
+              style={[
+                styles.grid,
+                {
+                  gap: layout.gap,
+                  justifyContent: layout.gridJustifyContent,
+                },
+              ]}
+            >
+              {LIBRARY_PLATES.map((item) => (
+                <CategoryCard
+                  key={item.id}
+                  card={item}
+                  tileWidth={layout.cardWidth}
+                  tileHeight={layout.cardHeight}
+                  cornerImageWidth={layout.cornerImageWidth}
+                  cornerImageHeight={layout.cornerImageHeight}
+                  titleFontSize={layout.cardTitleFontSize}
+                />
+              ))}
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -115,11 +119,44 @@ const styles = StyleSheet.create({
   column: {
     paddingTop: 8,
     width: '100%',
+    position: 'relative',
+  },
+  gridShell: {
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(141, 178, 235, 0.16)',
+    backgroundColor: 'rgba(255, 255, 255, 0.015)',
+    padding: 14,
+    overflow: 'hidden',
+    ...(globalThis?.window
+      ? ({
+          boxShadow: '0 10px 22px rgba(10, 15, 26, 0.2)',
+        } as object)
+      : {}),
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     width: '100%',
+  },
+  decorOrb: {
+    position: 'absolute',
+    borderRadius: 999,
+    zIndex: 0,
+  },
+  decorOrbTop: {
+    width: 170,
+    height: 170,
+    top: -72,
+    right: -44,
+    backgroundColor: 'rgba(112, 87, 236, 0.14)',
+  },
+  decorOrbBottom: {
+    width: 130,
+    height: 130,
+    left: -56,
+    bottom: 16,
+    backgroundColor: 'rgba(58, 122, 216, 0.12)',
   },
   proWrapper: {
     display: 'flex',

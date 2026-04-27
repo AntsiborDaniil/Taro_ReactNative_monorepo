@@ -50,6 +50,7 @@ function HabitChoose() {
             pressed && styles.choiceCardPressed,
           ]}
         >
+          <View style={[styles.cardAccent, styles.cardAccentBuild]} />
           <View style={styles.choiceHeader}>
             <Text style={styles.caption} category={TEXT_TAGS.label}>
               {t('habits:choose.badge.build')}
@@ -76,6 +77,7 @@ function HabitChoose() {
             pressed && styles.choiceCardPressed,
           ]}
         >
+          <View style={[styles.cardAccent, styles.cardAccentQuit]} />
           <View style={styles.choiceHeader}>
             <Text style={styles.caption} category={TEXT_TAGS.label}>
               {t('habits:choose.badge.quit')}
@@ -106,32 +108,35 @@ const styles = StyleSheet.create({
     gap: 14,
     marginTop: 258,
     paddingBottom: 16,
+    position: 'relative',
   },
   choiceCard: {
-    backgroundColor: COLORS.Background,
-    borderColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: 'rgba(16, 24, 40, 0.94)',
+    borderColor: 'rgba(170, 195, 232, 0.18)',
     borderWidth: 1,
-    borderRadius: 16,
-    padding: 16,
-    gap: 8,
+    borderRadius: 18,
+    padding: 18,
+    gap: 10,
+    overflow: 'hidden',
     ...({
       cursor: 'pointer',
       transition: 'transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease',
-      boxShadow: '0 6px 18px rgba(0,0,0,0.18)',
+      boxShadow: '0 8px 20px rgba(0,0,0,0.16)',
     } as object),
   },
   choiceCardBuild: {
-    borderLeftWidth: 2,
-    borderLeftColor: 'rgba(95, 197, 255, 0.9)',
+    borderLeftWidth: 1.5,
+    borderLeftColor: 'rgba(88, 196, 255, 0.85)',
   },
   choiceCardQuit: {
-    borderLeftWidth: 2,
-    borderLeftColor: 'rgba(255, 169, 95, 0.9)',
+    borderLeftWidth: 1.5,
+    borderLeftColor: 'rgba(255, 176, 108, 0.85)',
   },
   choiceCardHovered: {
     transform: [{ translateY: -2 }],
+    borderColor: 'rgba(199, 182, 255, 0.4)',
     ...({
-      boxShadow: '0 10px 24px rgba(0,0,0,0.24)',
+      boxShadow: '0 12px 24px rgba(0,0,0,0.22)',
     } as object),
   },
   choiceCardPressed: {
@@ -144,8 +149,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   caption: {
-    color: COLORS.Content2,
-    letterSpacing: 0.2,
+    color: 'rgba(198, 211, 239, 0.78)',
+    letterSpacing: 0.35,
   },
   text: {
     textAlign: 'left',
@@ -153,7 +158,7 @@ const styles = StyleSheet.create({
   },
   cardDescription: {
     color: COLORS.Content2,
-    lineHeight: 24,
+    lineHeight: 22,
   },
   image: {
     position: 'absolute',
@@ -174,12 +179,27 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   iconWrapperBuild: {
-    borderColor: 'rgba(95, 197, 255, 0.45)',
-    backgroundColor: 'rgba(70, 154, 255, 0.14)',
+    borderColor: 'rgba(111, 204, 255, 0.42)',
+    backgroundColor: 'rgba(70, 154, 255, 0.12)',
   },
   iconWrapperQuit: {
-    borderColor: 'rgba(255, 169, 95, 0.45)',
-    backgroundColor: 'rgba(255, 165, 71, 0.14)',
+    borderColor: 'rgba(255, 183, 132, 0.42)',
+    backgroundColor: 'rgba(255, 165, 71, 0.12)',
+  },
+  cardAccent: {
+    position: 'absolute',
+    width: 62,
+    height: 2,
+    left: 16,
+    top: 0,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
+  cardAccentBuild: {
+    backgroundColor: 'rgba(85, 176, 255, 0.85)',
+  },
+  cardAccentQuit: {
+    backgroundColor: 'rgba(255, 167, 95, 0.85)',
   },
 });
 

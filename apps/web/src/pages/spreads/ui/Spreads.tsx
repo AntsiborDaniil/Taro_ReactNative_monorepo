@@ -58,9 +58,14 @@ export default function Spreads() {
             },
           ]}
         >
+          <View style={[styles.decorOrb, styles.decorOrbTop]} />
+          <View style={[styles.decorOrb, styles.decorOrbBottom]} />
           {!!spreadsSections?.length &&
             spreadsSections.map((data) => (
-              <View style={{ gap: layout.gap - 2 }} key={data.title}>
+              <View
+                style={[styles.sectionCard, { gap: layout.gap - 2 }]}
+                key={data.title}
+              >
                 <Text
                   category={TEXT_TAGS.h4}
                   style={[
@@ -155,10 +160,12 @@ const styles = StyleSheet.create({
   },
   spreads: {
     maxWidth: '100%',
+    position: 'relative',
   },
   sectionTitle: {
-    marginBottom: 4,
+    marginBottom: 8,
     letterSpacing: 0.15,
+    color: '#F4F6FF',
   },
   flatListContainer: {
     width: '100%',
@@ -168,5 +175,37 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     flexDirection: 'row',
     flexWrap: 'wrap',
+  },
+  sectionCard: {
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(141, 178, 235, 0.16)',
+    backgroundColor: 'rgba(255, 255, 255, 0.015)',
+    padding: 14,
+    overflow: 'hidden',
+    ...(globalThis?.window
+      ? ({
+          boxShadow: '0 10px 22px rgba(10, 15, 26, 0.2)',
+        } as object)
+      : {}),
+  },
+  decorOrb: {
+    position: 'absolute',
+    borderRadius: 999,
+    zIndex: 0,
+  },
+  decorOrbTop: {
+    width: 180,
+    height: 180,
+    top: -80,
+    right: -48,
+    backgroundColor: 'rgba(112, 87, 236, 0.14)',
+  },
+  decorOrbBottom: {
+    width: 140,
+    height: 140,
+    left: -56,
+    bottom: -16,
+    backgroundColor: 'rgba(58, 122, 216, 0.12)',
   },
 });

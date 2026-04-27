@@ -85,6 +85,7 @@ function HabitCreate() {
         contentContainerStyle={styles.container}
       >
         <View style={styles.introCard}>
+          <View style={styles.sectionGlow} />
           <Text
             category={TEXT_TAGS.h4}
             weight={TEXT_WEIGHT.medium}
@@ -101,6 +102,7 @@ function HabitCreate() {
           </Text>
         </View>
         <View style={styles.shape}>
+          <View style={styles.sectionGlow} />
           <View style={styles.row}>
             <View style={styles.column}>
               <Input
@@ -162,6 +164,7 @@ function HabitCreate() {
         {habitType === HabitType.BuildPositive && (
           <>
             <View style={styles.shape}>
+              <View style={styles.sectionGlow} />
               <View style={styles.row}>
                 <Text category={TEXT_TAGS.h4} style={styles.sectionTitle}>
                   {t('habits:title.goal')}
@@ -201,6 +204,7 @@ function HabitCreate() {
               </View>
             </View>
             <View style={[styles.shape, { gap: 16 }]}>
+              <View style={styles.sectionGlow} />
               <View style={styles.row}>
                 <Button
                   style={[
@@ -300,6 +304,7 @@ function HabitCreate() {
         )}
         {!!habit.startDate && (
           <View style={styles.shape}>
+            <View style={styles.sectionGlow} />
             <View style={styles.row}>
               <Text category={TEXT_TAGS.h4} style={styles.sectionTitle}>
                 {t('habits:title.startDate')}
@@ -317,6 +322,7 @@ function HabitCreate() {
         )}
         {habitType === HabitType.QuitNegative && (
           <View style={styles.shape}>
+            <View style={styles.sectionGlow} />
             <SwitchElement
               value={(habit as INegativeHabit).isAutoFillEnabled}
               name={t('habits:title.autoFill')}
@@ -328,6 +334,7 @@ function HabitCreate() {
           </View>
         )}
         <View style={styles.shape}>
+          <View style={styles.sectionGlow} />
           <SwitchElement
             value={!!habit.endDate}
             name={t('habits:title.endDate')}
@@ -386,44 +393,51 @@ const styles = StyleSheet.create({
   },
   container: {
     gap: 12,
+    position: 'relative',
   },
   introCard: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 14,
+    backgroundColor: 'rgba(17, 26, 42, 0.94)',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    gap: 4,
+    borderColor: 'rgba(164, 188, 228, 0.2)',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 6,
+    overflow: 'hidden',
+    ...(globalThis?.window
+      ? ({
+          boxShadow: '0 8px 20px rgba(0, 0, 0, 0.14)',
+        } as object)
+      : {}),
   },
   introTitle: {
     color: COLORS.Content,
     marginBottom: 2,
   },
   introDescription: {
-    color: 'rgba(255,255,255,0.72)',
-    lineHeight: 24,
+    color: 'rgba(218, 230, 255, 0.7)',
+    lineHeight: 22,
   },
   sectionTitle: {
     color: COLORS.Content,
   },
   sectionDescription: {
-    color: 'rgba(255,255,255,0.72)',
-    lineHeight: 24,
+    color: 'rgba(218, 230, 255, 0.7)',
+    lineHeight: 22,
     marginTop: 2,
   },
   emoji: {
     fontSize: 64,
   },
   innerInput: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: 'rgba(255,255,255,0.035)',
+    borderColor: 'rgba(176, 197, 236, 0.2)',
     paddingLeft: 12,
     borderRadius: 10,
   },
   radioUnpressed: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderColor: 'rgba(180, 198, 229, 0.2)',
   },
   radioText: {
     color: COLORS.Content,
@@ -437,10 +451,18 @@ const styles = StyleSheet.create({
     left: 0,
     marginHorizontal: 16,
     marginTop: 32,
-    borderRadius: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(224, 195, 124, 0.42)',
+    backgroundColor: 'rgba(137, 106, 44, 0.28)',
+    ...(globalThis?.window
+      ? ({
+          boxShadow: '0 8px 18px rgba(85, 62, 21, 0.22)',
+        } as object)
+      : {}),
   },
   buttonText: {
-    color: COLORS.Content,
+    color: '#F9ECD2',
   },
   emojiButton: {
     aspectRatio: '1/1',
@@ -458,9 +480,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   controlButton: {
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.14)',
+    borderColor: 'rgba(176, 197, 236, 0.2)',
     backgroundColor: 'rgba(255,255,255,0.03)',
     minHeight: 52,
     ...({
@@ -475,21 +497,32 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   shape: {
-    padding: 14,
+    padding: 16,
     borderWidth: 1,
-    borderRadius: 14,
-    borderColor: 'rgba(255,255,255,0.12)',
-    backgroundColor: 'rgba(255,255,255,0.02)',
-    gap: 10,
+    borderRadius: 16,
+    borderColor: 'rgba(164, 188, 228, 0.2)',
+    backgroundColor: 'rgba(17, 26, 42, 0.9)',
+    gap: 12,
+    overflow: 'hidden',
     ...({
-      boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
+      boxShadow: '0 8px 20px rgba(0,0,0,0.14)',
     } as object),
+  },
+  sectionGlow: {
+    position: 'absolute',
+    width: 70,
+    height: 2,
+    top: 0,
+    left: 16,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    backgroundColor: 'rgba(182, 166, 245, 0.85)',
   },
   input: {
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.14)',
+    borderColor: 'rgba(176, 197, 236, 0.2)',
     paddingLeft: 12,
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: 'rgba(255,255,255,0.025)',
     borderRadius: 10,
     fontFamily:
       '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
@@ -517,8 +550,8 @@ const styles = StyleSheet.create({
   },
   sliderStyle: {
     borderRadius: 20,
-    marginTop: 4,
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.25)',
+    marginTop: 6,
+    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
   },
   dayButton: {
     width: 50,

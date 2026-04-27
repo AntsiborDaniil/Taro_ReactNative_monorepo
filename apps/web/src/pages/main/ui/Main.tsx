@@ -30,10 +30,21 @@ function Main() {
               },
             ]}
           >
-            <DayAdvice />
-            <HabitWidget />
-            <MoodDashboard isWidget horizontalInset={0} />
-            <AffirmationsBlock />
+            <View style={[styles.decorOrb, styles.decorOrbTop]} />
+            <View style={[styles.decorOrb, styles.decorOrbBottom]} />
+            <View style={styles.decorGrid} />
+            <View style={styles.sectionShell}>
+              <DayAdvice />
+            </View>
+            <View style={styles.sectionShell}>
+              <HabitWidget />
+            </View>
+            <View style={styles.sectionShell}>
+              <MoodDashboard isWidget horizontalInset={0} />
+            </View>
+            <View style={styles.sectionShell}>
+              <AffirmationsBlock />
+            </View>
           </View>
         </SafeAreaView>
       </ScrollView>
@@ -54,5 +65,50 @@ const styles = StyleSheet.create({
   column: {
     width: '100%',
     flexDirection: 'column',
+    position: 'relative',
+    overflow: 'hidden',
+    borderRadius: 20,
+  },
+  sectionShell: {
+    borderWidth: 1,
+    borderColor: 'rgba(141, 178, 235, 0.16)',
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.015)',
+    overflow: 'hidden',
+    ...(globalThis?.window
+      ? ({
+          boxShadow: '0 10px 22px rgba(10, 15, 26, 0.2)',
+        } as object)
+      : {}),
+  },
+  decorOrb: {
+    position: 'absolute',
+    borderRadius: 999,
+    zIndex: 0,
+  },
+  decorOrbTop: {
+    width: 210,
+    height: 210,
+    top: -110,
+    right: -74,
+    backgroundColor: 'rgba(112, 87, 236, 0.2)',
+  },
+  decorOrbBottom: {
+    width: 180,
+    height: 180,
+    left: -80,
+    bottom: 26,
+    backgroundColor: 'rgba(58, 122, 216, 0.16)',
+  },
+  decorGrid: {
+    position: 'absolute',
+    right: 22,
+    bottom: 40,
+    width: 88,
+    height: 88,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(181, 166, 235, 0.18)',
+    backgroundColor: 'rgba(170, 148, 250, 0.04)',
   },
 });
