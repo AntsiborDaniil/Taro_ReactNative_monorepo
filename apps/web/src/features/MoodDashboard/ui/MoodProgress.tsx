@@ -1,7 +1,13 @@
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { CircularProgressBar } from '@ui-kitten/components';
 import { MoodAndEnergyContext } from 'entities/moodAndEnergy';
-import type { ReactElement } from 'react';
+import { type ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
@@ -20,6 +26,10 @@ function MoodProgress({
   isWidget,
   interactive = true,
 }: MoodProgressProps): ReactElement {
+  const { width: winW } = useWindowDimensions();
+  const isCompact = winW < (isWidget ? 460 : 760);
+  const [isHovered, setIsHovered] = useState(false);
+
   const { todayProgress } = useData({
     Context: MoodAndEnergyContext,
   });
@@ -32,12 +42,38 @@ function MoodProgress({
 
   const { t } = useTranslation('moodAndEnergy');
 
+  const handleOpenMotivationCard = async () => {
+    if (!interactive) {
+      return;
+    }
+
+    if (isWidget) {
+      navigation.navigate(TabRoute.MainTab, {
+        screen: NavigationRoute.MoodAndEnergy,
+      });
+
+      return;
+    }
+
+    if (todayProgress) {
+      await handleSelectMotivationItem?.({
+        key: MotivationKey.MoodAndEnergy,
+        parameters: todayProgress.values,
+      });
+
+      navigation.navigate(TabRoute.MainTab, {
+        screen: NavigationRoute.MotivationCard,
+      });
+    }
+  };
+
   return (
     <Pressable
       style={({ pressed, hovered }) => [
         styles.wrapper,
         !isWidget && styles.wrapperScreen,
         isWidget && styles.wrapperWidget,
+        isCompact && styles.wrapperCompact,
         interactive &&
           hovered &&
           !isWidget &&
@@ -46,30 +82,17 @@ function MoodProgress({
         interactive && pressed && styles.wrapperPressed,
         !interactive && styles.wrapperStatic,
       ]}
-      onPress={async () => {
-        if (!interactive) {
-          return;
-        }
-
-        if (isWidget) {
-          navigation.navigate(TabRoute.MainTab, {
-            screen: NavigationRoute.MoodAndEnergy,
-          });
-
-          return;
-        }
-
-        if (todayProgress) {
-          await handleSelectMotivationItem?.({
-            key: MotivationKey.MoodAndEnergy,
-            parameters: todayProgress?.values,
-          });
-
-          navigation.navigate(TabRoute.MainTab, {
-            screen: NavigationRoute.MotivationCard,
-          });
+      onHoverIn={() => {
+        if (Platform.OS === 'web') {
+          setIsHovered(true);
         }
       }}
+      onHoverOut={() => {
+        if (Platform.OS === 'web') {
+          setIsHovered(false);
+        }
+      }}
+      onPress={handleOpenMotivationCard}
     >
       <CircularProgressBar
         size={isWidget ? 'medium' : 'large'}
@@ -112,6 +135,38 @@ function MoodProgress({
           </Text>
         )}
       </View>
+      {!isWidget && (
+        <View style={[styles.tarotPanel, isCompact && styles.tarotPanelCompact]}>
+          <View
+            style={[
+              styles.tarotCardPreview,
+              Platform.OS === 'web' && isHovered && styles.tarotCardPreviewHover,
+            ]}
+          >
+            <View style={styles.tarotCardBack} />
+            <View style={styles.tarotCardFront}>
+              <Text style={styles.tarotCardGlyph}>✦</Text>
+              <Text style={styles.tarotCardLabel}>TAROT</Text>
+            </View>
+          </View>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.tarotAction,
+              pressed && styles.tarotActionPressed,
+              !interactive && styles.tarotActionDisabled,
+            ]}
+            onPress={handleOpenMotivationCard}
+            disabled={!interactive}
+          >
+            <Text style={styles.tarotActionText}>
+              {todayProgress?.percents === 100
+                ? t('progress.howAreYou')
+                : t('progress.assess')}
+            </Text>
+          </Pressable>
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -119,40 +174,40 @@ function MoodProgress({
 const styles = StyleSheet.create({
   wrapper: {
     paddingHorizontal: 22,
-    paddingVertical: 20,
+    paddingVertical: 18,
     alignItems: 'center',
     borderRadius: 12,
-    borderColor: COLORS.Secondary,
+    borderColor: 'rgba(132, 176, 230, 0.28)',
     borderWidth: 1,
-    backgroundColor: COLORS.Background2,
+    backgroundColor: 'rgba(16, 25, 37, 0.72)',
     flexDirection: 'row',
-    gap: 22,
+    gap: 18,
     marginHorizontal: 16,
-    marginVertical: 14,
+    marginVertical: 10,
   },
   wrapperScreen: {
     width: '100%',
     maxWidth: '100%',
     alignSelf: 'stretch',
     marginHorizontal: 0,
-    marginVertical: 16,
-    paddingHorizontal: 28,
-    paddingVertical: 24,
-    gap: 28,
+    marginVertical: 12,
+    paddingHorizontal: 22,
+    paddingVertical: 20,
+    gap: 20,
     borderRadius: 16,
-    borderColor: 'rgba(132, 176, 230, 0.45)',
+    borderColor: 'rgba(132, 176, 230, 0.26)',
     ...(Platform.OS === 'web'
       ? ({
-          boxShadow: '0 8px 28px rgba(0, 0, 0, 0.22)',
+          boxShadow: '0 10px 24px rgba(0, 0, 0, 0.16)',
         } as object)
       : {}),
   },
   wrapperScreenHover:
     Platform.OS === 'web'
       ? ({
-          borderColor: 'rgba(160, 198, 255, 0.65)',
-          boxShadow: '0 12px 36px rgba(0, 0, 0, 0.3)',
-          backgroundColor: 'rgba(26, 34, 48, 0.98)',
+          borderColor: 'rgba(160, 198, 255, 0.5)',
+          boxShadow: '0 12px 28px rgba(0, 0, 0, 0.22)',
+          backgroundColor: 'rgba(26, 34, 48, 0.92)',
         } as object)
       : {},
   wrapperPressed: {
@@ -180,6 +235,99 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     gap: 20,
   },
+  wrapperCompact: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 14,
+  },
+  tarotPanel: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginLeft: 'auto',
+  },
+  tarotPanelCompact: {
+    width: '100%',
+    marginLeft: 0,
+    alignItems: 'flex-start',
+  },
+  tarotCardPreview: {
+    width: 84,
+    height: 108,
+    position: 'relative',
+  },
+  tarotCardPreviewHover:
+    Platform.OS === 'web'
+      ? ({
+          transform: [{ translateY: -3 }, { rotate: '2deg' }],
+        } as object)
+      : {},
+  tarotCardBack: {
+    position: 'absolute',
+    width: 74,
+    height: 96,
+    borderRadius: 10,
+    right: 0,
+    top: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(126, 103, 240, 0.45)',
+    backgroundColor: 'rgba(38, 31, 74, 0.8)',
+  },
+  tarotCardFront: {
+    position: 'absolute',
+    width: 74,
+    height: 96,
+    borderRadius: 10,
+    left: 0,
+    top: 0,
+    borderWidth: 1,
+    borderColor: 'rgba(198, 176, 255, 0.72)',
+    backgroundColor: 'rgba(21, 20, 46, 0.96)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow:
+            '0 8px 20px rgba(76, 53, 173, 0.35), inset 0 0 18px rgba(166, 133, 255, 0.18)',
+        } as object)
+      : {}),
+  },
+  tarotCardGlyph: {
+    color: '#C7AEFF',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  tarotCardLabel: {
+    color: '#D8CCFF',
+    fontSize: 10,
+    fontWeight: '600',
+    letterSpacing: 1.1,
+  },
+  tarotAction: {
+    minHeight: 36,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(179, 153, 255, 0.42)',
+    backgroundColor: 'rgba(81, 60, 168, 0.28)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tarotActionPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.99 }],
+  },
+  tarotActionDisabled: {
+    opacity: 0.65,
+  },
+  tarotActionText: {
+    color: '#E9E3FF',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.25,
+  },
   progress: {
     flexShrink: 0,
   },
@@ -188,8 +336,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   progressPercentLabelScreen: {
-    paddingHorizontal: 12,
-    fontSize: 22,
+    paddingHorizontal: 8,
+    fontSize: 18,
   },
   texts: {
     flex: 1,
@@ -202,7 +350,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   textsScreen: {
-    gap: 10,
+    gap: 6,
     justifyContent: 'center',
   },
   mainText: {
@@ -212,8 +360,8 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   mainTextScreen: {
-    fontSize: 22,
-    lineHeight: 22,
+    fontSize: 20,
+    lineHeight: 24,
     letterSpacing: 0.15,
   },
   subText: {
@@ -225,9 +373,9 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   subTextScreen: {
-    fontSize: 22,
-    lineHeight: 22,
-    marginTop: 4,
+    fontSize: 16,
+    lineHeight: 20,
+    marginTop: 2,
   },
 });
 

@@ -3,7 +3,6 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text as RNText,
   TouchableOpacity,
   View,
   useWindowDimensions,
@@ -11,6 +10,7 @@ import {
 import { MoodAndEnergyContext } from 'entities/moodAndEnergy';
 import { useTranslation } from 'react-i18next';
 import { MoodDisplayMode } from 'shared/api';
+import type { TMoodItem } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { getMonthDate, getMonthDayDate, getWeekDate } from 'shared/lib';
 import { COLORS } from 'shared/themes';
@@ -37,6 +37,7 @@ const CONFIG = {
 };
 
 const DESIGN = {
+  date: { color: 'transparent' },
   mood: { color: '#2658B7' },
   energy: { color: '#50A622' },
   stress: { color: '#AC2224' },
@@ -49,6 +50,7 @@ function MoodDashboard({
   const { t } = useTranslation('moodAndEnergy');
   const { t: tCore } = useTranslation('core');
   const { width: winW } = useWindowDimensions();
+  const isCompact = winW < (isWidget ? 460 : 760);
   const [visible, setVisible] = useState(false);
   const [hoveredMoodChip, setHoveredMoodChip] = useState<string | null>(null);
   const [dateHovered, setDateHovered] = useState(false);
@@ -61,7 +63,11 @@ function MoodDashboard({
   const { showModal } = useData({ Context: ModalsContext });
   const emptyModalShownRef = useRef(false);
 
-  const [usedMoods, setUsedMoods] = useState(['stress', 'energy', 'mood']);
+  const [usedMoods, setUsedMoods] = useState<Array<keyof TMoodItem>>([
+    'stress',
+    'energy',
+    'mood',
+  ]);
 
   useEffect(() => {
     if (!moodDataReady) {
@@ -82,7 +88,7 @@ function MoodDashboard({
     showModal(<EmptyResultsModal />);
   }, [displayData?.length, moodDataReady, showModal]);
 
-  const switchMood = (moodName: string) => {
+  const switchMood = (moodName: keyof TMoodItem) => {
     setUsedMoods((prevState) => {
       if (prevState.includes(moodName)) {
         return prevState.filter((m) => m !== moodName);
@@ -115,7 +121,11 @@ function MoodDashboard({
     );
   }
 
-  const moodsActionConfig = [
+  const moodsActionConfig: Array<{
+    name: keyof TMoodItem;
+    activeStyle: object;
+    translation: string;
+  }> = [
     {
       name: 'mood',
       activeStyle: styles.moodActionMood,
@@ -144,7 +154,18 @@ function MoodDashboard({
         ]}
       >
         {!isWidget && (
+          <>
+            <View style={[styles.decorOrb, styles.decorOrbTop]} />
+            <View style={[styles.decorOrb, styles.decorOrbBottom]} />
+            <View style={styles.decorGrid} />
+          </>
+        )}
+        {!isWidget && (
           <View style={styles.header}>
+            <View style={styles.headerTitleGroup}>
+              <Text style={styles.headerEyebrow}>TAROT INSIGHTS</Text>
+              <Text style={styles.headerTitle}>{t('name.mood')}</Text>
+            </View>
             <View style={styles.dateActionWrapper}>
               <Pressable
                 style={({ pressed }) => [
@@ -164,40 +185,46 @@ function MoodDashboard({
               {visible && (
                 <View style={styles.dates}>
                   <TouchableOpacity
+                    style={styles.dateItem}
                     onPress={selectDateMode(MoodDisplayMode.Week)}
                   >
                     <Text
-                      style={
+                      style={[
+                        styles.dateItemText,
                         dateMode === MoodDisplayMode.Week
                           ? styles.activeDate
-                          : undefined
-                      }
+                          : undefined,
+                      ]}
                     >
                       {t(`datesPeriod.${MoodDisplayMode.Week}`)}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
+                    style={styles.dateItem}
                     onPress={selectDateMode(MoodDisplayMode.Month)}
                   >
                     <Text
-                      style={
+                      style={[
+                        styles.dateItemText,
                         dateMode === MoodDisplayMode.Month
                           ? styles.activeDate
-                          : undefined
-                      }
+                          : undefined,
+                      ]}
                     >
                       {t(`datesPeriod.${MoodDisplayMode.Month}`)}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
+                    style={styles.dateItem}
                     onPress={selectDateMode(MoodDisplayMode.Year)}
                   >
                     <Text
-                      style={
+                      style={[
+                        styles.dateItemText,
                         dateMode === MoodDisplayMode.Year
                           ? styles.activeDate
-                          : undefined
-                      }
+                          : undefined,
+                      ]}
                     >
                       {t(`datesPeriod.${MoodDisplayMode.Year}`)}
                     </Text>
@@ -208,22 +235,26 @@ function MoodDashboard({
           </View>
         )}
         {!isWidget && (
-          <AreaGraphs
-            data={displayData ?? []}
-            yAxisKeys={usedMoods}
-            xAxisKey="date"
-            formatYLabel={() => {
-              return '';
-            }}
-            design={DESIGN}
-            {...CONFIG[dateMode ?? MoodDisplayMode.Week]}
-          />
+          <View style={styles.graphCard}>
+            <View style={styles.graphGlow} />
+            <AreaGraphs
+              data={displayData ?? []}
+              yAxisKeys={usedMoods}
+              xAxisKey="date"
+              formatYLabel={() => {
+                return '';
+              }}
+              design={DESIGN}
+              {...CONFIG[dateMode ?? MoodDisplayMode.Week]}
+            />
+          </View>
         )}
         <View
           style={[
             styles.moodsActions,
             isWidget && styles.moodsActionsWidget,
             !isWidget && styles.moodsActionsScreen,
+            isCompact && styles.moodsActionsCompact,
             {
               paddingHorizontal: isWidget
                 ? Math.min(18, Math.max(12, winW * 0.035))
@@ -231,6 +262,11 @@ function MoodDashboard({
             },
           ]}
         >
+          {!isWidget && (
+            <View style={styles.chipsHeader}>
+              <Text style={styles.chipsHeaderText}>{t('progress')}</Text>
+            </View>
+          )}
           {moodsActionConfig.map((item) => (
             <Pressable
               key={item.name}
@@ -240,6 +276,7 @@ function MoodDashboard({
                 styles.moodAction,
                 isWidget && styles.moodActionWidget,
                 !isWidget && styles.moodActionScreen,
+                isCompact && styles.moodActionCompact,
                 usedMoods.includes(item.name) ? item.activeStyle : undefined,
                 hoveredMoodChip === item.name &&
                   (isWidget ? styles.moodChipHoverWidget : styles.moodChipHoverScreen),
@@ -249,16 +286,17 @@ function MoodDashboard({
                 switchMood(item.name);
               }}
             >
-              <RNText
+              <Text
                 style={[
                   styles.moodActionText,
                   isWidget && styles.moodActionTextWidget,
                   !isWidget && styles.moodActionTextScreen,
                 ]}
-                numberOfLines={isWidget ? 2 : 1}
+                category="label"
+                numberOfLines={1}
               >
                 {item.translation}
-              </RNText>
+              </Text>
             </Pressable>
           ))}
         </View>
@@ -275,23 +313,26 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     alignItems: 'stretch',
     backgroundColor: COLORS.Background,
-    boxShadow: '0 0 20px rgba(67, 35, 212, 1)',
+    borderWidth: 1,
+    borderColor: 'rgba(132, 176, 230, 0.16)',
     borderRadius: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
+    paddingTop: 10,
+    paddingBottom: 10,
+    gap: 8,
+    overflow: 'hidden',
   },
   wrapperWidget: {
     paddingTop: 12,
     paddingBottom: 10,
   },
   wrapperScreen: {
-    paddingTop: 4,
-    paddingBottom: 4,
+    paddingTop: 8,
+    paddingBottom: 8,
     borderRadius: 18,
     ...(Platform.OS === 'web'
       ? ({
           boxShadow:
-            '0 0 0 1px rgba(132, 176, 230, 0.12), 0 12px 40px rgba(0, 0, 0, 0.35)',
+            '0 0 0 1px rgba(132, 176, 230, 0.08), 0 12px 28px rgba(0, 0, 0, 0.2)',
         } as object)
       : {}),
   },
@@ -314,8 +355,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     justifyContent: 'space-between',
-    paddingTop: 18,
-    paddingBottom: 18,
+    flexWrap: 'wrap',
+    paddingTop: 12,
+    paddingBottom: 14,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(132, 176, 230, 0.14)',
   },
   moodsActionsWidget: {
     gap: 10,
@@ -324,23 +368,28 @@ const styles = StyleSheet.create({
   },
   moodsActionsScreen: {
     gap: 12,
-    paddingTop: 22,
-    paddingBottom: 22,
+    paddingTop: 16,
+    paddingBottom: 16,
+  },
+  moodsActionsCompact: {
+    gap: 10,
   },
   moodAction: {
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: '31%',
     minWidth: 0,
     paddingVertical: 8,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 12,
     paddingHorizontal: 8,
-    backgroundColor: COLORS.SpbSky4,
+    backgroundColor: 'rgba(58, 79, 114, 0.5)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.16)',
+    borderColor: 'rgba(255, 255, 255, 0.14)',
     ...(globalThis?.window
       ? ({
-          boxShadow: '0 4px 10px rgba(0, 0, 0, 0.22)',
+          boxShadow: '0 4px 14px rgba(0, 0, 0, 0.14)',
         } as object)
       : {}),
   },
@@ -351,9 +400,12 @@ const styles = StyleSheet.create({
   },
   moodActionScreen: {
     minHeight: 54,
-    paddingVertical: 14,
+    paddingVertical: 13,
     paddingHorizontal: 12,
     borderRadius: 14,
+  },
+  moodActionCompact: {
+    flexBasis: '100%',
   },
   moodChipHoverScreen:
     Platform.OS === 'web'
@@ -368,23 +420,21 @@ const styles = StyleSheet.create({
   },
   moodActionText: {
     color: '#F5F7FF',
-    fontSize: 22,
+    fontSize: 16,
     fontFamily: 'Montserrat-SemiBold',
     textAlign: 'center',
     width: '100%',
-    ...(Platform.OS === 'web' ? ({ lineHeight: 22 } as object) : {}),
+    ...(Platform.OS === 'web' ? ({ whiteSpace: 'nowrap' } as object) : {}),
     ...(Platform.OS === 'android'
       ? { includeFontPadding: false, textAlignVertical: 'center' }
       : {}),
   },
   moodActionTextWidget: {
-    fontSize: 22,
-    ...(Platform.OS === 'web' ? ({ lineHeight: 22 } as object) : {}),
+    fontSize: 16,
   },
   moodActionTextScreen: {
-    fontSize: 22,
+    fontSize: 16,
     letterSpacing: 0.2,
-    ...(Platform.OS === 'web' ? ({ lineHeight: 22 } as object) : {}),
   },
   moodActionMood: {
     backgroundColor: DESIGN.mood.color,
@@ -399,27 +449,48 @@ const styles = StyleSheet.create({
     borderColor: '#E35557',
   },
   header: {
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     paddingTop: 12,
-    paddingBottom: 4,
-    alignItems: 'flex-end',
+    paddingBottom: 8,
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(132, 176, 230, 0.14)',
+  },
+  headerTitleGroup: {
+    gap: 2,
+  },
+  headerEyebrow: {
+    color: 'rgba(191, 170, 255, 0.9)',
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1.1,
+  },
+  headerTitle: {
+    color: '#F3F6FF',
+    fontSize: 18,
+    fontWeight: '700',
   },
   dateActionWrapper: {
     position: 'relative',
   },
   dateAction: {
     paddingVertical: 8,
-    paddingHorizontal: 14,
-    minHeight: 40,
-    alignItems: 'flex-end',
+    paddingHorizontal: 12,
+    minHeight: 36,
+    alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(132, 176, 230, 0.28)',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
   },
   dateActionText: {
     color: COLORS.Content,
-    fontSize: 22,
+    fontSize: 15,
     fontWeight: '600',
-    ...(Platform.OS === 'web' ? ({ lineHeight: 22 } as object) : {}),
+    ...(Platform.OS === 'web' ? ({ lineHeight: 20 } as object) : {}),
   },
   dateActionHover:
     Platform.OS === 'web'
@@ -432,16 +503,120 @@ const styles = StyleSheet.create({
   },
   dates: {
     backgroundColor: COLORS.Background2,
-    padding: 16,
+    padding: 10,
     position: 'absolute',
-    gap: 8,
-    bottom: -124,
-    left: -8,
-    borderRadius: 16,
+    gap: 6,
+    bottom: -130,
+    right: 0,
+    borderRadius: 12,
     zIndex: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(132, 176, 230, 0.26)',
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '0 10px 24px rgba(0, 0, 0, 0.22)',
+        } as object)
+      : {}),
+  },
+  dateItem: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  dateItemText: {
+    color: COLORS.Content,
+    fontSize: 14,
+    fontWeight: '500',
   },
   activeDate: {
     color: COLORS.Primary,
+    fontWeight: '700',
+    ...(Platform.OS === 'web'
+      ? ({
+          textDecorationLine: 'underline',
+        } as object)
+      : {}),
+  },
+  graphCard: {
+    marginTop: 4,
+    marginHorizontal: 12,
+    borderRadius: 14,
+    paddingTop: 6,
+    paddingBottom: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(132, 176, 230, 0.14)',
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  graphGlow: {
+    position: 'absolute',
+    width: 220,
+    height: 120,
+    borderRadius: 999,
+    right: -40,
+    top: -35,
+    backgroundColor: 'rgba(109, 82, 224, 0.22)',
+    ...(Platform.OS === 'web'
+      ? ({
+          filter: 'blur(20px)',
+        } as object)
+      : {}),
+  },
+  chipsHeader: {
+    width: '100%',
+    marginBottom: 2,
+  },
+  chipsHeaderText: {
+    color: 'rgba(195, 211, 248, 0.85)',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.35,
+  },
+  decorOrb: {
+    position: 'absolute',
+    borderRadius: 999,
+    zIndex: 0,
+  },
+  decorOrbTop: {
+    width: 170,
+    height: 170,
+    top: -95,
+    right: -46,
+    backgroundColor: 'rgba(106, 83, 214, 0.24)',
+    ...(Platform.OS === 'web'
+      ? ({
+          filter: 'blur(16px)',
+        } as object)
+      : {}),
+  },
+  decorOrbBottom: {
+    width: 150,
+    height: 150,
+    bottom: -92,
+    left: -54,
+    backgroundColor: 'rgba(62, 117, 205, 0.2)',
+    ...(Platform.OS === 'web'
+      ? ({
+          filter: 'blur(14px)',
+        } as object)
+      : {}),
+  },
+  decorGrid: {
+    position: 'absolute',
+    right: 20,
+    bottom: 22,
+    width: 84,
+    height: 84,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(181, 166, 235, 0.18)',
+    backgroundColor: 'rgba(170, 148, 250, 0.04)',
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.02)',
+        } as object)
+      : {}),
   },
 });
 
