@@ -54,7 +54,12 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
   const { sceneContentWidth } = useTabRailLayout();
   const { height: windowHeight } = useWindowDimensions();
   const carouselWidth = sceneContentWidth;
-  const carouselHeight = Math.max(520, windowHeight - 140);
+  /** Не выше окна минус хедер/табы — иначе карусель перекрывает шапку и блокирует «Назад». */
+  const reservedChrome = 220;
+  const carouselHeight = Math.min(
+    600,
+    Math.max(320, windowHeight - reservedChrome),
+  );
 
   const { selectedTab } = useData({ Context: TabsAndRoutesContext });
 

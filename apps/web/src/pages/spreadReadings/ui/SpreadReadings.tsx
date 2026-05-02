@@ -9,6 +9,7 @@ import { TarotCardReadingsSpread } from 'features/TarotCardReadings';
 import { useData } from 'shared/DataProvider';
 import { CopyIcon } from 'shared/icons';
 import { isTablet } from 'shared/lib';
+import { COLORS } from 'shared/themes';
 import { ScreenLayout } from 'shared/ui';
 
 function SpreadReadings() {
@@ -51,12 +52,16 @@ function SpreadReadings() {
 const styles = StyleSheet.create({
   headerWrap: {
     paddingRight: 16,
-    zIndex: 3,
+    zIndex: 20,
+    position: 'relative',
+    backgroundColor: COLORS.Background,
   },
   contentWrap: {
     flex: 1,
+    minHeight: 0,
     position: 'relative',
-    zIndex: 2,
+    zIndex: 1,
+    overflow: 'hidden',
   },
 });
 

@@ -36,6 +36,12 @@ function DayAdvice() {
     });
   };
 
+  const handleBackToMain = () => {
+    navigate(TabRoute.MainTab, {
+      screen: NavigationRoute.Main,
+    });
+  };
+
   const handleReset = async () => {
     await handleVibrationClick?.();
     await handleResetDaySuggest?.();
@@ -43,38 +49,60 @@ function DayAdvice() {
 
   return (
     <ScreenLayout>
-      <Header title="" />
-      <Image style={styles.image} source={getImage(['core', 'girl'])} />
-      <View style={[styles.advice, { bottom: bottom + 48 }]}>
-        <View style={styles.text}>
-          <Text category={TEXT_TAGS.h2} weight={TEXT_WEIGHT.medium}>
-            {date ?? ''}
-          </Text>
-          <Text category={TEXT_TAGS.h1} weight={TEXT_WEIGHT.medium}>
-            {t('core:dailyCard.title')}
-          </Text>
+      <View style={styles.root}>
+        <Image style={styles.image} source={getImage(['core', 'girl'])} />
+        <View
+          style={[styles.advice, { paddingBottom: bottom + 48 }]}
+          pointerEvents="box-none"
+        >
+          <View style={styles.text}>
+            <Text category={TEXT_TAGS.h2} weight={TEXT_WEIGHT.medium}>
+              {date ?? ''}
+            </Text>
+            <Text category={TEXT_TAGS.h1} weight={TEXT_WEIGHT.medium}>
+              {t('core:dailyCard.title')}
+            </Text>
+          </View>
+          {hasSelectedDayCard && (
+            <Button style={styles.resetButton} onPress={handleReset}>
+              {t('core:button.resetDayCard')}
+            </Button>
+          )}
+          <CoverFlowCardCarousel
+            hasImmediateAnimation
+            onAdditionalClick={handleNavigate}
+          />
         </View>
-        {hasSelectedDayCard && (
-          <Button style={styles.resetButton} onPress={handleReset}>
-            {t('core:button.resetDayCard')}
-          </Button>
-        )}
-        <CoverFlowCardCarousel
-          hasImmediateAnimation
-          onAdditionalClick={handleNavigate}
-        />
+        <View style={styles.headerLayer} pointerEvents="box-none">
+          <Header title="" backAction={handleBackToMain} />
+        </View>
       </View>
     </ScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    minHeight: 0,
+    position: 'relative',
+    width: '100%',
+  },
+  headerLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 50,
+    elevation: 50,
+  },
   advice: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 14,
     paddingHorizontal: 16,
+    zIndex: 1,
   },
   text: {
     width: '100%',
@@ -100,9 +128,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   image: {
+    ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
     opacity: 0.7,
+    zIndex: 0,
   },
 });
 

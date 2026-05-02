@@ -1,8 +1,9 @@
 import { SpreadContext } from 'entities/Spread';
+import { SpreadName } from 'shared/api';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { NavigationRoute } from 'shared/types';
+import { NavigationRoute, TabRoute } from 'shared/types';
 import { getNavigationRules } from './getNavigationRules';
 
 type THeaderNavigationParameters = {
@@ -49,6 +50,17 @@ export function useHeaderNavigation({
     });
 
     if (!navigationRules) {
+      if (
+        spread?.id === SpreadName.Simple_DaySuggest &&
+        selectedTab === TabRoute.MainTab
+      ) {
+        navigation.navigate(TabRoute.MainTab, {
+          screen: NavigationRoute.Main,
+        });
+
+        return;
+      }
+
       router.goBack(); // Возвращаемся назад по умолчанию
 
       return;
