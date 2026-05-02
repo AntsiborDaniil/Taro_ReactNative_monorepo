@@ -7,6 +7,7 @@ import {
   THabitItem,
   TMoodItem,
   TMotivationItem,
+  TAROT_AI_API_BASE_URL,
   TSelectedTarotCard,
 } from 'shared/api';
 import { LoadingsContext } from 'shared/contexts/Loadings';
@@ -59,7 +60,7 @@ export function useMotivation(): TTarotMotivationHookResult {
       });
 
       const aiInterpretationResponse = await fetch(
-        `https://tarot-api.ru/api/motivation/${key}`,
+        `${TAROT_AI_API_BASE_URL}/api/motivation/${key}`,
         {
           method: 'POST',
           headers: {

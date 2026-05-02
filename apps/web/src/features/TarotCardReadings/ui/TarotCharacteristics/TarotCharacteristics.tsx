@@ -1,5 +1,5 @@
 import { RefObject, useMemo } from 'react';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { useTabRailLayout } from 'app/navigation/tabs/TabRailLayoutContext';
 import { useTranslation } from 'react-i18next';
 import { ICarouselInstance } from 'react-native-reanimated-carousel';
@@ -14,6 +14,28 @@ import {
   TCharacteristicsLibrary,
   ZODIACS,
 } from './Items';
+
+const GRID_GAP = 16;
+const HORIZONTAL_PAD = 32;
+
+/** Колонок в сетке по ширине сцены (учёт rail на web). */
+function getCharacteristicColumnCount(
+  containerWidth: number,
+  itemCount: number
+): number {
+  if (itemCount <= 0) {
+    return 1;
+  }
+  let cols: number;
+  if (containerWidth >= 900) {
+    cols = 3;
+  } else if (containerWidth >= 560) {
+    cols = 2;
+  } else {
+    cols = 1;
+  }
+  return Math.min(cols, itemCount);
+}
 
 type TarotCharacteristicsProps = {
   card: TSelectedTarotCard;
@@ -69,20 +91,56 @@ function TarotCharacteristics({
     card.suit,
   ]);
 
-  const horizontalPad = 32;
-  const gap = 16;
-  const containerWidth = Math.max(220, sceneContentWidth - horizontalPad);
-  const columns = containerWidth >= 920 ? 4 : containerWidth >= 520 ? 2 : 1;
-  const itemWidth = Math.max(
-    180,
-    Math.floor((containerWidth - gap * (columns - 1)) / columns)
+  const containerWidth = Math.max(
+    220,
+    sceneContentWidth - HORIZONTAL_PAD
   );
 
+  const columnCount = getCharacteristicColumnCount(
+    containerWidth,
+    content.length
+  );
+
+  const flexItemWidth = Math.max(
+    148,
+    Math.floor(
+      (containerWidth - GRID_GAP * (columnCount - 1)) / columnCount
+    )
+  );
+
+  const gridStyle = useMemo(() => {
+    if (Platform.OS === 'web') {
+      return {
+        display: 'grid' as const,
+        width: '100%' as const,
+        maxWidth: containerWidth,
+        gap: GRID_GAP,
+        gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+        justifyItems: 'stretch' as const,
+        alignItems: 'start' as const,
+      };
+    }
+    return {
+      width: '100%' as const,
+      maxWidth: containerWidth,
+      flexDirection: 'row' as const,
+      flexWrap: 'wrap' as const,
+      justifyContent: 'center' as const,
+      gap: GRID_GAP,
+    };
+  }, [columnCount, containerWidth]);
+
   return (
-    <SafeAreaView style={styles.content}>
-      <View style={[styles.grid, { maxWidth: containerWidth }]}>
+    <View style={styles.content}>
+      <View style={[styles.grid, gridStyle]}>
         {content.map((item) => (
-          <SafeAreaView style={[styles.item, { width: itemWidth }]} key={item.subtitle}>
+          <View
+            style={[
+              styles.item,
+              Platform.OS === 'web' ? styles.itemGrid : { width: flexItemWidth },
+            ]}
+            key={item.subtitle}
+          >
             {item.icon}
             <View style={styles.texts}>
               <Text category={TEXT_TAGS.label} style={styles.label}>
@@ -90,10 +148,10 @@ function TarotCharacteristics({
               </Text>
               <Text style={styles.title}>{t(item.title)}</Text>
             </View>
-          </SafeAreaView>
+          </View>
         ))}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -103,18 +161,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   grid: {
-    width: '100%',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 16,
+    alignSelf: 'center',
   },
   item: {
     alignItems: 'center',
     justifyContent: 'flex-start',
     gap: 10,
-    paddingVertical: 6,
-    minHeight: 130,
+    paddingVertical: 8,
+    minHeight: 112,
+  },
+  itemGrid: {
+    width: '100%',
+    minWidth: 0,
+    maxWidth: '100%',
   },
   label: {
     color: COLORS.SpbSky1,

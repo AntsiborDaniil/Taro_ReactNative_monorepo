@@ -75,10 +75,33 @@ function TarotCard({
     outputRange: [COLORS.Content, COLORS.Accent],
   });
 
+  const hasExplicitSize =
+    typeof width === 'number' &&
+    typeof height === 'number' &&
+    width > 0 &&
+    height > 0;
+
+  const imagePadding = imageResizeMode === 'contain' ? 0 : 16;
+
+  const imageInnerWebStyle =
+    hasExplicitSize && Platform.OS === 'web'
+      ? ({
+          flexGrow: 0,
+          flexShrink: 0,
+          flexBasis: 'auto',
+          width: '100%',
+          height: '100%',
+          maxWidth: '100%',
+          maxHeight: '100%',
+          objectFit: imageResizeMode === 'contain' ? 'contain' : 'cover',
+        } as object)
+      : undefined;
+
   return (
     <Animated.View
       style={[
         styles.card,
+        hasExplicitSize ? styles.cardExplicitOuter : styles.cardFlexFill,
         {
           transform:
             direction === TarotCardDirection.Reversed
@@ -92,7 +115,26 @@ function TarotCard({
       <ImageBackground
         source={imageSource}
         resizeMode={imageResizeMode}
-        style={[styles.imageBackground, { width, height }]}
+        imageStyle={imageInnerWebStyle}
+        style={
+          hasExplicitSize
+            ? [
+                styles.imageBackgroundFixed,
+                {
+                  width,
+                  height,
+                  padding: imagePadding,
+                },
+              ]
+            : [
+                styles.imageBackground,
+                {
+                  width,
+                  height,
+                  padding: imagePadding,
+                },
+              ]
+        }
       >
         {!!isSelected && (
           <Animated.View
@@ -123,12 +165,23 @@ function TarotCard({
 
 const styles = StyleSheet.create({
   card: {
-    flex: 1,
     borderRadius: 12,
     overflow: 'hidden',
     position: 'relative',
     borderStyle: 'solid',
     borderWidth: 1,
+  },
+  /** Растягивание внутри flex-родителя, когда нет явных width/height */
+  cardFlexFill: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 0,
+  },
+  /** Фиксированный размер карты (мотивация, деталь и т.д.) — без flex-basis: 0 */
+  cardExplicitOuter: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto',
   },
   imageBackground: {
     flex: 1,
@@ -138,7 +191,12 @@ const styles = StyleSheet.create({
     aspectRatio: 9 / 16,
     width: null,
     height: null,
-    padding: 16,
+  },
+  /** Явные px-размеры: без flex:1, чтобы web не схлопывал ImageBackground */
+  imageBackgroundFixed: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
   },
   iconWrapper: {
     backgroundColor: COLORS.Accent,

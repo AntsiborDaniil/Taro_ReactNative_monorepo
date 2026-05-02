@@ -11,6 +11,7 @@ import {
   SpreadsCategory,
   TarotCardDirection,
   tarotCards,
+  TAROT_AI_API_BASE_URL,
   TSpread,
   TTarotCard,
 } from 'shared/api';
@@ -440,7 +441,7 @@ export function useSpread({
       setInterpretationLoading(true);
 
       const aiInterpretationResponse = await fetch(
-        'https://tarot-api.ru/api/interpret',
+        `${TAROT_AI_API_BASE_URL}/api/interpret`,
         {
           method: 'POST',
           headers: {
