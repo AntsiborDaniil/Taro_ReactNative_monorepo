@@ -75,6 +75,8 @@
   "share.message.ios": "Discover what the cards hold for you! Dive into mystical Tarot readings and unlock your path.",
   "share.message.android": "Discover what the cards hold for you! Dive into mystical Tarot readings and unlock your path. Get the app now",
   "share.title": "Unveil Your Destiny with Tarot!",
+  "share.web.copied": "Link text copied to clipboard",
+  "share.web.fail": "Could not share — please try again",
 
   "nav.tab.main": "Home",
   "nav.tab.spreads": "Spreads",

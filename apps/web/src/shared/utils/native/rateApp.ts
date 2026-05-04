@@ -16,6 +16,10 @@ const COOLDOWN = 90 * 24 * 60 * 60 * 1000;
 const FINISHED_SPREADS_FOR_RATE_APP = 3;
 
 export async function rateApp() {
+  if (Platform.OS === 'web') {
+    return;
+  }
+
   const canRequest = InAppReview.isAvailable();
   let shown = false;
 

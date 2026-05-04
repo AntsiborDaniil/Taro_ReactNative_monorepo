@@ -1,7 +1,17 @@
 {
   "settings": "Settings",
 
+  "web.page.hint": "Web: push notifications and in-store reviews are available in the mobile app.",
+
+  "section.game": "Spreads",
+  "section.look": "Look & feedback",
+  "section.share": "Share",
+  "section.mobile": "Mobile app",
+  "section.legal": "Legal",
+
   "sound": "Sound and notifications",
+  "sound.web": "Sound & haptics",
+  "sound.web.hint": "Push notifications are not available on the web. Use the iOS or Android app for reminders and moon phases.",
   "sound.vibration": "Vibration",
   "sound.notifications": "Notifications",
   "sound.moon.notifications": "Moon phase notifications",
@@ -20,8 +30,16 @@
   "deck.style.modern": "Modern Art",
 
   "share": "Share",
+  "share.web": "Copy app link",
+  "share.web.hint": "Uses Web Share when supported, otherwise copies store links to the clipboard",
 
   "rate.app": "Rate the app",
+
+  "mobile.app": "Get the mobile app",
+  "mobile.app.hint": "Subscriptions, favorites, and notifications work in the Mindful app",
+
+  "store.modal.title": "Open store",
+  "store.modal.subtitle": "Download Mindful for the full experience",
 
   "terms.of.use": "Terms of use",
 

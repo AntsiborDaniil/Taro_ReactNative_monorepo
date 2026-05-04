@@ -1,7 +1,17 @@
 {
   "settings": "Настройки",
 
+  "web.page.hint": "Веб-версия: уведомления и оценка в магазине доступны в приложении для телефона.",
+
+  "section.game": "Расклады",
+  "section.look": "Внешний вид и отклик",
+  "section.share": "Поделиться",
+  "section.mobile": "Мобильное приложение",
+  "section.legal": "Документы",
+
   "sound": "Звук и уведомления",
+  "sound.web": "Звук и вибрация",
+  "sound.web.hint": "Пуш-уведомления на сайте недоступны — в приложении для iOS и Android доступны напоминания и фазы Луны.",
   "sound.vibration": "Вибрация",
   "sound.notifications": "Уведомления",
   "sound.moon.notifications": "Уведомления о фазах Луны",
@@ -20,8 +30,16 @@
   "deck.style.modern": "Современный модерн",
 
   "share": "Поделиться",
+  "share.web": "Ссылка на приложение",
+  "share.web.hint": "Web Share или копирование текста со ссылками на App Store и Google Play",
 
   "rate.app": "Оценить приложение",
+
+  "mobile.app": "Установить на телефон",
+  "mobile.app.hint": "Подписка, избранное и уведомления — в приложении Mindful",
+
+  "store.modal.title": "Открыть в магазине",
+  "store.modal.subtitle": "Скачайте Mindful для полного опыта",
 
   "terms.of.use": "Условия использования",
 
