@@ -294,6 +294,7 @@ const styles = StyleSheet.create({
   doneButton: {
     width: '100%',
     alignSelf: 'stretch',
+    marginBottom: 18,
   },
 });
 

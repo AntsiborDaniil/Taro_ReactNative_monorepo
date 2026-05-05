@@ -354,7 +354,7 @@ function HabitCreate() {
       </ScrollView>
       <Button
         disabled={!habit.title}
-        style={[styles.button, { bottom }]}
+        style={[styles.button, { marginBottom: bottom + 16 }]}
         onPress={handleSubmit}
       >
         <Text category={TEXT_TAGS.h3} style={styles.buttonText}>

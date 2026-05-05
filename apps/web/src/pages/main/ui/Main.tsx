@@ -39,7 +39,6 @@ function Main() {
               },
             ]}
           >
-            <View style={[styles.decorOrb, styles.decorOrbTop]} />
             <View style={[styles.decorOrb, styles.decorOrbBottom]} />
             <View style={styles.decorGrid} />
             <View style={styles.sectionShell}>
@@ -98,13 +97,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     borderRadius: 999,
     zIndex: 0,
-  },
-  decorOrbTop: {
-    width: 210,
-    height: 210,
-    top: -110,
-    right: -74,
-    backgroundColor: 'rgba(112, 87, 236, 0.2)',
   },
   decorOrbBottom: {
     width: 180,
