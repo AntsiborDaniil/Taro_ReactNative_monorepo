@@ -34,6 +34,7 @@
     "lorem-ipsum": "^2.0.8",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-hook-form": "^7.75.0",
     "react-i18next": "^15.4.1",
     "react-native": "0.79.6",
     "react-native-error-boundary": "^2.0.0",

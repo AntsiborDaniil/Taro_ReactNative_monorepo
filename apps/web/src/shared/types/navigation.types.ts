@@ -22,6 +22,7 @@ export enum NavigationRoute {
   HabitsWeek = 'HabitsWeek',
   MotivationCard = 'MotivationCard',
   GoalCelebration = 'GoalCelebration',
+  Auth = 'Auth',
 }
 
 export enum TabRoute {

@@ -3,7 +3,7 @@ import { CardsDictionary } from 'pages/cardsDictionary';
 import { DetailCard } from 'pages/detailCard';
 import { FavoriteCards } from 'pages/favoriteCards';
 import { Library } from 'pages/library';
-import { DeckStyle, Language, Settings, Sound } from 'pages/settings';
+import { Auth, DeckStyle, Language, Settings, Sound } from 'pages/settings';
 import { SpreadReadings } from 'pages/spreadReadings';
 import { SpreadsHistory } from 'pages/spreadsHistory';
 import { useTranslation } from 'react-i18next';
@@ -48,6 +48,7 @@ function LibraryScreen() {
         component={DeckStyle}
       />
       <LibraryStack.Screen name={NavigationRoute.Sound} component={Sound} />
+      <LibraryStack.Screen name={NavigationRoute.Auth} component={Auth} />
       <LibraryStack.Screen
         name={NavigationRoute.TermsOfUse}
         component={WebView}

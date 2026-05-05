@@ -3,6 +3,7 @@
 
   "web.page.hint": "Веб-версия: уведомления и оценка в магазине доступны в приложении для телефона.",
 
+  "section.account": "Аккаунт",
   "section.game": "Расклады",
   "section.look": "Внешний вид и отклик",
   "section.share": "Поделиться",
@@ -17,6 +18,7 @@
   "sound.moon.notifications": "Уведомления о фазах Луны",
 
   "language": "Язык приложения",
+  "account": "Личный кабинет",
 
   "hasReversed": "Перевернутые карты",
 
@@ -43,6 +45,29 @@
 
   "legal.open.newTab": "Открыть в новой вкладке",
   "legal.open.newTab.hint": "Полноэкранный просмотр в браузере, удобно на печать",
+
+  "auth.hero.title": "Добро пожаловать в Mindful",
+  "auth.hero.subtitle": "Войдите в профиль, чтобы сохранить подписку, историю раскладов и избранные карты на всех устройствах.",
+  "auth.signIn": "Войти",
+  "auth.signUp": "Регистрация",
+  "auth.createAccount": "Создать аккаунт",
+  "auth.name": "Имя",
+  "auth.namePlaceholder": "Как к вам обращаться",
+  "auth.email": "Email",
+  "auth.emailPlaceholder": "you@example.com",
+  "auth.password": "Пароль",
+  "auth.passwordPlaceholder": "Минимум 8 символов",
+  "auth.show": "Показать",
+  "auth.hide": "Скрыть",
+  "auth.or": "или",
+  "auth.stub.title": "UI авторизации готов",
+  "auth.stub.subtitle": "На следующем шаге подключим Supabase Auth",
+  "auth.validation.nameRequired": "Введите имя",
+  "auth.validation.nameMin": "Имя должно быть не короче 2 символов",
+  "auth.validation.emailRequired": "Введите email",
+  "auth.validation.emailInvalid": "Некорректный email",
+  "auth.validation.passwordRequired": "Введите пароль",
+  "auth.validation.passwordMin": "Пароль должен быть не короче 8 символов",
 
   "terms.of.use": "Условия использования",
 

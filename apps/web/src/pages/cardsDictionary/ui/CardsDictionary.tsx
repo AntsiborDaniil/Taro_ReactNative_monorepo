@@ -21,7 +21,11 @@ function CardsDictionary() {
   return (
     <ScreenLayout>
       <Header showBackButton title={t('core:page.dictionary')} />
-      <ScrollView style={styles.wrapper}>
+      <ScrollView
+        style={styles.wrapper}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
         <CardsSuits
           selectedSuitOrArcana={selectedSuitOrArcana}
           setSelectedSuitOrArcana={setSelectedSuitOrArcana}
@@ -38,12 +42,14 @@ function CardsDictionary() {
 const styles = StyleSheet.create({
   wrapper: {
     paddingHorizontal: 16,
-    paddingBottom: 16,
+  },
+  content: {
+    paddingBottom: 28,
   },
   text: {
     textAlign: 'center',
-    marginTop: 30,
-    marginBottom: 4,
+    marginTop: 16,
+    marginBottom: 10,
   },
 });
 

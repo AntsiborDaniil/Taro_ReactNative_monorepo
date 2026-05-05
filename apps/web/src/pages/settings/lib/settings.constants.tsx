@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Platform } from 'react-native';
-import { Bell, GetIcon, Lang, Paint, Share, Star } from 'shared/icons';
+import { Bell, GetIcon, Lang, Paint, PersonIcon, Share, Star } from 'shared/icons';
 import { isTablet } from 'shared/lib';
 import { NavigationRoute } from 'shared/types';
 import { rateApp, shareApp } from 'shared/utils';
@@ -14,6 +14,11 @@ export type SettingsRouteItem = {
 };
 
 const SETTINGS_ROUTES_NATIVE: SettingsRouteItem[] = [
+  {
+    icon: <PersonIcon width={isTablet ? 34 : 24} height={isTablet ? 34 : 24} />,
+    title: 'account',
+    url: NavigationRoute.Auth,
+  },
   {
     icon: <Lang width={isTablet ? 34 : 24} height={isTablet ? 34 : 24} />,
     title: 'language',
@@ -54,6 +59,11 @@ export function getSettingsRoutes(
   }
 
   return [
+    {
+      icon: <PersonIcon width={isTablet ? 34 : 24} height={isTablet ? 34 : 24} />,
+      title: 'account',
+      url: NavigationRoute.Auth,
+    },
     {
       icon: <Lang width={isTablet ? 34 : 24} height={isTablet ? 34 : 24} />,
       title: 'language',

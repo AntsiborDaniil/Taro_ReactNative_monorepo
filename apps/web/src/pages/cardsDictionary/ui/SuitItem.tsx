@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
@@ -24,7 +24,9 @@ function SuitItem({
   selectedSuitOrArcana,
   setSelectedSuitOrArcana,
 }: SuitItemProps): ReactElement {
+  const { width } = useWindowDimensions();
   const { Icon, id, suitOrArcana } = suitItem;
+  const isCompact = width < 430;
 
   const checked = selectedSuitOrArcana === suitOrArcana;
 
@@ -53,7 +55,10 @@ function SuitItem({
         setSelectedSuitOrArcana(suitOrArcana);
       }}
       key={id}
-      style={styles.item}
+      style={[
+        styles.item,
+        isCompact && styles.itemCompact,
+      ]}
     >
       <Animated.View style={[styles.gradientWrapper, animatedGradient]}>
         <LinearGradient
@@ -67,8 +72,8 @@ function SuitItem({
       </Animated.View>
 
       <Icon
-        width={isTablet ? 60 : 40}
-        height={isTablet ? 60 : 40}
+        width={isTablet ? 60 : isCompact ? 30 : 34}
+        height={isTablet ? 60 : isCompact ? 30 : 34}
         fill={checked ? COLORS.Primary : COLORS.Content}
       />
     </TouchableOpacity>
@@ -94,6 +99,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 14,
     position: 'relative',
+  },
+  itemCompact: {
+    width: 50,
+    height: 50,
+    borderRadius: 12,
   },
 });
 

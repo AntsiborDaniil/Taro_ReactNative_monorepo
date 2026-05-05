@@ -3,6 +3,7 @@
 
   "web.page.hint": "Web: push notifications and in-store reviews are available in the mobile app.",
 
+  "section.account": "Account",
   "section.game": "Spreads",
   "section.look": "Look & feedback",
   "section.share": "Share",
@@ -17,6 +18,7 @@
   "sound.moon.notifications": "Moon phase notifications",
 
   "language": "App language",
+  "account": "Account",
 
   "hasReversed": "Reversed cards",
 
@@ -43,6 +45,29 @@
 
   "legal.open.newTab": "Open in a new tab",
   "legal.open.newTab.hint": "Full view in the browser, easier to read or print",
+
+  "auth.hero.title": "Welcome to Mindful",
+  "auth.hero.subtitle": "Sign in to sync subscription, spreads history, and favorite cards across your devices.",
+  "auth.signIn": "Sign in",
+  "auth.signUp": "Sign up",
+  "auth.createAccount": "Create account",
+  "auth.name": "Name",
+  "auth.namePlaceholder": "How should we call you?",
+  "auth.email": "Email",
+  "auth.emailPlaceholder": "you@example.com",
+  "auth.password": "Password",
+  "auth.passwordPlaceholder": "At least 8 characters",
+  "auth.show": "Show",
+  "auth.hide": "Hide",
+  "auth.or": "or",
+  "auth.stub.title": "Auth UI is ready",
+  "auth.stub.subtitle": "Next step: connect Supabase Auth",
+  "auth.validation.nameRequired": "Enter your name",
+  "auth.validation.nameMin": "Name should be at least 2 characters",
+  "auth.validation.emailRequired": "Enter your email",
+  "auth.validation.emailInvalid": "Invalid email format",
+  "auth.validation.passwordRequired": "Enter your password",
+  "auth.validation.passwordMin": "Password must be at least 8 characters",
 
   "terms.of.use": "Terms of use",
 
