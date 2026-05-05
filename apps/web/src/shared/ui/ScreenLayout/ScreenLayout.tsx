@@ -1,7 +1,9 @@
 import {
+  Platform,
   StatusBar,
   StyleProp,
   StyleSheet,
+  useWindowDimensions,
   View,
   ViewStyle,
 } from 'react-native';
@@ -17,6 +19,14 @@ type ScreenLayoutProps = {
 
 function ScreenLayout({ children, style }: ScreenLayoutProps): ReactNode {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const isCompact = width < 760;
+  const isWide = width > 1280;
+
+  const topOrbSize = isCompact ? 190 : isWide ? 300 : 260;
+  const bottomOrbSize = isCompact ? 150 : isWide ? 250 : 220;
+  const decorGridSize = isCompact ? 84 : isWide ? 140 : 120;
+  const hideDecorGrid = width < 620;
 
   return (
     <>
@@ -28,9 +38,43 @@ function ScreenLayout({ children, style }: ScreenLayoutProps): ReactNode {
       </View>
       <View style={styles.wrapper}>
         <View pointerEvents="none" style={styles.decorLayer}>
-          <View style={[styles.decorOrb, styles.decorOrbTop]} />
-          <View style={[styles.decorOrb, styles.decorOrbBottom]} />
-          <View style={styles.decorGrid} />
+          <View
+            style={[
+              styles.decorOrb,
+              styles.decorOrbTop,
+              {
+                width: topOrbSize,
+                height: topOrbSize,
+                top: -Math.round(topOrbSize * 0.54),
+                right: -Math.round(topOrbSize * 0.28),
+              },
+            ]}
+          />
+          <View
+            style={[
+              styles.decorOrb,
+              styles.decorOrbBottom,
+              {
+                width: bottomOrbSize,
+                height: bottomOrbSize,
+                left: -Math.round(bottomOrbSize * 0.42),
+                bottom: -Math.round(bottomOrbSize * 0.5),
+              },
+            ]}
+          />
+          {!hideDecorGrid && (
+            <View
+              style={[
+                styles.decorGrid,
+                {
+                  width: decorGridSize,
+                  height: decorGridSize,
+                  right: isCompact ? 16 : 30,
+                  bottom: isCompact ? 16 : 36,
+                },
+              ]}
+            />
+          )}
         </View>
         <Layout
           style={StyleSheet.flatten([
@@ -38,6 +82,8 @@ function ScreenLayout({ children, style }: ScreenLayoutProps): ReactNode {
             {
               ...insets,
               paddingBottom: insets.bottom,
+              paddingTop: isCompact ? 6 : 8,
+              gap: isCompact ? 12 : 16,
             },
             style as StyleProp<ViewStyle>,
           ])}
@@ -77,29 +123,22 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   decorOrbTop: {
-    width: 260,
-    height: 260,
-    top: -140,
-    right: -70,
     backgroundColor: 'rgba(117, 96, 224, 0.16)',
   },
   decorOrbBottom: {
-    width: 220,
-    height: 220,
-    left: -90,
-    bottom: -110,
     backgroundColor: 'rgba(75, 139, 228, 0.13)',
   },
   decorGrid: {
     position: 'absolute',
-    width: 120,
-    height: 120,
-    right: 30,
-    bottom: 36,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: 'rgba(175, 161, 232, 0.12)',
     backgroundColor: 'rgba(170, 148, 250, 0.025)',
+    ...(Platform.OS === 'web'
+      ? ({
+          backdropFilter: 'blur(1px)',
+        } as object)
+      : {}),
   },
 });
 

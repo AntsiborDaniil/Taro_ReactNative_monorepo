@@ -38,6 +38,7 @@ type CardsListProps<T> = {
 
 const LOCKED_DECK_STYLES = ['settings:deck.style.modern'];
 const GRID_GAP = 14;
+const GRID_SIDE_PADDING = 24;
 const CARD_ASPECT_RATIO = 9 / 16;
 
 function CardsList<T extends BaseTarotCardProps>({
@@ -77,15 +78,23 @@ function CardsList<T extends BaseTarotCardProps>({
     emptyModalShownRef.current = true;
     showModal(<EmptyResultsModal />);
   }, [cards.length, showModal]);
-  const containerWidth = Math.max(260, Math.min(windowWidth, sceneContentWidth) - 32);
+  const containerWidth = Math.max(
+    220,
+    Math.min(windowWidth, sceneContentWidth) - GRID_SIDE_PADDING
+  );
   const numColumns = useMemo(() => {
     if (containerWidth >= 1100) return 4;
     if (containerWidth >= 760) return 3;
-    return 2;
+    if (containerWidth >= 430) return 2;
+    return 1;
   }, [containerWidth]);
 
   const cardWidth = useMemo(
-    () => Math.floor((containerWidth - GRID_GAP * (numColumns - 1)) / numColumns),
+    () =>
+      Math.max(
+        160,
+        Math.floor((containerWidth - GRID_GAP * (numColumns - 1)) / numColumns)
+      ),
     [containerWidth, numColumns]
   );
   const cardHeight = useMemo(
@@ -201,7 +210,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   textWrapper: {
-    minHeight: 56,
+    minHeight: 48,
     width: '100%',
     alignItems: 'center',
   },

@@ -2,6 +2,7 @@ import React from 'react';
 import {
   StyleSheet,
   TextStyle,
+  View,
   TouchableOpacity,
   ViewStyle,
 } from 'react-native';
@@ -46,48 +47,53 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
     <Layout
       style={StyleSheet.flatten([styles.header, stylesWrapper as StyleProp<ViewStyle>])}
     >
-      {/* Левая кнопка "Назад" (опционально) */}
-
-      {leftContent}
-
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={showBackButton ? handleBackPress : undefined}
-        activeOpacity={0.7}
-        hitSlop={{ top: 16, left: 16, bottom: 16, right: 16 }}
-      >
-        <ChevronLeftIcon
-          opacity={showBackButton ? 1 : 0}
-          width={isTablet ? 32 : 24}
-          height={isTablet ? 32 : 24}
-        />
-      </TouchableOpacity>
-
-      {/* Текст заголовка посередине */}
-      <Text
-        category="h3"
-        style={StyleSheet.flatten([styles.title, titleStyle])}
-      >
-        {title}
-      </Text>
-
-      {rightAction ? (
+      <View style={styles.sideSlot}>
+        {leftContent}
         <TouchableOpacity
-          style={styles.rightButton}
-          onPress={rightAction}
+          style={styles.backButton}
+          onPress={showBackButton ? handleBackPress : undefined}
           activeOpacity={0.7}
           hitSlop={{ top: 16, left: 16, bottom: 16, right: 16 }}
         >
-          {rightContent ?? (
-            <SettingsIcon
-              width={isTablet ? 32 : 24}
-              height={isTablet ? 32 : 24}
-            />
-          )}
+          <ChevronLeftIcon
+            opacity={showBackButton ? 1 : 0}
+            width={isTablet ? 32 : 24}
+            height={isTablet ? 32 : 24}
+          />
         </TouchableOpacity>
-      ) : (
-        <ChevronLeftIcon opacity={0} width={24} height={24} />
-      )}
+      </View>
+
+      <View style={styles.titleSlot}>
+        <Text
+          category="h3"
+          numberOfLines={1}
+          style={StyleSheet.flatten([styles.title, titleStyle])}
+        >
+          {title}
+        </Text>
+      </View>
+
+      <View style={[styles.sideSlot, styles.rightSlot]}>
+        {rightAction ? (
+          <TouchableOpacity
+            style={styles.rightButton}
+            onPress={rightAction}
+            activeOpacity={0.7}
+            hitSlop={{ top: 16, left: 16, bottom: 16, right: 16 }}
+          >
+            {rightContent ?? (
+              <SettingsIcon
+                width={isTablet ? 32 : 24}
+                height={isTablet ? 32 : 24}
+              />
+            )}
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.rightButtonPlaceholder}>
+            <ChevronLeftIcon opacity={0} width={24} height={24} />
+          </View>
+        )}
+      </View>
     </Layout>
   );
 };
@@ -102,20 +108,37 @@ const themedStyles = StyleService.create({
     alignItems: 'center',
     position: 'relative',
     justifyContent: 'space-between',
+    minHeight: 48,
+  },
+  sideSlot: {
+    minWidth: 56,
+    maxWidth: '25%',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+  rightSlot: {
+    alignItems: 'flex-end',
+  },
+  titleSlot: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: 'center',
+    paddingHorizontal: 6,
   },
   backButton: {
     padding: 8,
-    paddingRight: 16,
+    paddingRight: 8,
   },
   rightButton: {
-    paddingVertical: 8,
-    paddingLeft: 8,
-    marginRight: 14,
+    padding: 8,
+  },
+  rightButtonPlaceholder: {
+    padding: 8,
   },
   title: {
-    flex: 1,
     textAlign: 'center',
-    marginLeft: -16,
+    paddingHorizontal: 4,
   },
 });
 

@@ -1,4 +1,10 @@
-import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { MoodDashboard } from 'features/MoodDashboard';
 import { ScreenLayout } from 'shared/ui';
 import { HabitWidget } from 'widgets/habitWidget';
@@ -8,6 +14,8 @@ import { useMainLayout } from './useMainLayout';
 
 function Main() {
   const layout = useMainLayout();
+  const { width } = useWindowDimensions();
+  const isCompact = width < 430;
 
   return (
     <ScreenLayout>
@@ -23,6 +31,7 @@ function Main() {
           <View
             style={[
               styles.column,
+              isCompact && styles.columnCompact,
               {
                 maxWidth: layout.contentWidth,
                 paddingHorizontal: layout.padding,
@@ -68,6 +77,10 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
     borderRadius: 20,
+  },
+  columnCompact: {
+    borderRadius: 14,
+    overflow: 'visible',
   },
   sectionShell: {
     borderWidth: 1,

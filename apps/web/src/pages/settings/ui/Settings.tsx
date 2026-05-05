@@ -135,6 +135,7 @@ function Settings() {
             <View style={webStyles.card}>
               <SwitchElement
                 name="settings:hasReversed"
+                style={webStyles.reversedSwitchWrap}
                 labelStyle={styles.settingsBody}
                 icon={
                   <ReverseIcon
@@ -422,14 +423,19 @@ function createWebStyles() {
       letterSpacing: 0.6,
       textTransform: 'uppercase',
     },
+    reversedSwitchWrap: {
+      paddingVertical: 20,
+      paddingHorizontal: 18,
+      width: '100%',
+    },
     card: {
       width: '100%',
       borderRadius: 16,
       borderWidth: 1,
       borderColor: 'rgba(175, 161, 232, 0.18)',
       backgroundColor: COLORS.Background2,
-      paddingVertical: 4,
-      paddingHorizontal: 4,
+      paddingVertical: 8,
+      paddingHorizontal: 8,
       ...(Platform.OS === 'web'
         ? ({
             boxShadow: '0 8px 32px rgba(0,0,0,0.25)',

@@ -41,6 +41,9 @@
   "store.modal.title": "Open store",
   "store.modal.subtitle": "Download Mindful for the full experience",
 
+  "legal.open.newTab": "Open in a new tab",
+  "legal.open.newTab.hint": "Full view in the browser, easier to read or print",
+
   "terms.of.use": "Terms of use",
 
   "privacy.policy": "Privacy policy"

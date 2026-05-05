@@ -41,6 +41,9 @@
   "store.modal.title": "Открыть в магазине",
   "store.modal.subtitle": "Скачайте Mindful для полного опыта",
 
+  "legal.open.newTab": "Открыть в новой вкладке",
+  "legal.open.newTab.hint": "Полноэкранный просмотр в браузере, удобно на печать",
+
   "terms.of.use": "Условия использования",
 
   "privacy.policy": "Политика конфиденц."

@@ -27,15 +27,20 @@ export function useMainLayout(): MainLayout {
   const { width: W, height: H } = useWindowDimensions();
 
   return useMemo(() => {
+    const isCompact = W < 430;
     const contentWidth = Math.min(W, MAX_CONTENT_WIDTH);
-    const padding = Math.round(Math.min(28, Math.max(12, ms(W, 16))));
+    const padding = Math.round(
+      Math.min(24, Math.max(isCompact ? 10 : 12, ms(W, isCompact ? 12 : 16)))
+    );
     const sectionGap = Math.round(
-      Math.min(48, Math.max(24, ms(W, 34) + (H / 812) * 6))
+      Math.min(36, Math.max(isCompact ? 12 : 18, ms(W, isCompact ? 14 : 24)))
     );
     const bottomMargin = Math.round(
-      Math.min(56, Math.max(28, (H / 812) * 44))
+      Math.min(56, Math.max(isCompact ? 16 : 24, (H / 812) * 36))
     );
-    const scrollBottomPad = Math.round(Math.max(20, (H / 812) * 28));
+    const scrollBottomPad = Math.round(
+      Math.max(isCompact ? 12 : 18, (H / 812) * 24)
+    );
 
     return {
       contentWidth,
