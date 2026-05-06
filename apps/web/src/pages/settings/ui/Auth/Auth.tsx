@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -13,6 +14,13 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
 import { Header } from 'features/header';
+import {
+  ChevronRightIcon,
+  CrossIcon,
+  EyeHideIcon,
+  EyeShowIcon,
+  Payments,
+} from 'shared/icons';
 import {
   authCredentials,
   authRequestHeaders,
@@ -56,16 +64,75 @@ type PasswordFormValues = {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const AUTH_SESSION_STORAGE_KEY = 'authSession';
 
+type AuthPasswordInputProps = {
+  value: string;
+  onChangeText: (text: string) => void;
+  onBlur: () => void;
+  placeholder: string;
+  /** true = символы скрыты (secureTextEntry). */
+  masked: boolean;
+  onToggleMask: () => void;
+  toggleA11yLabel: string;
+  hasError?: boolean;
+};
+
+function AuthPasswordInput({
+  value,
+  onChangeText,
+  onBlur,
+  placeholder,
+  masked,
+  onToggleMask,
+  toggleA11yLabel,
+  hasError,
+}: AuthPasswordInputProps) {
+  return (
+    <View style={styles.passwordInputOuter}>
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        onBlur={onBlur}
+        secureTextEntry={masked}
+        autoCapitalize="none"
+        placeholder={placeholder}
+        placeholderTextColor="rgba(255,255,255,0.42)"
+        style={[
+          styles.input,
+          styles.passwordInputWithReveal,
+          hasError && styles.inputError,
+        ]}
+      />
+      <Pressable
+        onPress={onToggleMask}
+        style={({ pressed }) => [
+          styles.passwordRevealHit,
+          pressed && styles.passwordRevealPressed,
+        ]}
+        accessibilityRole="button"
+        accessibilityLabel={toggleA11yLabel}
+      >
+        {masked ? (
+          <EyeShowIcon width={22} height={22} fill={COLORS.Primary} />
+        ) : (
+          <EyeHideIcon width={22} height={22} fill={COLORS.Primary} />
+        )}
+      </Pressable>
+    </View>
+  );
+}
+
 function Auth() {
   const { t, i18n } = useTranslation();
   const [tab, setTab] = useState<AuthTab>('signin');
   const [showPassword, setShowPassword] = useState(false);
+  const [showAccountPassword, setShowAccountPassword] = useState(false);
   const [session, setSession] = useState<AuthSessionData | null>(null);
   const [isSessionLoading, setIsSessionLoading] = useState(true);
   const [profileSaving, setProfileSaving] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
   /** Сбрасывает дерево гостевой формы после выхода (RN Web иначе может «наследовать» ноду первого инпута). */
   const [guestAuthEpoch, setGuestAuthEpoch] = useState(0);
+  const [addCardModalVisible, setAddCardModalVisible] = useState(false);
 
   const useCookie = authUsesCookie();
 
@@ -464,6 +531,9 @@ function Auth() {
     clearErrors();
     passwordForm.clearErrors();
     profileForm.clearErrors();
+    setShowPassword(false);
+    setShowAccountPassword(false);
+    setAddCardModalVisible(false);
     setGuestAuthEpoch((n) => n + 1);
     setSession(null);
     Toast.show({
@@ -571,14 +641,38 @@ function Auth() {
                   : t('settings:auth.profile.save')}
               </Button>
               <Text category={TEXT_TAGS.p2} style={styles.accountMeta}>
-                {t('settings:auth.accountId')}: {session.user.id}
+                {`${t('settings:auth.accountId')}: ${session.user.id}`}
               </Text>
             </View>
 
             <View style={styles.formCard}>
-              <Text category={TEXT_TAGS.h4} style={styles.sectionTitle}>
-                {t('settings:auth.password.sectionTitle')}
-              </Text>
+              <View style={styles.passwordSectionHead}>
+                <Text
+                  category={TEXT_TAGS.h4}
+                  style={[styles.sectionTitle, styles.sectionTitleInline]}
+                >
+                  {t('settings:auth.password.sectionTitle')}
+                </Text>
+                <Pressable
+                  onPress={() => setShowAccountPassword((v) => !v)}
+                  style={({ pressed }) => [
+                    styles.passwordHeadToggle,
+                    pressed && styles.passwordRevealPressed,
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    showAccountPassword
+                      ? t('settings:auth.hide')
+                      : t('settings:auth.show')
+                  }
+                >
+                  {showAccountPassword ? (
+                    <EyeHideIcon width={22} height={22} fill={COLORS.Primary} />
+                  ) : (
+                    <EyeShowIcon width={22} height={22} fill={COLORS.Primary} />
+                  )}
+                </Pressable>
+              </View>
               <View style={styles.fieldWrap}>
                 <Text category={TEXT_TAGS.p2} style={styles.fieldLabel}>
                   {t('settings:auth.password.current')}
@@ -594,7 +688,7 @@ function Auth() {
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      secureTextEntry
+                      secureTextEntry={!showAccountPassword}
                       autoCapitalize="none"
                       placeholder={t('settings:auth.passwordPlaceholder')}
                       placeholderTextColor="rgba(255,255,255,0.42)"
@@ -631,7 +725,7 @@ function Auth() {
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      secureTextEntry
+                      secureTextEntry={!showAccountPassword}
                       autoCapitalize="none"
                       placeholder={t('settings:auth.passwordPlaceholder')}
                       placeholderTextColor="rgba(255,255,255,0.42)"
@@ -668,7 +762,7 @@ function Auth() {
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      secureTextEntry
+                      secureTextEntry={!showAccountPassword}
                       autoCapitalize="none"
                       placeholder={t('settings:auth.passwordPlaceholder')}
                       placeholderTextColor="rgba(255,255,255,0.42)"
@@ -738,17 +832,22 @@ function Auth() {
                   hovered && styles.addPaymentButtonHover,
                   pressed && styles.addPaymentButtonPressed,
                 ]}
-                onPress={() =>
-                  Toast.show({
-                    type: 'info',
-                    text1: t('settings:auth.payments.addSoon.title'),
-                    text2: t('settings:auth.payments.addSoon.subtitle'),
-                  })
-                }
+                onPress={() => setAddCardModalVisible(true)}
+                accessibilityRole="button"
+                accessibilityLabel={t('settings:auth.payments.addCard')}
               >
-                <Text category={TEXT_TAGS.h4} style={styles.addPaymentText}>
-                  {t('settings:auth.payments.addCard')}
-                </Text>
+                <View style={styles.addPaymentIconWrap}>
+                  <Payments width={24} height={20} fill={COLORS.Primary} />
+                </View>
+                <View style={styles.addPaymentTextCol}>
+                  <Text category={TEXT_TAGS.h4} style={styles.addPaymentTitle}>
+                    {t('settings:auth.payments.addCard')}
+                  </Text>
+                  <Text category={TEXT_TAGS.p2} style={styles.addPaymentHint}>
+                    {t('settings:auth.payments.addCardHint')}
+                  </Text>
+                </View>
+                <ChevronRightIcon width={20} height={20} />
               </Pressable>
             </View>
 
@@ -764,6 +863,7 @@ function Auth() {
               <Pressable
                 onPress={() => {
                   setTab('signin');
+                  setShowPassword(false);
                   clearErrors('name');
                 }}
                 style={[
@@ -784,6 +884,7 @@ function Auth() {
               <Pressable
                 onPress={() => {
                   setTab('signup');
+                  setShowPassword(false);
                   clearErrors();
                 }}
                 style={[
@@ -872,24 +973,9 @@ function Auth() {
                 </View>
 
                 <View style={styles.fieldWrap}>
-                  <View style={styles.passwordLabelRow}>
-                    <Text category={TEXT_TAGS.p2} style={styles.fieldLabel}>
-                      {t('settings:auth.password')}
-                    </Text>
-                    <Pressable
-                      onPress={() => setShowPassword((v) => !v)}
-                      style={({ hovered }) => [
-                        styles.togglePassword,
-                        hovered && styles.togglePasswordHover,
-                      ]}
-                    >
-                      <Text category={TEXT_TAGS.p2} style={styles.togglePasswordText}>
-                        {showPassword
-                          ? t('settings:auth.hide')
-                          : t('settings:auth.show')}
-                      </Text>
-                    </Pressable>
-                  </View>
+                  <Text category={TEXT_TAGS.p2} style={styles.fieldLabel}>
+                    {t('settings:auth.password')}
+                  </Text>
                   <Controller
                     control={control}
                     name="password"
@@ -901,18 +987,19 @@ function Auth() {
                       },
                     }}
                     render={({ field: { value, onChange, onBlur } }) => (
-                      <TextInput
+                      <AuthPasswordInput
                         value={value}
                         onChangeText={onChange}
                         onBlur={onBlur}
-                        secureTextEntry={!showPassword}
-                        autoCapitalize="none"
                         placeholder={t('settings:auth.passwordPlaceholder')}
-                        placeholderTextColor="rgba(255,255,255,0.42)"
-                        style={[
-                          styles.input,
-                          errors.password && styles.inputError,
-                        ]}
+                        masked={!showPassword}
+                        onToggleMask={() => setShowPassword((v) => !v)}
+                        toggleA11yLabel={
+                          showPassword
+                            ? t('settings:auth.hide')
+                            : t('settings:auth.show')
+                        }
+                        hasError={!!errors.password}
                       />
                     )}
                   />
@@ -1015,24 +1102,9 @@ function Auth() {
                 </View>
 
                 <View style={styles.fieldWrap}>
-                  <View style={styles.passwordLabelRow}>
-                    <Text category={TEXT_TAGS.p2} style={styles.fieldLabel}>
-                      {t('settings:auth.password')}
-                    </Text>
-                    <Pressable
-                      onPress={() => setShowPassword((v) => !v)}
-                      style={({ hovered }) => [
-                        styles.togglePassword,
-                        hovered && styles.togglePasswordHover,
-                      ]}
-                    >
-                      <Text category={TEXT_TAGS.p2} style={styles.togglePasswordText}>
-                        {showPassword
-                          ? t('settings:auth.hide')
-                          : t('settings:auth.show')}
-                      </Text>
-                    </Pressable>
-                  </View>
+                  <Text category={TEXT_TAGS.p2} style={styles.fieldLabel}>
+                    {t('settings:auth.password')}
+                  </Text>
                   <Controller
                     control={control}
                     name="password"
@@ -1044,18 +1116,19 @@ function Auth() {
                       },
                     }}
                     render={({ field: { value, onChange, onBlur } }) => (
-                      <TextInput
+                      <AuthPasswordInput
                         value={value}
                         onChangeText={onChange}
                         onBlur={onBlur}
-                        secureTextEntry={!showPassword}
-                        autoCapitalize="none"
                         placeholder={t('settings:auth.passwordPlaceholder')}
-                        placeholderTextColor="rgba(255,255,255,0.42)"
-                        style={[
-                          styles.input,
-                          errors.password && styles.inputError,
-                        ]}
+                        masked={!showPassword}
+                        onToggleMask={() => setShowPassword((v) => !v)}
+                        toggleA11yLabel={
+                          showPassword
+                            ? t('settings:auth.hide')
+                            : t('settings:auth.show')
+                        }
+                        hasError={!!errors.password}
                       />
                     )}
                   />
@@ -1125,6 +1198,53 @@ function Auth() {
           </View>
         )}
       </ScrollView>
+
+      <Modal
+        transparent
+        animationType="fade"
+        visible={addCardModalVisible}
+        onRequestClose={() => setAddCardModalVisible(false)}
+      >
+        <View style={styles.paymentModalRoot}>
+          <Pressable
+            style={styles.paymentModalBackdrop}
+            onPress={() => setAddCardModalVisible(false)}
+            accessibilityRole="button"
+            accessibilityLabel={t('settings:auth.payments.modal.close')}
+          />
+          <View style={styles.paymentModalSheet}>
+            <View style={styles.paymentModalHeader}>
+              <Text
+                category={TEXT_TAGS.h3}
+                style={styles.paymentModalTitle}
+              >
+                {t('settings:auth.payments.modal.title')}
+              </Text>
+              <Pressable
+                onPress={() => setAddCardModalVisible(false)}
+                style={({ pressed }) => [
+                  styles.paymentModalClose,
+                  pressed && styles.paymentModalClosePressed,
+                ]}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel={t('settings:auth.payments.modal.close')}
+              >
+                <CrossIcon width={22} height={22} />
+              </Pressable>
+            </View>
+            <Text category={TEXT_TAGS.p2} style={styles.paymentModalBody}>
+              {t('settings:auth.payments.modal.body')}
+            </Text>
+            <Button
+              style={styles.paymentModalButton}
+              onPress={() => setAddCardModalVisible(false)}
+            >
+              {t('settings:auth.payments.modal.close')}
+            </Button>
+          </View>
+        </View>
+      </Modal>
     </ScreenLayout>
   );
 }
@@ -1227,6 +1347,10 @@ const styles = StyleSheet.create({
     color: COLORS.Content,
     marginBottom: 4,
   },
+  sectionTitleInline: {
+    flex: 1,
+    marginBottom: 0,
+  },
   fieldWrap: {
     gap: 8,
   },
@@ -1292,46 +1416,89 @@ const styles = StyleSheet.create({
     color: 'rgba(229, 236, 249, 0.92)',
     fontSize: 11,
   },
-  addPaymentButton: {
+  passwordSectionHead: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 8,
+  },
+  passwordHeadToggle: {
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    ...(Platform.OS === 'web'
+      ? ({ cursor: 'pointer' as const } as object)
+      : {}),
+  },
+  passwordInputOuter: {
+    position: 'relative',
+    width: '100%',
     justifyContent: 'center',
-    minHeight: 48,
-    borderRadius: 12,
+    alignSelf: 'stretch',
+  },
+  passwordInputWithReveal: {
+    paddingRight: 48,
+  },
+  passwordRevealHit: {
+    position: 'absolute',
+    right: 4,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+    minWidth: 44,
+    ...(Platform.OS === 'web'
+      ? ({ cursor: 'pointer' as const } as object)
+      : {}),
+  },
+  passwordRevealPressed: {
+    opacity: 0.75,
+  },
+  addPaymentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderRadius: 16,
     borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: 'rgba(176, 197, 236, 0.28)',
-    backgroundColor: 'rgba(255,255,255,0.02)',
+    borderColor: 'rgba(128, 174, 226, 0.38)',
+    backgroundColor: 'rgba(102, 154, 211, 0.14)',
+    minHeight: 72,
     ...(Platform.OS === 'web'
       ? ({ cursor: 'pointer' as const } as object)
       : {}),
   },
   addPaymentButtonHover: {
-    backgroundColor: 'rgba(100, 152, 202, 0.1)',
+    backgroundColor: 'rgba(102, 154, 211, 0.22)',
+    borderColor: 'rgba(148, 188, 236, 0.48)',
   },
   addPaymentButtonPressed: {
-    opacity: 0.9,
+    opacity: 0.92,
   },
-  addPaymentText: {
-    color: COLORS.Primary,
-  },
-  passwordLabelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  addPaymentIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: 'center',
-  },
-  togglePassword: {
-    paddingVertical: 3,
-    paddingHorizontal: 7,
-    borderRadius: 8,
-    ...(Platform.OS === 'web'
-      ? ({ cursor: 'pointer' as const } as object)
-      : {}),
-  },
-  togglePasswordHover: {
+    justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(176, 197, 236, 0.2)',
   },
-  togglePasswordText: {
-    color: COLORS.Primary,
+  addPaymentTextCol: {
+    flex: 1,
+    gap: 4,
+    minWidth: 0,
+  },
+  addPaymentTitle: {
+    color: COLORS.Content,
+  },
+  addPaymentHint: {
+    color: 'rgba(216, 228, 247, 0.68)',
+    fontSize: 13,
+    lineHeight: 18,
   },
   input: {
     borderWidth: 1,
@@ -1394,6 +1561,66 @@ const styles = StyleSheet.create({
   },
   socialButtonText: {
     color: COLORS.Content,
+  },
+  paymentModalRoot: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 22,
+  },
+  paymentModalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(10, 14, 22, 0.72)',
+  },
+  paymentModalSheet: {
+    width: '100%',
+    maxWidth: 420,
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 22,
+    gap: 14,
+    backgroundColor: 'rgba(24, 31, 45, 0.98)',
+    borderWidth: 1,
+    borderColor: 'rgba(148, 176, 226, 0.35)',
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '0 24px 48px rgba(0, 0, 0, 0.45)',
+        } as object)
+      : {
+          elevation: 12,
+        }),
+    zIndex: 2,
+  },
+  paymentModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  paymentModalTitle: {
+    flex: 1,
+    color: COLORS.Content,
+    paddingRight: 4,
+  },
+  paymentModalClose: {
+    padding: 6,
+    borderRadius: 10,
+    marginTop: -4,
+    marginRight: -4,
+    ...(Platform.OS === 'web'
+      ? ({ cursor: 'pointer' as const } as object)
+      : {}),
+  },
+  paymentModalClosePressed: {
+    opacity: 0.72,
+  },
+  paymentModalBody: {
+    color: 'rgba(218, 230, 255, 0.82)',
+    lineHeight: 22,
+  },
+  paymentModalButton: {
+    marginTop: 6,
   },
 });
 

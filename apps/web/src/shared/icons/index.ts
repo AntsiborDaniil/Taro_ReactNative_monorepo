@@ -18,6 +18,8 @@ export { default as DownIcon } from './DownIcon.svg';
 export { default as ElementAirIcon } from './ElementAirIcon.svg';
 export { default as EmojiIcon } from './EmojiIcon.svg';
 export { default as En } from './En.svg';
+export { default as EyeHideIcon } from './EyeHide.svg';
+export { default as EyeShowIcon } from './EyeShow.svg';
 export { default as FireIcon } from './FireIcon.svg';
 export { default as GetIcon } from './GetIcon.svg';
 export { default as HeartIcon } from './HeartIcon.svg';
