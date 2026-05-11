@@ -1,9 +1,9 @@
 import React from 'react';
-import { Image, View } from 'react-native';
+import { Image, StyleProp, View, ViewStyle } from 'react-native';
 
 type VideoProps = {
   source?: unknown;
-  style?: object;
+  style?: StyleProp<ViewStyle>;
   muted?: boolean;
   repeat?: boolean;
   resizeMode?: string;

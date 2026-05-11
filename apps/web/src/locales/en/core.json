@@ -40,6 +40,15 @@
   "page.habitCreate": "Create Habits",
 
   "library": "Library",
+  "library.intro.lead": "Meanings, history, favorites.",
+  "library.section.title": "Sections",
+  "library.section.subtitle": "",
+  "library.tile.dictionary.title": "Card meanings",
+  "library.tile.dictionary.subtitle": "Arcana & interpretations",
+  "library.tile.history.title": "Spread history",
+  "library.tile.history.subtitle": "Past readings",
+  "library.tile.favorite.title": "Favorites",
+  "library.tile.favorite.subtitle": "Saved cards",
 
   "save": "Save",
 

@@ -342,8 +342,12 @@ export function useSpread({
         const savedSpread = await saveSpread(newSpread);
 
         if (savedSpread) {
-          setSpread(savedSpread);
-          completedSpread = savedSpread;
+          const normalized = {
+            ...savedSpread,
+            question: savedSpread.question ?? '',
+          };
+          setSpread(normalized);
+          completedSpread = normalized;
         }
       }
       setQuestion('');
@@ -462,7 +466,10 @@ export function useSpread({
         const savedSpread = await saveSpread({ ...spread, interpretation });
 
         if (savedSpread) {
-          setSpread(savedSpread);
+          setSpread({
+            ...savedSpread,
+            question: savedSpread.question ?? spread.question ?? '',
+          });
         }
       }
 

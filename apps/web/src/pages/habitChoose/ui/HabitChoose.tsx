@@ -7,7 +7,7 @@ import { useNativeNavigation } from 'shared/hooks';
 import { GetIcon, QuitIcon } from 'shared/icons';
 import { getImage } from 'shared/lib';
 import { COLORS } from 'shared/themes';
-import { HabitType, NavigationRoute, TabRoute } from 'shared/types';
+import { HabitType, NavigationRoute, PressableWebState, TabRoute } from 'shared/types';
 import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 
 function HabitChoose() {
@@ -43,12 +43,15 @@ function HabitChoose() {
           accessibilityRole="button"
           accessibilityLabel={t('habits:button.chooseBad')}
           onPress={() => openHabitCreate(HabitType.BuildPositive)}
-          style={({ hovered, pressed }) => [
+          style={(state: PressableWebState) => {
+            const { hovered, pressed } = state;
+            return [
             styles.choiceCard,
             styles.choiceCardBuild,
             hovered && styles.choiceCardHovered,
             pressed && styles.choiceCardPressed,
-          ]}
+          ];
+          }}
         >
           <View style={[styles.cardAccent, styles.cardAccentBuild]} />
           <View style={styles.choiceHeader}>
@@ -70,12 +73,15 @@ function HabitChoose() {
           accessibilityRole="button"
           accessibilityLabel={t('habits:button.chooseGood')}
           onPress={() => openHabitCreate(HabitType.QuitNegative)}
-          style={({ hovered, pressed }) => [
+          style={(state: PressableWebState) => {
+            const { hovered, pressed } = state;
+            return [
             styles.choiceCard,
             styles.choiceCardQuit,
             hovered && styles.choiceCardHovered,
             pressed && styles.choiceCardPressed,
-          ]}
+          ];
+          }}
         >
           <View style={[styles.cardAccent, styles.cardAccentQuit]} />
           <View style={styles.choiceHeader}>
@@ -157,7 +163,7 @@ const styles = StyleSheet.create({
     color: COLORS.Content,
   },
   cardDescription: {
-    color: COLORS.Content2,
+    color: COLORS.SpbSky1,
     lineHeight: 22,
   },
   image: {

@@ -117,7 +117,7 @@ function TarotCharacteristics({
         gap: GRID_GAP,
         gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
         justifyItems: 'stretch' as const,
-        alignItems: 'start' as const,
+        alignItems: 'flex-start' as const,
       };
     }
     return {

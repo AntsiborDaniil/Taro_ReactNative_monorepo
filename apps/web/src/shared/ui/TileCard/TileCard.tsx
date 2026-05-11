@@ -2,6 +2,7 @@ import { memo } from 'react';
 import {
   Image,
   ImageBackground,
+  Platform,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -40,6 +41,9 @@ function TileCard({
   isSelected,
   textStyles,
   imageResizeMode,
+  subtitle,
+  subtitleStyle,
+  accessibilityLabel,
 }: TileCardProps) {
   const { t } = useTranslation();
   const { width: winW } = useWindowDimensions();
@@ -54,16 +58,23 @@ function TileCard({
     }
   };
 
-  return (
-    <TouchableOpacity
-      onPress={handlePress}
-      disabled={disabled}
-      activeOpacity={0.7}
-    >
+  const accessibilityLabelComputed =
+    accessibilityLabel ??
+    (typeof children === 'string'
+      ? subtitle
+        ? `${t(children)}. ${subtitle ? t(subtitle) : ''}`
+        : t(children)
+      : undefined);
+
+  const subtitleOutsideCard =
+    Boolean(subtitle) && imagePosition !== ImagePosition.Corner;
+
+  const cardTree = (
       <Layout style={StyleSheet.flatten([{ width, backgroundColor: 'transparent' }])}>
         <Layout
           style={StyleSheet.flatten([
             styles.container,
+            imagePosition === ImagePosition.Corner ? styles.containerSurface : null,
             { width, height },
             !!hasOutline && styles.outlined,
             !!isSelected && styles.selected,
@@ -100,7 +111,7 @@ function TileCard({
                 ))}
             </ImageBackground>
           ) : (
-            <View style={styles.container}>
+            <View style={styles.cornerInner}>
               {!!gradient && (
                 <LinearGradient
                   colors={gradient}
@@ -119,12 +130,40 @@ function TileCard({
                   },
                 ]}
               />
+              <LinearGradient
+                pointerEvents="none"
+                colors={[
+                  'rgba(12, 14, 24, 0.88)',
+                  'rgba(12, 14, 24, 0.28)',
+                  'transparent',
+                ]}
+                locations={[0, 0.42, 1]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.cornerTopLeftScrim}
+              />
               {textPosition === TextPosition.Inner &&
                 (typeof children === 'string' ? (
-                  <View style={textViewStyles}>
-                    <Text style={textStyles} weight={fontWeight}>
+                  <View style={[styles.cornerTextBlock, textViewStyles]}>
+                    <Text
+                      category={TEXT_TAGS.h4}
+                      style={[styles.cornerTitleText, textStyles]}
+                      weight={fontWeight}
+                      numberOfLines={subtitle ? 3 : 5}
+                      ellipsizeMode="tail"
+                    >
                       {t(children)}
                     </Text>
+                    {subtitle ? (
+                      <Text
+                        category={TEXT_TAGS.p2}
+                        style={[styles.cornerSubtitleText, subtitleStyle]}
+                        numberOfLines={2}
+                        ellipsizeMode="tail"
+                      >
+                        {subtitle ? t(subtitle) : null}
+                      </Text>
+                    ) : null}
                   </View>
                 ) : (
                   children
@@ -164,12 +203,85 @@ function TileCard({
             children
           ))}
       </Layout>
+  );
+
+  return (
+    <TouchableOpacity
+      onPress={handlePress}
+      disabled={disabled}
+      activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabelComputed}
+    >
+      {subtitleOutsideCard ? (
+        <View style={{ width }}>
+          {cardTree}
+          <Text
+            category={TEXT_TAGS.p2}
+            style={[styles.tileSubtitle, subtitleStyle]}
+          >
+            {t(subtitle!)}
+          </Text>
+        </View>
+      ) : (
+        cardTree
+      )}
     </TouchableOpacity>
   );
 }
 
 // Темированные стили с UI Kitten
 const styles = StyleService.create({
+  containerSurface:
+    Platform.OS === 'web'
+      ? ({
+          boxShadow: '0 6px 22px rgba(0, 0, 0, 0.32)',
+          borderWidth: 1,
+          borderColor: 'rgba(255, 255, 255, 0.07)',
+        } as object)
+      : {
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: 'rgba(255, 255, 255, 0.08)',
+        },
+  cornerInner: {
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+    overflow: 'hidden',
+    borderRadius: 18,
+  },
+  cornerTopLeftScrim: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '56%',
+    height: '50%',
+    zIndex: 3,
+  },
+  cornerTextBlock: {
+    position: 'absolute',
+    top: 13,
+    left: 13,
+    zIndex: 5,
+    /** Колонка только над левой зоной — арт справа не пересекается */
+    maxWidth: '46%',
+    paddingRight: 4,
+  },
+  cornerTitleText: {
+    color: COLORS.Content,
+    textAlign: 'left',
+    textShadowColor: 'rgba(0, 0, 0, 0.35)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
+  },
+  cornerSubtitleText: {
+    marginTop: 6,
+    color: 'rgba(232, 239, 252, 0.85)',
+    textAlign: 'left',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 5,
+  },
   textView: {
     maxWidth: '80%',
     paddingHorizontal: 8,
@@ -179,7 +291,7 @@ const styles = StyleService.create({
   },
   text: {},
   container: {
-    borderRadius: 16,
+    borderRadius: 18,
     position: 'relative',
     overflow: 'hidden',
     height: '100%',
@@ -231,6 +343,14 @@ const styles = StyleService.create({
   selected: {
     borderWidth: 2,
     borderColor: getColorOpacity(COLORS.Primary, 60),
+  },
+  tileSubtitle: {
+    marginTop: 12,
+    paddingHorizontal: 4,
+    fontSize: 17,
+    lineHeight: 22,
+    color: 'rgba(216, 228, 247, 0.78)',
+    letterSpacing: 0.15,
   },
 });
 

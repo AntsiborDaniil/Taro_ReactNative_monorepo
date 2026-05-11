@@ -29,6 +29,7 @@ import {
   getTarotAiApiBaseUrl,
 } from 'shared/api';
 import { COLORS } from 'shared/themes';
+import { PressableWebState } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 
 type AuthTab = 'signin' | 'signup';
@@ -799,11 +800,14 @@ function Auth() {
                 {t('settings:auth.payments.stub')}
               </Text>
               <Pressable
-                style={({ hovered, pressed }) => [
+                style={(s: PressableWebState) => {
+                  const { hovered, pressed } = s;
+                  return [
                   styles.paymentRow,
                   hovered && styles.paymentRowHover,
                   pressed && styles.paymentRowPressed,
-                ]}
+                ];
+                }}
                 onPress={() =>
                   Toast.show({
                     type: 'info',
@@ -827,11 +831,14 @@ function Auth() {
                 </View>
               </Pressable>
               <Pressable
-                style={({ hovered, pressed }) => [
+                style={(s: PressableWebState) => {
+                  const { hovered, pressed } = s;
+                  return [
                   styles.addPaymentButton,
                   hovered && styles.addPaymentButtonHover,
                   pressed && styles.addPaymentButtonPressed,
-                ]}
+                ];
+                }}
                 onPress={() => setAddCardModalVisible(true)}
                 accessibilityRole="button"
                 accessibilityLabel={t('settings:auth.payments.addCard')}
@@ -1028,11 +1035,14 @@ function Auth() {
 
                 <View style={styles.socialButtons}>
                   <Pressable
-                    style={({ hovered, pressed }) => [
+                    style={(s: PressableWebState) => {
+                      const { hovered, pressed } = s;
+                      return [
                       styles.socialButton,
                       hovered && styles.socialButtonHover,
                       pressed && styles.socialButtonPressed,
-                    ]}
+                    ];
+                    }}
                     onPress={() =>
                       Toast.show({
                         type: 'info',
@@ -1046,11 +1056,14 @@ function Auth() {
                     </Text>
                   </Pressable>
                   <Pressable
-                    style={({ hovered, pressed }) => [
+                    style={(s: PressableWebState) => {
+                      const { hovered, pressed } = s;
+                      return [
                       styles.socialButton,
                       hovered && styles.socialButtonHover,
                       pressed && styles.socialButtonPressed,
-                    ]}
+                    ];
+                    }}
                     onPress={() =>
                       Toast.show({
                         type: 'info',
@@ -1157,11 +1170,14 @@ function Auth() {
 
                 <View style={styles.socialButtons}>
                   <Pressable
-                    style={({ hovered, pressed }) => [
+                    style={(s: PressableWebState) => {
+                      const { hovered, pressed } = s;
+                      return [
                       styles.socialButton,
                       hovered && styles.socialButtonHover,
                       pressed && styles.socialButtonPressed,
-                    ]}
+                    ];
+                    }}
                     onPress={() =>
                       Toast.show({
                         type: 'info',
@@ -1175,11 +1191,14 @@ function Auth() {
                     </Text>
                   </Pressable>
                   <Pressable
-                    style={({ hovered, pressed }) => [
+                    style={(s: PressableWebState) => {
+                      const { hovered, pressed } = s;
+                      return [
                       styles.socialButton,
                       hovered && styles.socialButtonHover,
                       pressed && styles.socialButtonPressed,
-                    ]}
+                    ];
+                    }}
                     onPress={() =>
                       Toast.show({
                         type: 'info',

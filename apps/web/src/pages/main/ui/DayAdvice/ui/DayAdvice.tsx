@@ -1,15 +1,16 @@
 import {
-  ImageBackground,
   Platform,
   Pressable,
+  type PressableStateCallbackType,
   StyleSheet,
   useWindowDimensions,
-  View,
 } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
-import { ApplicationConfigContext } from 'entities/ApplicationConfig';
-import { SpreadContext } from 'entities/Spread';
-import { LinearGradient } from 'expo-linear-gradient';
+import {
+  ApplicationConfigContext,
+  type TApplicationConfigHookResult,
+} from 'entities/ApplicationConfig';
+import { SpreadContext, type TSpreadHookResult } from 'entities/Spread';
 import { useTranslation } from 'react-i18next';
 import { simpleSpreads } from 'shared/api';
 import { useData } from 'shared/DataProvider';
@@ -20,6 +21,7 @@ import {
   isTablet,
   moderateScale,
 } from 'shared/lib';
+import { ImageBackground, LinearGradient, View } from 'shared/lib/rnWebJsx';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
@@ -41,11 +43,11 @@ function DayAdvice() {
   const { t } = useTranslation();
   const date = getCurrentDate();
 
-  const { selectSpread } = useData({
+  const { selectSpread } = useData<Partial<TSpreadHookResult>>({
     Context: SpreadContext,
   });
 
-  const { handleVibrationClick } = useData({
+  const { handleVibrationClick } = useData<Partial<TApplicationConfigHookResult>>({
     Context: ApplicationConfigContext,
   });
 
@@ -73,7 +75,7 @@ function DayAdvice() {
   return (
     <View style={[styles.container, { height: cardHeight }]}>
       <Pressable
-        style={({ pressed }) => [
+        style={({ pressed }: PressableStateCallbackType) => [
           styles.button,
           pressed && styles.buttonPressed,
         ]}

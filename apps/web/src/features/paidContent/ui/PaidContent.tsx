@@ -19,6 +19,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { PurchasesPackage } from 'react-native-purchases';
 import { Header } from 'features/header';
 import { PaymentContext } from 'features/payment';
 import { useData } from 'shared/DataProvider';
@@ -178,8 +179,15 @@ function PaidContent() {
                   ))}
 
                   <View style={styles.variants}>
-                    {offerings?.current?.availablePackages?.reduce(
-                      (acc: ReactElement[], item, index, array) => {
+                    {(
+                      offerings?.current?.availablePackages ?? []
+                    ).reduce(
+                      (
+                        acc: ReactElement[],
+                        item: PurchasesPackage,
+                        index: number,
+                        array: PurchasesPackage[]
+                      ) => {
                         if (
                           array.length > 1 &&
                           activeOffering &&

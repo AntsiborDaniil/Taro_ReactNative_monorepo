@@ -23,7 +23,7 @@ import { ChevronRightIcon, CrossIcon, ReverseIcon } from 'shared/icons';
 import { AsyncMemorySettingKey, isTablet, moderateScale } from 'shared/lib';
 import { COLORS, SETTINGS_TYPOGRAPHY } from 'shared/themes';
 import { appStoreLinks } from 'shared/utils';
-import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
+import { AnalyticAction, NavigationRoute, PressableWebState, TabRoute } from 'shared/types';
 import { Button, ScreenLayout, SwitchElement, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { APP_AGREEMENTS, getSettingsRoutes } from '../lib';
@@ -165,10 +165,13 @@ function Settings() {
                   onPress={() =>
                     handlePress(route.url, route.title, route.onPress)
                   }
-                  style={({ hovered, pressed }) => [
+                  style={(s: PressableWebState) => {
+                    const { hovered, pressed } = s;
+                    return [
                     webStyles.row,
                     (hovered || pressed) && webStyles.rowActive,
-                  ]}
+                  ];
+                  }}
                 >
                   <View style={styles.iconWrapper}>
                     <View style={styles.icon}>{route.icon}</View>
@@ -199,10 +202,13 @@ function Settings() {
                     onPress={() =>
                       handlePress(route.url, route.title, route.onPress)
                     }
-                    style={({ hovered, pressed }) => [
+                    style={(s: PressableWebState) => {
+                      const { hovered, pressed } = s;
+                      return [
                       webStyles.row,
                       (hovered || pressed) && webStyles.rowActive,
-                    ]}
+                    ];
+                    }}
                   >
                     <View style={styles.iconWrapper}>
                       <View style={styles.icon}>{route.icon}</View>
@@ -233,10 +239,13 @@ function Settings() {
                   onPress={() =>
                     handlePress(route.url, route.title, route.onPress)
                   }
-                  style={({ hovered, pressed }) => [
+                  style={(s: PressableWebState) => {
+                    const { hovered, pressed } = s;
+                    return [
                     webStyles.row,
                     (hovered || pressed) && webStyles.rowActive,
-                  ]}
+                  ];
+                  }}
                 >
                   <View style={styles.iconWrapper}>
                     <View style={styles.icon}>{route.icon}</View>
@@ -271,10 +280,13 @@ function Settings() {
                   onPress={() =>
                     handlePress(route.url, route.title, route.onPress)
                   }
-                  style={({ hovered, pressed }) => [
+                  style={(s: PressableWebState) => {
+                    const { hovered, pressed } = s;
+                    return [
                     webStyles.row,
                     (hovered || pressed) && webStyles.rowActive,
-                  ]}
+                  ];
+                  }}
                 >
                   <View style={styles.iconWrapper}>
                     <View style={styles.icon}>{route.icon}</View>

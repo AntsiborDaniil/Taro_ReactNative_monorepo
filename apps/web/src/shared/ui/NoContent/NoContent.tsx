@@ -8,7 +8,7 @@ import { Text, TEXT_TAGS } from '../Text';
 
 type NoContentProps = {
   title: string;
-  buttonText: string;
+  buttonText?: string;
   onPress?: () => void;
 };
 

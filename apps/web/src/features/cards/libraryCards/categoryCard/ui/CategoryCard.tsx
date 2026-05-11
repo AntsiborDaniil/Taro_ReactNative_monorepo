@@ -9,6 +9,7 @@ import {
   NavigationRoute,
   TRedirectPlate,
 } from 'shared/types';
+import { COLORS } from 'shared/themes';
 import { TEXT_WEIGHT, TileCard } from 'shared/ui';
 
 type CategoryCardProps = {
@@ -19,6 +20,8 @@ type CategoryCardProps = {
   cornerImageHeight: number;
   /** Кегль заголовка на плитке (библиотека). */
   titleFontSize?: number;
+  tileSubtitleFontSize?: number;
+  tileSubtitleLineHeight?: number;
 };
 
 function CategoryCard({
@@ -28,8 +31,18 @@ function CategoryCard({
   cornerImageWidth,
   cornerImageHeight,
   titleFontSize,
+  tileSubtitleFontSize,
+  tileSubtitleLineHeight,
 }: CategoryCardProps) {
-  const { img, id, name, navigationRoute, gradient, tabRoute } = card ?? {};
+  const {
+    img,
+    id,
+    name,
+    navigationRoute,
+    gradient,
+    tabRoute,
+    subtitle,
+  } = card ?? {};
 
   const navigation = useNativeNavigation();
 
@@ -63,13 +76,29 @@ function CategoryCard({
         imageWidth={cornerImageWidth}
         imageHeight={cornerImageHeight}
         imagePosition={ImagePosition.Corner}
-        fontWeight={TEXT_WEIGHT.regular}
+        imageOffsetX={6}
+        imageOffsetY={8}
+        fontWeight={TEXT_WEIGHT.semibold}
         textStyles={[
-          styles.text,
-          titleFontSize != null ? { fontSize: titleFontSize } : null,
+          styles.tileTitle,
+          titleFontSize != null
+            ? {
+                fontSize: titleFontSize,
+                lineHeight: Math.round(titleFontSize * 1.28),
+              }
+            : null,
         ]}
         onPress={handlePress}
         gradient={gradient}
+        subtitle={subtitle}
+        subtitleStyle={
+          tileSubtitleFontSize != null && tileSubtitleLineHeight != null
+            ? {
+                fontSize: tileSubtitleFontSize,
+                lineHeight: tileSubtitleLineHeight,
+              }
+            : undefined
+        }
       >
         {name ?? ''}
       </TileCard>
@@ -80,7 +109,8 @@ function CategoryCard({
 export default CategoryCard;
 
 const styles = StyleSheet.create({
-  text: {
-    padding: 12,
+  tileTitle: {
+    paddingBottom: 1,
+    color: COLORS.Content,
   },
 });

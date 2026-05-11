@@ -2,6 +2,7 @@ import {
   Platform,
   Pressable,
   StyleSheet,
+  TextStyle,
   View,
   useWindowDimensions,
 } from 'react-native';
@@ -12,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { COLORS } from 'shared/themes';
-import { NavigationRoute, TabRoute } from 'shared/types';
+import { NavigationRoute, TabRoute, PressableWebState } from 'shared/types';
 import { Text, TEXT_TAGS } from 'shared/ui';
 import { MotivationContext } from '../../../entities/tarotMotivation';
 import { MotivationKey } from '../../../shared/api';
@@ -69,7 +70,9 @@ function MoodProgress({
 
   return (
     <Pressable
-      style={({ pressed, hovered }) => [
+      style={({ pressed, ...rest }: PressableWebState) => {
+        const hovered = rest.hovered;
+        return [
         styles.wrapper,
         !isWidget && styles.wrapperScreen,
         isWidget && styles.wrapperWidget,
@@ -81,7 +84,8 @@ function MoodProgress({
           styles.wrapperScreenHover,
         interactive && pressed && styles.wrapperPressed,
         !interactive && styles.wrapperStatic,
-      ]}
+      ];
+      }}
       onHoverIn={() => {
         if (Platform.OS === 'web') {
           setIsHovered(true);
@@ -97,10 +101,12 @@ function MoodProgress({
       <CircularProgressBar
         size={isWidget ? 'medium' : 'large'}
         style={styles.progress}
-        textStyle={[
-          styles.progressPercentLabel,
-          !isWidget && styles.progressPercentLabelScreen,
-        ]}
+        textStyle={
+          StyleSheet.flatten([
+            styles.progressPercentLabel,
+            !isWidget && styles.progressPercentLabelScreen,
+          ]) as TextStyle
+        }
         progress={(todayProgress?.percents ?? 0) / 100}
       />
       <View

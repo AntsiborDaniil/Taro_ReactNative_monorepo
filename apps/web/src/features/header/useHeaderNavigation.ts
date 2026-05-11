@@ -28,8 +28,9 @@ export function useHeaderNavigation({
   const { spread } = useData({ Context: SpreadContext });
   const { selectedTab } = useData({ Context: TabsAndRoutesContext });
 
-  const selectedRoute = state?.routes?.[state?.index ?? 0]
-    ?.name as NavigationRoute;
+  const selectedRoute = state?.routes?.[state?.index ?? 0]?.name as unknown as
+    | NavigationRoute
+    | undefined;
 
   // Обработчик нажатия на кнопку "Назад"
   const handleBackPress = () => {

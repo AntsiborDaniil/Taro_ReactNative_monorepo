@@ -8,7 +8,7 @@ import { useData } from 'shared/DataProvider';
 import { getImage } from 'shared/lib';
 import { COLORS, getColorOpacity } from 'shared/themes';
 import { AnalyticAction } from 'shared/types';
-import { Text, TEXT_TAGS } from 'shared/ui';
+import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 
 import type { LibraryLayout } from './useLibraryLayout';
@@ -63,15 +63,41 @@ function SubscriptionsBanner({ layout }: SubscriptionsBannerProps) {
         <View style={styles.row}>
           <View style={styles.textColumn}>
             <Text
-              category={TEXT_TAGS.h3}
+              category={TEXT_TAGS.h4}
+              weight={TEXT_WEIGHT.semibold}
               style={[
                 styles.title,
-                { fontSize: layout.bannerTitleFontSize },
+                {
+                  fontSize: layout.bannerTitleFontSize,
+                  lineHeight: Math.round(layout.bannerTitleFontSize * 1.28),
+                },
               ]}
             >
-              {t('subscriptions:banner:title')}
+              {t('subscriptions:banner.title')}
             </Text>
-            <Text style={styles.action} category={TEXT_TAGS.label}>
+            <Text
+              category={TEXT_TAGS.p2}
+              style={[
+                styles.subtitle,
+                {
+                  fontSize: layout.bannerSubtitleFontSize,
+                  lineHeight: Math.round(layout.bannerSubtitleFontSize + 5),
+                },
+              ]}
+            >
+              {t('subscriptions:banner.subtitle')}
+            </Text>
+            <Text
+              category={TEXT_TAGS.label}
+              weight={TEXT_WEIGHT.semibold}
+              style={[
+                styles.action,
+                {
+                  fontSize: layout.bannerActionFontSize,
+                  lineHeight: Math.round(layout.bannerActionFontSize + 4),
+                },
+              ]}
+            >
               {t('subscriptions:banner.action')}
             </Text>
           </View>
@@ -121,7 +147,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     justifyContent: 'center',
-    gap: 12,
+    gap: 6,
     paddingRight: 4,
   },
   imageColumn: {
@@ -132,15 +158,22 @@ const styles = StyleSheet.create({
   title: {
     color: COLORS.Content,
   },
+  subtitle: {
+    color: 'rgba(216, 228, 247, 0.72)',
+    maxWidth: 260,
+  },
   action: {
     alignSelf: 'flex-start',
-    paddingVertical: 9,
-    paddingHorizontal: 13,
-    borderRadius: 18,
+    marginTop: 2,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
     overflow: 'hidden',
-    fontSize: 22,
+    letterSpacing: 0.15,
     color: COLORS.Primary,
-    backgroundColor: getColorOpacity(COLORS.Background2, 72),
+    backgroundColor: getColorOpacity(COLORS.Background2, 56),
+    borderWidth: 1,
+    borderColor: getColorOpacity(COLORS.Primary, 32),
   },
 });
 

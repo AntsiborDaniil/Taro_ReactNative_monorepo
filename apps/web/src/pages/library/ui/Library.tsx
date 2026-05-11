@@ -11,7 +11,7 @@ import { useNativeNavigation } from 'shared/hooks';
 import { StarsPro } from 'shared/icons';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
-import { ScreenLayout, Text, TEXT_WEIGHT } from 'shared/ui';
+import { ScreenLayout, Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { LIBRARY_PLATES } from '../lib';
 import SubscriptionsBanner from './SubscriptionsBanner';
@@ -76,14 +76,69 @@ function Library() {
               maxWidth: '100%',
               alignSelf: 'center',
               paddingHorizontal: layout.padding,
-              gap: layout.gap + 4,
             },
           ]}
         >
-          <View style={[styles.decorOrb, styles.decorOrbTop]} />
-          <View style={[styles.decorOrb, styles.decorOrbBottom]} />
-          {!isPractitioner && <SubscriptionsBanner layout={layout} />}
-          <View style={styles.gridShell}>
+          <Text
+            category={TEXT_TAGS.p2}
+            style={[
+              styles.introLead,
+              {
+                fontSize: layout.libraryIntroFontSize,
+                lineHeight: Math.round(layout.libraryIntroFontSize + 7),
+              },
+            ]}
+          >
+            {t('core:library.intro.lead')}
+          </Text>
+          {!isPractitioner ? (
+            <View style={{ marginTop: Math.round(layout.gap * 0.65) }}>
+              <SubscriptionsBanner layout={layout} />
+            </View>
+          ) : null}
+          <View
+            style={{
+              marginTop: !isPractitioner
+                ? Math.round(layout.gap * 0.75)
+                : Math.round(layout.gap * 0.35),
+            }}
+          >
+            <Text
+              category={TEXT_TAGS.h4}
+              style={[
+                styles.sectionTitle,
+                {
+                  fontSize: layout.librarySectionTitleFontSize,
+                  lineHeight: Math.round(layout.librarySectionTitleFontSize + 6),
+                },
+              ]}
+            >
+              {t('core:library.section.title')}
+            </Text>
+            {Boolean(t('core:library.section.subtitle').trim()) ? (
+              <Text
+                category={TEXT_TAGS.p2}
+                style={[
+                  styles.sectionSubtitle,
+                  {
+                    fontSize: layout.libraryIntroFontSize,
+                    lineHeight: Math.round(layout.libraryIntroFontSize + 7),
+                  },
+                ]}
+              >
+                {t('core:library.section.subtitle')}
+              </Text>
+            ) : null}
+          </View>
+          <View
+            style={[
+              styles.gridShell,
+              {
+                marginTop: Math.round(layout.gap * 0.45),
+                padding: layout.gridShellPadding,
+              },
+            ]}
+          >
             <View
               style={[
                 styles.grid,
@@ -102,6 +157,10 @@ function Library() {
                   cornerImageWidth={layout.cornerImageWidth}
                   cornerImageHeight={layout.cornerImageHeight}
                   titleFontSize={layout.cardTitleFontSize}
+                  tileSubtitleFontSize={layout.libraryTileSubtitleFontSize}
+                  tileSubtitleLineHeight={
+                    layout.libraryTileSubtitleLineHeight
+                  }
                 />
               ))}
             </View>
@@ -117,16 +176,28 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   column: {
-    paddingTop: 8,
+    paddingTop: 4,
     width: '100%',
-    position: 'relative',
+  },
+  introLead: {
+    color: 'rgba(216, 228, 247, 0.82)',
+    maxWidth: 560,
+    width: '100%',
+  },
+  sectionTitle: {
+    color: COLORS.Content,
+    letterSpacing: 0.2,
+  },
+  sectionSubtitle: {
+    marginTop: 6,
+    color: 'rgba(216, 228, 247, 0.72)',
+    maxWidth: 520,
   },
   gridShell: {
     borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(141, 178, 235, 0.16)',
     backgroundColor: 'rgba(255, 255, 255, 0.015)',
-    padding: 14,
     overflow: 'hidden',
     ...(globalThis?.window
       ? ({
@@ -138,25 +209,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     width: '100%',
-  },
-  decorOrb: {
-    position: 'absolute',
-    borderRadius: 999,
-    zIndex: 0,
-  },
-  decorOrbTop: {
-    width: 170,
-    height: 170,
-    top: -72,
-    right: -44,
-    backgroundColor: 'rgba(112, 87, 236, 0.14)',
-  },
-  decorOrbBottom: {
-    width: 130,
-    height: 130,
-    left: -56,
-    bottom: 16,
-    backgroundColor: 'rgba(58, 122, 216, 0.12)',
   },
   proWrapper: {
     display: 'flex',

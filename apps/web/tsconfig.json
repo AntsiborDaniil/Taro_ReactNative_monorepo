@@ -2,22 +2,34 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "baseUrl": "src",
+    "jsx": "react-jsx",
+    "baseUrl": ".",
     "target": "es2017",
     "module": "esnext",
     "moduleResolution": "bundler",
+    "customConditions": ["react-native"],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@appmetrica/react-native-analytics": ["./shared/stubs/appmetrica"],
-      "app/*": ["./app/*"],
-      "pages/*": ["./pages/*"],
-      "features/*": ["./features/*"],
-      "entities/*": ["./entities/*"],
-      "widgets/*": ["./widgets/*"],
-      "shared/*": ["./shared/*"],
-      "locales/*": ["./locales/*"],
-      "assets/*": ["./assets/*"]
+      "react-native": ["./node_modules/react-native/types/index.d.ts"],
+      "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime.d.ts"],
+      "expo-linear-gradient": ["./node_modules/expo-linear-gradient/build/LinearGradient.d.ts"],
+      "react-i18next": ["./node_modules/react-i18next/index.d.mts"],
+      "@appmetrica/react-native-analytics": ["./src/shared/stubs/appmetrica"],
+      "app/*": ["./src/app/*"],
+      "pages/*": ["./src/pages/*"],
+      "features/*": ["./src/features/*"],
+      "entities/*": ["./src/entities/*"],
+      "widgets/*": ["./src/widgets/*"],
+      "shared/*": ["./src/shared/*"],
+      "locales/*": ["./src/locales/*"],
+      "assets/*": ["./src/assets/*"]
     }
-  }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".expo/types/**/*.ts",
+    "declarations.d.ts"
+  ]
 }

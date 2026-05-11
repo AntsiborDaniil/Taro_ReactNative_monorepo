@@ -52,9 +52,7 @@ export interface TranslationResources {
   hello: {
     [key: string]: string;
   };
-  affirmations: {
-    [key: string]: string;
-  };
+  affirmations: Record<string, unknown>;
   moodAndEnergy: {
     [key: string]: string;
   };

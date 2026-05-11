@@ -15,7 +15,7 @@ import { Header } from 'features/header';
 import { useData } from 'shared/DataProvider';
 import { ChevronRightIcon } from 'shared/icons';
 import { COLORS } from 'shared/themes';
-import { NavigationRoute } from 'shared/types';
+import { NavigationRoute, PressableWebState } from 'shared/types';
 import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 
 type WebViewScreen = {
@@ -82,10 +82,13 @@ function WebViewScreen({ customUrl }: WebViewScreen) {
             <Pressable
               accessibilityRole="link"
               onPress={openInBrowser}
-              style={({ hovered, pressed }) => [
+              style={(state: PressableWebState) => {
+                const { hovered, pressed } = state;
+                return [
                 styles.openRow,
                 (hovered || pressed) && styles.openRowActive,
-              ]}
+              ];
+              }}
             >
               <View style={styles.openRowText}>
                 <Text category={TEXT_TAGS.h4} style={styles.openRowTitle}>

@@ -15,5 +15,6 @@ export function useData<T extends TProviderData>({
     throw new Error('useData must be used within a DataProvider');
   }
 
-  return context;
+  // `createContext<Partial<T>>({})` makes TS infer `{}` for some consumers; value is always `T` here.
+  return context as T;
 }

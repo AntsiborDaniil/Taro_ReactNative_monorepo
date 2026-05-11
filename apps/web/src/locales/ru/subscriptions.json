@@ -1,6 +1,7 @@
 {
-  "banner.title": "Откройте \nпуть Практика",
-  "banner.action": "Попробовать бесплатно",
+  "banner.title": "Путь практика",
+  "banner.subtitle": "3 дня бесплатно",
+  "banner.action": "Подробнее",
 
   "subscriptionModal.title": "Разблокируйте путь Практика",
   "subscriptionModal.practiceTitle": "Выберите новый путь Практика",

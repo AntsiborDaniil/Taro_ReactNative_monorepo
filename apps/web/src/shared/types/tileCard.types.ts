@@ -3,6 +3,7 @@ import {
   DimensionValue,
   ImageResizeMode,
   StyleProp,
+  TextStyle,
   ViewStyle,
 } from 'react-native';
 import { IconProps } from '@ui-kitten/components/ui/icon/icon.component';
@@ -28,9 +29,15 @@ export type TileCardProps = {
   iconProps?: IconProps;
   disabled?: boolean;
   textPosition?: TextPosition; // Расположение текста внутри или снаружи контейнера;
-  textStyles?: StyleProp<ViewStyle>;
+  textStyles?: StyleProp<TextStyle>;
   imageResizeMode?: ImageResizeMode;
   textViewStyles?: StyleProp<ViewStyle>;
+  /** Подпись под карточкой (ключ i18n). */
+  subtitle?: string;
+  /** Доп. стили подписи под карточкой (кегль, цвет). */
+  subtitleStyle?: StyleProp<TextStyle>;
+  /** Явная метка для доступности; иначе собирается из заголовка и subtitle. */
+  accessibilityLabel?: string;
 };
 
 export enum ImagePosition {

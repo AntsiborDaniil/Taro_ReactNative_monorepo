@@ -3,6 +3,8 @@ import { NavigationRoute, TabRoute } from './navigation.types';
 export type TRedirectPlate = {
   id: number | string;
   name: string;
+  /** Доп. строка под плиткой (ключ i18n). */
+  subtitle?: string;
   img: string;
   navigationRoute: NavigationRoute;
   tabRoute: TabRoute;

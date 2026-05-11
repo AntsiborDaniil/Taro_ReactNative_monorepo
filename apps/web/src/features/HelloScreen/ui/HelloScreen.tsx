@@ -21,6 +21,7 @@ import Carousel, {
   Pagination,
 } from 'react-native-reanimated-carousel';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { PurchasesPackage } from 'react-native-purchases';
 import { useData } from 'shared/DataProvider';
 import { CrossIcon } from 'shared/icons';
 import { AsyncMemoryKey, getImage, isTablet } from 'shared/lib';
@@ -108,7 +109,7 @@ function HelloScreen() {
   };
 
   const priceString = offerings?.current?.availablePackages.find(
-    (item) => item.identifier === '$rc_annual'
+    (item: PurchasesPackage) => item.identifier === '$rc_annual'
   )?.product.priceString;
 
   const clickContinue = (index: number) => async () => {
