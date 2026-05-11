@@ -130,18 +130,6 @@ function TileCard({
                   },
                 ]}
               />
-              <LinearGradient
-                pointerEvents="none"
-                colors={[
-                  'rgba(12, 14, 24, 0.88)',
-                  'rgba(12, 14, 24, 0.28)',
-                  'transparent',
-                ]}
-                locations={[0, 0.42, 1]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.cornerTopLeftScrim}
-              />
               {textPosition === TextPosition.Inner &&
                 (typeof children === 'string' ? (
                   <View style={[styles.cornerTextBlock, textViewStyles]}>
@@ -249,14 +237,6 @@ const styles = StyleService.create({
     position: 'relative',
     overflow: 'hidden',
     borderRadius: 18,
-  },
-  cornerTopLeftScrim: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '56%',
-    height: '50%',
-    zIndex: 3,
   },
   cornerTextBlock: {
     position: 'absolute',

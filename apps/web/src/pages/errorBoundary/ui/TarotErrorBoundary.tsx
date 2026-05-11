@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
       ? ({
           cursor: 'pointer',
           transition:
-            'transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease',
+            'box-shadow 0.2s ease, background-color 0.2s ease',
           boxShadow: '0 8px 22px rgba(246, 192, 27, 0.32)',
         } as object)
       : {}),
@@ -190,7 +190,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFD24D',
     ...(Platform.OS === 'web'
       ? ({
-          transform: 'translateY(-1px)',
           boxShadow: '0 12px 26px rgba(246, 192, 27, 0.45)',
         } as object)
       : {}),

@@ -283,11 +283,10 @@ const styles = StyleSheet.create({
   cardItemWrap: {
     borderRadius: 16,
     ...({
-      transition: 'transform 0.15s ease, box-shadow 0.2s ease',
+      transition: 'box-shadow 0.2s ease',
     } as object),
   },
   cardItemHovered: {
-    transform: [{ translateY: -2 }],
     ...({
       boxShadow: '0 10px 22px rgba(0,0,0,0.26)',
     } as object),
@@ -319,12 +318,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.14)',
     ...({
-      transition: 'transform 0.15s ease, box-shadow 0.2s ease',
+      transition: 'box-shadow 0.2s ease',
       boxShadow: '0 8px 20px rgba(0,0,0,0.34)',
     } as object),
   },
   headerButtonHovered: {
-    transform: [{ translateY: -2 }],
+    ...({
+      boxShadow: '0 12px 26px rgba(0,0,0,0.4)',
+    } as object),
   },
   headerButtonPressed: {
     opacity: 0.92,

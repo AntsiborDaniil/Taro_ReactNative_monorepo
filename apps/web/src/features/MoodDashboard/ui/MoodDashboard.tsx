@@ -409,11 +409,15 @@ const styles = StyleSheet.create({
   },
   moodChipHoverScreen:
     Platform.OS === 'web'
-      ? ({ transform: [{ translateY: -2 }] } as object)
+      ? ({
+          borderColor: 'rgba(255, 255, 255, 0.26)',
+        } as object)
       : {},
   moodChipHoverWidget:
     Platform.OS === 'web'
-      ? ({ transform: [{ translateY: -1 }] } as object)
+      ? ({
+          borderColor: 'rgba(255, 255, 255, 0.22)',
+        } as object)
       : {},
   moodChipPressed: {
     opacity: 0.9,

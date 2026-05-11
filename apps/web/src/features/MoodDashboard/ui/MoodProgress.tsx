@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   tarotCardPreviewHover:
     Platform.OS === 'web'
       ? ({
-          transform: [{ translateY: -3 }, { rotate: '2deg' }],
+          boxShadow: '0 12px 28px rgba(76, 53, 173, 0.42)',
         } as object)
       : {},
   tarotCardBack: {

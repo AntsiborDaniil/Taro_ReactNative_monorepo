@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     ...({
       cursor: 'pointer',
-      transition: 'transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease',
+      transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
       boxShadow: '0 8px 20px rgba(0,0,0,0.16)',
     } as object),
   },
@@ -139,14 +139,12 @@ const styles = StyleSheet.create({
     borderLeftColor: 'rgba(255, 176, 108, 0.85)',
   },
   choiceCardHovered: {
-    transform: [{ translateY: -2 }],
     borderColor: 'rgba(199, 182, 255, 0.4)',
     ...({
       boxShadow: '0 12px 24px rgba(0,0,0,0.22)',
     } as object),
   },
   choiceCardPressed: {
-    transform: [{ translateY: 0 }],
     opacity: 0.96,
   },
   choiceHeader: {

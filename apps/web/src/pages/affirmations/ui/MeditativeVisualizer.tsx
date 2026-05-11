@@ -260,12 +260,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.02)',
     overflow: 'hidden',
     ...({
-      transition: 'transform 0.16s ease, box-shadow 0.2s ease',
+      transition: 'box-shadow 0.2s ease',
       boxShadow: '0 14px 34px rgba(0,0,0,0.24)',
     } as object),
   },
   containerHovered: {
-    transform: [{ translateY: -2 }],
     ...({
       boxShadow: '0 18px 40px rgba(0,0,0,0.30)',
     } as object),

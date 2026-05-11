@@ -9,7 +9,6 @@ export const LIBRARY_PLATES: TRedirectPlate[] = [
     img: getImage(['core', `cardsDescriptions`]),
     tabRoute: TabRoute.LibraryTab,
     navigationRoute: NavigationRoute.CardsDictionary,
-    gradient: ['rgba(28, 30, 42, 0.93)', 'rgba(246, 192, 27, 0.2)'],
   },
   {
     id: 1,
@@ -19,7 +18,6 @@ export const LIBRARY_PLATES: TRedirectPlate[] = [
 
     tabRoute: TabRoute.LibraryTab,
     navigationRoute: NavigationRoute.SpreadsHistory,
-    gradient: ['rgba(28, 30, 42, 0.93)', 'rgba(47, 186, 216, 0.22)'],
   },
   {
     id: 2,
@@ -28,6 +26,5 @@ export const LIBRARY_PLATES: TRedirectPlate[] = [
     img: getImage(['core', `favoriteCards`]),
     tabRoute: TabRoute.LibraryTab,
     navigationRoute: NavigationRoute.FavoriteCards,
-    gradient: ['rgba(28, 30, 42, 0.93)', 'rgba(100, 152, 202, 0.24)'],
   },
 ];
