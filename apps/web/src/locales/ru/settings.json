@@ -18,6 +18,7 @@
   "sound.moon.notifications": "Уведомления о фазах Луны",
 
   "language": "Язык приложения",
+  "language.modal.subtitle": "Интерфейс обновится сразу, перезагрузка не нужна.",
   "account": "Личный кабинет",
 
   "hasReversed": "Перевернутые карты",

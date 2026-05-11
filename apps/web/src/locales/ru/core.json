@@ -91,6 +91,13 @@
   "nav.rail.collapse": "Свернуть боковую панель",
   "nav.rail.expand": "Развернуть боковую панель",
 
+  "a11y.back": "Назад",
+  "a11y.settings": "Открыть настройки",
+  "a11y.headerActions": "Дополнительные действия",
+  "a11y.horizontalList": "Горизонтальный список",
+  "a11y.suitsRow": "Масти и арканы",
+  "a11y.horizontalScrollHint": "Прокрутка ряда: два пальца по тачпаду, Shift и колёсико мыши или перетаскивание.",
+
   "stub.missingData.title": "Данные не найдены или устарели",
   "stub.missingData.button": "К раскладам",
   "stub.emptyResults": "Ничего не найдено",

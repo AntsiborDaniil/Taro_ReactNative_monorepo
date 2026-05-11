@@ -94,6 +94,13 @@
   "nav.rail.collapse": "Collapse sidebar",
   "nav.rail.expand": "Expand sidebar",
 
+  "a11y.back": "Go back",
+  "a11y.settings": "Open settings",
+  "a11y.headerActions": "Open actions",
+  "a11y.horizontalList": "Horizontal list",
+  "a11y.suitsRow": "Suits and arcanas",
+  "a11y.horizontalScrollHint": "Scroll this row: two-finger swipe on the trackpad, Shift + mouse wheel, or click and drag.",
+
   "stub.missingData.title": "Data not found or outdated",
   "stub.missingData.button": "Go to spreads",
   "stub.emptyResults": "Nothing found",

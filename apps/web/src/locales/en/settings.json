@@ -18,6 +18,7 @@
   "sound.moon.notifications": "Moon phase notifications",
 
   "language": "App language",
+  "language.modal.subtitle": "The interface updates right away — no reload needed.",
   "account": "Account",
 
   "hasReversed": "Reversed cards",

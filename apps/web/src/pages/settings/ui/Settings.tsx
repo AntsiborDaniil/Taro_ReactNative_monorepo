@@ -28,6 +28,7 @@ import { Button, ScreenLayout, SwitchElement, Text, TEXT_TAGS } from 'shared/ui'
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { APP_AGREEMENTS, getSettingsRoutes } from '../lib';
 import { useSettings } from '../model';
+import LanguagePickerModal from './Language/LanguagePickerModal';
 
 const WEB_ROW_KEYS_ACCOUNT = new Set(['account']);
 const WEB_ROW_KEYS_LOOK = new Set(['language', 'deck.style']);
@@ -39,6 +40,7 @@ function Settings() {
   const isWeb = Platform.OS === 'web';
   const { sceneContentWidth } = useTabRailLayout();
   const [storeModalOpen, setStoreModalOpen] = useState(false);
+  const [languageModalOpen, setLanguageModalOpen] = useState(false);
 
   const { handleChangeBase } = useSettings({
     hasAutoSave: true,
@@ -74,6 +76,11 @@ function Settings() {
     });
 
     await handleVibrationClick?.();
+
+    if (Platform.OS === 'web' && screen === NavigationRoute.Language) {
+      setLanguageModalOpen(true);
+      return;
+    }
 
     if (title === 'payments') {
       showModal?.(<PaidContent />);
@@ -376,6 +383,11 @@ function Settings() {
             </Pressable>
           </Pressable>
         </Modal>
+
+        <LanguagePickerModal
+          visible={languageModalOpen}
+          onClose={() => setLanguageModalOpen(false)}
+        />
       </ScreenLayout>
     );
   }

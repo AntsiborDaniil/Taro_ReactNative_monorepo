@@ -45,6 +45,7 @@ function CardsList({ selectedSuitOrArcana }: CardsListProps) {
     <CardsListBase
       onPressAnalytics={onPressCard}
       cards={cardsGroups[selectedSuitOrArcana] ?? []}
+      preferCompactTiles
     />
   );
 }

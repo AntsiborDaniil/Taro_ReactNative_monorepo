@@ -14,7 +14,9 @@ import {
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { COLORS, myTheme } from 'shared/themes';
 import RootNavigator from './src/app/navigation/RootNavigator';
+import { navigationRef } from './src/app/navigation/navigationRef';
 import GlobalProvider from './src/app/providers/GlobalProvider/ui/GlobalProvider';
+import { WebA11yRoot } from './src/app/providers/WebA11y';
 import {
   ApplicationConfigContext,
   useApplicationConfig,
@@ -106,7 +108,8 @@ export default function RootLayout() {
     <SafeAreaProvider style={{ backgroundColor: COLORS.Background }}>
       <ApplicationProvider {...eva} theme={{ ...eva.dark, ...myTheme }}>
         <DataProvider Context={LoadingsContext} value={loadingsContextData}>
-          <NavigationContainer>
+          <NavigationContainer ref={navigationRef}>
+            {Platform.OS === 'web' ? <WebA11yRoot /> : null}
             <ErrorBoundary FallbackComponent={TarotErrorBoundary}>
               <DataProvider
                 Context={UserContext}

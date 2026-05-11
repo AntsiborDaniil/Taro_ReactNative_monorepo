@@ -78,6 +78,7 @@ function HelloScreen() {
   const [isLastScreen, setIsLastScreen] = useState<boolean>(false);
 
   const { t } = useTranslation('hello');
+  const { t: tCore } = useTranslation('core');
 
   const { isLoading, handlePurchase, offerings } = useData({
     Context: PaymentContext,
@@ -148,6 +149,11 @@ function HelloScreen() {
 
   return (
     <SafeAreaView style={styles.modalOverlayWrapper}>
+      <View
+        style={styles.carouselA11yHost}
+        accessibilityLabel={tCore('a11y.horizontalList')}
+        accessibilityHint={tCore('a11y.horizontalScrollHint')}
+      >
       <Carousel
         ref={carouselRef}
         data={HELLO_SCREENS}
@@ -239,6 +245,7 @@ function HelloScreen() {
           );
         }}
       />
+      </View>
     </SafeAreaView>
   );
 }
@@ -246,6 +253,10 @@ function HelloScreen() {
 const styles = StyleSheet.create({
   modalOverlayWrapper: {
     backgroundColor: COLORS.Background,
+  },
+  carouselA11yHost: {
+    flex: 1,
+    width: '100%',
   },
   screenItem: {
     padding: 16,

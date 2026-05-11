@@ -1,5 +1,13 @@
 import React, { forwardRef, Ref, useCallback, useRef } from 'react';
-import { Animated, ListRenderItem, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import {
+  Animated,
+  ListRenderItem,
+  Platform,
+  StyleSheet,
+  View,
+  type ViewStyle,
+} from 'react-native';
 import { FlatList, GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   DEFAULT_DECELERATION_RATE,
@@ -10,6 +18,7 @@ import { CarouselProps, ForwardRefCarousel } from './types';
 const Carousel = forwardRef(
   <T,>(props: CarouselProps<T>, ref: Ref<FlatList<T>>) => {
     const scrollX = useRef(new Animated.Value(0)).current;
+    const { t } = useTranslation();
 
     const {
       data,
@@ -20,6 +29,9 @@ const Carousel = forwardRef(
       outerCarouselRef,
       carouselWidth,
       renderItemStyle,
+      style: listStyle,
+      accessibilityLabel: a11yLabel,
+      accessibilityHint: a11yHint,
       ...restProps
     } = props ?? {};
 
@@ -50,6 +62,14 @@ const Carousel = forwardRef(
       [scrollX]
     );
 
+    const webScrollStyle: ViewStyle | undefined =
+      Platform.OS === 'web'
+        ? ({
+            touchAction: 'pan-x',
+            overscrollBehaviorX: 'contain',
+          } as ViewStyle)
+        : undefined;
+
     return (
       <GestureHandlerRootView style={styles.container}>
         <Animated.View style={[styles.container, { maxWidth: carouselWidth }]}>
@@ -70,6 +90,10 @@ const Carousel = forwardRef(
             keyExtractor={(_, index) => index.toString()}
             decelerationRate={decelerationRate ?? DEFAULT_DECELERATION_RATE}
             onScroll={handleScroll}
+            accessibilityRole="list"
+            accessibilityLabel={a11yLabel ?? t('core:a11y.horizontalList')}
+            accessibilityHint={a11yHint ?? t('core:a11y.horizontalScrollHint')}
+            style={[webScrollStyle, listStyle]}
             {...restProps}
           />
         </Animated.View>

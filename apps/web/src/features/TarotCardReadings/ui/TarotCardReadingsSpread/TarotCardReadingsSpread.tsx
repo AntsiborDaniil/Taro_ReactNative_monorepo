@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   InteractionManager,
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -163,6 +164,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
   }, [cardIndex]);
 
   const { t } = useTranslation();
+  const { t: tCore } = useTranslation('core');
 
   const currentIndex = carouselRef.current?.getCurrentIndex();
 
@@ -265,16 +267,24 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
           horizontal
         />
       )}
-      <Carousel
-        ref={carouselRef}
-        data={carouselData}
-        onProgressChange={progress}
-        vertical={false}
-        loop={false}
-        width={carouselWidth}
-        height={carouselHeight}
-        style={styles.carousel}
-        renderItem={({ index }) => {
+      <View
+        style={styles.carouselA11yHost}
+        accessibilityLabel={tCore('a11y.horizontalList')}
+        accessibilityHint={tCore('a11y.horizontalScrollHint')}
+        {...(Platform.OS === 'web'
+          ? ({ className: 'tarot-web-scroll-x' } as { className?: string })
+          : {})}
+      >
+        <Carousel
+          ref={carouselRef}
+          data={carouselData}
+          onProgressChange={progress}
+          vertical={false}
+          loop={false}
+          width={carouselWidth}
+          height={carouselHeight}
+          style={styles.carousel}
+          renderItem={({ index }) => {
           const card = spread?.selectedCards?.[index - (hasSummary ? 1 : 0)];
 
           const isFirstCard = index < 1;
@@ -567,7 +577,8 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
             </ScrollView>
           );
         }}
-      />
+        />
+      </View>
     </View>
   );
 }
@@ -580,6 +591,11 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'relative',
     zIndex: 2,
+  },
+  carouselA11yHost: {
+    flex: 1,
+    minHeight: 0,
+    alignSelf: 'stretch',
   },
   carousel: {
     zIndex: 2,

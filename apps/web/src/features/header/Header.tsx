@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   StyleSheet,
   TextStyle,
@@ -19,6 +20,8 @@ interface CustomHeaderProps {
   backAction?: () => void; // Кастомное действие для кнопки "Назад" (опционально)
   rightAction?: (() => void) | null; // Опциональное действие справа (например, клик по иконке)
   rightContent?: React.ReactNode;
+  /** Подпись для кнопки справа (VoiceOver / TalkBack / веб) */
+  rightAccessibilityLabel?: string;
   leftContent?: React.ReactNode;
   rightIconName?: string; // Имя иконки для правого действия (из пакета eva)
   stylesWrapper?: StyleProp<ViewStyle>;
@@ -33,10 +36,12 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   rightAction,
   leftContent,
   rightContent,
+  rightAccessibilityLabel,
   stylesWrapper,
   titleStyle,
 }) => {
   const styles = useStyleSheet(themedStyles);
+  const { t } = useTranslation();
 
   const { handleBackPress } = useHeaderNavigation({
     backAction,
@@ -54,6 +59,9 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
           onPress={showBackButton ? handleBackPress : undefined}
           activeOpacity={0.7}
           hitSlop={{ top: 16, left: 16, bottom: 16, right: 16 }}
+          accessible={showBackButton}
+          accessibilityRole="button"
+          accessibilityLabel={t('core:a11y.back')}
         >
           <ChevronLeftIcon
             opacity={showBackButton ? 1 : 0}
@@ -80,6 +88,13 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
             onPress={rightAction}
             activeOpacity={0.7}
             hitSlop={{ top: 16, left: 16, bottom: 16, right: 16 }}
+            accessibilityRole="button"
+            accessibilityLabel={
+              rightAccessibilityLabel ??
+              (rightContent
+                ? t('core:a11y.headerActions')
+                : t('core:a11y.settings'))
+            }
           >
             {rightContent ?? (
               <SettingsIcon
