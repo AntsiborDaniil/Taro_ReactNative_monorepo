@@ -113,9 +113,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
   const { spread, dayCardHydrated, handleGetAIInterpretation } = useData({
     Context: SpreadContext,
   });
-  const { handleResetDaySuggest } = useData({
-    Context: SpreadContext,
-  });
 
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
@@ -124,7 +121,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
   const hasSummary = !spread || spread.category !== SpreadsCategory.Simple;
 
   const cardsCount = (spread?.cardsCount ?? 0) + (hasSummary ? 1 : 0);
-  const isDaySuggestSpread = spread?.id === SpreadName.Simple_DaySuggest;
 
   useEffect(() => {
     if (__DEV__) {
@@ -152,15 +148,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
       setTimeout(() => {
         rateAppAfterFinishedSpreads().catch(() => {});
       }, 1000);
-    });
-  };
-
-  const handleResetDayCard = async () => {
-    await handleVibrationClick?.();
-    await handleResetDaySuggest?.();
-
-    navigation.navigate(TabRoute.MainTab, {
-      screen: NavigationRoute.DayAdvice,
     });
   };
 
@@ -402,8 +389,8 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
           );
           const isDaySuggest = spread?.id === SpreadName.Simple_DaySuggest;
           const dayCardWidth = Math.max(
-            220,
-            Math.min(360, Math.round(carouselWidth * (carouselWidth < 900 ? 0.72 : 0.56)))
+            168,
+            Math.min(272, Math.round(carouselWidth * (carouselWidth < 900 ? 0.5 : 0.34))),
           );
           const dayCardHeight = Math.round((dayCardWidth / 9) * 16);
           const cardWidth = isDaySuggest ? dayCardWidth : readingCardWidth;
@@ -581,21 +568,8 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                       </View>
                     )}
 
-                    {isLastCard && (
-                      <View
-                        style={[
-                          styles.lastActions,
-                          isDaySuggestSpread && styles.lastActionsDaySuggest,
-                        ]}
-                      >
-                        {spread?.id === SpreadName.Simple_DaySuggest && (
-                          <Button
-                            style={[styles.actionButton, styles.resetDayButton]}
-                            onPress={handleResetDayCard}
-                          >
-                            {t('core:button.resetDayCard')}
-                          </Button>
-                        )}
+                    {isLastCard && spread?.id !== SpreadName.Simple_DaySuggest && (
+                      <View style={styles.lastActions}>
                         <Button style={[styles.actionButton, styles.doneButton]} onPress={handleDone}>
                           {t('core:finish')}
                         </Button>
@@ -711,9 +685,6 @@ const styles = StyleSheet.create({
     maxWidth: 320,
     alignSelf: 'center',
   },
-  lastActionsDaySuggest: {
-    marginTop: 6,
-  },
   actionButton: {
     width: '100%',
     minHeight: 50,
@@ -723,11 +694,6 @@ const styles = StyleSheet.create({
       boxShadow: '0 10px 22px rgba(0,0,0,0.30)',
       transitionDuration: '140ms',
     } as object),
-  },
-  resetDayButton: {
-    backgroundColor: 'rgba(17, 25, 40, 0.92)',
-    borderWidth: 1,
-    borderColor: 'rgba(147, 197, 253, 0.65)',
   },
   orderMeaning: {
     textAlign: 'center',
