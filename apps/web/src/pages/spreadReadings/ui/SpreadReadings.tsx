@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
@@ -61,7 +61,10 @@ const styles = StyleSheet.create({
     minHeight: 0,
     position: 'relative',
     zIndex: 1,
-    overflow: 'hidden',
+    ...Platform.select({
+      web: { overflow: 'visible' as const },
+      default: { overflow: 'hidden' },
+    }),
   },
 });
 

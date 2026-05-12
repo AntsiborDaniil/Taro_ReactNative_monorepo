@@ -80,9 +80,10 @@ function ScreenLayout({ children, style }: ScreenLayoutProps): ReactNode {
           style={StyleSheet.flatten([
             styles.layout,
             {
-              ...insets,
+              paddingLeft: insets.left,
+              paddingRight: insets.right,
+              paddingTop: Math.max(insets.top, isCompact ? 6 : 8),
               paddingBottom: insets.bottom,
-              paddingTop: isCompact ? 6 : 8,
               gap: isCompact ? 12 : 16,
             },
             style as StyleProp<ViewStyle>,

@@ -6,9 +6,11 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  type LayoutChangeEvent,
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { LikeCard } from 'entities/favorites';
@@ -54,13 +56,34 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
 
   const { sceneContentWidth } = useTabRailLayout();
   const { height: windowHeight } = useWindowDimensions();
+  const tabBarHeight = useBottomTabBarHeight();
   const carouselWidth = sceneContentWidth;
-  /** Не выше окна минус хедер/табы — иначе карусель перекрывает шапку и блокирует «Назад». */
-  const reservedChrome = 220;
-  const carouselHeight = Math.min(
-    600,
-    Math.max(320, windowHeight - reservedChrome),
+  const reservedChrome = 200 + tabBarHeight;
+  const [measuredCarouselHeight, setMeasuredCarouselHeight] = useState<
+    number | null
+  >(null);
+  const fallbackCarouselHeight = Math.max(
+    280,
+    Math.floor(windowHeight - reservedChrome),
   );
+  const carouselHeight = Math.max(
+    220,
+    measuredCarouselHeight ?? fallbackCarouselHeight,
+  );
+
+  const onCarouselSlotLayout = (event: LayoutChangeEvent) => {
+    const h = Math.round(event.nativeEvent.layout.height);
+    if (h < 1) {
+      return;
+    }
+    setMeasuredCarouselHeight((prev) =>
+      prev === null || Math.abs(prev - h) > 2 ? h : prev,
+    );
+  };
+
+  useEffect(() => {
+    setMeasuredCarouselHeight(null);
+  }, [windowHeight, tabBarHeight, sceneContentWidth]);
 
   const { selectedTab } = useData({ Context: TabsAndRoutesContext });
 
@@ -112,7 +135,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
         carouselHeight,
       });
     }
-  }, [sceneContentWidth, windowHeight, carouselWidth, carouselHeight]);
+  }, [sceneContentWidth, windowHeight, carouselWidth, carouselHeight, tabBarHeight]);
 
   const handleDone = async () => {
     await handleVibrationClick?.();
@@ -269,6 +292,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
       )}
       <View
         style={styles.carouselA11yHost}
+        onLayout={onCarouselSlotLayout}
         accessibilityLabel={tCore('a11y.horizontalList')}
         accessibilityHint={tCore('a11y.horizontalScrollHint')}
         {...(Platform.OS === 'web'
@@ -292,7 +316,10 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
 
           if (!card) {
             return (
-              <ScrollView key={index} style={styles.summaryWrapper}>
+              <ScrollView
+                key={index}
+                style={[styles.carouselItemScroll, styles.summaryWrapper]}
+              >
                 <SafeAreaView style={styles.content}>
                   <View style={styles.contentInner}>
                     <View style={styles.paddingWrapper}>
@@ -385,7 +412,10 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
           return (
             <ScrollView
               key={index}
-              contentContainerStyle={isDaySuggest ? styles.daySuggestScrollContent : undefined}
+              style={styles.carouselItemScroll}
+              contentContainerStyle={
+                isDaySuggest ? styles.daySuggestScrollInner : undefined
+              }
             >
               <SafeAreaView style={[styles.content, isDaySuggest && styles.daySuggestContent]}>
                 <View style={[styles.contentInner, isDaySuggest && styles.daySuggestContentInner]}>
@@ -599,6 +629,10 @@ const styles = StyleSheet.create({
   },
   carousel: {
     zIndex: 2,
+    ...Platform.select({
+      web: { overflow: 'visible' as const },
+      default: {},
+    }),
   },
   paddingWrapper: {
     paddingHorizontal: 16,
@@ -614,18 +648,20 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     marginBottom: 32,
   },
-  daySuggestScrollContent: {
-    flexGrow: 1,
+  daySuggestScrollInner: {
+    paddingBottom: 24,
   },
   daySuggestContent: {
-    flex: 1,
-    justifyContent: 'center',
     marginBottom: 0,
     paddingBottom: 12,
   },
   daySuggestContentInner: {
     marginBottom: 0,
     gap: 16,
+  },
+  carouselItemScroll: {
+    width: '100%',
+    height: '100%',
   },
   summaryWrapper: {
     position: 'relative',
@@ -661,7 +697,7 @@ const styles = StyleSheet.create({
   buttons: {
     flexDirection: 'row',
     gap: 16,
-    flex: 1,
+    width: '100%',
     justifyContent: 'space-between',
   },
   doneButton: {
