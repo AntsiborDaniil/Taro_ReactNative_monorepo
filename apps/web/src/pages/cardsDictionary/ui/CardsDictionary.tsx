@@ -41,7 +41,7 @@ function CardsDictionary() {
 
 const styles = StyleSheet.create({
   wrapper: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
   },
   content: {
     paddingBottom: 28,
