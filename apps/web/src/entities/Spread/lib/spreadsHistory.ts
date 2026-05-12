@@ -1,12 +1,48 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { v4 as uuidv4 } from 'uuid';
-import { TSpread } from 'shared/api';
+import {
+  SpreadName,
+  TSpread,
+  authCredentials,
+  authRequestHeaders,
+  getTarotAiApiBaseUrl,
+} from 'shared/api';
 import {
   AsyncMemoryKey,
   getTodayISO,
   getValueForAsyncDeviceMemoryKey,
   saveAsyncDeviceMemoryKey,
 } from 'shared/lib';
+import { emitTarotAuthChanged } from 'shared/lib/tarotAuthEvents';
+import { isGuestFreeSpreadId } from 'shared/lib/tarotGuestSpreads';
+
+async function consumeTarotDailySlotOnServer(): Promise<boolean> {
+  if (Platform.OS !== 'web') {
+    return true;
+  }
+  try {
+    const res = await fetch(
+      `${getTarotAiApiBaseUrl()}/api/tarot/daily/consume`,
+      {
+        method: 'POST',
+        credentials: authCredentials(),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Web-Cookie-Auth': '1',
+          ...authRequestHeaders(null),
+        },
+      }
+    );
+    if (res.ok) {
+      emitTarotAuthChanged();
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
 
 export async function getLastSpreadsPackIndex(): Promise<number> {
   try {
@@ -80,19 +116,31 @@ export async function saveSpread(
 
     await AsyncStorage.setItem(packKey, JSON.stringify(pack));
 
-    const currentAmountSpreads = await getValueForAsyncDeviceMemoryKey<
-      Record<string, string>
-    >(AsyncMemoryKey.LimitOfSpreads);
-
-    await saveAsyncDeviceMemoryKey<Record<string, string>>(
-      AsyncMemoryKey.LimitOfSpreads,
-      {
-        ...(currentAmountSpreads || {}),
-        [getTodayISO()]: String(
-          Number(currentAmountSpreads?.[getTodayISO()] ?? '0') + 1
-        ),
+    if (Platform.OS === 'web') {
+      const skipServerQuota = isGuestFreeSpreadId(spread.id);
+      if (!skipServerQuota) {
+        const consumed = await consumeTarotDailySlotOnServer();
+        if (!consumed) {
+          pack.shift();
+          await AsyncStorage.setItem(packKey, JSON.stringify(pack));
+          return undefined;
+        }
       }
-    );
+    } else {
+      const currentAmountSpreads = await getValueForAsyncDeviceMemoryKey<
+        Record<string, string>
+      >(AsyncMemoryKey.LimitOfSpreads);
+
+      await saveAsyncDeviceMemoryKey<Record<string, string>>(
+        AsyncMemoryKey.LimitOfSpreads,
+        {
+          ...(currentAmountSpreads || {}),
+          [getTodayISO()]: String(
+            Number(currentAmountSpreads?.[getTodayISO()] ?? '0') + 1
+          ),
+        }
+      );
+    }
 
     return savedSpread;
   } catch (error) {

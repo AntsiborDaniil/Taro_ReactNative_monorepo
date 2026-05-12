@@ -1,11 +1,15 @@
 import { ReactElement } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { MoodAndEnergyContext } from 'entities/moodAndEnergy';
+import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
 import { MoodDashboard } from 'features/MoodDashboard';
 import { useData } from 'shared/DataProvider';
-import { ScreenLayout } from 'shared/ui';
+import { useNativeNavigation } from 'shared/hooks';
+import { COLORS } from 'shared/themes';
+import { NavigationRoute, TabRoute } from 'shared/types';
+import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { InputSlider } from 'shared/ui/Slider/Slider';
 
 import { useMoodAndEnergyLayout } from './useMoodAndEnergyLayout';
@@ -15,10 +19,42 @@ export type MoodAndEnergyScreenProps = {};
 function MoodAndEnergyScreen(_props: MoodAndEnergyScreenProps): ReactElement {
   const { t } = useTranslation('moodAndEnergy');
   const layout = useMoodAndEnergyLayout();
+  const navigation = useNativeNavigation();
+
+  const { isAuthenticated, authSessionLoading } = useData({
+    Context: UserContext,
+  });
 
   const { displayData, updateTodayMood } = useData({
     Context: MoodAndEnergyContext,
   });
+
+  if (
+    Platform.OS === 'web' &&
+    !authSessionLoading &&
+    isAuthenticated === false
+  ) {
+    return (
+      <ScreenLayout>
+        <Header title={t('core:yourState')} />
+        <View style={styles.authGate}>
+          <Text category={TEXT_TAGS.p1} style={styles.authGateText}>
+            {t('signInRequired.body')}
+          </Text>
+          <Button
+            style={styles.authGateButton}
+            onPress={() =>
+              navigation.navigate(TabRoute.LibraryTab, {
+                screen: NavigationRoute.Auth,
+              })
+            }
+          >
+            {t('signInRequired.cta')}
+          </Button>
+        </View>
+      </ScreenLayout>
+    );
+  }
 
   return (
     <ScreenLayout>
@@ -104,6 +140,24 @@ const styles = StyleSheet.create({
   sliders: {
     paddingTop: 8,
     paddingBottom: 4,
+  },
+  authGate: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    gap: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    maxWidth: 420,
+    alignSelf: 'center',
+  },
+  authGateText: {
+    textAlign: 'center',
+    color: COLORS.SpbSky1,
+    lineHeight: 22,
+  },
+  authGateButton: {
+    minWidth: 220,
   },
 });
 

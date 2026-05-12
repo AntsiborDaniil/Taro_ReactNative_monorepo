@@ -28,6 +28,7 @@ import {
   authUsesCookie,
   getTarotAiApiBaseUrl,
 } from 'shared/api';
+import { emitTarotAuthChanged } from 'shared/lib/tarotAuthEvents';
 import { COLORS } from 'shared/themes';
 import { PressableWebState } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -228,16 +229,17 @@ function Auth() {
 
           if (!response.ok) {
             setSession(null);
-            setIsSessionLoading(false);
-            return;
+          } else {
+            const meResponse = (await response.json()) as { user: AuthUser };
+            setSession({ token: null, user: meResponse.user });
           }
-
-          const meResponse = (await response.json()) as { user: AuthUser };
-          setSession({ token: null, user: meResponse.user });
         } catch {
           setSession(null);
         } finally {
           setIsSessionLoading(false);
+          if (Platform.OS === 'web') {
+            emitTarotAuthChanged();
+          }
         }
         return;
       }
@@ -245,6 +247,9 @@ function Auth() {
       const savedSession = await AsyncStorage.getItem(AUTH_SESSION_STORAGE_KEY);
       if (!savedSession) {
         setIsSessionLoading(false);
+        if (Platform.OS === 'web') {
+          emitTarotAuthChanged();
+        }
         return;
       }
 
@@ -258,6 +263,9 @@ function Auth() {
           await AsyncStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
           setSession(null);
           setIsSessionLoading(false);
+          if (Platform.OS === 'web') {
+            emitTarotAuthChanged();
+          }
           return;
         }
 
@@ -271,6 +279,9 @@ function Auth() {
           await AsyncStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
           setSession(null);
           setIsSessionLoading(false);
+          if (Platform.OS === 'web') {
+            emitTarotAuthChanged();
+          }
           return;
         }
 
@@ -285,6 +296,9 @@ function Auth() {
         setSession(null);
       } finally {
         setIsSessionLoading(false);
+        if (Platform.OS === 'web') {
+          emitTarotAuthChanged();
+        }
       }
     };
 
@@ -374,6 +388,9 @@ function Auth() {
           ? t('settings:auth.success.subtitle.cookie')
           : t('settings:auth.success.subtitle'),
       });
+      if (Platform.OS === 'web') {
+        emitTarotAuthChanged();
+      }
     } catch {
       Toast.show({
         type: 'error',
@@ -537,6 +554,9 @@ function Auth() {
     setAddCardModalVisible(false);
     setGuestAuthEpoch((n) => n + 1);
     setSession(null);
+    if (Platform.OS === 'web') {
+      emitTarotAuthChanged();
+    }
     Toast.show({
       type: 'success',
       text1: t('settings:auth.signOutSuccess'),

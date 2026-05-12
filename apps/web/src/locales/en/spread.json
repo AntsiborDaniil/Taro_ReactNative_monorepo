@@ -21,6 +21,18 @@
   "limit.title": "Daily layout limit exceeded!",
   "limit.body": "Become a Tarot Practitioner or wait for a new day.",
 
+  "dailyLimit.title": "Daily spread limit reached",
+  "dailyLimit.body": "You can complete up to 10 spreads per day while signed in. Try again tomorrow.",
+
+  "signInRequired.title": "Sign in to use spreads",
+  "signInRequired.body": "Tarot spreads are available only with an account. Sign in or create one to continue.",
+  "signInRequired.cta": "Open account",
+
+  "guestSpread.badge": "No sign-in",
+  "guestCatalog.banner": "“Yes or No” and “Daily advice” are available without signing in — look for the badge on the cards.",
+
+  "yesNo.guestInterpretation": "Your yes or no follows from the card meaning above. Sign in for a personalized AI reading tied to your question.",
+
   "thematic_relationship.name": "Relationships",
   "thematic_relationship.description": "The \"Relationships\" spread will help deeply analyze romantic connection from six key perspectives. It reveals mutual feelings of partners, their potential in relationships and provides wise advice for harmonious union development.",
   "thematic_relationship.сardMeaning.0": "Your feelings",

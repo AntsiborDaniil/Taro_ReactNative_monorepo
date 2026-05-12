@@ -33,7 +33,7 @@ export default function SpreadsGroups() {
 
   return (
     <ScreenLayout style={styles.wrapper}>
-      <Header title={t('core:page.spreadsHistory')} />
+      <Header showBackButton={false} title={t('core:page.spreadsHistory')} />
       {/*<ScrollView>*/}
       {spreadsSections.length ? (
         <SectionList

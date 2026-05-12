@@ -14,7 +14,6 @@ import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { ScreenLayout, Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { LIBRARY_PLATES } from '../lib';
-import SubscriptionsBanner from './SubscriptionsBanner';
 import { useLibraryLayout } from './useLibraryLayout';
 
 function Library() {
@@ -91,16 +90,9 @@ function Library() {
           >
             {t('core:library.intro.lead')}
           </Text>
-          {!isPractitioner ? (
-            <View style={{ marginTop: Math.round(layout.gap * 0.65) }}>
-              <SubscriptionsBanner layout={layout} />
-            </View>
-          ) : null}
           <View
             style={{
-              marginTop: !isPractitioner
-                ? Math.round(layout.gap * 0.75)
-                : Math.round(layout.gap * 0.35),
+              marginTop: Math.round(layout.gap * 0.65),
             }}
           >
             <Text

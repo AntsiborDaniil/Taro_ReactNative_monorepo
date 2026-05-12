@@ -35,6 +35,7 @@ function SpreadReadings() {
     <ScreenLayout>
       <View style={styles.headerWrap}>
         <Header
+          showBackButton={false}
           title={t(spread?.name ?? '')}
           rightContent={
             <CopyIcon width={isTablet ? 32 : 24} height={isTablet ? 32 : 24} />

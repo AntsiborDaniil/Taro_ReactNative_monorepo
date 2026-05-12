@@ -23,6 +23,8 @@ type SpreadCatalogCardProps = {
   width: DimensionValue;
   imageAreaHeight?: number;
   isLocked?: boolean;
+  /** Чип на превью: простой расклад доступен гостю (веб). */
+  guestNoAuthBadge?: boolean;
   onPress: () => void;
   layout: SpreadsLayout;
 };
@@ -33,10 +35,12 @@ function SpreadCatalogCard({
   width,
   imageAreaHeight,
   isLocked = false,
+  guestNoAuthBadge = false,
   onPress,
   layout,
 }: SpreadCatalogCardProps) {
   const { t } = useTranslation();
+  const { t: tSpread } = useTranslation('spread');
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);
 
@@ -71,10 +75,15 @@ function SpreadCatalogCard({
   const onHoverIn = useCallback(() => setHovered(true), []);
   const onHoverOut = useCallback(() => setHovered(false), []);
 
+  const a11yHint = isLocked
+    ? t('core:spreads.catalog.hintLocked')
+    : t('core:spreads.catalog.hint');
+  const a11yBadge = guestNoAuthBadge ? ` ${tSpread('guestSpread.badge')}.` : '';
+
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${title}. ${isLocked ? t('core:spreads.catalog.hintLocked') : t('core:spreads.catalog.hint')}`}
+      accessibilityLabel={`${title}. ${a11yHint}${a11yBadge}`}
       onPress={onPress}
       onHoverIn={onHoverIn}
       onHoverOut={onHoverOut}
@@ -103,6 +112,21 @@ function SpreadCatalogCard({
             style={[styles.imageFade, { height: layout.imageFadeHeight }]}
           />
         </View>
+        {guestNoAuthBadge && (
+          <LinearGradient
+            colors={[
+              'rgba(255, 252, 248, 0.96)',
+              'rgba(236, 244, 255, 0.94)',
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.guestBadge}
+          >
+            <Text category={TEXT_TAGS.label} style={styles.guestBadgeText}>
+              {tSpread('guestSpread.badge')}
+            </Text>
+          </LinearGradient>
+        )}
         {isLocked && (
           <OverlayIcon>
             <LockIcon
@@ -213,6 +237,37 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     pointerEvents: 'none',
+  },
+  guestBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: getColorOpacity(COLORS.Secondary, 0.35),
+    maxWidth: '78%',
+    ...Platform.select({
+      web: {
+        boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
+      },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 4,
+      },
+    }),
+  },
+  guestBadgeText: {
+    color: COLORS.Background,
+    letterSpacing: 0.2,
+    fontWeight: '600',
+    fontSize: 11,
+    lineHeight: 14,
   },
   lockIcon: {},
   textBlock: {

@@ -21,7 +21,7 @@ import {
   ApplicationConfigContext,
   useApplicationConfig,
 } from './src/entities/ApplicationConfig';
-import { UserContext } from './src/entities/user';
+import { UserContext, WebUserSessionProvider } from './src/entities/user';
 import AnimatedSplashScreen from './src/features/splash/ui/AnimatedSplashScreen';
 import { SubscriptionType } from './src/shared/api';
 import { LoadingsContext, useLoadings } from './src/shared/contexts/Loadings';
@@ -111,29 +111,46 @@ export default function RootLayout() {
           <NavigationContainer ref={navigationRef}>
             {Platform.OS === 'web' ? <WebA11yRoot /> : null}
             <ErrorBoundary FallbackComponent={TarotErrorBoundary}>
-              <DataProvider
-                Context={UserContext}
-                value={{
-                  customerInfo: null,
-                  subscriptionType: SubscriptionType.Freemium,
-                  setSubscriptionType: () => {},
-                  isPractitioner: false,
-                }}
-                key="UserContext"
-              >
+              {Platform.OS === 'web' ? (
+                <WebUserSessionProvider>
+                  <DataProvider
+                    Context={ApplicationConfigContext}
+                    value={applicationConfigContextData}
+                    key="ApplicationConfigContext"
+                  >
+                    <GlobalProvider>
+                      <RootNavigator />
+                    </GlobalProvider>
+                    <AIAnimation
+                      hasVibration={applicationConfigContextData.sound?.vibration}
+                    />
+                  </DataProvider>
+                </WebUserSessionProvider>
+              ) : (
                 <DataProvider
-                  Context={ApplicationConfigContext}
-                  value={applicationConfigContextData}
-                  key="ApplicationConfigContext"
+                  Context={UserContext}
+                  value={{
+                    customerInfo: null,
+                    subscriptionType: SubscriptionType.Freemium,
+                    setSubscriptionType: () => {},
+                    isPractitioner: false,
+                  }}
+                  key="UserContext"
                 >
-                  <GlobalProvider>
-                    <RootNavigator />
-                  </GlobalProvider>
-                  <AIAnimation
-                    hasVibration={applicationConfigContextData.sound?.vibration}
-                  />
+                  <DataProvider
+                    Context={ApplicationConfigContext}
+                    value={applicationConfigContextData}
+                    key="ApplicationConfigContext"
+                  >
+                    <GlobalProvider>
+                      <RootNavigator />
+                    </GlobalProvider>
+                    <AIAnimation
+                      hasVibration={applicationConfigContextData.sound?.vibration}
+                    />
+                  </DataProvider>
                 </DataProvider>
-              </DataProvider>
+              )}
             </ErrorBoundary>
           </NavigationContainer>
         </DataProvider>

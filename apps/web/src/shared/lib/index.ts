@@ -5,4 +5,6 @@ export * from './random';
 export * from './tarotCardReadings';
 export * from './responsive';
 export * from './habits';
+export * from './tarotAuthEvents';
+export * from './tarotGuestSpreads';
 export * from './web';

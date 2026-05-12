@@ -1,16 +1,19 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
+import { LinearGradient } from 'expo-linear-gradient';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
 import { PaidContent } from 'features/paidContent';
+import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { DeckStyle } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { blurActiveElement, getImage } from 'shared/lib';
+import { blurActiveElement, getImage, isGuestFreeSpreadId } from 'shared/lib';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
+import { COLORS, getColorOpacity } from 'shared/themes';
 import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 
@@ -21,7 +24,7 @@ export default function Spreads() {
   const layout = useSpreadsLayout();
 
   const { showModal } = useData({ Context: ModalsContext });
-  const { subscriptionType } = useData({ Context: UserContext });
+  const { subscriptionType, isAuthenticated } = useData({ Context: UserContext });
   const { selectSpread, spreadsSections } = useData({
     Context: SpreadContext,
   });
@@ -30,13 +33,16 @@ export default function Spreads() {
   });
 
   const { t } = useTranslation();
+  const { t: tSpread } = useTranslation('spread');
 
   const navigation = useNativeNavigation();
+
+  const showWebGuestBanner = Platform.OS === 'web' && !isAuthenticated;
 
   return (
     <ScreenLayout>
       <Header
-        showBackButton={true}
+        showBackButton={false}
         title={t('core:page.spreadsGroups')}
         titleStyle={layout.columns === 1 ? spreadsHeaderTitle.mobile : undefined}
       />
@@ -60,6 +66,22 @@ export default function Spreads() {
         >
           <View style={[styles.decorOrb, styles.decorOrbTop]} />
           <View style={[styles.decorOrb, styles.decorOrbBottom]} />
+          {showWebGuestBanner && (
+            <LinearGradient
+              colors={[
+                getColorOpacity(COLORS.Primary, 0.35),
+                getColorOpacity('#4A7AE8', 0.22),
+                getColorOpacity(COLORS.Background2, 0.08),
+              ]}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              style={styles.guestBanner}
+            >
+              <Text category={TEXT_TAGS.p2} style={styles.guestBannerText}>
+                {tSpread('guestCatalog.banner')}
+              </Text>
+            </LinearGradient>
+          )}
           {!!spreadsSections?.length &&
             spreadsSections.map((data) => (
               <View
@@ -93,6 +115,10 @@ export default function Spreads() {
                         subscriptionItem === subscriptionType
                     );
 
+                    const guestFree = isGuestFreeSpreadId(item.id);
+                    const guestBadge =
+                      Platform.OS === 'web' && !isAuthenticated && guestFree;
+
                     return (
                       <SpreadCatalogCard
                         key={item.id}
@@ -104,6 +130,7 @@ export default function Spreads() {
                           item.id,
                         ])}
                         isLocked={isLocked}
+                        guestNoAuthBadge={guestBadge}
                         width={layout.cardWidth}
                         imageAreaHeight={layout.previewHeight}
                         onPress={async () => {
@@ -120,6 +147,15 @@ export default function Spreads() {
 
                           if (isLocked) {
                             showModal?.(<PaidContent />);
+                            return;
+                          }
+
+                          if (
+                            Platform.OS === 'web' &&
+                            !isAuthenticated &&
+                            !guestFree
+                          ) {
+                            showModal?.(<SignInForSpreadsModal />);
                             return;
                           }
 
@@ -207,5 +243,25 @@ const styles = StyleSheet.create({
     left: -56,
     bottom: -16,
     backgroundColor: 'rgba(58, 122, 216, 0.12)',
+  },
+  guestBanner: {
+    width: '100%',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: getColorOpacity(COLORS.SpbSky1, 0.45),
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    zIndex: 1,
+    ...(globalThis?.window
+      ? ({
+          boxShadow: '0 8px 24px rgba(10, 20, 40, 0.28)',
+        } as object)
+      : {}),
+  },
+  guestBannerText: {
+    color: '#EEF3FF',
+    letterSpacing: 0.2,
+    lineHeight: 22,
+    textAlign: 'center',
   },
 });

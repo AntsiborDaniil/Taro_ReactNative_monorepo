@@ -8,5 +8,8 @@
   "progress.howAreYou": "Find out how you feel today",
   "progress.assess": "Assess your condition",
   "progress.createCard": "Create card",
-  "progress": "Progress"
+  "progress": "Progress",
+  "signInRequired.title": "Sign in to track your state",
+  "signInRequired.body": "Recording mood and energy is available only with an account.",
+  "signInRequired.cta": "Open account"
 }

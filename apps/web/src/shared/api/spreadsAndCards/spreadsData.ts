@@ -46,7 +46,10 @@ export const thematicSpreads: Record<string, TSpread> = {
     cardsCount: 6,
     cardsPosition: [],
     selectedCards: [],
-    availableSubscriptions: [SubscriptionType.Practice],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
     cardsOrder: [
       {
         meaning: 'thematic_relationship.сardMeaning.0',
@@ -77,7 +80,10 @@ export const thematicSpreads: Record<string, TSpread> = {
     cardsCount: 9,
     cardsPosition: [],
     selectedCards: [],
-    availableSubscriptions: [SubscriptionType.Practice],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
     cardsOrder: [
       {
         meaning: 'thematic_careerFinance.сardMeaning.0',
@@ -117,7 +123,10 @@ export const thematicSpreads: Record<string, TSpread> = {
     cardsCount: 6,
     cardsPosition: [],
     selectedCards: [],
-    availableSubscriptions: [SubscriptionType.Practice],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
     cardsOrder: [
       {
         meaning: 'thematic_love.сardMeaning.0',
@@ -152,7 +161,10 @@ export const universalSpreads: Record<string, TSpread> = {
     horizontalPosition: [0],
     cardsPosition: [],
     selectedCards: [],
-    availableSubscriptions: [SubscriptionType.Practice],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
     cardsOrder: [
       {
         meaning: 'universal_celticCross.сardMeaning.0',
@@ -195,7 +207,10 @@ export const universalSpreads: Record<string, TSpread> = {
     cardsCount: 10,
     cardsPosition: [],
     selectedCards: [],
-    availableSubscriptions: [SubscriptionType.Practice],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
     cardsOrder: [
       {
         meaning: 'universal_pyramid.сardMeaning.0',
@@ -229,55 +244,58 @@ export const universalSpreads: Record<string, TSpread> = {
       },
     ],
   },
-  // flame: {
-  //   name: 'spread:universal_flame.name',
-  //   description: 'spread:universal_flame.description',
-  //   id: SpreadName.Universal_Flame,
-  //   category: SpreadsCategory.Universal,
-  //   img: '',
-  //   cardsCount: 12,
-  //   cardsPosition: [],
-  //   selectedCards: [],
-  //   availableSubscriptions: [SubscriptionType.Practice],
-  //   cardsOrder: [
-  //     {
-  //       meaning: 'universal_flame.сardMeaning.0',
-  //     },
-  //     {
-  //       meaning: 'universal_flame.сardMeaning.1',
-  //     },
-  //     {
-  //       meaning: 'universal_flame.сardMeaning.2',
-  //     },
-  //     {
-  //       meaning: 'universal_flame.сardMeaning.3',
-  //     },
-  //     {
-  //       meaning: 'universal_flame.сardMeaning.4',
-  //     },
-  //     {
-  //       meaning: 'universal_flame.сardMeaning.5',
-  //     },
-  //     {
-  //       meaning: 'universal_flame.сardMeaning.6',
-  //     },
-  //     {
-  //       meaning: 'universal_flame.сardMeaning.7',
-  //     },
-  //     {
-  //       meaning: 'universal_flame.сardMeaning.8',
-  //     },
-  //     {
-  //       meaning: 'universal_flame.сardMeaning.9',
-  //     },
-  //     {
-  //       meaning: 'universal_flame.сardMeaning.10',
-  //     },
-  //     {
-  //       meaning: 'universal_flame.сardMeaning.11',
-  //     },
-  //   ],
-  // },
+  flame: {
+    name: 'spread:universal_flame.name',
+    description: 'spread:universal_flame.description',
+    id: SpreadName.Universal_Flame,
+    category: SpreadsCategory.Universal,
+    img: '',
+    cardsCount: 12,
+    cardsPosition: [],
+    selectedCards: [],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
+    cardsOrder: [
+      {
+        meaning: 'universal_flame.сardMeaning.0',
+      },
+      {
+        meaning: 'universal_flame.сardMeaning.1',
+      },
+      {
+        meaning: 'universal_flame.сardMeaning.2',
+      },
+      {
+        meaning: 'universal_flame.сardMeaning.3',
+      },
+      {
+        meaning: 'universal_flame.сardMeaning.4',
+      },
+      {
+        meaning: 'universal_flame.сardMeaning.5',
+      },
+      {
+        meaning: 'universal_flame.сardMeaning.6',
+      },
+      {
+        meaning: 'universal_flame.сardMeaning.7',
+      },
+      {
+        meaning: 'universal_flame.сardMeaning.8',
+      },
+      {
+        meaning: 'universal_flame.сardMeaning.9',
+      },
+      {
+        meaning: 'universal_flame.сardMeaning.10',
+      },
+      {
+        meaning: 'universal_flame.сardMeaning.11',
+      },
+    ],
+  },
   horseshoe: {
     name: 'spread:universal_horseshoe.name',
     description: 'spread:universal_horseshoe.description',
@@ -287,7 +305,10 @@ export const universalSpreads: Record<string, TSpread> = {
     cardsCount: 7,
     cardsPosition: [],
     selectedCards: [],
-    availableSubscriptions: [SubscriptionType.Practice],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
     cardsOrder: [
       {
         meaning: 'universal_horseshoe.сardMeaning.0',
@@ -324,7 +345,10 @@ export const selfDevelopmentSpreads: Record<string, TSpread> = {
     cardsCount: 10,
     cardsPosition: [],
     selectedCards: [],
-    availableSubscriptions: [SubscriptionType.Practice],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
     cardsOrder: [
       {
         meaning: 'selfDevelopment_mirror.сardMeaning.0',
@@ -401,7 +425,10 @@ export const choiceSpreads: Record<string, TSpread> = {
     cardsCount: 7,
     cardsPosition: [],
     selectedCards: [],
-    availableSubscriptions: [SubscriptionType.Practice],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
     cardsOrder: [
       {
         meaning: 'choice_twoPaths.сardMeaning.0',
@@ -435,7 +462,10 @@ export const choiceSpreads: Record<string, TSpread> = {
     cardsCount: 9,
     cardsPosition: [],
     selectedCards: [],
-    availableSubscriptions: [SubscriptionType.Practice],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
     cardsOrder: [
       {
         meaning: 'choice_crossroad.сardMeaning.0',
@@ -502,7 +532,7 @@ export const spreadsData: TSpreadCategory[] = [
     spreads: [
       universalSpreads.celticCross,
       universalSpreads.pyramid,
-      // universalSpreads.flame,
+      universalSpreads.flame,
       universalSpreads.horseshoe,
     ],
   },

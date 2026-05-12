@@ -4,10 +4,11 @@ import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
 import { PaidContent } from 'features/paidContent';
+import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { DeckStyle, TSpread } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { getImage, horizontalScale } from 'shared/lib';
+import { getImage, horizontalScale, isGuestFreeSpreadId } from 'shared/lib';
 import {
   AnalyticAction,
   ImagePosition,
@@ -16,6 +17,7 @@ import {
 } from 'shared/types';
 import { TileCard } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
+import { Platform } from 'react-native';
 
 type SmallSpreadCardProps = {
   spread: TSpread;
@@ -31,13 +33,22 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
     Context: ApplicationConfigContext,
   });
 
-  const { subscriptionType } = useData({ Context: UserContext });
+  const { subscriptionType, isAuthenticated } = useData({
+    Context: UserContext,
+  });
 
   const { showModal } = useData({ Context: ModalsContext });
 
-  const isLocked = !spread?.availableSubscriptions.some(
-    (subscriptionItem) => subscriptionItem === subscriptionType
-  );
+  const isSubscriptionLocked =
+    !spread?.availableSubscriptions.some(
+      (subscriptionItem) => subscriptionItem === subscriptionType
+    );
+
+  const guestFree = isGuestFreeSpreadId(spread?.id);
+
+  const isLocked =
+    (Platform.OS === 'web' && !isAuthenticated && !guestFree) ||
+    (Platform.OS !== 'web' && isSubscriptionLocked);
 
   const { selectSpread } = useData({
     Context: SpreadContext,
@@ -63,6 +74,11 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
         }
 
         await handleVibrationClick?.();
+
+        if (Platform.OS === 'web' && !isAuthenticated && !guestFree) {
+          showModal?.(<SignInForSpreadsModal />);
+          return;
+        }
 
         if (isLocked) {
           showModal?.(<PaidContent />);

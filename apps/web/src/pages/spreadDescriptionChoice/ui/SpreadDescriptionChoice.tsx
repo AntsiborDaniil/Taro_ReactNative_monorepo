@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
-import * as Notifications from 'expo-notifications';
 import { useTranslation } from 'react-i18next';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Header } from 'features/header';
-import { PaidContent } from 'features/paidContent';
+import { DailyTarotLimitModal, SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import Question from 'features/Question/ui/Question';
 import { SpreadScheme } from 'features/scheme';
 import { SpreadsCategory, spreadsDataNames } from 'shared/api';
@@ -17,6 +16,7 @@ import {
   AsyncMemoryKey,
   getTodayISO,
   getValueForAsyncDeviceMemoryKey,
+  isGuestFreeSpreadId,
   moderateScale,
   verticalScale,
 } from 'shared/lib';
@@ -34,7 +34,9 @@ function SpreadDescriptionChoice() {
 
   const { spread, checkErrors, question } = useData({ Context: SpreadContext });
 
-  const { isPractitioner } = useData({ Context: UserContext });
+  const { isPractitioner, isAuthenticated, tarotDaily } = useData({
+    Context: UserContext,
+  });
 
   const { showModal } = useData({ Context: ModalsContext });
 
@@ -43,11 +45,33 @@ function SpreadDescriptionChoice() {
   });
 
   const handlePressMakeSpread = useCallback(async () => {
-    const currentAmountSpreads = await getValueForAsyncDeviceMemoryKey<
-      Record<string, string>
-    >(AsyncMemoryKey.LimitOfSpreads);
+    if (
+      Platform.OS === 'web' &&
+      !isAuthenticated &&
+      spread &&
+      !isGuestFreeSpreadId(spread.id)
+    ) {
+      showModal?.(<SignInForSpreadsModal />);
+      return;
+    }
 
-    const isLocked = Number(currentAmountSpreads?.[getTodayISO()] ?? '0') > 2;
+    let isLocked = false;
+    if (Platform.OS === 'web') {
+      const used = tarotDaily?.used ?? 0;
+      const limit = tarotDaily?.limit ?? 10;
+      isLocked =
+        Boolean(isAuthenticated) &&
+        !!spread &&
+        !isGuestFreeSpreadId(spread.id) &&
+        used >= limit;
+    } else {
+      const currentAmountSpreads = await getValueForAsyncDeviceMemoryKey<
+        Record<string, string>
+      >(AsyncMemoryKey.LimitOfSpreads);
+      isLocked =
+        !isPractitioner &&
+        Number(currentAmountSpreads?.[getTodayISO()] ?? '0') >= 10;
+    }
 
     AppMetrica.reportEvent(AnalyticAction.ClickMakeSpread, {
       isLocked: isPractitioner ? false : isLocked,
@@ -56,16 +80,7 @@ function SpreadDescriptionChoice() {
     await handleVibrationClick?.();
 
     if (!isPractitioner && isLocked) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: t('spread:limit.title'),
-          body: t('spread:limit.body'),
-        },
-        trigger: null,
-      });
-
-      showModal?.(<PaidContent />);
-
+      showModal?.(<DailyTarotLimitModal />);
       return;
     }
 
@@ -76,12 +91,15 @@ function SpreadDescriptionChoice() {
     setIsSelectingCards(true);
   }, [
     checkErrors,
+    isAuthenticated,
     isPractitioner,
     question,
     showModal,
     spread?.name,
-    t,
+    tarotDaily?.limit,
+    tarotDaily?.used,
     handleVibrationClick,
+    spread?.id,
   ]);
 
   const isSimpleSpread = spread?.category === SpreadsCategory.Simple;
@@ -96,7 +114,7 @@ function SpreadDescriptionChoice() {
   if (!spread) {
     return (
       <ScreenLayout>
-        <Header title="" />
+        <Header showBackButton={false} title="" />
         <NoContent
           title={t('core:stub.missingData.title')}
           buttonText={t('core:stub.missingData.button')}
@@ -111,7 +129,7 @@ function SpreadDescriptionChoice() {
 
   return (
     <ScreenLayout>
-      <Header title="" />
+      <Header showBackButton={false} title="" />
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 48 }}

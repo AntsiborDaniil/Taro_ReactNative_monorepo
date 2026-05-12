@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Image, Platform, StyleSheet, View } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
-import * as Notifications from 'expo-notifications';
 import { useTranslation } from 'react-i18next';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
@@ -13,7 +12,7 @@ import {
   useAnimationCarousel,
 } from 'features/carousel';
 import { Header } from 'features/header';
-import { PaidContent } from 'features/paidContent';
+import { DailyTarotLimitModal, SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { Question } from 'features/Question';
 import { SpreadScheme } from 'features/scheme';
 import { SpreadName } from 'shared/api';
@@ -25,6 +24,7 @@ import {
   getImage,
   getTodayISO,
   getValueForAsyncDeviceMemoryKey,
+  isGuestFreeSpreadId,
   isTablet,
   verticalScale,
 } from 'shared/lib';
@@ -56,18 +56,42 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
     Context: SpreadContext,
   });
 
-  const { isPractitioner } = useData({ Context: UserContext });
+  const { isPractitioner, isAuthenticated, tarotDaily } = useData({
+    Context: UserContext,
+  });
 
   const { showModal } = useData({ Context: ModalsContext });
 
   const animationCarouselContextData = useAnimationCarousel();
 
   const handlePressMakeSpread = useCallback(async () => {
-    const currentAmountSpreads = await getValueForAsyncDeviceMemoryKey<
-      Record<string, string>
-    >(AsyncMemoryKey.LimitOfSpreads);
+    if (
+      Platform.OS === 'web' &&
+      !isAuthenticated &&
+      spread &&
+      !isGuestFreeSpreadId(spread.id)
+    ) {
+      showModal?.(<SignInForSpreadsModal />);
+      return;
+    }
 
-    const isLocked = Number(currentAmountSpreads?.[getTodayISO()] ?? '0') > 2;
+    let isLocked = false;
+    if (Platform.OS === 'web') {
+      const used = tarotDaily?.used ?? 0;
+      const limit = tarotDaily?.limit ?? 10;
+      isLocked =
+        Boolean(isAuthenticated) &&
+        !!spread &&
+        !isGuestFreeSpreadId(spread.id) &&
+        used >= limit;
+    } else {
+      const currentAmountSpreads = await getValueForAsyncDeviceMemoryKey<
+        Record<string, string>
+      >(AsyncMemoryKey.LimitOfSpreads);
+      isLocked =
+        !isPractitioner &&
+        Number(currentAmountSpreads?.[getTodayISO()] ?? '0') >= 10;
+    }
 
     AppMetrica.reportEvent(AnalyticAction.ClickMakeSpread, {
       spread: spread?.name,
@@ -76,16 +100,7 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
     });
 
     if (!isPractitioner && isLocked) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: t('spread:limit.title'),
-          body: t('spread:limit.body'),
-        },
-        trigger: null,
-      });
-
-      showModal?.(<PaidContent />);
-
+      showModal?.(<DailyTarotLimitModal />);
       return;
     }
 
@@ -94,7 +109,17 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
     }
 
     setHasAskedQuestion(true);
-  }, [spread?.name, question, isPractitioner, checkErrors, t, showModal]);
+  }, [
+    spread?.id,
+    spread?.name,
+    question,
+    isPractitioner,
+    isAuthenticated,
+    tarotDaily?.used,
+    tarotDaily?.limit,
+    checkErrors,
+    showModal,
+  ]);
 
   const handleNavigateToSpreadReading = useCallback(async () => {
     if (spread) {
@@ -118,7 +143,7 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
 
   return (
     <ScreenLayout>
-      <Header title={t(spread?.name ?? '') ?? 'Выбор карт'} />
+      <Header showBackButton={false} title={t(spread?.name ?? '') ?? 'Выбор карт'} />
       <DataProvider
         Context={AnimationCarouselContext}
         value={animationCarouselContextData}

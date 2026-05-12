@@ -1,16 +1,20 @@
-import { useEffect, useMemo, useState } from 'react';
+import { createElement, useEffect, useMemo, useState } from 'react';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useTranslation } from 'react-i18next';
 import type { LayoutChangeEvent } from 'react-native';
+import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+import { DailyTarotLimitModal, SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import {
   SpreadName,
   SpreadsCategory,
   TarotCardDirection,
   tarotCards,
+  authCredentials,
+  authRequestHeaders,
   getTarotAiApiBaseUrl,
   TSpread,
   TTarotCard,
@@ -21,10 +25,12 @@ import {
   DIRECTIONS,
   getRandomElementFromArray,
   getTarotCardReadings,
+  isGuestFreeSpreadId,
   isTablet,
 } from 'shared/lib';
 import { AsyncMemoryKey } from 'shared/lib/deviceMemory';
 import { AnalyticAction } from 'shared/types';
+import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { UserContext } from '../../user';
 import {
   clearTodayDayCard,
@@ -100,7 +106,11 @@ export function useSpread({
 
   const { setIsFullScreenLoading } = useData({ Context: LoadingsContext });
 
-  const { isPractitioner } = useData({ Context: UserContext });
+  const { isPractitioner, isAuthenticated, tarotDaily } = useData({
+    Context: UserContext,
+  });
+
+  const { showModal } = useData({ Context: ModalsContext });
 
   const { t, i18n } = useTranslation();
 
@@ -287,13 +297,6 @@ export function useSpread({
         : TarotCardDirection.Upright;
     }
 
-    setSelectedCardsIds((prevState) => ({
-      ...prevState,
-      [selectedCard.id]: true,
-    }));
-
-    setPreSelectedTarotCard(null);
-
     if (!spread) {
       if (__DEV__) {
         console.warn(`${DAY_CARD_DEBUG} handleSelectTarotCard:abort:noSpread`);
@@ -310,6 +313,38 @@ export function useSpread({
       }
       return false;
     }
+
+    const freeUseOfAI = await AsyncStorage.getItem(AsyncMemoryKey.FreeUseOfAI);
+    const nextCount = spread.selectedCards.length + 1;
+    const willComplete = nextCount === spread.cardsCount;
+    const needsSlot =
+      spread?.id === SpreadName.Simple_DaySuggest ||
+      (!isPractitioner && freeUseOfAI);
+
+    if (
+      Platform.OS === 'web' &&
+      willComplete &&
+      needsSlot &&
+      !isGuestFreeSpreadId(spread.id)
+    ) {
+      if (!isAuthenticated) {
+        showModal?.(createElement(SignInForSpreadsModal));
+        return false;
+      }
+      const used = tarotDaily?.used ?? 0;
+      const limit = tarotDaily?.limit ?? 10;
+      if (used >= limit) {
+        showModal?.(createElement(DailyTarotLimitModal));
+        return false;
+      }
+    }
+
+    setSelectedCardsIds((prevState) => ({
+      ...prevState,
+      [selectedCard.id]: true,
+    }));
+
+    setPreSelectedTarotCard(null);
 
     const newCard = getTarotCardReadings({
       card: selectedCard,
@@ -329,8 +364,6 @@ export function useSpread({
         selectedCardsLength: newSelectedCards.length,
       });
     }
-
-    const freeUseOfAI = await AsyncStorage.getItem(AsyncMemoryKey.FreeUseOfAI);
 
     if (newSelectedCards.length === spread.cardsCount) {
       let completedSpread = newSpread;
@@ -434,6 +467,47 @@ export function useSpread({
       return;
     }
 
+    if (
+      Platform.OS === 'web' &&
+      !isAuthenticated &&
+      spread?.id === SpreadName.Simple_YesNo &&
+      spread
+    ) {
+      const localText = t('spread:yesNo.guestInterpretation');
+      setSpread((prevState) =>
+        prevState ? { ...prevState, interpretation: localText } : prevState
+      );
+      const savedSpread = await saveSpread({
+        ...spread,
+        interpretation: localText,
+      });
+      if (savedSpread) {
+        setSpread({
+          ...savedSpread,
+          question: savedSpread.question ?? spread.question ?? '',
+        });
+      }
+      return;
+    }
+
+    if (
+      Platform.OS === 'web' &&
+      !isAuthenticated &&
+      !isGuestFreeSpreadId(spread?.id)
+    ) {
+      showModal?.(createElement(SignInForSpreadsModal));
+      return;
+    }
+
+    if (
+      Platform.OS === 'web' &&
+      isAuthenticated &&
+      (tarotDaily?.used ?? 0) >= (tarotDaily?.limit ?? 10)
+    ) {
+      showModal?.(createElement(DailyTarotLimitModal));
+      return;
+    }
+
     const AIRequestBody = getAIRequestBody({
       t,
       spread,
@@ -448,12 +522,30 @@ export function useSpread({
         `${getTarotAiApiBaseUrl()}/api/interpret`,
         {
           method: 'POST',
+          credentials: authCredentials(),
           headers: {
             'Content-Type': 'application/json',
+            'X-Web-Cookie-Auth': '1',
+            ...authRequestHeaders(null),
           },
           body: JSON.stringify(AIRequestBody),
         }
       );
+
+      if (!aiInterpretationResponse.ok) {
+        if (aiInterpretationResponse.status === 401) {
+          showModal?.(createElement(SignInForSpreadsModal));
+        } else if (aiInterpretationResponse.status === 429) {
+          showModal?.(createElement(DailyTarotLimitModal));
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: t('core:ai.error1'),
+            text2: t('core:ai.error2'),
+          });
+        }
+        return;
+      }
 
       const interpretation: string = (await aiInterpretationResponse.json())
         .interpretation;
@@ -470,6 +562,8 @@ export function useSpread({
             ...savedSpread,
             question: savedSpread.question ?? spread.question ?? '',
           });
+        } else if (Platform.OS === 'web') {
+          showModal?.(createElement(DailyTarotLimitModal));
         }
       }
 
