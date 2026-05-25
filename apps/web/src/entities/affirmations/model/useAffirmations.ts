@@ -30,7 +30,8 @@ export function useAffirmations(): TAffirmationsHookResult {
 
   const { t } = useTranslation();
 
-  const { isPractitioner } = useData({ Context: UserContext });
+  const { isPractitioner, isAuthenticated } = useData({ Context: UserContext });
+  const canAccessAllCategories = Boolean(isPractitioner || isAuthenticated);
 
   const handleSelectedAffirmationCategory = useCallback(
     async (category: AffirmationCategory) => {
@@ -98,7 +99,7 @@ export function useAffirmations(): TAffirmationsHookResult {
         AsyncMemoryKey.SelectedAffirmationCategory
       )) as AffirmationCategory | null;
 
-      const category = isPractitioner
+      const category = canAccessAllCategories
         ? memorySelectedAffirmationCategory
         : AffirmationCategory.General;
 
@@ -110,7 +111,7 @@ export function useAffirmations(): TAffirmationsHookResult {
     selectDefaultCategory();
   }, [
     handleSelectedAffirmationCategory,
-    isPractitioner,
+    canAccessAllCategories,
     selectedAffirmation,
     selectedAffirmationCategory,
   ]);

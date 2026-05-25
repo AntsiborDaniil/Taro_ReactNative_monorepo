@@ -35,37 +35,37 @@ const CATEGORIES = [
   {
     category: AffirmationCategory.General,
     name: 'affirmations:general',
-    gradient: ['rgba(0, 0, 0, 0)', 'rgba(135, 206, 235, 0.36)'],
+    gradient: ['rgba(18, 24, 36, 0.2)', 'rgba(135, 206, 235, 0.58)'],
     hasLock: false,
   },
   {
     category: AffirmationCategory.Career,
     name: 'affirmations:career',
-    gradient: ['rgba(0, 0, 0, 0)', 'rgba(255, 140, 0, 0.36)'],
+    gradient: ['rgba(18, 24, 36, 0.2)', 'rgba(255, 140, 0, 0.58)'],
     hasLock: true,
   },
   {
     category: AffirmationCategory.Love,
     name: 'affirmations:love',
-    gradient: ['rgba(0, 0, 0, 0)', 'rgba(255, 20, 147, 0.36)'],
+    gradient: ['rgba(18, 24, 36, 0.2)', 'rgba(255, 20, 147, 0.58)'],
     hasLock: true,
   },
   {
     category: AffirmationCategory.Purpose,
     name: 'affirmations:purpose',
-    gradient: ['rgba(0, 0, 0, 0)', 'rgba(138, 43, 226, 0.36)'],
+    gradient: ['rgba(18, 24, 36, 0.2)', 'rgba(138, 43, 226, 0.58)'],
     hasLock: true,
   },
   {
     category: AffirmationCategory.Health,
     name: 'affirmations:health',
-    gradient: ['rgba(0, 0, 0, 0)', 'rgba(34, 139, 34, 0.36)'],
+    gradient: ['rgba(18, 24, 36, 0.2)', 'rgba(34, 139, 34, 0.58)'],
     hasLock: true,
   },
   {
     category: AffirmationCategory.Motivation,
     name: 'affirmations:motivation',
-    gradient: ['rgba(0, 0, 0, 0)', 'rgba(255, 69, 0, 0.36)'],
+    gradient: ['rgba(18, 24, 36, 0.2)', 'rgba(255, 69, 0, 0.58)'],
     hasLock: true,
   },
 ];
@@ -85,9 +85,10 @@ const SelectCategory = ({ layout }: SelectCategoryProps) => {
     useData({
       Context: AffirmationsContext,
     });
-  const { isPractitioner } = useData({
+  const { isPractitioner, isAuthenticated } = useData({
     Context: UserContext,
   });
+  const canAccessAllCategories = Boolean(isPractitioner || isAuthenticated);
   const { showModal } = useData({ Context: ModalsContext });
 
   const { t } = useTranslation();
@@ -192,7 +193,7 @@ const SelectCategory = ({ layout }: SelectCategoryProps) => {
               const cardWidth: DimensionValue =
                 layout.categoryColumns === 1 ? '100%' : layout.affirmationCardWidth;
               const handleCardPress = () => {
-                if (!isPractitioner && item.hasLock) {
+                if (!canAccessAllCategories && item.hasLock) {
                   showModal?.(<PaidContent />);
 
                   return;
@@ -203,23 +204,19 @@ const SelectCategory = ({ layout }: SelectCategoryProps) => {
               };
 
               return (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t(item.name)}
-                  onPress={handleCardPress}
-                  style={(state) => [
+                <View
+                  style={[
                     styles.cardItemWrap,
                     {
                       width: cardWidth,
                       marginBottom: layout.listPaddingBottom,
                     },
-                    (state as { hovered?: boolean }).hovered && styles.cardItemHovered,
-                    state.pressed && styles.cardItemPressed,
                     isSelected && styles.cardItemSelected,
                   ]}
                 >
                   <TileCard
                     id={item.category}
+                    accessibilityLabel={t(item.name)}
                     textStyles={[
                       styles.cardText,
                       {
@@ -229,15 +226,17 @@ const SelectCategory = ({ layout }: SelectCategoryProps) => {
                     ]}
                     isSelected={isSelected}
                     width={cardWidth}
-                    isLocked={!isPractitioner && item.hasLock}
+                    isLocked={!canAccessAllCategories && item.hasLock}
                     height={layout.affirmationCardHeight}
                     imagePosition={ImagePosition.Corner}
                     gradient={item.gradient as [string, string]}
-                    disabled
+                    fontWeight="semibold"
+                    textViewStyles={styles.cardTextView}
+                    onPress={handleCardPress}
                   >
-                    {t(item.name)}
+                    {item.name}
                   </TileCard>
-                </Pressable>
+                </View>
               );
             }}
           />
@@ -265,12 +264,19 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   cardText: {
-    paddingHorizontal: 14,
-    paddingTop: 12,
-    paddingBottom: 10,
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
     color: COLORS.Content,
     maxWidth: '100%',
     flexWrap: 'wrap',
+    fontWeight: '600',
+  },
+  cardTextView: {
+    top: 14,
+    left: 14,
+    maxWidth: '72%',
+    paddingRight: 6,
   },
   listContainer: {
     paddingTop: 6,
@@ -285,15 +291,6 @@ const styles = StyleSheet.create({
     ...({
       transition: 'box-shadow 0.2s ease',
     } as object),
-  },
-  cardItemHovered: {
-    ...({
-      boxShadow: '0 10px 22px rgba(0,0,0,0.26)',
-    } as object),
-  },
-  cardItemPressed: {
-    opacity: 0.94,
-    transform: [{ scale: 0.992 }],
   },
   cardItemSelected: {
     ...({

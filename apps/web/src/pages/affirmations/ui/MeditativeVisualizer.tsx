@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import {
   Canvas,
   LinearGradient,
@@ -303,14 +303,22 @@ const styles = StyleSheet.create({
   affirmationText: {
     textAlign: 'center',
     letterSpacing: 0.25,
-    textShadowColor: 'rgba(0,0,0,0.35)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 10,
+    ...(Platform.OS === 'web'
+      ? ({ textShadow: '0 1px 10px rgba(0,0,0,0.35)' } as object)
+      : {
+          textShadowColor: 'rgba(0,0,0,0.35)',
+          textShadowOffset: { width: 0, height: 1 },
+          textShadowRadius: 10,
+        }),
   },
   affirmationTextAccent: {
-    textShadowColor: 'rgba(74, 225, 208, 0.42)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 12,
+    ...(Platform.OS === 'web'
+      ? ({ textShadow: '0 0 12px rgba(74, 225, 208, 0.42)' } as object)
+      : {
+          textShadowColor: 'rgba(74, 225, 208, 0.42)',
+          textShadowOffset: { width: 0, height: 0 },
+          textShadowRadius: 12,
+        }),
   },
 });
 

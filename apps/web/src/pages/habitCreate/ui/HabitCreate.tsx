@@ -106,13 +106,12 @@ function HabitCreate() {
           <View style={styles.row}>
             <View style={styles.column}>
               <Input
-                label="habits:title.habit"
                 baseInputProps={{
                   ...inputBaseProps,
                   style: [
                     styles.input,
                     styles.largeInput,
-                    styles.habitPrimaryInput,
+                    styles.habitFieldInput,
                     { maxWidth: screen.width - 168 },
                   ],
                   value: habit.title,
@@ -126,8 +125,7 @@ function HabitCreate() {
                   style: [
                     styles.input,
                     styles.largeInput,
-                    styles.smallInput,
-                    styles.habitPrimaryInput,
+                    styles.habitFieldInput,
                     { maxWidth: screen.width - 168 },
                   ],
                   value: habit.description,
@@ -541,8 +539,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 400,
   },
-  habitPrimaryInput: {
-    fontSize: 18,
+  habitFieldInput: {
+    fontSize: 16,
+    lineHeight: 22,
   },
   goalInput: {
     minHeight: 52,

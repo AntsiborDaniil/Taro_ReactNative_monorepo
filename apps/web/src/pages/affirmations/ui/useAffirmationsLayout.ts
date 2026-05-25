@@ -49,7 +49,7 @@ export function useAffirmationsLayout(): AffirmationsLayout {
         : (columnInner - categoryGap) / categoryColumns
     );
     const affirmationCardHeight = Math.round(
-      Math.min(116, Math.max(92, ms(W, categoryColumns === 1 ? 108 : 98)))
+      Math.min(140, Math.max(108, ms(W, categoryColumns === 1 ? 124 : 112)))
     );
     const listPaddingBottom = W < 760 ? 10 : 14;
     const visualSize = Math.round(

@@ -1,0 +1,1 @@
+export { WebTypographyRoot } from './WebTypographyRoot';

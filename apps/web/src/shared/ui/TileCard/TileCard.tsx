@@ -193,27 +193,40 @@ function TileCard({
       </Layout>
   );
 
+  const content = subtitleOutsideCard ? (
+    <View style={{ width }}>
+      {cardTree}
+      <Text
+        category={TEXT_TAGS.p2}
+        style={[styles.tileSubtitle, subtitleStyle]}
+      >
+        {t(subtitle!)}
+      </Text>
+    </View>
+  ) : (
+    cardTree
+  );
+
+  if (disabled) {
+    return (
+      <View
+        pointerEvents="none"
+        accessibilityLabel={accessibilityLabelComputed}
+      >
+        {content}
+      </View>
+    );
+  }
+
   return (
     <TouchableOpacity
       onPress={handlePress}
-      disabled={disabled}
       activeOpacity={0.7}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabelComputed}
+      style={Platform.OS === 'web' ? styles.webPressable : undefined}
     >
-      {subtitleOutsideCard ? (
-        <View style={{ width }}>
-          {cardTree}
-          <Text
-            category={TEXT_TAGS.p2}
-            style={[styles.tileSubtitle, subtitleStyle]}
-          >
-            {t(subtitle!)}
-          </Text>
-        </View>
-      ) : (
-        cardTree
-      )}
+      {content}
     </TouchableOpacity>
   );
 }
@@ -332,6 +345,9 @@ const styles = StyleService.create({
     color: 'rgba(216, 228, 247, 0.78)',
     letterSpacing: 0.15,
   },
+  webPressable: {
+    cursor: 'pointer',
+  } as object,
 });
 
 export default memo(TileCard);

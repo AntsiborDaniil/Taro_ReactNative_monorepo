@@ -17,6 +17,7 @@ import RootNavigator from './src/app/navigation/RootNavigator';
 import { navigationRef } from './src/app/navigation/navigationRef';
 import GlobalProvider from './src/app/providers/GlobalProvider/ui/GlobalProvider';
 import { WebA11yRoot } from './src/app/providers/WebA11y';
+import { WebTypographyRoot } from './src/app/providers/WebTypography';
 import {
   ApplicationConfigContext,
   useApplicationConfig,
@@ -109,7 +110,12 @@ export default function RootLayout() {
       <ApplicationProvider {...eva} theme={{ ...eva.dark, ...myTheme }}>
         <DataProvider Context={LoadingsContext} value={loadingsContextData}>
           <NavigationContainer ref={navigationRef}>
-            {Platform.OS === 'web' ? <WebA11yRoot /> : null}
+            {Platform.OS === 'web' ? (
+              <>
+                <WebA11yRoot />
+                <WebTypographyRoot />
+              </>
+            ) : null}
             <ErrorBoundary FallbackComponent={TarotErrorBoundary}>
               {Platform.OS === 'web' ? (
                 <WebUserSessionProvider>

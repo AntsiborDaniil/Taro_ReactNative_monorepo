@@ -128,6 +128,8 @@ module.exports = wrapWithReanimatedMetroConfig(
     config.resolver.blockList =
       /(?:^|\/)(?:\.pnpm-store|\.turbo|\.git)(?:\/|$)/;
 
+    const upstreamResolveRequest = config.resolver.resolveRequest;
+
     config.resolver.resolveRequest = function packageExportsResolver(
       context,
       moduleImport,
@@ -159,6 +161,10 @@ module.exports = wrapWithReanimatedMetroConfig(
           moduleImport,
           platform
         );
+      }
+
+      if (typeof upstreamResolveRequest === 'function') {
+        return upstreamResolveRequest(context, moduleImport, platform);
       }
 
       return context.resolveRequest(context, moduleImport, platform);

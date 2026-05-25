@@ -1,0 +1,175 @@
+/**
+ * Единая шкала типографики и отступов для web.
+ * Меняйте значения здесь — они применяются через CSS-переменные на :root.
+ *
+ * Брейкпоинты:
+ *   mobile   — до 767px   (базовые значения в :root)
+ *   tablet   — 768px+
+ *   laptop   — 1024px+
+ *   desktop  — 1440px+
+ *   wide     — 1920px+
+ *
+ * Семантика заголовков (примеры использования):
+ *   --font-title-display  — hero / splash
+ *   --font-title-page     — заголовок экрана (Header)
+ *   --font-title-section  — заголовок блока на странице
+ *   --font-title-card     — заголовок карточки / плитки
+ *   --font-title-subtle   — подзаголовок, акцент в карточке
+ *
+ * После правок запустите: pnpm sync:responsive-tokens (в apps/web)
+ */
+
+html {
+  font-size: var(--font-size-base, 12px);
+}
+
+body {
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-base);
+}
+
+:root {
+  --viewport-tier: mobile;
+
+  /* ─── Семейство ─── */
+  --font-family-base: Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, Helvetica, Arial, sans-serif;
+
+  /* ─── Базовый кегль (body) ─── */
+  --font-size-base: 12px;
+  --line-height-base: 1.45;
+
+  /* ─── Иерархия заголовков (главное — правьте здесь) ─── */
+  --font-title-display: 22px;
+  --font-title-page: 20px;
+  --font-title-section: 16px;
+  --font-title-card: 15px;
+  --font-title-subtle: 14px;
+
+  /* ─── Текст и подписи ─── */
+  --font-size-body: 12px;
+  --font-size-body-lg: 13px;
+  --font-size-label: 11px;
+  --font-size-caption: 10px;
+
+  /* ─── Привязка к компоненту Text (category) ─── */
+  --font-h1: var(--font-title-display);
+  --font-h2: var(--font-title-page);
+  --font-h3: var(--font-title-section);
+  --font-h4: var(--font-title-card);
+  --font-h5: var(--font-title-subtle);
+  --font-p1: var(--font-size-body);
+  --font-p2: var(--font-size-caption);
+  --font-label: var(--font-size-label);
+
+  --line-height-tight: 1.2;
+  --line-height-title: 1.25;
+  --line-height-normal: 1.45;
+  --line-height-relaxed: 1.6;
+
+  /* ─── Layout (опционально) ─── */
+  --content-max-width: 100%;
+  --space-page-x: 16px;
+  --space-section-y: 12px;
+  --space-card-gap: 10px;
+}
+
+/* ─── Планшет ─── */
+@media (min-width: 768px) {
+  :root {
+    --viewport-tier: tablet;
+
+    --font-size-base: 13px;
+
+    --font-title-display: 24px;
+    --font-title-page: 22px;
+    --font-title-section: 17px;
+    --font-title-card: 16px;
+    --font-title-subtle: 15px;
+
+    --font-size-body: 13px;
+    --font-size-body-lg: 14px;
+    --font-size-label: 12px;
+    --font-size-caption: 11px;
+
+    --content-max-width: 720px;
+    --space-page-x: 20px;
+    --space-section-y: 14px;
+    --space-card-gap: 12px;
+  }
+}
+
+/* ─── Ноутбук ─── */
+@media (min-width: 1024px) {
+  :root {
+    --viewport-tier: laptop;
+
+    --font-size-base: 14px;
+
+    --font-title-display: 26px;
+    --font-title-page: 24px;
+    --font-title-section: 18px;
+    --font-title-card: 17px;
+    --font-title-subtle: 16px;
+
+    --font-size-body: 14px;
+    --font-size-body-lg: 15px;
+    --font-size-label: 13px;
+    --font-size-caption: 12px;
+
+    --content-max-width: 960px;
+    --space-page-x: 24px;
+    --space-section-y: 16px;
+    --space-card-gap: 12px;
+  }
+}
+
+/* ─── Desktop 1440+ ─── */
+@media (min-width: 1440px) {
+  :root {
+    --viewport-tier: desktop;
+
+    --font-size-base: 15px;
+
+    --font-title-display: 28px;
+    --font-title-page: 26px;
+    --font-title-section: 19px;
+    --font-title-card: 18px;
+    --font-title-subtle: 17px;
+
+    --font-size-body: 15px;
+    --font-size-body-lg: 16px;
+    --font-size-label: 14px;
+    --font-size-caption: 13px;
+
+    --content-max-width: 1200px;
+    --space-page-x: 28px;
+    --space-section-y: 18px;
+    --space-card-gap: 14px;
+  }
+}
+
+/* ─── Wide 1920+ ─── */
+@media (min-width: 1920px) {
+  :root {
+    --viewport-tier: wide;
+
+    --font-size-base: 16px;
+
+    --font-title-display: 32px;
+    --font-title-page: 28px;
+    --font-title-section: 20px;
+    --font-title-card: 19px;
+    --font-title-subtle: 18px;
+
+    --font-size-body: 16px;
+    --font-size-body-lg: 17px;
+    --font-size-label: 14px;
+    --font-size-caption: 13px;
+
+    --content-max-width: 1280px;
+    --space-page-x: 32px;
+    --space-section-y: 20px;
+    --space-card-gap: 16px;
+  }
+}

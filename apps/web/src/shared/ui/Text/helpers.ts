@@ -1,6 +1,9 @@
 import { StyleProp, StyleSheet } from 'react-native';
 import { TextStyle } from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
-import { toResponsiveFontPx, TYPOGRAPHY_CATEGORY_PX } from 'shared/themes/typography';
+import {
+  resolveCategoryPx,
+  toResponsiveFontPx,
+} from 'shared/themes/typography';
 import { TEXT_TAGS, TEXT_WEIGHT } from './constants';
 
 const fontFamilyMap: Record<string, string> = {
@@ -46,7 +49,7 @@ export function getTextStyles({
     fontFamily: fontFamilyMap[weight || DEFAULT_TEXT_WEIGHTS[category!]],
   };
 
-  const defaultSize = TYPOGRAPHY_CATEGORY_PX[category!];
+  const defaultSize = resolveCategoryPx(category!);
   const explicitSize = base.fontSize;
   const resolvedFontSize =
     typeof explicitSize === 'number' && !Number.isNaN(explicitSize)
