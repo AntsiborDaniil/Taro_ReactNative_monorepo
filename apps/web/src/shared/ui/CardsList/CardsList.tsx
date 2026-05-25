@@ -105,8 +105,7 @@ function CardsList<T extends BaseTarotCardProps>({
 
     if (containerWidth >= 1100) return 4;
     if (containerWidth >= 760) return 3;
-    if (containerWidth >= 430) return 2;
-    return 1;
+    return 2;
   }, [containerWidth, preferCompactTiles]);
 
   const cardWidth = useMemo(() => {
@@ -120,7 +119,7 @@ function CardsList<T extends BaseTarotCardProps>({
       );
     }
 
-    return Math.max(160, raw);
+    return Math.max(130, raw);
   }, [containerWidth, numColumns, preferCompactTiles, gridGap]);
   const cardHeight = useMemo(
     () => Math.round(cardWidth / CARD_ASPECT_RATIO),

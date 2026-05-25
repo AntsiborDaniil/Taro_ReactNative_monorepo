@@ -11,6 +11,14 @@ const SPREAD_FLOW_ROUTES = new Set<string>([
   NavigationRoute.SpreadDescriptionChoice,
 ]);
 
+/** Экраны библиотеки и смежные — назад через goBack(), не в каталог раскладов. */
+const LIBRARY_ORIGIN_ROUTES = new Set<string>([
+  NavigationRoute.SpreadsHistory,
+  NavigationRoute.FavoriteCards,
+  NavigationRoute.Library,
+  NavigationRoute.CardsDictionary,
+]);
+
 export function useSpreadCatalogBack() {
   const navigation = useNativeNavigation();
   const { selectedTab } = useData({ Context: TabsAndRoutesContext });
@@ -24,6 +32,11 @@ export function useSpreadCatalogBack() {
       index > 0 ? (routes[index - 1]?.name as string | undefined) : undefined;
 
     if (previousRoute === NavigationRoute.Spreads) {
+      navigation.goBack();
+      return;
+    }
+
+    if (previousRoute && LIBRARY_ORIGIN_ROUTES.has(previousRoute)) {
       navigation.goBack();
       return;
     }

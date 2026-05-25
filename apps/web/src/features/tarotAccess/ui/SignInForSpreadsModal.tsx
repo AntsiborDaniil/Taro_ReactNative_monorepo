@@ -20,8 +20,8 @@ import { Button } from 'shared/ui/Button';
 import { Text, TEXT_TAGS } from 'shared/ui/Text';
 
 export type SignInForSpreadsModalProps = {
-  /** По умолчанию тексты из `spread:`; для настроения — `moodAndEnergy`. */
-  i18nNamespace?: 'spread' | 'moodAndEnergy';
+  /** По умолчанию тексты из `spread:`; для настроения — `moodAndEnergy`; для стиля колоды — `settings`. */
+  i18nNamespace?: 'spread' | 'moodAndEnergy' | 'settings';
 };
 
 function SignInForSpreadsModal({

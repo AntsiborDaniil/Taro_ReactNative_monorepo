@@ -1,10 +1,10 @@
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
-import { PaidContent } from 'features/paidContent';
+import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { useData } from 'shared/DataProvider';
 import { AsyncMemorySettingKey } from 'shared/lib';
 import { AnalyticAction } from 'shared/types';
@@ -21,7 +21,7 @@ function DeckStyle() {
     asyncMemoryKey: AsyncMemorySettingKey.Appearance,
   });
 
-  const { isPractitioner } = useData({ Context: UserContext });
+  const { isAuthenticated } = useData({ Context: UserContext });
 
   const { showModal } = useData({ Context: ModalsContext });
 
@@ -32,15 +32,19 @@ function DeckStyle() {
   return (
     <ScreenLayout style={styles.container}>
       <Header title={t('settings:deck.style')} />
-      <View style={styles.inner}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <CardsList
           hasSelectStatus
-          isAllUnlocked={isPractitioner}
+          isAllUnlocked={isAuthenticated}
           cards={DECK_STYLES}
           onPressLocked={async () => {
             await handleVibrationClick?.();
 
-            showModal?.(<PaidContent />);
+            showModal?.(<SignInForSpreadsModal i18nNamespace="settings" />);
           }}
           onPress={async (item) => {
             await handleVibrationClick?.();
@@ -52,7 +56,7 @@ function DeckStyle() {
             });
           }}
         />
-      </View>
+      </ScrollView>
     </ScreenLayout>
   );
 }
@@ -61,8 +65,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  inner: {
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: 14,
+    paddingBottom: 24,
   },
 });
 

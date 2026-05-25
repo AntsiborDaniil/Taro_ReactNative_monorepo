@@ -8,10 +8,9 @@ import { TSpread } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { COLORS, getColorOpacity } from 'shared/themes';
-import { NavigationRoute, TabRoute } from 'shared/types';
+import { NavigationRoute } from 'shared/types';
 import { NoContent, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { useSpreadsHistory } from '../model';
-import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SpreadsGroups() {
@@ -29,11 +28,9 @@ export default function SpreadsGroups() {
 
   const { spreadsSections, loadMore, loading } = useSpreadsHistory();
 
-  const { selectedTab } = useData({ Context: TabsAndRoutesContext });
-
   return (
     <ScreenLayout style={styles.wrapper}>
-      <Header showBackButton={false} title={t('core:page.spreadsHistory')} />
+      <Header title={t('core:page.spreadsHistory')} />
       {/*<ScrollView>*/}
       {spreadsSections.length ? (
         <SectionList
@@ -82,9 +79,7 @@ export default function SpreadsGroups() {
 
                   await handleVibrationClick?.();
 
-                  navigation.navigate(selectedTab as TabRoute, {
-                    screen: NavigationRoute.SpreadReadings,
-                  });
+                  navigation.navigate(NavigationRoute.SpreadReadings);
                 }}
               >
                 <View style={styles.historyItem_top}>

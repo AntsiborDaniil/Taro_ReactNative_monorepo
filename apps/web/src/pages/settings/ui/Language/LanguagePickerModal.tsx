@@ -1,6 +1,15 @@
-import { Modal, Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useCallback } from 'react';
+import {
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { CrossIcon } from 'shared/icons';
+import { blurActiveElement } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { Text, TEXT_TAGS } from 'shared/ui';
 import LanguagePickerBody from './LanguagePickerBody';
@@ -13,24 +22,26 @@ type LanguagePickerModalProps = {
 function LanguagePickerModal({ visible, onClose }: LanguagePickerModalProps) {
   const { t } = useTranslation();
 
+  const handleClose = useCallback(() => {
+    blurActiveElement();
+    onClose();
+  }, [onClose]);
+
   return (
     <Modal
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
-      <Pressable
-        style={styles.backdrop}
-        accessibilityRole="button"
-        accessibilityLabel={t('core:stub.emptyResultsModal.closeBackdrop')}
-        onPress={onClose}
-      >
+      <View style={styles.root} pointerEvents="box-none">
         <Pressable
-          style={styles.card}
-          onPress={(e) => e.stopPropagation()}
-          accessibilityViewIsModal
-        >
+          style={styles.backdrop}
+          accessibilityRole="button"
+          accessibilityLabel={t('core:stub.emptyResultsModal.closeBackdrop')}
+          onPress={handleClose}
+        />
+        <View style={styles.card} accessibilityViewIsModal>
           <View style={styles.header}>
             <Text category={TEXT_TAGS.h3} style={styles.title}>
               {t('settings:language')}
@@ -39,25 +50,28 @@ function LanguagePickerModal({ visible, onClose }: LanguagePickerModalProps) {
               accessibilityRole="button"
               accessibilityLabel={t('core:stub.emptyResultsModal.closeBackdrop')}
               hitSlop={12}
-              onPress={onClose}
+              onPress={handleClose}
             >
               <CrossIcon width={22} height={22} />
             </TouchableOpacity>
           </View>
-          <LanguagePickerBody variant="modal" onAfterChange={onClose} />
-        </Pressable>
-      </Pressable>
+          <LanguagePickerBody variant="modal" onAfterChange={handleClose} />
+        </View>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
+  root: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.55)',
   },
   card: {
     width: '100%',
