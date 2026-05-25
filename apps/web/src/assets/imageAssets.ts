@@ -37,6 +37,7 @@ export type ImageStructure = {
       thematic_love: any,
       thematic_relationship: any,
       universal_celticCross: any,
+      universal_flame: any,
       universal_horseshoe: any,
       universal_pyramid: any,
     },
@@ -59,6 +60,7 @@ export type ImageStructure = {
       thematic_careerFinance: any,
       thematic_relationship: any,
       universal_celticCross: any,
+      universal_flame: any,
     },
   },
   tarotCards: {
@@ -348,6 +350,7 @@ const imageAssets: ImageStructure = {
       "thematic_love": require('../../assets/images/spreads/flatIllustration/thematic_love.webp'),
       "thematic_relationship": require('../../assets/images/spreads/flatIllustration/thematic_relationship.webp'),
       "universal_celticCross": require('../../assets/images/spreads/flatIllustration/universal_celticCross.webp'),
+      "universal_flame": require('../../assets/images/spreads/flatIllustration/universal_flame.webp'),
       "universal_horseshoe": require('../../assets/images/spreads/flatIllustration/universal_horseshoe.webp'),
       "universal_pyramid": require('../../assets/images/spreads/flatIllustration/universal_pyramid.webp')
     }
@@ -369,7 +372,8 @@ const imageAssets: ImageStructure = {
       "simple_YesNo": require('../../assets/images/spreadsSmall/flatIllustration/simple_YesNo.webp'),
       "thematic_careerFinance": require('../../assets/images/spreadsSmall/flatIllustration/thematic_careerFinance.webp'),
       "thematic_relationship": require('../../assets/images/spreadsSmall/flatIllustration/thematic_relationship.webp'),
-      "universal_celticCross": require('../../assets/images/spreadsSmall/flatIllustration/universal_celticCross.webp')
+      "universal_celticCross": require('../../assets/images/spreadsSmall/flatIllustration/universal_celticCross.webp'),
+      "universal_flame": require('../../assets/images/spreadsSmall/flatIllustration/universal_flame.webp')
     }
   },
   "tarotCards": {

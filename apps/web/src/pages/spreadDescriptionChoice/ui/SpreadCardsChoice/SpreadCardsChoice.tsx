@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, Platform, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  ImageBackground,
+  Platform,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
@@ -12,6 +21,7 @@ import {
   useAnimationCarousel,
 } from 'features/carousel';
 import { Header } from 'features/header';
+import { useSpreadCatalogBack } from 'features/header/useSpreadCatalogBack';
 import { DailyTarotLimitModal, SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { Question } from 'features/Question';
 import { SpreadScheme } from 'features/scheme';
@@ -34,6 +44,8 @@ import { Button, ScreenLayout } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { CardDescription } from '../CardDescription';
 
+const PHONE_MAX_WIDTH = 640;
+
 type SpreadCardsChoiceProps = {
   isSimpleSpread?: boolean;
 };
@@ -43,7 +55,11 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
   const [hasAskedQuestion, setHasAskedQuestion] = useState(false);
 
   const navigation = useNativeNavigation();
+  const handleBackToSpreads = useSpreadCatalogBack();
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
+  const { bottom } = useSafeAreaInsets();
+  const isPhone = width < PHONE_MAX_WIDTH;
 
   const {
     spread,
@@ -141,9 +157,52 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
     }
   }, [isSpreadCompleted, isSimpleSpread, handleNavigateToSpreadReading]);
 
+  const isDaySuggest = spread?.id === SpreadName.Simple_DaySuggest;
+
+  if (isDaySuggest) {
+    return (
+      <ScreenLayout style={styles.daySuggestScreen}>
+        <View style={styles.daySuggestRoot}>
+          <ImageBackground
+            source={getImage(['core', 'girl'])}
+            resizeMode="cover"
+            style={styles.daySuggestBg}
+            imageStyle={styles.daySuggestBgImage}
+          >
+            <View style={styles.daySuggestScrim} pointerEvents="none" />
+            <View style={styles.daySuggestHeader} pointerEvents="box-none">
+              <Header
+                backAction={handleBackToSpreads}
+                title={t(spread?.name ?? '')}
+              />
+            </View>
+            <DataProvider
+              Context={AnimationCarouselContext}
+              value={animationCarouselContextData}
+            >
+              <View
+                style={[
+                  styles.daySuggestCenter,
+                  { paddingBottom: bottom + (isPhone ? 12 : 48) },
+                ]}
+                pointerEvents="box-none"
+              >
+                <AnimatedCard />
+                <CoverFlowCardCarousel overlayControls={isPhone} />
+              </View>
+            </DataProvider>
+          </ImageBackground>
+        </View>
+      </ScreenLayout>
+    );
+  }
+
   return (
     <ScreenLayout>
-      <Header showBackButton={false} title={t(spread?.name ?? '') ?? 'Выбор карт'} />
+      <Header
+        backAction={handleBackToSpreads}
+        title={t(spread?.name ?? '') ?? 'Выбор карт'}
+      />
       <DataProvider
         Context={AnimationCarouselContext}
         value={animationCarouselContextData}
@@ -254,6 +313,52 @@ const styles = StyleSheet.create({
   carousel: { marginTop: 40 },
   carouselSimpleSpread: {
     marginTop: 0,
+  },
+  daySuggestScreen: {
+    paddingTop: 0,
+    paddingHorizontal: 0,
+    gap: 0,
+  },
+  daySuggestRoot: {
+    flex: 1,
+    minHeight: 0,
+    width: '100%',
+    overflow: 'hidden',
+    position: 'relative',
+    backgroundColor: COLORS.Background,
+  },
+  daySuggestBg: {
+    flex: 1,
+    width: '100%',
+    minHeight: 0,
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  daySuggestBgImage: {
+    opacity: 0.85,
+  },
+  daySuggestScrim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(8, 12, 22, 0.15)',
+    zIndex: 0,
+  },
+  daySuggestHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 50,
+  },
+  daySuggestCenter: {
+    flex: 1,
+    width: '100%',
+    alignSelf: 'stretch',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 14,
+    paddingHorizontal: 16,
+    zIndex: 1,
   },
 });
 

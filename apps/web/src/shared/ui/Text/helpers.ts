@@ -53,7 +53,7 @@ export function getTextStyles({
   const explicitSize = base.fontSize;
   const resolvedFontSize =
     typeof explicitSize === 'number' && !Number.isNaN(explicitSize)
-      ? toResponsiveFontPx(explicitSize)
+      ? explicitSize
       : toResponsiveFontPx(defaultSize);
 
   textStyle = {

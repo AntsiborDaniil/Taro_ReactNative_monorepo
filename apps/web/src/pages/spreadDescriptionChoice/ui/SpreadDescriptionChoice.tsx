@@ -7,6 +7,7 @@ import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Header } from 'features/header';
+import { useSpreadCatalogBack } from 'features/header/useSpreadCatalogBack';
 import { DailyTarotLimitModal, SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import Question from 'features/Question/ui/Question';
 import { SpreadScheme } from 'features/scheme';
@@ -29,6 +30,7 @@ import { SpreadCardsChoice } from './SpreadCardsChoice';
 
 function SpreadDescriptionChoice() {
   const [isSelectingCards, setIsSelectingCards] = useState<boolean>(false);
+  const handleBackToSpreads = useSpreadCatalogBack();
 
   const { t } = useTranslation();
 
@@ -114,7 +116,7 @@ function SpreadDescriptionChoice() {
   if (!spread) {
     return (
       <ScreenLayout>
-        <Header showBackButton={false} title="" />
+        <Header backAction={handleBackToSpreads} title="" />
         <NoContent
           title={t('core:stub.missingData.title')}
           buttonText={t('core:stub.missingData.button')}
@@ -129,7 +131,7 @@ function SpreadDescriptionChoice() {
 
   return (
     <ScreenLayout>
-      <Header showBackButton={false} title="" />
+      <Header backAction={handleBackToSpreads} title="" />
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 48 }}

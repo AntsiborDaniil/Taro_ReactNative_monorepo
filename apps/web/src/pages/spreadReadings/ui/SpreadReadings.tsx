@@ -5,6 +5,7 @@ import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
+import { useSpreadCatalogBack } from 'features/header/useSpreadCatalogBack';
 import { TarotCardReadingsSpread } from 'features/TarotCardReadings';
 import { useData } from 'shared/DataProvider';
 import { CopyIcon } from 'shared/icons';
@@ -24,6 +25,7 @@ function SpreadReadings() {
   });
 
   const { t } = useTranslation();
+  const handleBackToSpreads = useSpreadCatalogBack();
 
   const handlePressCopy = useCallback(async () => {
     await handleVibrationClick?.();
@@ -35,7 +37,7 @@ function SpreadReadings() {
     <ScreenLayout>
       <View style={styles.headerWrap}>
         <Header
-          showBackButton={false}
+          backAction={handleBackToSpreads}
           title={t(spread?.name ?? '')}
           rightContent={
             <CopyIcon width={isTablet ? 32 : 24} height={isTablet ? 32 : 24} />

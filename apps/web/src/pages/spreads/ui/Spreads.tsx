@@ -12,6 +12,7 @@ import { DeckStyle } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { blurActiveElement, getImage, isGuestFreeSpreadId } from 'shared/lib';
+import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { COLORS, getColorOpacity } from 'shared/themes';
 import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -36,6 +37,10 @@ export default function Spreads() {
   const { t: tSpread } = useTranslation('spread');
 
   const navigation = useNativeNavigation();
+  const { selectedTab } = useData({ Context: TabsAndRoutesContext });
+
+  const spreadsNavigatorTab =
+    selectedTab === TabRoute.SpreadsTab ? TabRoute.SpreadsTab : TabRoute.MainTab;
 
   const showWebGuestBanner = Platform.OS === 'web' && !isAuthenticated;
 
@@ -163,13 +168,13 @@ export default function Spreads() {
                             (await selectSpread?.(item)) || {};
 
                           if (shouldRedirectToSpreadReading) {
-                            navigation.navigate(TabRoute.MainTab, {
+                            navigation.navigate(spreadsNavigatorTab, {
                               screen: NavigationRoute.SpreadReadings,
                             });
                             return;
                           }
 
-                          navigation.navigate(TabRoute.MainTab, {
+                          navigation.navigate(spreadsNavigatorTab, {
                             screen: NavigationRoute.SpreadDescriptionChoice,
                           });
                         }}

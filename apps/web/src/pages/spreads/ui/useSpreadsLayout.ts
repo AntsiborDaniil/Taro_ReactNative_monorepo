@@ -66,8 +66,8 @@ export function useSpreadsLayout(): SpreadsLayout {
     const textPadH = Math.round(Math.min(26, Math.max(14, W * 0.045)));
     const textPadTop = Math.round(Math.min(22, Math.max(12, v(16))));
     const textPadBottom = Math.round(Math.min(30, Math.max(18, v(24))));
-    const textBlockGap = Math.round(Math.min(16, Math.max(8, v(10))));
-    const titleFontSize = GLOBAL_UI_TEXT_PX;
+    const textBlockGap = 0;
+    const titleFontSize = 14;
     const hintFontSize = GLOBAL_UI_TEXT_PX;
     const lockIconSize = Math.round(Math.min(40, Math.max(28, W * 0.07)));
     const imageFadeHeight = Math.round(Math.min(56, Math.max(36, v(44))));

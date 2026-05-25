@@ -138,7 +138,7 @@ function MoodProgress({
         ]}
       >
         <Text
-          category={TEXT_TAGS.h4}
+          category={isWidget ? TEXT_TAGS.label : TEXT_TAGS.h4}
           style={[
             styles.mainText,
             isWidget && styles.mainTextWidget,
@@ -384,7 +384,8 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   mainTextWidget: {
-    lineHeight: 22,
+    fontSize: 14,
+    lineHeight: 18,
   },
   mainTextScreen: {
     fontSize: 20,
@@ -396,7 +397,8 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   subTextWidget: {
-    lineHeight: 22,
+    fontSize: 12,
+    lineHeight: 16,
     marginTop: 2,
   },
   subTextScreen: {

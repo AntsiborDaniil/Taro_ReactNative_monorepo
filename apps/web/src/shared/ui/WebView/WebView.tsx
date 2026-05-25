@@ -16,7 +16,8 @@ import { useData } from 'shared/DataProvider';
 import { ChevronRightIcon } from 'shared/icons';
 import { COLORS } from 'shared/themes';
 import { NavigationRoute, PressableWebState } from 'shared/types';
-import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
+import { ScreenLayout } from '../ScreenLayout';
+import { Text, TEXT_TAGS } from '../Text';
 
 type WebViewScreen = {
   customUrl?: string;

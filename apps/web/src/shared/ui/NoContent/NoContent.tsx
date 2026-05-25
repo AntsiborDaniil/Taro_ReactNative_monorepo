@@ -10,15 +10,17 @@ type NoContentProps = {
   title: string;
   buttonText?: string;
   onPress?: () => void;
+  /** Вертикально по центру родителя с flex: 1 (экран расклада / совет дня). */
+  centered?: boolean;
 };
 
-function NoContent({ title, onPress, buttonText }: NoContentProps) {
+function NoContent({ title, onPress, buttonText, centered }: NoContentProps) {
   const { t } = useTranslation();
 
   const navigation = useNativeNavigation();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, centered && styles.containerCentered]}>
       <Text style={styles.title} category={TEXT_TAGS.h3}>
         {title}
       </Text>
@@ -53,6 +55,12 @@ const styles = StyleSheet.create({
     marginTop: 24,
     paddingHorizontal: 16,
     gap: 16,
+  },
+  containerCentered: {
+    flex: 1,
+    justifyContent: 'center',
+    marginTop: 0,
+    width: '100%',
   },
   title: { textAlign: 'center' },
   image: {

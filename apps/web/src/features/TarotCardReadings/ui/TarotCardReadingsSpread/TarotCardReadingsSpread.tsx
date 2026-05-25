@@ -55,7 +55,8 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
   let isViewedLastCard = false;
 
   const { sceneContentWidth } = useTabRailLayout();
-  const { height: windowHeight } = useWindowDimensions();
+  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+  const isPhone = windowWidth < 640;
   const tabBarHeight = useBottomTabBarHeight();
   const carouselWidth = sceneContentWidth;
   const reservedChrome = 200 + tabBarHeight;
@@ -203,10 +204,13 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
       console.warn(`${DAY_CARD_DEBUG} spreadReadings:noSpreadAfterHydration`);
     }
     return (
-      <NoContent
-        title={t('core:stub.missingData.title')}
-        buttonText={t('core:stub.missingData.button')}
-      />
+      <View style={styles.gestureRoot}>
+        <NoContent
+          centered
+          title={t('core:stub.missingData.title')}
+          buttonText={t('core:stub.missingData.button')}
+        />
+      </View>
     );
   }
 
@@ -221,15 +225,18 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
       });
     }
     return (
-      <NoContent
-        title={t('core:dailyCard.empty.title')}
-        buttonText={t('core:dailyCard.empty.button')}
-        onPress={() =>
-          navigation.navigate(TabRoute.MainTab, {
-            screen: NavigationRoute.DayAdvice,
-          })
-        }
-      />
+      <View style={styles.gestureRoot}>
+        <NoContent
+          centered
+          title={t('core:dailyCard.empty.title')}
+          buttonText={t('core:dailyCard.empty.button')}
+          onPress={() =>
+            navigation.navigate(TabRoute.MainTab, {
+              screen: NavigationRoute.DayAdvice,
+            })
+          }
+        />
+      </View>
     );
   }
 
@@ -401,7 +408,12 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
               key={index}
               style={styles.carouselItemScroll}
               contentContainerStyle={
-                isDaySuggest ? styles.daySuggestScrollInner : undefined
+                isDaySuggest
+                  ? [
+                      styles.daySuggestScrollInner,
+                      isPhone && styles.daySuggestScrollInnerPhone,
+                    ]
+                  : undefined
               }
             >
               <SafeAreaView style={[styles.content, isDaySuggest && styles.daySuggestContent]}>
@@ -624,6 +636,10 @@ const styles = StyleSheet.create({
   },
   daySuggestScrollInner: {
     paddingBottom: 24,
+  },
+  daySuggestScrollInnerPhone: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   daySuggestContent: {
     marginBottom: 0,

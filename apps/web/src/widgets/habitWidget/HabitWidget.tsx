@@ -69,7 +69,11 @@ function HabitWidget() {
         <View style={styles.topRow}>
           <View style={styles.main}>
             <View style={styles.headerRow}>
-              <Text category={TEXT_TAGS.h4} weight={TEXT_WEIGHT.medium}>
+              <Text
+                category={TEXT_TAGS.label}
+                weight={TEXT_WEIGHT.medium}
+                style={styles.dateText}
+              >
                 {`${date[0].toUpperCase()}${date.slice(1)}`}
               </Text>
               <Text
@@ -82,14 +86,14 @@ function HabitWidget() {
             </View>
             <ProgressBar style={styles.progress} progress={progressPercent} />
             {habitsOfTheDay?.length ? (
-              <Text style={styles.description} category={TEXT_TAGS.label}>
+              <Text style={styles.goalsText} category={TEXT_TAGS.p1}>
                 {t('habits:widget.completedGoals', {
                   completed: completedGoals,
                   total: habitsOfTheDay.length,
                 })}
               </Text>
             ) : (
-              <Text style={styles.description} category={TEXT_TAGS.label}>
+              <Text style={styles.goalsText} category={TEXT_TAGS.p1}>
                 {t('habits:widget.empty')}
               </Text>
             )}
@@ -178,14 +182,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexShrink: 0,
   },
-  description: {
+  dateText: {
+    fontSize: 14,
+    lineHeight: 18,
+  },
+  goalsText: {
     width: '100%',
     textAlign: 'center',
-    lineHeight: 24,
-    fontSize: 20,
+    fontSize: 16,
+    lineHeight: 20,
     color: 'rgba(255,255,255,0.74)',
     paddingHorizontal: 4,
-    marginTop: 10,
+    marginTop: 8,
   },
   percent: {
     backgroundColor: COLORS.Success700,

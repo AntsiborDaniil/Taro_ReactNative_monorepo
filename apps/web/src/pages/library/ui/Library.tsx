@@ -90,24 +90,12 @@ function Library() {
           >
             {t('core:library.intro.lead')}
           </Text>
-          <View
-            style={{
-              marginTop: Math.round(layout.gap * 0.65),
-            }}
-          >
-            <Text
-              category={TEXT_TAGS.h4}
-              style={[
-                styles.sectionTitle,
-                {
-                  fontSize: layout.librarySectionTitleFontSize,
-                  lineHeight: Math.round(layout.librarySectionTitleFontSize + 6),
-                },
-              ]}
+          {Boolean(t('core:library.section.subtitle').trim()) ? (
+            <View
+              style={{
+                marginTop: Math.round(layout.gap * 0.65),
+              }}
             >
-              {t('core:library.section.title')}
-            </Text>
-            {Boolean(t('core:library.section.subtitle').trim()) ? (
               <Text
                 category={TEXT_TAGS.p2}
                 style={[
@@ -120,8 +108,8 @@ function Library() {
               >
                 {t('core:library.section.subtitle')}
               </Text>
-            ) : null}
-          </View>
+            </View>
+          ) : null}
           <View
             style={[
               styles.gridShell,
@@ -175,15 +163,15 @@ const styles = StyleSheet.create({
     color: 'rgba(216, 228, 247, 0.82)',
     maxWidth: 560,
     width: '100%',
-  },
-  sectionTitle: {
-    color: COLORS.Content,
-    letterSpacing: 0.2,
+    alignSelf: 'center',
+    textAlign: 'center',
   },
   sectionSubtitle: {
     marginTop: 6,
     color: 'rgba(216, 228, 247, 0.72)',
     maxWidth: 520,
+    alignSelf: 'center',
+    textAlign: 'center',
   },
   gridShell: {
     borderRadius: 18,

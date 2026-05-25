@@ -61,6 +61,7 @@ function SpreadCatalogCard({
   const titleStyle = useMemo(
     () => ({
       fontSize: layout.titleFontSize,
+      lineHeight: Math.round(layout.titleFontSize * 1.25),
     }),
     [layout.titleFontSize]
   );
