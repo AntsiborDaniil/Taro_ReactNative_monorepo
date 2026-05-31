@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  InteractionManager,
   Platform,
   Pressable,
   SafeAreaView,
@@ -25,7 +24,6 @@ import Carousel, {
 } from 'react-native-reanimated-carousel';
 import { useTabRailLayout } from 'app/navigation/tabs/TabRailLayoutContext';
 import { SpreadName, SpreadsCategory, TarotCardDirection } from 'shared/api';
-import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { ChevronLeftIcon, LeafIcon, ReverseIcon } from 'shared/icons';
@@ -34,17 +32,10 @@ import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { Button, NoContent, TarotCard, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
-import { rateAppAfterFinishedSpreads } from 'shared/utils';
 import { PaidContent } from '../../../paidContent';
 import { SpreadScheme } from '../../../scheme';
 import { TarotCharacteristics } from '../TarotCharacteristics';
 import TarotMeanings from '../TarotMeanings/TarotMeanings';
-
-const NAVIGATION_ROUTES: Record<TabRoute, NavigationRoute> = {
-  [TabRoute.LibraryTab]: NavigationRoute.SpreadsHistory,
-  [TabRoute.MainTab]: NavigationRoute.Main,
-  [TabRoute.SpreadsTab]: NavigationRoute.Spreads,
-};
 
 type Props = {
   cardIndex?: string;
@@ -85,8 +76,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
   useEffect(() => {
     setMeasuredCarouselHeight(null);
   }, [windowHeight, tabBarHeight, sceneContentWidth]);
-
-  const { selectedTab } = useData({ Context: TabsAndRoutesContext });
 
   const { isPractitioner } = useData({ Context: UserContext });
 
@@ -133,24 +122,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
       });
     }
   }, [sceneContentWidth, windowHeight, carouselWidth, carouselHeight, tabBarHeight]);
-
-  const handleDone = async () => {
-    await handleVibrationClick?.();
-
-    if (!selectedTab) {
-      return;
-    }
-
-    navigation.navigate(selectedTab, {
-      screen: NAVIGATION_ROUTES[selectedTab],
-    });
-
-    InteractionManager.runAfterInteractions(() => {
-      setTimeout(() => {
-        rateAppAfterFinishedSpreads().catch(() => {});
-      }, 1000);
-    });
-  };
 
   const handlePressToUnlock = async () => {
     await handleVibrationClick?.();
@@ -354,16 +325,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                         </View>
                       )}
 
-                      {isLastCard && (
-                        <View>
-                          <Button
-                            style={styles.doneButton}
-                            onPress={handleDone}
-                          >
-                            {t('core:finish')}
-                          </Button>
-                        </View>
-                      )}
                     </View>
                   </View>
                 </SafeAreaView>
@@ -580,13 +541,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                       </View>
                     )}
 
-                    {isLastCard && spread?.id !== SpreadName.Simple_DaySuggest && (
-                      <View style={styles.lastActions}>
-                        <Button style={[styles.actionButton, styles.doneButton]} onPress={handleDone}>
-                          {t('core:finish')}
-                        </Button>
-                      </View>
-                    )}
                   </View>
                 </View>
               </SafeAreaView>
@@ -689,27 +643,6 @@ const styles = StyleSheet.create({
     gap: 16,
     width: '100%',
     justifyContent: 'space-between',
-  },
-  doneButton: {
-    backgroundColor: 'rgba(88, 101, 242, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(182, 190, 255, 0.72)',
-  },
-  lastActions: {
-    gap: 12,
-    width: '100%',
-    maxWidth: 320,
-    alignSelf: 'center',
-  },
-  actionButton: {
-    width: '100%',
-    minHeight: 50,
-    borderRadius: 14,
-    ...({
-      cursor: 'pointer',
-      boxShadow: '0 10px 22px rgba(0,0,0,0.30)',
-      transitionDuration: '140ms',
-    } as object),
   },
   orderMeaning: {
     textAlign: 'center',

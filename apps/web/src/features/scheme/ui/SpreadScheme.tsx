@@ -3,7 +3,7 @@ import { SpreadContext } from 'entities/Spread';
 import { useTranslation } from 'react-i18next';
 import { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
 // import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SpreadName } from 'shared/api';
+import { SpreadName, SpreadsCategory } from 'shared/api';
 import { DataProvider, useData } from 'shared/DataProvider';
 import { Text, TEXT_TAGS } from 'shared/ui';
 import { SchemeContext, TSchemeMapping } from '../model';
@@ -54,18 +54,20 @@ function SpreadScheme({
   // const insets = useSafeAreaInsets();
 
   if (!spread?.id) {
-    return (
-      <View style={styles.stub}>
-        <Text category={TEXT_TAGS.p1} style={styles.stubText}>
-          {t('stub.missingData.title')}
-        </Text>
-      </View>
-    );
+    return null;
   }
 
   const Scheme = SchemeMapping[spread.id];
 
   if (!Scheme) {
+    if (
+      spread.category === SpreadsCategory.Simple ||
+      spread.cardsCount <= 1 ||
+      !spread.cardsPosition?.length
+    ) {
+      return null;
+    }
+
     return (
       <View style={styles.stub}>
         <Text category={TEXT_TAGS.p1} style={styles.stubText}>

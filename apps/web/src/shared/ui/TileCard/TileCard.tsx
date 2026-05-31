@@ -15,6 +15,7 @@ import { ImagePosition, TextPosition, TileCardProps } from 'shared/types';
 import { OverlayIcon } from '../OverlayIcon';
 import { Text, TEXT_TAGS } from '../Text';
 import { LockIcon } from '../../icons';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS, getColorOpacity } from '../../themes';
 
 // Иконка замка для заблокированного состояния
@@ -347,6 +348,7 @@ const styles = StyleService.create({
   },
   webPressable: {
     cursor: 'pointer',
+    ...WEB_HOVER_TRANSITION,
   } as object,
 });
 

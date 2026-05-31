@@ -10,7 +10,7 @@ import {
 import { Layout, StyleService, useStyleSheet } from '@ui-kitten/components';
 import type { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
 import { ChevronLeftIcon, SettingsIcon } from 'shared/icons';
-import { isTablet } from 'shared/lib';
+import { isTablet, WEB_HOVER_TRANSITION } from 'shared/lib';
 import { Text } from 'shared/ui/Text';
 import { useHeaderNavigation } from './useHeaderNavigation';
 
@@ -144,9 +144,11 @@ const themedStyles = StyleService.create({
   backButton: {
     padding: 8,
     paddingRight: 8,
+    ...WEB_HOVER_TRANSITION,
   },
   rightButton: {
     padding: 8,
+    ...WEB_HOVER_TRANSITION,
   },
   rightButtonPlaceholder: {
     padding: 8,

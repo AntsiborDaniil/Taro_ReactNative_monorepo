@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import type { PressableProps } from 'react-native';
 import type { CSSProperties, ReactNode } from 'react';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from '../../themes';
 import { Text, TEXT_TAGS } from '../Text';
 
@@ -57,6 +58,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    ...WEB_HOVER_TRANSITION,
   },
   cursorPointer: Platform.select({
     web: { cursor: 'pointer' } as object,

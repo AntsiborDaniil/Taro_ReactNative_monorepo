@@ -209,13 +209,16 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
       >
         <KeyboardAwareScrollView
           style={{ flex: 1, position: 'relative' }}
+          contentContainerStyle={styles.scrollContent}
           enableOnAndroid={true} // Включает поддержку на Android
           extraScrollHeight={100} // Дополнительное пространство для прокрутки
         >
           <View style={styles.wrapper}>
-            <View style={styles.scheme}>
-              <SpreadScheme hasRotation={false} isChoicePage />
-            </View>
+            {!isSimpleSpread && (
+              <View style={styles.scheme}>
+                <SpreadScheme hasRotation={false} isChoicePage />
+              </View>
+            )}
             {isSpreadCompleted && !isSimpleSpread ? (
               <View style={styles.summary}>
                 <ChoiceTriangle width={60} height={60} />
@@ -228,31 +231,31 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
               </View>
             ) : (
               <>
-                {isSimpleSpread && (
-                  <Image
-                    style={styles.image}
-                    source={
-                      spread?.id === SpreadName.Simple_DaySuggest
-                        ? getImage(['core', 'girl'])
-                        : getImage([
-                            'spreads',
-                            'flatIllustration',
-                            'simple_YesNo',
-                          ])
-                    }
-                  />
-                )}
-                <AnimatedCard />
+                {isSimpleSpread &&
+                  spread?.id !== SpreadName.Simple_DaySuggest &&
+                  !hasAskedQuestion && (
+                    <Image
+                      style={styles.image}
+                      source={getImage([
+                        'spreads',
+                        'flatIllustration',
+                        'simple_YesNo',
+                      ])}
+                    />
+                  )}
                 {spread?.id === SpreadName.Simple_DaySuggest ||
                 !isSimpleSpread ||
                 hasAskedQuestion ? (
-                  <CoverFlowCardCarousel
-                    style={
-                      isSimpleSpread
-                        ? styles.carouselSimpleSpread
-                        : styles.carousel
-                    }
-                  />
+                  <View style={styles.cardPickerCenter}>
+                    <AnimatedCard />
+                    <CoverFlowCardCarousel
+                      style={
+                        isSimpleSpread
+                          ? styles.carouselSimpleSpread
+                          : styles.carousel
+                      }
+                    />
+                  </View>
                 ) : (
                   <View style={styles.questionWrapper}>
                     <Question />
@@ -282,12 +285,29 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
 }
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+  },
   questionWrapper: {
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
+    alignItems: 'stretch',
     paddingHorizontal: 12,
     paddingVertical: 20,
     gap: 12,
   },
+  cardPickerCenter: {
+    width: '100%',
+    minHeight: 300,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    paddingVertical: 16,
+    position: 'relative',
+  },
   wrapper: {
+    flexGrow: 1,
     marginBottom: 48,
   },
   description: {
@@ -310,9 +330,13 @@ const styles = StyleSheet.create({
   },
   button: { width: '100%', height: verticalScale(46), borderRadius: 32 },
   scheme: { paddingLeft: 16, paddingRight: 16 },
-  carousel: { marginTop: 40 },
+  carousel: {
+    marginTop: 8,
+    alignSelf: 'center',
+  },
   carouselSimpleSpread: {
     marginTop: 0,
+    alignSelf: 'center',
   },
   daySuggestScreen: {
     paddingTop: 0,

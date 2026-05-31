@@ -11,6 +11,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { LockIcon } from 'shared/icons';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS, getColorOpacity } from 'shared/themes';
 import { OverlayIcon } from 'shared/ui/OverlayIcon';
 import { Text, TEXT_TAGS } from 'shared/ui/Text';
@@ -184,6 +185,7 @@ const styles = StyleSheet.create({
       web: {
         boxShadow: '0 10px 28px rgba(0, 0, 0, 0.22)',
         cursor: 'pointer',
+        ...WEB_HOVER_TRANSITION,
       },
       default: {
         shadowColor: '#000',

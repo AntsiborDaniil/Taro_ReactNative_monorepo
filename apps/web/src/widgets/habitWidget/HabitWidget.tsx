@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { getCurrentDate, getHabitDayProgress } from 'shared/lib';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { NavigationRoute, TabRoute } from 'shared/types';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
@@ -131,7 +132,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     ...({
       cursor: 'pointer',
-      transition: 'box-shadow 0.2s ease',
+      ...WEB_HOVER_TRANSITION,
     } as object),
   },
   rootHovered: {

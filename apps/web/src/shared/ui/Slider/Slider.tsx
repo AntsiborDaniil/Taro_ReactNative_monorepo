@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from '../Text';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from '../../themes';
 
 type Props = {
@@ -78,6 +79,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.045)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
+    ...WEB_HOVER_TRANSITION,
   },
   cardHover:
     Platform.OS === 'web'

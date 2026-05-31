@@ -8,7 +8,7 @@ import ColorPicker, { HueSlider } from 'reanimated-color-picker';
 import EmojiPicker from 'rn-emoji-keyboard';
 import { Header } from 'features/header';
 import { EmojiIcon } from 'shared/icons';
-import { getLocalizedWeekdays } from 'shared/lib';
+import { getLocalizedWeekdays, WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import {
   HabitFrequency,
@@ -483,9 +483,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(176, 197, 236, 0.2)',
     backgroundColor: 'rgba(255,255,255,0.03)',
     minHeight: 52,
-    ...({
-      transition: 'border-color 0.2s ease, background-color 0.2s ease',
-    } as object),
+    ...WEB_HOVER_TRANSITION,
   },
   controlButtonText: {
     color: COLORS.Content,

@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { MoodDisplayMode } from 'shared/api';
 import type { TMoodItem } from 'shared/api';
 import { useData } from 'shared/DataProvider';
-import { getMonthDate, getMonthDayDate, getWeekDate } from 'shared/lib';
+import { getMonthDate, getMonthDayDate, getWeekDate, WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { AreaGraphs, EmptyResultsModal, Text } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
@@ -390,6 +390,7 @@ const styles = StyleSheet.create({
     ...(globalThis?.window
       ? ({
           boxShadow: '0 4px 14px rgba(0, 0, 0, 0.14)',
+          ...WEB_HOVER_TRANSITION,
         } as object)
       : {}),
   },
@@ -489,6 +490,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(132, 176, 230, 0.28)',
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    ...WEB_HOVER_TRANSITION,
   },
   dateActionText: {
     color: COLORS.Content,

@@ -14,6 +14,7 @@ import type { ICarouselInstance } from 'react-native-reanimated-carousel';
 import Carousel from 'react-native-reanimated-carousel';
 import { useData } from 'shared/DataProvider';
 import { ChevronLeftIcon } from 'shared/icons';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { Text } from 'shared/ui';
 import SlideItem from './SlideItem';
@@ -222,6 +223,7 @@ const styles = StyleSheet.create({
     ...({
       cursor: 'pointer',
       boxShadow: '0 8px 16px rgba(0,0,0,0.32)',
+      ...WEB_HOVER_TRANSITION,
     } as object),
   },
   controlButtonLeft: {

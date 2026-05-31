@@ -10,6 +10,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import TooltipBase, { TooltipProps } from 'react-native-walkthrough-tooltip';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from '../../themes';
 
 type AnchorRect = {
@@ -210,6 +211,7 @@ const styles = StyleSheet.create({
   },
   webTrigger: {
     cursor: 'pointer',
+    ...WEB_HOVER_TRANSITION,
   },
   webTriggerPressed: {
     opacity: 0.7,

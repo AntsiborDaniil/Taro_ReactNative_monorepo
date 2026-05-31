@@ -20,6 +20,7 @@ import { TarotCharacteristics } from 'features/TarotCardReadings/ui/TarotCharact
 import TarotMeanings from 'features/TarotCardReadings/ui/TarotMeanings/TarotMeanings';
 import { useNativeNavigation } from 'shared/hooks';
 import { LeafIcon, ReverseIcon } from 'shared/icons';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { NavigationRoute, TabRoute } from 'shared/types';
 import { TarotCardDirection } from '../../../shared/api';
@@ -139,6 +140,7 @@ function MoticationScreen(
                       ? ({
                           boxShadow: '0 12px 40px rgba(0,0,0,0.35)',
                           cursor: 'pointer',
+                          ...WEB_HOVER_TRANSITION,
                         } as object)
                       : {
                           shadowColor: '#000',

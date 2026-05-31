@@ -11,6 +11,7 @@ import {
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { useTranslation } from 'react-i18next';
 import { getImage } from 'shared/lib';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { Text, TEXT_TAGS } from 'shared/ui';
 
@@ -180,9 +181,8 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web'
       ? ({
           cursor: 'pointer',
-          transition:
-            'box-shadow 0.2s ease, background-color 0.2s ease',
           boxShadow: '0 8px 22px rgba(246, 192, 27, 0.32)',
+          ...WEB_HOVER_TRANSITION,
         } as object)
       : {}),
   },

@@ -29,6 +29,7 @@ import {
   getTarotAiApiBaseUrl,
 } from 'shared/api';
 import { emitTarotAuthChanged } from 'shared/lib/tarotAuthEvents';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { PressableWebState } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -1423,7 +1424,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(176, 197, 236, 0.22)',
     backgroundColor: 'rgba(255,255,255,0.03)',
     ...(Platform.OS === 'web'
-      ? ({ cursor: 'pointer' as const } as object)
+      ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
   paymentRowHover: {
@@ -1467,7 +1468,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 10,
     ...(Platform.OS === 'web'
-      ? ({ cursor: 'pointer' as const } as object)
+      ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
   passwordInputOuter: {
@@ -1488,7 +1489,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     minWidth: 44,
     ...(Platform.OS === 'web'
-      ? ({ cursor: 'pointer' as const } as object)
+      ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
   passwordRevealPressed: {
@@ -1506,7 +1507,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(102, 154, 211, 0.14)',
     minHeight: 72,
     ...(Platform.OS === 'web'
-      ? ({ cursor: 'pointer' as const } as object)
+      ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
   addPaymentButtonHover: {
@@ -1588,7 +1589,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(176, 197, 236, 0.2)',
     backgroundColor: 'rgba(255,255,255,0.03)',
     ...(Platform.OS === 'web'
-      ? ({ cursor: 'pointer' as const } as object)
+      ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
   socialButtonHover: {
@@ -1648,7 +1649,7 @@ const styles = StyleSheet.create({
     marginTop: -4,
     marginRight: -4,
     ...(Platform.OS === 'web'
-      ? ({ cursor: 'pointer' as const } as object)
+      ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
   paymentModalClosePressed: {

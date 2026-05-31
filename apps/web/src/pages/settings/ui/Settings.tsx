@@ -20,7 +20,12 @@ import { PaidContent } from 'features/paidContent';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { ChevronRightIcon, CrossIcon, ReverseIcon } from 'shared/icons';
-import { AsyncMemorySettingKey, isTablet, moderateScale } from 'shared/lib';
+import {
+  AsyncMemorySettingKey,
+  isTablet,
+  moderateScale,
+  WEB_HOVER_TRANSITION,
+} from 'shared/lib';
 import { COLORS, SETTINGS_TYPOGRAPHY } from 'shared/themes';
 import { appStoreLinks } from 'shared/utils';
 import { AnalyticAction, NavigationRoute, PressableWebState, TabRoute } from 'shared/types';
@@ -516,7 +521,7 @@ function createWebStyles() {
       paddingHorizontal: 10,
       borderRadius: 12,
       ...(Platform.OS === 'web'
-        ? ({ cursor: 'pointer' as const } as object)
+        ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
         : {}),
     },
     rowActive: {

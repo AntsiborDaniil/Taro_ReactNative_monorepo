@@ -24,6 +24,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PaidContent } from 'features/paidContent';
 import { useData } from 'shared/DataProvider';
 import { DownIcon, UpIcon } from 'shared/icons';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { ImagePosition } from 'shared/types';
 import { TileCard } from 'shared/ui';
@@ -288,9 +289,7 @@ const styles = StyleSheet.create({
   },
   cardItemWrap: {
     borderRadius: 16,
-    ...({
-      transition: 'box-shadow 0.2s ease',
-    } as object),
+    ...WEB_HOVER_TRANSITION,
   },
   cardItemSelected: {
     ...({
@@ -315,8 +314,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.14)',
     ...({
-      transition: 'box-shadow 0.2s ease',
       boxShadow: '0 8px 20px rgba(0,0,0,0.34)',
+      ...WEB_HOVER_TRANSITION,
     } as object),
   },
   headerButtonHovered: {

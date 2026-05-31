@@ -14,6 +14,7 @@ import { WebView } from 'react-native-webview';
 import { Header } from 'features/header';
 import { useData } from 'shared/DataProvider';
 import { ChevronRightIcon } from 'shared/icons';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { NavigationRoute, PressableWebState } from 'shared/types';
 import { ScreenLayout } from '../ScreenLayout';
@@ -184,7 +185,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(175, 161, 232, 0.15)',
     ...(Platform.OS === 'web'
-      ? ({ cursor: 'pointer' as const } as object)
+      ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
   openRowActive: {

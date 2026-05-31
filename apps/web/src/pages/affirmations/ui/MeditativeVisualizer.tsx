@@ -18,6 +18,7 @@ import {
   withTiming,
 } from 'react-native-reanimated';
 import { useData } from 'shared/DataProvider';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 
@@ -260,8 +261,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.02)',
     overflow: 'hidden',
     ...({
-      transition: 'box-shadow 0.2s ease',
       boxShadow: '0 14px 34px rgba(0,0,0,0.24)',
+      ...WEB_HOVER_TRANSITION,
     } as object),
   },
   containerHovered: {

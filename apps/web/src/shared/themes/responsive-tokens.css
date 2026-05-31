@@ -28,6 +28,25 @@ body {
   line-height: var(--line-height-base);
 }
 
+/* Плавные hover для нативных HTML-контролов (RN Web задаёт transition в JS отдельно). */
+@media (hover: hover) and (pointer: fine) {
+  a,
+  button,
+  [role='button'],
+  input[type='button'],
+  input[type='submit'],
+  input[type='reset'] {
+    transition:
+      background-color 0.2s ease,
+      opacity 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease,
+      filter 0.2s ease,
+      transform 0.2s ease,
+      color 0.2s ease;
+  }
+}
+
 :root {
   --viewport-tier: mobile;
 

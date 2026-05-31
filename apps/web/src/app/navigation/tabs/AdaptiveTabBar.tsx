@@ -15,7 +15,7 @@ import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
 import { BookIcon, CardsIcon, ChevronLeftIcon, ChevronRightIcon, PlanetIcon } from 'shared/icons';
-import { blurActiveElement } from 'shared/lib';
+import { blurActiveElement, WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, TabRoute } from 'shared/types';
 import {
@@ -263,6 +263,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    ...WEB_HOVER_TRANSITION,
   },
   railToggleHover: {
     backgroundColor: 'rgba(244, 244, 245, 0.08)',
@@ -274,6 +275,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 6,
     borderRadius: 14,
     overflow: 'hidden',
+    ...WEB_HOVER_TRANSITION,
   },
   railItemHover: {
     backgroundColor: 'rgba(244, 244, 245, 0.06)',

@@ -14,6 +14,7 @@ import { type ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { NavigationRoute, TabRoute, PressableWebState } from 'shared/types';
 import { Text, TEXT_TAGS } from 'shared/ui';
@@ -226,6 +227,7 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web'
       ? ({
           boxShadow: '0 10px 24px rgba(0, 0, 0, 0.16)',
+          ...WEB_HOVER_TRANSITION,
         } as object)
       : {}),
   },
@@ -282,6 +284,7 @@ const styles = StyleSheet.create({
     width: 84,
     height: 108,
     position: 'relative',
+    ...WEB_HOVER_TRANSITION,
   },
   tarotCardPreviewHover:
     Platform.OS === 'web'

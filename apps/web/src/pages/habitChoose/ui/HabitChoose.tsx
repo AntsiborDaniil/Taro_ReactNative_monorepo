@@ -6,6 +6,7 @@ import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { GetIcon, QuitIcon } from 'shared/icons';
 import { getImage } from 'shared/lib';
+import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { HabitType, NavigationRoute, PressableWebState, TabRoute } from 'shared/types';
 import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -126,8 +127,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     ...({
       cursor: 'pointer',
-      transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
       boxShadow: '0 8px 20px rgba(0,0,0,0.16)',
+      ...WEB_HOVER_TRANSITION,
     } as object),
   },
   choiceCardBuild: {
