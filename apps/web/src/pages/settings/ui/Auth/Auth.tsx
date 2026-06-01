@@ -27,6 +27,7 @@ import {
   authSignHeaders,
   authUsesCookie,
   getTarotAiApiBaseUrl,
+  startGoogleSignIn,
 } from 'shared/api';
 import { emitTarotAuthChanged } from 'shared/lib/tarotAuthEvents';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
@@ -66,6 +67,29 @@ type PasswordFormValues = {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const AUTH_SESSION_STORAGE_KEY = 'authSession';
+
+type AuthApiBody = {
+  user?: AuthUser;
+  token?: string;
+  message?: string;
+  needsEmailVerification?: boolean;
+  email?: string;
+  devVerificationCode?: string;
+};
+
+async function parseAuthResponse(
+  response: Response
+): Promise<{ body: AuthApiBody; parseFailed: boolean }> {
+  const text = await response.text();
+  if (!text.trim()) {
+    return { body: {}, parseFailed: true };
+  }
+  try {
+    return { body: JSON.parse(text) as AuthApiBody, parseFailed: false };
+  } catch {
+    return { body: {}, parseFailed: true };
+  }
+}
 
 type AuthPasswordInputProps = {
   value: string;
@@ -136,6 +160,16 @@ function Auth() {
   /** Сбрасывает дерево гостевой формы после выхода (RN Web иначе может «наследовать» ноду первого инпута). */
   const [guestAuthEpoch, setGuestAuthEpoch] = useState(0);
   const [addCardModalVisible, setAddCardModalVisible] = useState(false);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<
+    string | null
+  >(null);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResendingCode, setIsResendingCode] = useState(false);
+  const [devVerificationCode, setDevVerificationCode] = useState<string | null>(
+    null
+  );
+  const [authSubmitting, setAuthSubmitting] = useState(false);
 
   const useCookie = authUsesCookie();
 
@@ -308,6 +342,115 @@ function Auth() {
     });
   }, [useCookie]);
 
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const authStatus = params.get('auth');
+    if (!authStatus) {
+      return;
+    }
+
+    const authMessage = params.get('authMessage');
+    params.delete('auth');
+    params.delete('authMessage');
+    const query = params.toString();
+    const cleaned = `${window.location.pathname}${query ? `?${query}` : ''}`;
+    window.history.replaceState({}, '', cleaned);
+
+    if (authStatus === 'success') {
+      void (async () => {
+        try {
+          const response = await fetch(
+            `${getTarotAiApiBaseUrl()}/api/auth/me`,
+            {
+              credentials: authCredentials(),
+              headers: authRequestHeaders(null),
+            }
+          );
+          if (response.ok) {
+            const meResponse = (await response.json()) as { user: AuthUser };
+            setSession({ token: null, user: meResponse.user });
+            emitTarotAuthChanged();
+            Toast.show({
+              type: 'success',
+              text1: t('settings:auth.oauth.success'),
+            });
+          }
+        } catch {
+          Toast.show({
+            type: 'error',
+            text1: t('settings:auth.oauth.error'),
+          });
+        }
+      })();
+      return;
+    }
+
+    Toast.show({
+      type: 'error',
+      text1: authMessage || t('settings:auth.oauth.error'),
+    });
+  }, [t]);
+
+  const openEmailVerification = (
+    email: string,
+    devCode?: string
+  ): void => {
+    setPendingVerificationEmail(email);
+    setDevVerificationCode(devCode ?? null);
+    if (devCode) {
+      setVerificationCode(devCode);
+    }
+    Toast.show({
+      type: 'success',
+      text1: t('settings:auth.verify.sent'),
+      text2: devCode
+        ? `${t('settings:auth.verify.devHint')} ${devCode}`
+        : undefined,
+    });
+  };
+
+  const applyAuthenticatedSession = async (
+    body: { user: AuthUser; token?: string },
+    options?: { successTitle?: string }
+  ): Promise<void> => {
+    if (useCookie) {
+      setSession({ token: null, user: body.user });
+    } else if (body.token) {
+      const nextSession: AuthSessionData = {
+        token: body.token,
+        user: body.user,
+      };
+      await AsyncStorage.setItem(
+        AUTH_SESSION_STORAGE_KEY,
+        JSON.stringify(nextSession)
+      );
+      setSession(nextSession);
+    }
+
+    setPendingVerificationEmail(null);
+    setVerificationCode('');
+    setDevVerificationCode(null);
+    reset({ name: '', email: '', password: '' });
+
+    Toast.show({
+      type: 'success',
+      text1: options?.successTitle ?? t('settings:auth.success.title'),
+      text2: options?.successTitle
+        ? undefined
+        : useCookie
+          ? t('settings:auth.success.subtitle.cookie')
+          : t('settings:auth.success.subtitle'),
+    });
+
+    if (Platform.OS === 'web') {
+      emitTarotAuthChanged();
+    }
+  };
+
   const onSubmit = async (values: AuthFormValues): Promise<void> => {
     if (isSignUp) {
       const signUpValid = await trigger(['name', 'email', 'password']);
@@ -316,6 +459,7 @@ function Auth() {
       }
     }
 
+    setAuthSubmitting(true);
     try {
       const endpoint = isSignUp ? 'signup' : 'signin';
       const payload = isSignUp
@@ -338,65 +482,173 @@ function Auth() {
         }
       );
 
-      const responseBody = (await response.json()) as
-        | AuthSessionData
-        | { user?: AuthUser; token?: string }
-        | { message?: string };
+      const { body: responseBody, parseFailed } =
+        await parseAuthResponse(response);
 
-      if (!response.ok) {
+      if (parseFailed) {
         Toast.show({
           type: 'error',
-          text1:
-            (responseBody as { message?: string }).message ||
-            t('settings:auth.error.default'),
+          text1: response.ok
+            ? t('settings:auth.error.default')
+            : t('settings:auth.error.network'),
         });
         return;
       }
 
-      if (useCookie) {
-        const user = (responseBody as { user: AuthUser }).user;
-        if (!user) {
-          Toast.show({
-            type: 'error',
-            text1: t('settings:auth.error.default'),
-          });
+      if (!response.ok) {
+        if (responseBody.needsEmailVerification && responseBody.email) {
+          openEmailVerification(
+            responseBody.email,
+            responseBody.devVerificationCode
+          );
           return;
         }
-        setSession({ token: null, user });
-      } else {
-        const body = responseBody as { user: AuthUser; token: string };
-        const nextSession: AuthSessionData = {
-          token: body.token,
-          user: body.user,
-        };
-        await AsyncStorage.setItem(
-          AUTH_SESSION_STORAGE_KEY,
-          JSON.stringify(nextSession)
+        Toast.show({
+          type: 'error',
+          text1: responseBody.message || t('settings:auth.error.default'),
+        });
+        return;
+      }
+
+      if (responseBody.needsEmailVerification) {
+        openEmailVerification(
+          responseBody.email || values.email.trim(),
+          responseBody.devVerificationCode
         );
-        setSession(nextSession);
+        return;
       }
 
-      reset({
-        name: '',
-        email: '',
-        password: '',
-      });
-
-      Toast.show({
-        type: 'success',
-        text1: t('settings:auth.success.title'),
-        text2: useCookie
-          ? t('settings:auth.success.subtitle.cookie')
-          : t('settings:auth.success.subtitle'),
-      });
-      if (Platform.OS === 'web') {
-        emitTarotAuthChanged();
+      if (!responseBody.user) {
+        Toast.show({
+          type: 'error',
+          text1: t('settings:auth.error.default'),
+        });
+        return;
       }
+
+      await applyAuthenticatedSession({
+        user: responseBody.user,
+        token: responseBody.token,
+      });
     } catch {
       Toast.show({
         type: 'error',
-        text1: t('settings:auth.error.default'),
+        text1: t('settings:auth.error.network'),
       });
+    } finally {
+      setAuthSubmitting(false);
+    }
+  };
+
+  const onVerifyEmail = async (): Promise<void> => {
+    if (!pendingVerificationEmail || verificationCode.trim().length < 4) {
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const response = await fetch(
+        `${getTarotAiApiBaseUrl()}/api/auth/verify-email`,
+        {
+          method: 'POST',
+          credentials: authCredentials(),
+          headers: {
+            'Content-Type': 'application/json',
+            ...authSignHeaders(),
+          },
+          body: JSON.stringify({
+            email: pendingVerificationEmail,
+            code: verificationCode.trim(),
+          }),
+        }
+      );
+
+      const { body, parseFailed } = await parseAuthResponse(response);
+
+      if (parseFailed || !response.ok) {
+        Toast.show({
+          type: 'error',
+          text1:
+            body.message ||
+            (parseFailed
+              ? t('settings:auth.error.network')
+              : t('settings:auth.verify.error')),
+        });
+        return;
+      }
+
+      if (!body.user) {
+        Toast.show({
+          type: 'error',
+          text1: t('settings:auth.verify.error'),
+        });
+        return;
+      }
+
+      await applyAuthenticatedSession(
+        { user: body.user, token: body.token },
+        { successTitle: t('settings:auth.verify.success') }
+      );
+    } catch {
+      Toast.show({
+        type: 'error',
+        text1: t('settings:auth.error.network'),
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const onResendVerification = async (): Promise<void> => {
+    if (!pendingVerificationEmail) {
+      return;
+    }
+
+    setIsResendingCode(true);
+    try {
+      const response = await fetch(
+        `${getTarotAiApiBaseUrl()}/api/auth/resend-verification`,
+        {
+          method: 'POST',
+          credentials: authCredentials(),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: pendingVerificationEmail }),
+        }
+      );
+
+      const { body, parseFailed } = await parseAuthResponse(response);
+
+      if (parseFailed || !response.ok) {
+        Toast.show({
+          type: 'error',
+          text1:
+            body.message ||
+            (parseFailed
+              ? t('settings:auth.error.network')
+              : t('settings:auth.error.default')),
+        });
+        return;
+      }
+
+      if (body.devVerificationCode) {
+        setDevVerificationCode(body.devVerificationCode);
+        setVerificationCode(body.devVerificationCode);
+      }
+
+      Toast.show({
+        type: 'success',
+        text1: t('settings:auth.verify.sent'),
+        text2: body.devVerificationCode
+          ? `${t('settings:auth.verify.devHintResend')} ${body.devVerificationCode}`
+          : undefined,
+      });
+    } catch {
+      Toast.show({
+        type: 'error',
+        text1: t('settings:auth.error.network'),
+      });
+    } finally {
+      setIsResendingCode(false);
     }
   };
 
@@ -885,6 +1137,81 @@ function Auth() {
               </Button>
             </View>
           </>
+        ) : pendingVerificationEmail ? (
+          <View style={styles.formCard}>
+            <Text category={TEXT_TAGS.h3} style={styles.verifyTitle}>
+              {t('settings:auth.verify.title')}
+            </Text>
+            <Text category={TEXT_TAGS.p2} style={styles.verifySubtitle}>
+              {t('settings:auth.verify.subtitle', {
+                email: pendingVerificationEmail,
+              })}
+            </Text>
+
+            {devVerificationCode ? (
+              <View style={styles.devCodeBanner}>
+                <Text category={TEXT_TAGS.p2} style={styles.devCodeLabel}>
+                  {t('settings:auth.verify.devHint')}
+                </Text>
+                <Text category={TEXT_TAGS.h3} style={styles.devCodeValue}>
+                  {devVerificationCode}
+                </Text>
+              </View>
+            ) : null}
+
+            <View style={styles.fieldWrap}>
+              <Text category={TEXT_TAGS.p2} style={styles.fieldLabel}>
+                {t('settings:auth.verify.code')}
+              </Text>
+              <TextInput
+                value={verificationCode}
+                onChangeText={setVerificationCode}
+                keyboardType="number-pad"
+                autoCapitalize="none"
+                autoComplete="one-time-code"
+                maxLength={8}
+                placeholder={t('settings:auth.verify.codePlaceholder')}
+                placeholderTextColor="rgba(255,255,255,0.42)"
+                style={[styles.input, styles.verifyCodeInput]}
+              />
+            </View>
+
+            <Button
+              disabled={
+                verificationCode.trim().length < 4 || isVerifying
+              }
+              style={styles.submitButton}
+              onPress={onVerifyEmail}
+            >
+              {t('settings:auth.verify.submit')}
+            </Button>
+
+            <Pressable
+              onPress={onResendVerification}
+              disabled={isResendingCode}
+              style={styles.verifyResendHit}
+            >
+              <Text category={TEXT_TAGS.p2} style={styles.verifyResendText}>
+                {isResendingCode
+                  ? t('settings:auth.verify.resending')
+                  : t('settings:auth.verify.resend')}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => {
+                setPendingVerificationEmail(null);
+                setVerificationCode('');
+                setDevVerificationCode(null);
+                setTab('signin');
+              }}
+              style={styles.verifyBackHit}
+            >
+              <Text category={TEXT_TAGS.p2} style={styles.verifyBackText}>
+                {t('settings:auth.verify.back')}
+              </Text>
+            </Pressable>
+          </View>
         ) : (
           <View style={styles.guestWrap} key={guestAuthEpoch}>
             <View style={styles.segment}>
@@ -1039,11 +1366,13 @@ function Auth() {
                 </View>
 
                 <Button
-                  disabled={!canSubmit || isSubmitting}
+                  disabled={!canSubmit || isSubmitting || authSubmitting}
                   style={styles.submitButton}
                   onPress={handleSubmit(onSubmit)}
                 >
-                  {submitLabel}
+                  {authSubmitting
+                    ? t('settings:auth.loading')
+                    : submitLabel}
                 </Button>
 
                 <View style={styles.dividerRow}>
@@ -1064,13 +1393,7 @@ function Auth() {
                       pressed && styles.socialButtonPressed,
                     ];
                     }}
-                    onPress={() =>
-                      Toast.show({
-                        type: 'info',
-                        text1: t('settings:auth.socialSoon.title'),
-                        text2: t('settings:auth.socialSoon.google'),
-                      })
-                    }
+                    onPress={startGoogleSignIn}
                   >
                     <Text category={TEXT_TAGS.h4} style={styles.socialButtonText}>
                       Google
@@ -1174,11 +1497,13 @@ function Auth() {
                 </View>
 
                 <Button
-                  disabled={!canSubmit || isSubmitting}
+                  disabled={!canSubmit || isSubmitting || authSubmitting}
                   style={styles.submitButton}
                   onPress={handleSubmit(onSubmit)}
                 >
-                  {submitLabel}
+                  {authSubmitting
+                    ? t('settings:auth.loading')
+                    : submitLabel}
                 </Button>
 
                 <View style={styles.dividerRow}>
@@ -1199,13 +1524,7 @@ function Auth() {
                       pressed && styles.socialButtonPressed,
                     ];
                     }}
-                    onPress={() =>
-                      Toast.show({
-                        type: 'info',
-                        text1: t('settings:auth.socialSoon.title'),
-                        text2: t('settings:auth.socialSoon.google'),
-                      })
-                    }
+                    onPress={startGoogleSignIn}
                   >
                     <Text category={TEXT_TAGS.h4} style={styles.socialButtonText}>
                       Google
@@ -1661,6 +1980,48 @@ const styles = StyleSheet.create({
   },
   paymentModalButton: {
     marginTop: 6,
+  },
+  verifyTitle: {
+    color: COLORS.Content,
+  },
+  verifySubtitle: {
+    color: 'rgba(218, 230, 255, 0.78)',
+    lineHeight: 20,
+  },
+  verifyCodeInput: {
+    textAlign: 'center',
+    letterSpacing: 6,
+    fontSize: 22,
+  },
+  verifyResendHit: {
+    alignSelf: 'center',
+    paddingVertical: 8,
+  },
+  verifyResendText: {
+    color: COLORS.Primary,
+  },
+  verifyBackHit: {
+    alignSelf: 'center',
+    paddingVertical: 4,
+  },
+  verifyBackText: {
+    color: 'rgba(186, 204, 235, 0.72)',
+  },
+  devCodeBanner: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(128, 174, 226, 0.45)',
+    backgroundColor: 'rgba(102, 154, 211, 0.12)',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 4,
+  },
+  devCodeLabel: {
+    color: 'rgba(218, 230, 255, 0.78)',
+  },
+  devCodeValue: {
+    color: COLORS.Primary,
+    letterSpacing: 4,
   },
 });
 

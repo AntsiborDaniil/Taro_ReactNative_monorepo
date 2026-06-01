@@ -27,7 +27,7 @@ import AnimatedSplashScreen from './src/features/splash/ui/AnimatedSplashScreen'
 import { SubscriptionType } from './src/shared/api';
 import { LoadingsContext, useLoadings } from './src/shared/contexts/Loadings';
 import { DataProvider } from './src/shared/DataProvider';
-import { AIAnimation } from './src/shared/ui';
+import { AIAnimation, TarotToast } from './src/shared/ui';
 
 import './i18n';
 
@@ -158,6 +158,7 @@ export default function RootLayout() {
                 </DataProvider>
               )}
             </ErrorBoundary>
+            {Platform.OS === 'web' ? <TarotToast /> : null}
           </NavigationContainer>
         </DataProvider>
       </ApplicationProvider>

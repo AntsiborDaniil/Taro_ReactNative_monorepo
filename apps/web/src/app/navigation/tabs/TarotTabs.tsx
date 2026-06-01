@@ -178,7 +178,7 @@ function TarotTabs() {
             options={{ title: t('nav.tab.library') }}
           />
         </Tabs.Navigator>
-        <TarotToast />
+        {Platform.OS !== 'web' ? <TarotToast /> : null}
       </TabRailLayoutProvider>
     </DataProvider>
   );
