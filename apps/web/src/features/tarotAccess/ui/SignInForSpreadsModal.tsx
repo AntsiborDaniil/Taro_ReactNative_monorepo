@@ -21,7 +21,7 @@ import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui/Text';
 
 export type SignInForSpreadsModalProps = {
   /** По умолчанию тексты из `spread:`; для настроения — `moodAndEnergy`; для стиля колоды — `settings`. */
-  i18nNamespace?: 'spread' | 'moodAndEnergy' | 'settings';
+  i18nNamespace?: 'spread' | 'moodAndEnergy' | 'settings' | 'affirmations';
 };
 
 function SignInForSpreadsModal({

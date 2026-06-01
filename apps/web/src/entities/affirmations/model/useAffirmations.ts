@@ -30,11 +30,20 @@ export function useAffirmations(): TAffirmationsHookResult {
 
   const { t } = useTranslation();
 
-  const { isPractitioner, isAuthenticated } = useData({ Context: UserContext });
-  const canAccessAllCategories = Boolean(isPractitioner || isAuthenticated);
+  const { isAuthenticated } = useData({ Context: UserContext });
+
+  const canAccessCategory = useCallback(
+    (category: AffirmationCategory) =>
+      category === AffirmationCategory.General || Boolean(isAuthenticated),
+    [isAuthenticated]
+  );
 
   const handleSelectedAffirmationCategory = useCallback(
     async (category: AffirmationCategory) => {
+      if (!canAccessCategory(category)) {
+        return;
+      }
+
       setSelectedAffirmationCategory(category);
 
       const memorySelectedAffirmations =
@@ -86,7 +95,7 @@ export function useAffirmations(): TAffirmationsHookResult {
         category
       );
     },
-    [t]
+    [t, canAccessCategory]
   );
 
   useEffect(() => {
@@ -99,19 +108,19 @@ export function useAffirmations(): TAffirmationsHookResult {
         AsyncMemoryKey.SelectedAffirmationCategory
       )) as AffirmationCategory | null;
 
-      const category = canAccessAllCategories
-        ? memorySelectedAffirmationCategory
-        : AffirmationCategory.General;
+      const remembered = memorySelectedAffirmationCategory;
+      const category =
+        remembered && canAccessCategory(remembered)
+          ? remembered
+          : AffirmationCategory.General;
 
-      await handleSelectedAffirmationCategory(
-        category ?? AffirmationCategory.General
-      );
+      await handleSelectedAffirmationCategory(category);
     }
 
     selectDefaultCategory();
   }, [
     handleSelectedAffirmationCategory,
-    canAccessAllCategories,
+    canAccessCategory,
     selectedAffirmation,
     selectedAffirmationCategory,
   ]);

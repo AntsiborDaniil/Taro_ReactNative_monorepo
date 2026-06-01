@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  type DimensionValue,
-  FlatList,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   View,
-  useWindowDimensions,
 } from 'react-native';
 import {
   AffirmationCategory,
@@ -16,60 +14,83 @@ import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
 import Animated, {
   Easing,
+  interpolate,
   useAnimatedStyle,
   useSharedValue,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { PaidContent } from 'features/paidContent';
+import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { useData } from 'shared/DataProvider';
-import { DownIcon, UpIcon } from 'shared/icons';
+import { ChevronRightIcon } from 'shared/icons';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
-import { ImagePosition } from 'shared/types';
-import { TileCard } from 'shared/ui';
+import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 
+import AffirmationCategoryChip from './AffirmationCategoryChip';
 import type { AffirmationsLayout } from './useAffirmationsLayout';
+
+const EXPAND_SPRING = { damping: 22, stiffness: 260, mass: 0.85 };
+const COLLAPSE_DURATION = 280;
 
 const CATEGORIES = [
   {
     category: AffirmationCategory.General,
     name: 'affirmations:general',
-    gradient: ['rgba(18, 24, 36, 0.2)', 'rgba(135, 206, 235, 0.58)'],
+    gradient: ['rgba(18, 24, 36, 0.55)', 'rgba(135, 206, 235, 0.72)'] as [
+      string,
+      string,
+    ],
     hasLock: false,
   },
   {
     category: AffirmationCategory.Career,
     name: 'affirmations:career',
-    gradient: ['rgba(18, 24, 36, 0.2)', 'rgba(255, 140, 0, 0.58)'],
+    gradient: ['rgba(18, 24, 36, 0.55)', 'rgba(255, 140, 0, 0.68)'] as [
+      string,
+      string,
+    ],
     hasLock: true,
   },
   {
     category: AffirmationCategory.Love,
     name: 'affirmations:love',
-    gradient: ['rgba(18, 24, 36, 0.2)', 'rgba(255, 20, 147, 0.58)'],
+    gradient: ['rgba(18, 24, 36, 0.55)', 'rgba(255, 20, 147, 0.68)'] as [
+      string,
+      string,
+    ],
     hasLock: true,
   },
   {
     category: AffirmationCategory.Purpose,
     name: 'affirmations:purpose',
-    gradient: ['rgba(18, 24, 36, 0.2)', 'rgba(138, 43, 226, 0.58)'],
+    gradient: ['rgba(18, 24, 36, 0.55)', 'rgba(138, 43, 226, 0.68)'] as [
+      string,
+      string,
+    ],
     hasLock: true,
   },
   {
     category: AffirmationCategory.Health,
     name: 'affirmations:health',
-    gradient: ['rgba(18, 24, 36, 0.2)', 'rgba(34, 139, 34, 0.58)'],
+    gradient: ['rgba(18, 24, 36, 0.55)', 'rgba(34, 139, 34, 0.68)'] as [
+      string,
+      string,
+    ],
     hasLock: true,
   },
   {
     category: AffirmationCategory.Motivation,
     name: 'affirmations:motivation',
-    gradient: ['rgba(18, 24, 36, 0.2)', 'rgba(255, 69, 0, 0.58)'],
+    gradient: ['rgba(18, 24, 36, 0.55)', 'rgba(255, 69, 0, 0.68)'] as [
+      string,
+      string,
+    ],
     hasLock: true,
   },
-];
+] as const;
 
 type SelectCategoryProps = {
   layout: AffirmationsLayout;
@@ -77,67 +98,103 @@ type SelectCategoryProps = {
 
 const SelectCategory = ({ layout }: SelectCategoryProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [contentHeight, setContentHeight] = useState(0);
-  const translateY = useSharedValue(1000);
+  const expandProgress = useSharedValue(0);
+  const measuredContentHeight = useSharedValue(0);
   const insets = useSafeAreaInsets();
-  const { height: viewportHeight } = useWindowDimensions();
 
   const { handleSelectedAffirmationCategory, selectedAffirmationCategory } =
-    useData({
-      Context: AffirmationsContext,
-    });
-  const { isPractitioner, isAuthenticated } = useData({
-    Context: UserContext,
-  });
-  const canAccessAllCategories = Boolean(isPractitioner || isAuthenticated);
+    useData({ Context: AffirmationsContext });
+  const { isAuthenticated } = useData({ Context: UserContext });
+  const canAccessLockedCategories = Boolean(isAuthenticated);
   const { showModal } = useData({ Context: ModalsContext });
 
   const { t } = useTranslation();
-  const isCompact = layout.categoryColumns === 1;
-  const maxListHeight = Math.round(
-    Math.max(220, Math.min(460, viewportHeight * (isCompact ? 0.46 : 0.42)))
+
+  const selectedMeta = useMemo(
+    () =>
+      CATEGORIES.find((c) => c.category === selectedAffirmationCategory) ??
+      CATEGORIES[0],
+    [selectedAffirmationCategory]
   );
-  const animatedStyle = useAnimatedStyle(() => {
+
+  const chevronRotation = useSharedValue(90);
+  const swatchScale = useSharedValue(1);
+
+  const contentAnimatedStyle = useAnimatedStyle(() => {
+    const height = measuredContentHeight.value * expandProgress.value;
+
     return {
+      height,
+      opacity: interpolate(expandProgress.value, [0, 0.35, 1], [0, 0.85, 1]),
       transform: [
         {
-          translateY: withTiming(translateY.value, {
-            duration: 300,
-            easing: Easing.inOut(Easing.ease),
-          }),
+          translateY: interpolate(expandProgress.value, [0, 1], [10, 0]),
+        },
+        {
+          scale: interpolate(expandProgress.value, [0, 1], [0.98, 1]),
         },
       ],
     };
   });
 
-  const toggleSheet = () => {
-    if (isOpen) {
-      // Закрываем: двигаем вниз на полную высоту контента
-      translateY.value = contentHeight;
-      setIsOpen(false);
-    } else {
-      // Открываем: двигаем вверх (translateY = 0)
-      translateY.value = 0;
-      setIsOpen(true);
-    }
+  const chevronAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${chevronRotation.value}deg` }],
+  }));
+
+  const swatchAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: swatchScale.value }],
+  }));
+
+  useEffect(() => {
+    chevronRotation.value = withTiming(isOpen ? -90 : 90, {
+      duration: 240,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [isOpen, chevronRotation]);
+
+  useEffect(() => {
+    swatchScale.value = withSpring(1.12, { damping: 10, stiffness: 260 }, () => {
+      swatchScale.value = withSpring(1, { damping: 12, stiffness: 200 });
+    });
+  }, [selectedMeta.category, swatchScale]);
+
+  const setExpanded = (next: boolean) => {
+    setIsOpen(next);
+    expandProgress.value = next
+      ? withSpring(1, EXPAND_SPRING)
+      : withTiming(0, {
+          duration: COLLAPSE_DURATION,
+          easing: Easing.in(Easing.cubic),
+        });
   };
 
-  const onContentLayout = (event: any) => {
-    const { height } = event.nativeEvent.layout;
-    setContentHeight(height);
+  const toggleSheet = () => {
+    setExpanded(!isOpen);
+  };
 
-    // Если компонент еще закрыт, устанавливаем начальную позицию
-    if (!isOpen) {
-      translateY.value = height;
+  const onContentLayout = (event: {
+    nativeEvent: { layout: { height: number } };
+  }) => {
+    const { height } = event.nativeEvent.layout;
+    measuredContentHeight.value = height;
+  };
+
+  const handleCategoryPress = (item: (typeof CATEGORIES)[number]) => {
+    if (!canAccessLockedCategories && item.hasLock) {
+      showModal?.(<SignInForSpreadsModal i18nNamespace="affirmations" />);
+      return;
+    }
+    handleSelectedAffirmationCategory?.(item.category);
+    if (isOpen) {
+      setExpanded(false);
     }
   };
 
   return (
-    <Animated.View
+    <View
       style={[
-        styles.container,
-        animatedStyle,
-        { paddingBottom: Math.max(8, insets.bottom + 4) },
+        styles.sheet,
+        { paddingBottom: Math.max(10, insets.bottom + 6) },
       ]}
     >
       <View
@@ -151,183 +208,180 @@ const SelectCategory = ({ layout }: SelectCategoryProps) => {
           },
         ]}
       >
-        <View style={styles.header}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('affirmations:toggleCategories')}
-            onPress={toggleSheet}
-            style={(state) => [
-              styles.headerButton,
-              (state as { hovered?: boolean }).hovered && styles.headerButtonHovered,
-              state.pressed && styles.headerButtonPressed,
-            ]}
-          >
-            {isOpen ? <DownIcon width={42} height={42} /> : <UpIcon width={42} height={42} />}
-          </Pressable>
-        </View>
-        <View style={styles.content} onLayout={onContentLayout}>
-          <FlatList
-            data={CATEGORIES}
-            keyExtractor={(item) => item.category.toString()}
-            key={`columns-${layout.categoryColumns}`}
-            numColumns={layout.categoryColumns}
-            scrollEnabled
-            showsVerticalScrollIndicator={isCompact}
-            style={[
-              styles.list,
-              isCompact && { maxHeight: maxListHeight },
-            ]}
-            contentContainerStyle={styles.listContainer}
-            columnWrapperStyle={
-              layout.categoryColumns > 1
-                ? [
-                    styles.row,
-                    {
-                      marginBottom: layout.listPaddingBottom,
-                      gap: layout.categoryGap,
-                    },
-                  ]
-                : undefined
-            }
-            renderItem={({ item }) => {
-              const isSelected = selectedAffirmationCategory === item.category;
-              const cardWidth: DimensionValue =
-                layout.categoryColumns === 1 ? '100%' : layout.affirmationCardWidth;
-              const handleCardPress = () => {
-                if (!canAccessAllCategories && item.hasLock) {
-                  showModal?.(<PaidContent />);
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('affirmations:toggleCategories')}
+          accessibilityState={{ expanded: isOpen }}
+          onPress={toggleSheet}
+          style={(state) => [
+            styles.handleRow,
+            (state as { hovered?: boolean }).hovered && styles.handleRowHovered,
+            state.pressed && styles.handleRowPressed,
+          ]}
+        >
+          <View style={styles.dragPill} />
+          <View style={styles.handleMain}>
+            <View style={styles.handleTextCol}>
+              <Text category={TEXT_TAGS.p2} style={styles.handleEyebrow}>
+                {t('affirmations:pickCategoryEyebrow')}
+              </Text>
+              <Text
+                category={TEXT_TAGS.h4}
+                weight={TEXT_WEIGHT.medium}
+                numberOfLines={1}
+                style={styles.handleTitle}
+              >
+                {isOpen
+                  ? t('affirmations:pickCategoryTitle')
+                  : t(selectedMeta.name)}
+              </Text>
+            </View>
+            <Animated.View
+              style={[
+                styles.previewSwatch,
+                swatchAnimatedStyle,
+                { backgroundColor: selectedMeta.gradient[1] },
+              ]}
+            />
+            <Animated.View style={[styles.chevronWrap, chevronAnimatedStyle]}>
+              <ChevronRightIcon width={18} height={18} fill={COLORS.Primary} />
+            </Animated.View>
+          </View>
+        </Pressable>
 
-                  return;
-                }
-
-                handleSelectedAffirmationCategory?.(item.category);
-                toggleSheet();
-              };
-
-              return (
-                <View
-                  style={[
-                    styles.cardItemWrap,
-                    {
-                      width: cardWidth,
-                      marginBottom: layout.listPaddingBottom,
-                    },
-                    isSelected && styles.cardItemSelected,
-                  ]}
-                >
-                  <TileCard
-                    id={item.category}
-                    accessibilityLabel={t(item.name)}
-                    textStyles={[
-                      styles.cardText,
-                      {
-                        fontSize: layout.categoryTitleSize,
-                        lineHeight: Math.round(layout.categoryTitleSize * 1.2),
-                      },
-                    ]}
-                    isSelected={isSelected}
-                    width={cardWidth}
-                    isLocked={!canAccessAllCategories && item.hasLock}
-                    height={layout.affirmationCardHeight}
-                    imagePosition={ImagePosition.Corner}
-                    gradient={item.gradient as [string, string]}
-                    fontWeight="semibold"
-                    textViewStyles={styles.cardTextView}
-                    onPress={handleCardPress}
-                  >
-                    {item.name}
-                  </TileCard>
-                </View>
-              );
-            }}
-          />
-        </View>
+        <Animated.View
+          style={[styles.content, contentAnimatedStyle]}
+          pointerEvents={isOpen ? 'auto' : 'none'}
+        >
+          <View style={styles.contentMeasure} onLayout={onContentLayout}>
+            <ScrollView
+              style={{ maxHeight: layout.pickerMaxHeight }}
+              showsVerticalScrollIndicator={layout.isNarrow && isOpen}
+              keyboardShouldPersistTaps="handled"
+              scrollEnabled={isOpen}
+              contentContainerStyle={[
+                styles.grid,
+                {
+                  gap: layout.categoryGap,
+                  paddingBottom: 4,
+                },
+              ]}
+            >
+              {CATEGORIES.map((item, index) => (
+                <AffirmationCategoryChip
+                  key={item.category}
+                  index={index}
+                  animateIn={isOpen}
+                  labelKey={item.name}
+                  gradient={item.gradient}
+                  width={layout.categoryChipWidth}
+                  height={layout.categoryChipHeight}
+                  fontSize={layout.categoryTitleSize}
+                  isSelected={
+                    selectedAffirmationCategory === item.category
+                  }
+                  isLocked={!canAccessLockedCategories && item.hasLock}
+                  onPress={() => handleCategoryPress(item)}
+                />
+              ))}
+            </ScrollView>
+          </View>
+        </Animated.View>
       </View>
-    </Animated.View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  sheet: {
     position: 'absolute',
-    backgroundColor: 'rgba(18,24,36,0.96)',
-    bottom: Platform.OS === 'ios' ? 24 : 0,
     left: 0,
     right: 0,
+    bottom: Platform.OS === 'ios' ? 20 : 0,
     zIndex: 10,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
     borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-    boxShadow: '0 -10px 26px rgba(0,0,0,0.34)',
+    borderColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: 'rgba(14, 18, 28, 0.94)',
+    ...(Platform.OS === 'web'
+      ? ({
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          boxShadow: '0 -12px 40px rgba(0,0,0,0.45)',
+        } as object)
+      : {}),
   },
   sheetInner: {
     width: '100%',
   },
-  cardText: {
-    paddingHorizontal: 0,
-    paddingTop: 0,
-    paddingBottom: 0,
-    color: COLORS.Content,
-    maxWidth: '100%',
-    flexWrap: 'wrap',
-    fontWeight: '600',
-  },
-  cardTextView: {
-    top: 14,
-    left: 14,
-    maxWidth: '72%',
-    paddingRight: 6,
-  },
-  listContainer: {
-    paddingTop: 6,
-    paddingBottom: 2,
-    paddingHorizontal: 2,
-  },
-  list: {
-    width: '100%',
-  },
-  cardItemWrap: {
-    borderRadius: 16,
+  handleRow: {
+    paddingTop: 8,
+    paddingBottom: 10,
+    paddingHorizontal: 4,
+    borderRadius: 14,
     ...WEB_HOVER_TRANSITION,
   },
-  cardItemSelected: {
-    ...({
-      boxShadow: '0 0 0 1px rgba(246,192,27,0.65), 0 10px 22px rgba(0,0,0,0.24)',
-    } as object),
+  handleRowHovered: {
+    backgroundColor: 'rgba(255,255,255,0.03)',
   },
-  row: {
-    justifyContent: 'flex-start',
-  },
-  header: {
-    alignItems: 'center',
-    marginTop: -22,
-    marginBottom: 8,
-  },
-  headerButton: {
-    backgroundColor: COLORS.Background2,
-    width: 54,
-    height: 54,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.14)',
-    ...({
-      boxShadow: '0 8px 20px rgba(0,0,0,0.34)',
-      ...WEB_HOVER_TRANSITION,
-    } as object),
-  },
-  headerButtonHovered: {
-    ...({
-      boxShadow: '0 12px 26px rgba(0,0,0,0.4)',
-    } as object),
-  },
-  headerButtonPressed: {
+  handleRowPressed: {
     opacity: 0.92,
   },
+  dragPill: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    marginBottom: 10,
+  },
+  handleMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  handleTextCol: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+  handleEyebrow: {
+    color: 'rgba(186, 204, 235, 0.62)',
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  handleTitle: {
+    color: COLORS.Content,
+  },
+  previewSwatch: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  chevronWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
   content: {
-    minHeight: 100,
+    overflow: 'hidden',
+  },
+  contentMeasure: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignContent: 'flex-start',
   },
 });
 

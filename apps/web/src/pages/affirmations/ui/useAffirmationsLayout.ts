@@ -1,63 +1,44 @@
 import { useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
-import { GLOBAL_UI_TEXT_PX } from 'shared/themes/typography';
 
 const MAX_CONTENT_WIDTH = 1280;
-const BASE_W = 375;
-
-function ms(screenW: number, size: number, factor = 0.5) {
-  return size + ((screenW / BASE_W) * size - size) * factor;
-}
 
 export type AffirmationsLayout = {
   contentWidth: number;
   padding: number;
   sectionGap: number;
   columnInner: number;
-  categoryColumns: 1 | 2;
+  categoryColumns: number;
   categoryGap: number;
-  affirmationCardWidth: number;
-  affirmationCardHeight: number;
-  listPaddingBottom: number;
+  categoryChipWidth: number;
+  categoryChipHeight: number;
+  categoryTitleSize: number;
+  pickerMaxHeight: number;
   visualSize: number;
   isNarrow: boolean;
   labelFontSize: number;
-  categoryTitleSize: number;
 };
 
-/**
- * Центрированная колонка и размеры карточек категорий — в духе страницы раскладов.
- */
 export function useAffirmationsLayout(): AffirmationsLayout {
-  const { width: W } = useWindowDimensions();
+  const { width: W, height: H } = useWindowDimensions();
 
   return useMemo(() => {
     const contentWidth = Math.min(W, MAX_CONTENT_WIDTH);
-    const padding = Math.round(
-      Math.min(28, Math.max(10, ms(W, 14) + W * 0.02))
-    );
-    const sectionGap = Math.round(
-      Math.min(18, Math.max(8, ms(W, 12)))
-    );
+    const padding = W < 400 ? 12 : W < 768 ? 14 : 16;
+    const sectionGap = W < 640 ? 10 : 12;
     const columnInner = Math.round(contentWidth - 2 * padding);
-    const categoryColumns: 1 | 2 = W <= 1280 ? 1 : 2;
-    const categoryGap = W < 760 ? 10 : 12;
-    const affirmationCardWidth = Math.max(
-      120,
-      categoryColumns === 1
-        ? columnInner
-        : (columnInner - categoryGap) / categoryColumns
+
+    const categoryColumns = W < 400 ? 1 : W < 640 ? 2 : W < 1024 ? 3 : 3;
+    const categoryGap = W < 640 ? 8 : 10;
+    const categoryChipHeight = W < 640 ? 48 : 52;
+    const usable = columnInner - categoryGap * (categoryColumns - 1);
+    const categoryChipWidth = Math.floor(usable / categoryColumns);
+
+    const categoryTitleSize = W < 640 ? 14 : 15;
+    const pickerMaxHeight = Math.round(
+      Math.min(280, Math.max(200, H * (W < 640 ? 0.38 : 0.32)))
     );
-    const affirmationCardHeight = Math.round(
-      Math.min(140, Math.max(108, ms(W, categoryColumns === 1 ? 124 : 112)))
-    );
-    const listPaddingBottom = W < 760 ? 10 : 14;
-    const visualSize = Math.round(
-      Math.min(560, Math.max(280, columnInner))
-    );
-    const categoryTitleSize = Math.round(
-      Math.min(34, Math.max(18, ms(W, categoryColumns === 1 ? 22 : 16)))
-    );
+    const visualSize = Math.round(Math.min(560, Math.max(260, columnInner)));
 
     return {
       contentWidth,
@@ -66,13 +47,13 @@ export function useAffirmationsLayout(): AffirmationsLayout {
       columnInner,
       categoryColumns,
       categoryGap,
-      affirmationCardWidth,
-      affirmationCardHeight,
-      listPaddingBottom,
+      categoryChipWidth,
+      categoryChipHeight,
+      categoryTitleSize,
+      pickerMaxHeight,
       visualSize,
       isNarrow: W < 640,
-      labelFontSize: GLOBAL_UI_TEXT_PX,
-      categoryTitleSize,
+      labelFontSize: W < 640 ? 14 : 16,
     };
-  }, [W]);
+  }, [W, H]);
 }

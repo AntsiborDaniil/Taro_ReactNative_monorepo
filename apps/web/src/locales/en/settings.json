@@ -61,7 +61,8 @@
   "auth.email": "Email",
   "auth.emailPlaceholder": "you@example.com",
   "auth.password": "Password",
-  "auth.passwordPlaceholder": "At least 8 characters",
+  "auth.passwordPlaceholder": "Strong password",
+  "auth.passwordRequirements": "At least 8 characters: A–Z, a–z, a digit, and a symbol (!@#$…)",
   "auth.show": "Show",
   "auth.hide": "Hide",
   "auth.loading": "Checking session...",
@@ -128,6 +129,12 @@
   "auth.validation.emailInvalid": "Invalid email format",
   "auth.validation.passwordRequired": "Enter your password",
   "auth.validation.passwordMin": "Password must be at least 8 characters",
+  "auth.validation.passwordTooShort": "At least 8 characters required",
+  "auth.validation.passwordTooLong": "At most 128 characters",
+  "auth.validation.passwordNoUpper": "Include an uppercase Latin letter (A–Z)",
+  "auth.validation.passwordNoLower": "Include a lowercase Latin letter (a–z)",
+  "auth.validation.passwordNoDigit": "Include a digit (0–9)",
+  "auth.validation.passwordNoSpecial": "Include a special character (!@#$…)",
 
   "terms.of.use": "Terms of use",
 

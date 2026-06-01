@@ -61,7 +61,8 @@
   "auth.email": "Email",
   "auth.emailPlaceholder": "you@example.com",
   "auth.password": "Пароль",
-  "auth.passwordPlaceholder": "Минимум 8 символов",
+  "auth.passwordPlaceholder": "Надёжный пароль",
+  "auth.passwordRequirements": "От 8 символов: A–Z, a–z, цифра и спецсимвол (!@#$…)",
   "auth.show": "Показать",
   "auth.hide": "Скрыть",
   "auth.loading": "Проверяем сессию...",
@@ -128,6 +129,12 @@
   "auth.validation.emailInvalid": "Некорректный email",
   "auth.validation.passwordRequired": "Введите пароль",
   "auth.validation.passwordMin": "Пароль должен быть не короче 8 символов",
+  "auth.validation.passwordTooShort": "Минимум 8 символов",
+  "auth.validation.passwordTooLong": "Не более 128 символов",
+  "auth.validation.passwordNoUpper": "Нужна заглавная латинская буква (A–Z)",
+  "auth.validation.passwordNoLower": "Нужна строчная латинская буква (a–z)",
+  "auth.validation.passwordNoDigit": "Нужна цифра (0–9)",
+  "auth.validation.passwordNoSpecial": "Нужен спецсимвол (!@#$…)",
 
   "terms.of.use": "Условия использования",
 

@@ -29,6 +29,12 @@ import {
   getTarotAiApiBaseUrl,
   startGoogleSignIn,
 } from 'shared/api';
+import {
+  passwordValidationCodeToI18nKey,
+  strongPasswordFormRules,
+  validateStrongPassword,
+  type PasswordValidationCode,
+} from 'shared/lib/passwordPolicy';
 import { emitTarotAuthChanged } from 'shared/lib/tarotAuthEvents';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
@@ -72,6 +78,7 @@ type AuthApiBody = {
   user?: AuthUser;
   token?: string;
   message?: string;
+  code?: PasswordValidationCode;
   needsEmailVerification?: boolean;
   email?: string;
   devVerificationCode?: string;
@@ -209,12 +216,22 @@ function Auth() {
   const passwordValue = watch('password');
   const nameValue = watch('name');
 
+  const passwordPolicyRules = useMemo(
+    () =>
+      strongPasswordFormRules({
+        requiredMessage: t('settings:auth.validation.passwordRequired'),
+        t,
+      }),
+    [t]
+  );
+
   const canSubmit = useMemo(() => {
     if (isSignUp) {
       return Boolean(
         emailValue?.trim() &&
+          nameValue?.trim() &&
           passwordValue?.trim() &&
-          nameValue?.trim()
+          validateStrongPassword(passwordValue) === null
       );
     }
     return Boolean(emailValue?.trim() && passwordValue?.trim());
@@ -503,9 +520,13 @@ function Auth() {
           );
           return;
         }
+        const weakPasswordMessage =
+          responseBody.code?.startsWith('PASSWORD_')
+            ? t(passwordValidationCodeToI18nKey(responseBody.code))
+            : responseBody.message || t('settings:auth.error.default');
         Toast.show({
           type: 'error',
-          text1: responseBody.message || t('settings:auth.error.default'),
+          text1: weakPasswordMessage,
         });
         return;
       }
@@ -741,13 +762,16 @@ function Auth() {
         }
       );
 
-      const body = (await response.json()) as { message?: string };
+      const { body, parseFailed } = await parseAuthResponse(response);
 
-      if (!response.ok) {
+      if (parseFailed || !response.ok) {
+        const weakPasswordMessage =
+          body.code?.startsWith('PASSWORD_')
+            ? t(passwordValidationCodeToI18nKey(body.code))
+            : body.message || t('settings:auth.password.error');
         Toast.show({
           type: 'error',
-          text1:
-            body.message || t('settings:auth.password.error'),
+          text1: weakPasswordMessage,
         });
         return;
       }
@@ -984,16 +1008,10 @@ function Auth() {
                 <Text category={TEXT_TAGS.p2} style={styles.fieldLabel}>
                   {t('settings:auth.password.new')}
                 </Text>
-                <Controller
-                  control={passwordForm.control}
-                  name="newPassword"
-                  rules={{
-                    required: t('settings:auth.validation.passwordRequired'),
-                    minLength: {
-                      value: 8,
-                      message: t('settings:auth.validation.passwordMin'),
-                    },
-                  }}
+                  <Controller
+                    control={passwordForm.control}
+                    name="newPassword"
+                    rules={passwordPolicyRules}
                   render={({ field: { value, onChange, onBlur } }) => (
                     <TextInput
                       value={value}
@@ -1016,6 +1034,9 @@ function Auth() {
                     {passwordForm.formState.errors.newPassword.message}
                   </Text>
                 )}
+                <Text category={TEXT_TAGS.p2} style={styles.passwordHint}>
+                  {t('settings:auth.passwordRequirements')}
+                </Text>
               </View>
               <View style={styles.fieldWrap}>
                 <Text category={TEXT_TAGS.p2} style={styles.fieldLabel}>
@@ -1026,9 +1047,12 @@ function Auth() {
                   name="confirmPassword"
                   rules={{
                     required: t('settings:auth.validation.passwordRequired'),
-                    minLength: {
-                      value: 8,
-                      message: t('settings:auth.validation.passwordMin'),
+                    validate: (value) => {
+                      const newPassword = passwordForm.getValues('newPassword');
+                      if (value !== newPassword) {
+                        return t('settings:auth.password.mismatch');
+                      }
+                      return validateStrongPasswordMessage(value, t);
                     },
                   }}
                   render={({ field: { value, onChange, onBlur } }) => (
@@ -1334,13 +1358,7 @@ function Auth() {
                   <Controller
                     control={control}
                     name="password"
-                    rules={{
-                      required: t('settings:auth.validation.passwordRequired'),
-                      minLength: {
-                        value: 8,
-                        message: t('settings:auth.validation.passwordMin'),
-                      },
-                    }}
+                    rules={passwordPolicyRules}
                     render={({ field: { value, onChange, onBlur } }) => (
                       <AuthPasswordInput
                         value={value}
@@ -1363,6 +1381,9 @@ function Auth() {
                       {errors.password.message}
                     </Text>
                   )}
+                  <Text category={TEXT_TAGS.p2} style={styles.passwordHint}>
+                    {t('settings:auth.passwordRequirements')}
+                  </Text>
                 </View>
 
                 <Button
@@ -1467,10 +1488,6 @@ function Auth() {
                     name="password"
                     rules={{
                       required: t('settings:auth.validation.passwordRequired'),
-                      minLength: {
-                        value: 8,
-                        message: t('settings:auth.validation.passwordMin'),
-                      },
                     }}
                     render={({ field: { value, onChange, onBlur } }) => (
                       <AuthPasswordInput
@@ -1715,6 +1732,11 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     color: 'rgba(221, 231, 247, 0.9)',
+  },
+  passwordHint: {
+    color: 'rgba(186, 204, 235, 0.62)',
+    lineHeight: 18,
+    marginTop: -4,
   },
   fieldLabelSpaced: {
     marginTop: 8,

@@ -8,3 +8,4 @@ export * from './habits';
 export * from './tarotAuthEvents';
 export * from './tarotGuestSpreads';
 export * from './web';
+export * from './passwordPolicy';
