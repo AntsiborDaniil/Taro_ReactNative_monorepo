@@ -85,4 +85,9 @@ Native clients: use `Authorization: Bearer <access_token>` from Supabase session
 
 Production: **[DEPLOY.md](../../DEPLOY.md)** — Supabase + Render (API) + Vercel (web).
 
+**Render (Node):** Root Directory `apps/api`. Build Command: `npm install && npm run build`. Start: `npm start`.  
+(TypeScript pinned to `5.8.3`; Yarn 1 on Render does not use the repo’s Yarn Berry `yarn.lock`.)
+
+**Render (Docker):** Runtime Docker, `Dockerfile.prod` — preferred; no custom build command.
+
 Quick health check after API deploy: `GET /health`
