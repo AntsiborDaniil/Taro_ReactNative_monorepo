@@ -106,7 +106,7 @@ module.exports = wrapWithReanimatedMetroConfig(
       ),
       'react-native-device-detection': path.resolve(
         __dirname,
-        'src/shared/stubs/noop.ts'
+        'src/shared/stubs/device-detection.ts'
       ),
       'expo-dev-client': path.resolve(
         __dirname,

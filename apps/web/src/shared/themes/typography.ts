@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { width } from 'shared/lib/responsive';
+import { width } from 'shared/lib/responsive/responsive';
 import { TEXT_TAGS } from 'shared/ui/Text/constants';
 import {
   CATEGORY_CSS_VAR,

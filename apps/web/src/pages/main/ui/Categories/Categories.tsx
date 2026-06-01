@@ -10,7 +10,7 @@ import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { useTranslation } from 'react-i18next';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { horizontalScale } from 'shared/lib';
+import { horizontalScale } from 'shared/lib/responsive/responsive';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction } from 'shared/types';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';

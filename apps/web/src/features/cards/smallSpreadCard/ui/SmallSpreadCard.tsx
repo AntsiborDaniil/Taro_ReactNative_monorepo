@@ -8,7 +8,8 @@ import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { DeckStyle, TSpread } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { getImage, horizontalScale, isGuestFreeSpreadId } from 'shared/lib';
+import { getImage, isGuestFreeSpreadId } from 'shared/lib';
+import { horizontalScale } from 'shared/lib/responsive/responsive';
 import {
   AnalyticAction,
   ImagePosition,
