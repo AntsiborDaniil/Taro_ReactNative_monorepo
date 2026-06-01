@@ -180,17 +180,11 @@ export function AdaptiveTabBar({
   }
 
   const barHeight =
-    variant === 'labeled'
-      ? Platform.OS === 'ios'
-        ? 86
-        : Platform.OS === 'web'
-          ? 72
-          : 72 + safe.bottom
-      : Platform.OS === 'ios'
-        ? 80
-        : Platform.OS === 'web'
-          ? 64
-          : 60 + safe.bottom;
+    Platform.OS === 'ios'
+      ? 80
+      : Platform.OS === 'web'
+        ? 64
+        : 60 + safe.bottom;
 
   return (
     <BottomTabBar
@@ -200,18 +194,11 @@ export function AdaptiveTabBar({
       insets={insets}
       style={[
         styles.bottomBar,
-        variant === 'labeled' && styles.bottomBarLabeled,
-        variant === 'compact' && styles.bottomBarCompact,
+        styles.bottomBarCompact,
         {
           height: barHeight,
           paddingBottom:
-            variant === 'labeled'
-              ? Platform.OS === 'web'
-                ? 10
-                : Math.max(insets.bottom, 10)
-              : Platform.OS === 'web'
-                ? 8
-                : Math.max(insets.bottom, 6),
+            Platform.OS === 'web' ? 8 : Math.max(insets.bottom, 6),
         },
       ]}
     />

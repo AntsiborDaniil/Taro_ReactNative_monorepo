@@ -41,10 +41,13 @@ function TileCard({
   disabled,
   isSelected,
   textStyles,
+  titleNumberOfLines,
+  titleEllipsizeMode,
   imageResizeMode,
   subtitle,
   subtitleStyle,
   accessibilityLabel,
+  imageOnly = false,
 }: TileCardProps) {
   const { t } = useTranslation();
   const { width: winW } = useWindowDimensions();
@@ -112,7 +115,12 @@ function TileCard({
                 ))}
             </ImageBackground>
           ) : (
-            <View style={styles.cornerInner}>
+            <View
+              style={[
+                styles.cornerInner,
+                imageOnly && styles.cornerInnerImageOnly,
+              ]}
+            >
               {!!gradient && (
                 <LinearGradient
                   colors={gradient}
@@ -123,23 +131,28 @@ function TileCard({
                 source={imageSource}
                 resizeMode="contain"
                 style={[
-                  styles.cornerImage,
+                  imageOnly ? styles.cornerImageCentered : styles.cornerImage,
                   { width: imageWidth, height: imageHeight },
-                  {
-                    right: imageOffsetX,
-                    bottom: imageOffsetY,
-                  },
+                  imageOnly
+                    ? null
+                    : {
+                        right: imageOffsetX,
+                        bottom: imageOffsetY,
+                      },
                 ]}
               />
-              {textPosition === TextPosition.Inner &&
+              {!imageOnly &&
+                textPosition === TextPosition.Inner &&
                 (typeof children === 'string' ? (
                   <View style={[styles.cornerTextBlock, textViewStyles]}>
                     <Text
                       category={TEXT_TAGS.h4}
                       style={[styles.cornerTitleText, textStyles]}
                       weight={fontWeight}
-                      numberOfLines={subtitle ? 3 : 5}
-                      ellipsizeMode="tail"
+                      numberOfLines={
+                        titleNumberOfLines ?? (subtitle ? 3 : 5)
+                      }
+                      ellipsizeMode={titleEllipsizeMode}
                     >
                       {t(children)}
                     </Text>
@@ -251,6 +264,14 @@ const styles = StyleService.create({
     position: 'relative',
     overflow: 'hidden',
     borderRadius: 18,
+  },
+  cornerInnerImageOnly: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cornerImageCentered: {
+    position: 'relative',
+    zIndex: 2,
   },
   cornerTextBlock: {
     position: 'absolute',

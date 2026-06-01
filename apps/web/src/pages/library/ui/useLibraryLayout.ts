@@ -1,18 +1,83 @@
 import { useMemo } from 'react';
-import { useWindowDimensions } from 'react-native';
+import { Platform, useWindowDimensions } from 'react-native';
 import {
   TAB_BREAKPOINT_LABELED,
   TAB_BREAKPOINT_RAIL,
 } from 'app/navigation/tabs/adaptiveTabLayout';
 import { useTabRailLayout } from 'app/navigation/tabs/TabRailLayoutContext';
+import { readCssVarPx } from 'shared/themes/responsive-tokens';
 import { GLOBAL_UI_TEXT_PX } from 'shared/themes/typography';
 import { LIBRARY_PLATES } from '../lib';
+import {
+  isLibraryTileTitleMidViewport,
+} from '../lib/titleLayout';
 
-const MAX_CONTENT_WIDTH = 1280;
+const MAX_CONTENT_WIDTH_FALLBACK = 1280;
 const BASE_W = 375;
 const LIBRARY_CARD_COUNT = LIBRARY_PLATES.length;
-/** Минимальная ширина плитки до перехода на меньшее число колонок. */
-const MIN_CARD_W = 158;
+
+function getMaxContentWidth(layoutW: number): number {
+  if (Platform.OS !== 'web' || typeof document === 'undefined') {
+    return Math.min(layoutW, MAX_CONTENT_WIDTH_FALLBACK);
+  }
+
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue('--content-max-width')
+    .trim();
+
+  if (raw.endsWith('%')) {
+    const pct = Number.parseFloat(raw);
+    if (Number.isFinite(pct)) {
+      return Math.round((layoutW * pct) / 100);
+    }
+  }
+
+  const px = readCssVarPx('--content-max-width', MAX_CONTENT_WIDTH_FALLBACK);
+  return px > 200 ? px : Math.min(layoutW, MAX_CONTENT_WIDTH_FALLBACK);
+}
+
+/** Ширина плитки: равномерно по ряду; неполный последний ряд — на всю ширину сетки. */
+function computeTileWidth(
+  index: number,
+  columnCount: number,
+  gridInner: number,
+  gap: number,
+  total: number
+): number {
+  if (columnCount <= 1) {
+    return gridInner;
+  }
+
+  const defaultWidth =
+    (gridInner - gap * Math.max(0, columnCount - 1)) / columnCount;
+  const remainder = total % columnCount;
+  if (remainder === 0) {
+    return defaultWidth;
+  }
+
+  const lastRowStart = total - remainder;
+  if (index < lastRowStart) {
+    return defaultWidth;
+  }
+
+  const lastRowCount = remainder;
+  return (gridInner - gap * Math.max(0, lastRowCount - 1)) / lastRowCount;
+}
+
+function resolveColumnCount(hasTabRail: boolean, gridInner: number): number {
+  if (!hasTabRail) {
+    return 1;
+  }
+
+  if (gridInner >= 520) {
+    return Math.min(3, LIBRARY_CARD_COUNT);
+  }
+  if (gridInner >= 300) {
+    return Math.min(2, LIBRARY_CARD_COUNT);
+  }
+
+  return 1;
+}
 
 function ms(screenW: number, size: number, factor = 0.5) {
   return size + ((screenW / BASE_W) * size - size) * factor;
@@ -23,6 +88,10 @@ export type LibraryLayout = {
   padding: number;
   gap: number;
   cardWidth: number;
+  /** Ширина каждой плитки с учётом неполного последнего ряда. */
+  cardWidths: number[];
+  /** Мобильный / нижний tab bar — плитки столбиком на всю ширину. */
+  isStackedTiles: boolean;
   cardHeight: number;
   cornerImageWidth: number;
   cornerImageHeight: number;
@@ -49,9 +118,10 @@ export type LibraryLayout = {
   /** Учтена левая навигационная рейка (широкий web). */
   hasTabRail: boolean;
   columnCount: number;
-  gridJustifyContent: 'flex-start' | 'center';
   /** Отступ внутри рамки сетки (горизонтально и вертикально). */
   gridShellPadding: number;
+  /** 768–1123px: особая вёрстка заголовков «Избранное» / «История раскладов». */
+  isTileTitleMidViewport: boolean;
 };
 
 /**
@@ -60,13 +130,13 @@ export type LibraryLayout = {
  */
 export function useLibraryLayout(): LibraryLayout {
   const { width: W, height: H } = useWindowDimensions();
-  const { effectiveRailWidth } = useTabRailLayout();
+  const { sceneContentWidth } = useTabRailLayout();
 
   return useMemo(() => {
     const hasTabRail = W >= TAB_BREAKPOINT_RAIL;
-    const layoutW = hasTabRail ? W - effectiveRailWidth : W;
+    const layoutW = Math.max(1, Math.min(W, sceneContentWidth));
 
-    const contentWidth = Math.min(layoutW, MAX_CONTENT_WIDTH);
+    const contentWidth = getMaxContentWidth(layoutW);
     const padding = Math.round(
       Math.min(16, Math.max(8, ms(layoutW, 11) + layoutW * 0.01))
     );
@@ -78,22 +148,15 @@ export function useLibraryLayout(): LibraryLayout {
     const gridShellPadding = Math.round(Math.min(12, Math.max(9, gap)));
     const gridInner = Math.max(0, inner - 2 * gridShellPadding);
 
-    let columnCount = 1;
-    if (gridInner >= MIN_CARD_W * 3 + gap * 2) columnCount = 3;
-    else if (gridInner >= MIN_CARD_W * 2 + gap) columnCount = 2;
+    const columnCount = resolveColumnCount(hasTabRail, gridInner);
+    const isStackedTiles = columnCount === 1;
 
-    columnCount = Math.min(columnCount, LIBRARY_CARD_COUNT);
-
-    const cardWidth =
-      columnCount <= 1
-        ? gridInner
-        : (gridInner - gap * (columnCount - 1)) / columnCount;
-
-    const orphanLastRow =
-      columnCount > 1 && LIBRARY_CARD_COUNT % columnCount !== 0;
-    const gridJustifyContent: 'flex-start' | 'center' = orphanLastRow
-      ? 'center'
-      : 'flex-start';
+    const cardWidths = LIBRARY_PLATES.map((_, index) =>
+      computeTileWidth(index, columnCount, gridInner, gap, LIBRARY_CARD_COUNT)
+    );
+    const cardWidth = isStackedTiles
+      ? gridInner
+      : Math.max(...cardWidths, 0);
 
     const v = (n: number) => (H / 812) * n;
     const singleColumnCardHeight = Math.round(
@@ -105,7 +168,10 @@ export function useLibraryLayout(): LibraryLayout {
     const cardHeight =
       columnCount === 1 ? singleColumnCardHeight : multiColumnCardHeight;
     const cornerImageWidth = Math.round(
-      Math.min(124, Math.max(72, cardWidth * 0.44))
+      Math.min(
+        isStackedTiles ? 140 : 124,
+        Math.max(72, cardWidth * (isStackedTiles ? 0.36 : 0.44))
+      )
     );
     const cornerImageHeight = Math.round(
       Math.min(132, Math.max(78, cardHeight * 0.62))
@@ -162,6 +228,8 @@ export function useLibraryLayout(): LibraryLayout {
       padding,
       gap,
       cardWidth,
+      cardWidths,
+      isStackedTiles,
       cardHeight,
       cornerImageWidth,
       cornerImageHeight,
@@ -183,8 +251,8 @@ export function useLibraryLayout(): LibraryLayout {
       isNarrow: layoutW < TAB_BREAKPOINT_LABELED,
       hasTabRail,
       columnCount,
-      gridJustifyContent,
       gridShellPadding,
+      isTileTitleMidViewport: isLibraryTileTitleMidViewport(layoutW),
     };
-  }, [W, H, effectiveRailWidth]);
+  }, [W, H, sceneContentWidth]);
 }

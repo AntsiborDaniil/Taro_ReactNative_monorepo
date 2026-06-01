@@ -17,7 +17,7 @@ import { COLORS, getColorOpacity } from 'shared/themes';
 import { NavigationRoute, TabRoute } from 'shared/types';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { Button } from 'shared/ui/Button';
-import { Text, TEXT_TAGS } from 'shared/ui/Text';
+import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui/Text';
 
 export type SignInForSpreadsModalProps = {
   /** По умолчанию тексты из `spread:`; для настроения — `moodAndEnergy`; для стиля колоды — `settings`. */
@@ -101,10 +101,22 @@ function SignInForSpreadsModal({
             style={[styles.button, isWeb && styles.buttonCompact]}
             onPress={goToAccount}
           >
-            {t('signInRequired.cta')}
+            <Text
+              category={TEXT_TAGS.p2}
+              weight={TEXT_WEIGHT.medium}
+              style={styles.buttonLabel}
+            >
+              {t('signInRequired.cta')}
+            </Text>
           </Button>
           <Button style={styles.secondary} onPress={handleClose}>
-            {tCore('stub.emptyResultsModal.button')}
+            <Text
+              category={TEXT_TAGS.p2}
+              weight={TEXT_WEIGHT.regular}
+              style={styles.secondaryLabel}
+            >
+              {tCore('stub.emptyResultsModal.button')}
+            </Text>
           </Button>
         </View>
       </View>
@@ -188,9 +200,21 @@ const styles = StyleSheet.create({
     marginTop: 4,
     minWidth: 200,
   },
+  buttonLabel: {
+    color: COLORS.Content,
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+  },
   secondary: {
     marginTop: 0,
     backgroundColor: 'transparent',
+  },
+  secondaryLabel: {
+    color: getColorOpacity(COLORS.Content, 88),
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
   },
 });
 

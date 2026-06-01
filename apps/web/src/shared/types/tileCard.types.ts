@@ -30,6 +30,10 @@ export type TileCardProps = {
   disabled?: boolean;
   textPosition?: TextPosition; // Расположение текста внутри или снаружи контейнера;
   textStyles?: StyleProp<TextStyle>;
+  /** Лимит строк заголовка (плитки библиотеки). */
+  titleNumberOfLines?: number;
+  /** По умолчанию `tail`; для многострочных заголовков без обрезки слов — не задавать. */
+  titleEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   imageResizeMode?: ImageResizeMode;
   textViewStyles?: StyleProp<ViewStyle>;
   /** Подпись под карточкой (ключ i18n). */
@@ -38,6 +42,8 @@ export type TileCardProps = {
   subtitleStyle?: StyleProp<TextStyle>;
   /** Явная метка для доступности; иначе собирается из заголовка и subtitle. */
   accessibilityLabel?: string;
+  /** Только иллюстрация без заголовка (нижний tab bar). */
+  imageOnly?: boolean;
 };
 
 export enum ImagePosition {

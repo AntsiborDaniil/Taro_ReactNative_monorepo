@@ -39,7 +39,7 @@ function TarotTabs() {
   const { width } = useWindowDimensions();
   const variant = getAdaptiveTabVariant(width);
   const isRail = variant === 'rail';
-  const isLabeled = variant === 'labeled';
+  const isBottomBar = !isRail;
 
   const [railCollapsed, setRailCollapsed] = useState(() =>
     readTabRailCollapsedFromSession()
@@ -84,7 +84,7 @@ function TarotTabs() {
     hasReversedCards: spread?.hasReversed,
   });
 
-  const iconSize = isLabeled ? 36 : 40;
+  const iconSize = isBottomBar ? 40 : 36;
 
   return (
     <DataProvider Context={SpreadContext} value={spreadContextData}>
@@ -93,22 +93,11 @@ function TarotTabs() {
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarPosition: isRail ? 'left' : 'bottom',
-          tabBarShowLabel: isLabeled,
-          tabBarLabelPosition: 'below-icon',
+          tabBarShowLabel: false,
           tabBarActiveTintColor: COLORS.Primary,
           tabBarInactiveTintColor: COLORS.Content,
-          tabBarLabelStyle: isLabeled
-            ? {
-                fontFamily: 'Montserrat-Medium',
-                fontSize: 22,
-                letterSpacing: 0.2,
-                marginTop: 2,
-              }
-            : undefined,
-          tabBarItemStyle: isLabeled
-            ? { paddingTop: 6, paddingBottom: 2 }
-            : { paddingTop: 4 },
-          tabBarIconStyle: isLabeled ? { marginTop: 8 } : { marginTop: 12 },
+          tabBarItemStyle: { paddingTop: 4 },
+          tabBarIconStyle: { marginTop: 12 },
           tabBarStyle: isRail
             ? {
                 width: effectiveRailWidth,

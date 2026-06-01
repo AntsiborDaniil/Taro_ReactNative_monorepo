@@ -9,7 +9,7 @@ import type { PressableProps } from 'react-native';
 import type { CSSProperties, ReactNode } from 'react';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from '../../themes';
-import { Text, TEXT_TAGS } from '../Text';
+import { Text, TEXT_TAGS, TEXT_WEIGHT } from '../Text';
 
 type TButtonProps = Omit<PressableProps, 'style' | 'children'> & {
   children: ReactNode;
@@ -39,7 +39,11 @@ function Button({ children, style, disabled, ...rest }: TButtonProps) {
       }}
     >
       {typeof children === 'string' ? (
-        <Text category={TEXT_TAGS.h3} style={styles.text}>
+        <Text
+          category={TEXT_TAGS.p1}
+          weight={TEXT_WEIGHT.medium}
+          style={styles.text}
+        >
           {children}
         </Text>
       ) : (
@@ -79,6 +83,8 @@ const styles = StyleSheet.create({
   },
   text: {
     color: COLORS.Content,
+    fontSize: 14,
+    lineHeight: 20,
   },
 });
 

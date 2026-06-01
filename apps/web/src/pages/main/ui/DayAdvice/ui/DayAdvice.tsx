@@ -1,9 +1,13 @@
+import { useMemo, useState } from 'react';
 import {
+  ImageBackground,
+  type LayoutChangeEvent,
   Platform,
   Pressable,
   type PressableStateCallbackType,
   StyleSheet,
   useWindowDimensions,
+  View,
 } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import {
@@ -11,17 +15,12 @@ import {
   type TApplicationConfigHookResult,
 } from 'entities/ApplicationConfig';
 import { SpreadContext, type TSpreadHookResult } from 'entities/Spread';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { simpleSpreads } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import {
-  getCurrentDate,
-  getImage,
-  isTablet,
-  moderateScale,
-} from 'shared/lib';
-import { ImageBackground, LinearGradient, View } from 'shared/lib/rnWebJsx';
+import { getCurrentDate, getImage } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
@@ -30,18 +29,20 @@ function DayAdvice() {
   const { navigate } = useNativeNavigation();
   const { width: winW } = useWindowDimensions();
   const isCompact = winW < 420;
-  const cardHeight = Math.max(
-    isCompact ? 320 : 350,
-    Math.min(isTablet ? 620 : 450, Math.round(winW * (isCompact ? 0.94 : 0.82)))
-  );
-  const heroStageMinHeight = Math.round(cardHeight * (isCompact ? 0.56 : 0.6));
-  const frameWidth = isCompact ? '62%' : '54%';
-  const frameMinWidth = isCompact ? 172 : 200;
-  const railHeight = Math.round(heroStageMinHeight * 0.86);
-  const badgeBottom = Math.max(10, Math.round(cardHeight * 0.05));
+  const [frameSize, setFrameSize] = useState({ width: 0, height: 0 });
 
   const { t } = useTranslation();
-  const date = getCurrentDate();
+  const dateLabel = getCurrentDate('badge');
+
+  const badgeDateFontSize = useMemo(() => {
+    const w = frameSize.width || (isCompact ? 184 : 220);
+    return Math.max(10, Math.min(12, Math.round(w * 0.052)));
+  }, [frameSize.width, isCompact]);
+
+  const railHeight = useMemo(() => {
+    const h = frameSize.height || Math.round((frameSize.width || 200) / 0.62);
+    return Math.round(h * 0.88);
+  }, [frameSize.height, frameSize.width]);
 
   const { selectSpread } = useData<Partial<TSpreadHookResult>>({
     Context: SpreadContext,
@@ -50,6 +51,13 @@ function DayAdvice() {
   const { handleVibrationClick } = useData<Partial<TApplicationConfigHookResult>>({
     Context: ApplicationConfigContext,
   });
+
+  const handleFrameLayout = (event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    if (width > 0 && height > 0) {
+      setFrameSize({ width, height });
+    }
+  };
 
   const handleSelectDayAdvice = async () => {
     AppMetrica.reportEvent(AnalyticAction.ClickDayCard);
@@ -73,7 +81,7 @@ function DayAdvice() {
   };
 
   return (
-    <View style={[styles.container, { height: cardHeight }]}>
+    <View style={styles.container}>
       <Pressable
         style={({ pressed }: PressableStateCallbackType) => [
           styles.button,
@@ -93,17 +101,24 @@ function DayAdvice() {
         <View style={[styles.decorOrb, styles.decorOrbTop]} />
         <View style={[styles.decorOrb, styles.decorOrbBottom]} />
 
-        <View style={[styles.heroStage, { minHeight: heroStageMinHeight }]}>
-          <View style={[styles.heroRail, styles.heroRailLeft, { height: railHeight }]} />
-          <View style={[styles.heroRail, styles.heroRailRight, { height: railHeight }]} />
+        <View style={[styles.heroStage, isCompact && styles.heroStageCompact]}>
           <View
             style={[
-              styles.heroFrame,
-              {
-                width: frameWidth,
-                minWidth: frameMinWidth,
-              },
+              styles.heroRail,
+              styles.heroRailLeft,
+              railHeight > 0 ? { height: railHeight } : null,
             ]}
+          />
+          <View
+            style={[
+              styles.heroRail,
+              styles.heroRailRight,
+              railHeight > 0 ? { height: railHeight } : null,
+            ]}
+          />
+          <View
+            onLayout={handleFrameLayout}
+            style={[styles.heroFrame, isCompact && styles.heroFrameCompact]}
           >
             <ImageBackground
               style={styles.heroImage}
@@ -115,14 +130,32 @@ function DayAdvice() {
                 colors={['rgba(0, 0, 0, 0)', 'rgba(13, 18, 30, 0.88)']}
                 style={styles.heroImageFade}
               />
-              <View style={[styles.heroOverlayBadge, { bottom: badgeBottom }]}>
-                <Text category={TEXT_TAGS.p2} style={styles.dateInImage}>
-                  {date ?? ''}
+              <View style={styles.heroOverlayBadge}>
+                <Text
+                  category={TEXT_TAGS.label}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.8}
+                  style={[
+                    styles.dateLine,
+                    {
+                      fontSize: badgeDateFontSize,
+                      lineHeight: badgeDateFontSize + 4,
+                    },
+                  ]}
+                >
+                  {dateLabel}
                 </Text>
                 <Text
-                  category={TEXT_TAGS.h4}
+                  category={TEXT_TAGS.h5}
                   weight={TEXT_WEIGHT.medium}
-                  style={styles.titleInImage}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.9}
+                  style={[
+                    styles.titleInImage,
+                    isCompact && styles.titleInImageCompact,
+                  ]}
                 >
                   {t('core:dailyCard.title')}
                 </Text>
@@ -139,10 +172,7 @@ function DayAdvice() {
           >
             {t('core:dailyCard.title')}
           </Text>
-          <Text
-            category={TEXT_TAGS.p2}
-            style={styles.subtitle}
-          >
+          <Text category={TEXT_TAGS.p2} style={styles.subtitle}>
             {t('core:spreads.catalog.hint')}
           </Text>
         </View>
@@ -156,12 +186,9 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 16,
     overflow: 'hidden',
-    position: 'relative',
   },
   button: {
-    position: 'relative',
     width: '100%',
-    height: '100%',
     overflow: 'hidden',
   },
   buttonPressed: {
@@ -176,10 +203,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
     alignSelf: 'stretch',
     width: '100%',
-    paddingHorizontal: 14,
-    paddingTop: 10,
-    paddingBottom: 14,
-    gap: 6,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
+    gap: 4,
     zIndex: 1,
     alignItems: 'center',
   },
@@ -190,18 +217,23 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: 'center',
     color: 'rgba(216, 228, 247, 0.75)',
-    lineHeight: 22,
+    lineHeight: 20,
   },
   heroStage: {
-    marginTop: 10,
+    marginTop: 12,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+    paddingBottom: 2,
+  },
+  heroStageCompact: {
+    marginTop: 10,
   },
   heroRail: {
     position: 'absolute',
-    width: 18,
+    width: 20,
+    minHeight: 180,
     borderRadius: 10,
     backgroundColor: 'rgba(236, 189, 65, 0.95)',
     ...(Platform.OS === 'web'
@@ -210,14 +242,14 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   heroRailLeft: {
-    left: '21%',
+    left: '22%',
   },
   heroRailRight: {
-    right: '21%',
+    right: '22%',
   },
   heroFrame: {
     width: '54%',
-    minWidth: 180,
+    minWidth: 200,
     maxWidth: 280,
     aspectRatio: 0.62,
     borderRadius: 18,
@@ -230,6 +262,10 @@ const styles = StyleSheet.create({
       : {}),
     zIndex: 2,
   },
+  heroFrameCompact: {
+    width: '58%',
+    minWidth: 184,
+  },
   heroImage: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -241,7 +277,8 @@ const styles = StyleSheet.create({
       web: {
         objectFit: 'cover',
         objectPosition: 'center center',
-        transform: 'scale(1.18)',
+        transform: 'scale(1.05)',
+        imageRendering: 'auto',
       },
       default: {},
     }),
@@ -249,24 +286,18 @@ const styles = StyleSheet.create({
   heroImageFade: {
     ...StyleSheet.absoluteFillObject,
   },
-  heroImageText: {
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingBottom: 14,
-    paddingHorizontal: 10,
-    gap: 4,
-  },
   heroOverlayBadge: {
     position: 'absolute',
-    left: 10,
-    right: 10,
-    bottom: 16,
+    left: 8,
+    right: 8,
+    bottom: 10,
     zIndex: 4,
     borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
     alignItems: 'center',
-    gap: 2,
+    gap: 1,
+    maxWidth: '100%',
     backgroundColor: 'rgba(8, 12, 22, 0.78)',
     borderWidth: 1,
     borderColor: 'rgba(232, 238, 255, 0.36)',
@@ -276,18 +307,28 @@ const styles = StyleSheet.create({
         } as object)
       : {}),
   },
-  dateInImage: {
+  dateLine: {
     color: '#F2F6FF',
     textAlign: 'center',
-    lineHeight: moderateScale(22),
-    fontWeight: '600',
+    width: '100%',
+    textTransform: 'capitalize',
+    ...Platform.select({
+      web: { whiteSpace: 'nowrap' } as object,
+      default: {},
+    }),
   },
   titleInImage: {
     color: '#FFFFFF',
     textAlign: 'center',
-    fontSize: 18,
-    lineHeight: 22,
-    letterSpacing: 0.15,
+    marginTop: 2,
+    width: '100%',
+    fontSize: 17,
+    lineHeight: 21,
+    letterSpacing: 0.1,
+  },
+  titleInImageCompact: {
+    fontSize: 15,
+    lineHeight: 19,
   },
   decorOrb: {
     position: 'absolute',
@@ -304,7 +345,7 @@ const styles = StyleSheet.create({
   decorOrbBottom: {
     width: 120,
     height: 120,
-    bottom: 24,
+    bottom: 8,
     left: -46,
     backgroundColor: 'rgba(61, 118, 214, 0.2)',
   },

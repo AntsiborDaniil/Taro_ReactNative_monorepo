@@ -7,7 +7,8 @@ import {
   TarotCardArcana,
   TarotCardSuit,
 } from 'shared/api';
-import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
+import { CARDS_GRID_SIDE_PADDING_COMPACT } from 'shared/ui/CardsList/gridPadding';
+import { ScreenLayout, Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import CardsList from './CardsList';
 import CardsSuits from './CardsSuits';
 
@@ -30,7 +31,11 @@ function CardsDictionary() {
           selectedSuitOrArcana={selectedSuitOrArcana}
           setSelectedSuitOrArcana={setSelectedSuitOrArcana}
         />
-        <Text style={styles.text} category={TEXT_TAGS.h3}>
+        <Text
+          style={styles.text}
+          category={TEXT_TAGS.h4}
+          weight={TEXT_WEIGHT.medium}
+        >
           {t(ARCANAS_AND_SUITS_NAMES[selectedSuitOrArcana])}
         </Text>
         <CardsList selectedSuitOrArcana={selectedSuitOrArcana} />
@@ -41,7 +46,7 @@ function CardsDictionary() {
 
 const styles = StyleSheet.create({
   wrapper: {
-    paddingHorizontal: 8,
+    paddingHorizontal: CARDS_GRID_SIDE_PADDING_COMPACT,
   },
   content: {
     paddingBottom: 28,

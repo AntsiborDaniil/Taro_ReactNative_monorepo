@@ -41,7 +41,9 @@ type CardsListProps<T> = {
 const LOCKED_DECK_STYLES = ['settings:deck.style.modern'];
 const GRID_GAP = 14;
 const GRID_SIDE_PADDING = 24;
-const GRID_SIDE_PADDING_COMPACT = 10;
+import { CARDS_GRID_SIDE_PADDING_COMPACT } from './gridPadding';
+
+const GRID_SIDE_PADDING_COMPACT = CARDS_GRID_SIDE_PADDING_COMPACT;
 const GRID_GAP_DICTIONARY = 16;
 const CARD_ASPECT_RATIO = 9 / 16;
 /** Словарь карт: крупные плитки, меньше колонок, сетка по брейкпоинтам. */

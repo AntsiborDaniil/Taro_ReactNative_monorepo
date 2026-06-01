@@ -82,7 +82,14 @@ function DayAdvice() {
           >
             {!isPhone && (
               <View style={styles.text}>
-                <Text category={TEXT_TAGS.h2} weight={TEXT_WEIGHT.medium}>
+                <Text
+                  category={TEXT_TAGS.h3}
+                  weight={TEXT_WEIGHT.medium}
+                  style={styles.dateHeading}
+                  numberOfLines={2}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.85}
+                >
                   {date ?? ''}
                 </Text>
                 <Text category={TEXT_TAGS.h1} weight={TEXT_WEIGHT.medium}>
@@ -153,6 +160,10 @@ const styles = StyleSheet.create({
     gap: 14,
     paddingHorizontal: 16,
     zIndex: 1,
+  },
+  dateHeading: {
+    textAlign: 'center',
+    width: '100%',
   },
   text: {
     width: '100%',

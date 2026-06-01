@@ -6,27 +6,31 @@ import {
 } from 'shared/themes/typography';
 import { TEXT_TAGS, TEXT_WEIGHT } from './constants';
 
-const fontFamilyMap: Record<string, string> = {
-  regular: 'Montserrat-Regular',
-  bold: 'Montserrat-Bold',
-  italic: 'Montserrat-Italic',
-  extraBold: 'Montserrat-ExtraBold',
-  light: 'Montserrat-Light',
-  medium: 'Montserrat-Medium',
-  semiBold: 'Montserrat-SemiBold',
-  thin: 'Montserrat-Thin',
+const FONT_BY_WEIGHT: Record<
+  keyof typeof TEXT_WEIGHT,
+  { fontFamily: string; fontWeight: TextStyle['fontWeight'] }
+> = {
+  regular: { fontFamily: 'Montserrat-Regular', fontWeight: '400' },
+  medium: { fontFamily: 'Montserrat-Medium', fontWeight: '500' },
+  semibold: { fontFamily: 'Montserrat-SemiBold', fontWeight: '600' },
+  bold: { fontFamily: 'Montserrat-Bold', fontWeight: '700' },
+  extraBold: { fontFamily: 'Montserrat-ExtraBold', fontWeight: '800' },
+  light: { fontFamily: 'Montserrat-Light', fontWeight: '300' },
+  thin: { fontFamily: 'Montserrat-Thin', fontWeight: '200' },
+  italic: { fontFamily: 'Montserrat-Italic', fontWeight: '400' },
 };
 
-const DEFAULT_TEXT_WEIGHTS = {
-  [TEXT_TAGS.h1]: TEXT_WEIGHT.bold,
-  [TEXT_TAGS.h2]: TEXT_WEIGHT.semibold,
-  [TEXT_TAGS.h3]: TEXT_WEIGHT.medium,
-  [TEXT_TAGS.h4]: TEXT_WEIGHT.regular,
-  [TEXT_TAGS.h5]: TEXT_WEIGHT.regular,
-  [TEXT_TAGS.p1]: TEXT_WEIGHT.regular,
-  [TEXT_TAGS.p2]: TEXT_WEIGHT.regular,
-  [TEXT_TAGS.label]: TEXT_WEIGHT.regular,
-};
+const DEFAULT_TEXT_WEIGHTS: Record<keyof typeof TEXT_TAGS, keyof typeof TEXT_WEIGHT> =
+  {
+    [TEXT_TAGS.h1]: TEXT_WEIGHT.semibold,
+    [TEXT_TAGS.h2]: TEXT_WEIGHT.medium,
+    [TEXT_TAGS.h3]: TEXT_WEIGHT.regular,
+    [TEXT_TAGS.h4]: TEXT_WEIGHT.regular,
+    [TEXT_TAGS.h5]: TEXT_WEIGHT.regular,
+    [TEXT_TAGS.p1]: TEXT_WEIGHT.regular,
+    [TEXT_TAGS.p2]: TEXT_WEIGHT.regular,
+    [TEXT_TAGS.label]: TEXT_WEIGHT.regular,
+  };
 
 type TTextStylesParameters = {
   category?: keyof typeof TEXT_TAGS;
@@ -44,9 +48,14 @@ export function getTextStyles({
 
   let textStyle: TextStyle = { ...base };
 
+  const resolvedWeight =
+    weight ?? DEFAULT_TEXT_WEIGHTS[category ?? TEXT_TAGS.p1];
+  const font = FONT_BY_WEIGHT[resolvedWeight];
+
   textStyle = {
     ...textStyle,
-    fontFamily: fontFamilyMap[weight || DEFAULT_TEXT_WEIGHTS[category!]],
+    fontFamily: font.fontFamily,
+    fontWeight: base.fontWeight ?? font.fontWeight,
   };
 
   const defaultSize = resolveCategoryPx(category!);
@@ -59,11 +68,6 @@ export function getTextStyles({
   textStyle = {
     ...textStyle,
     fontSize: resolvedFontSize,
-  };
-
-  textStyle = {
-    ...textStyle,
-    fontWeight: base.fontWeight || TEXT_WEIGHT[weight!],
   };
 
   return textStyle;

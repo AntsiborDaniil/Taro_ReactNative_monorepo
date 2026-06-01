@@ -81,7 +81,8 @@ function TarotCard({
     width > 0 &&
     height > 0;
 
-  const imagePadding = imageResizeMode === 'contain' ? 0 : 16;
+  const imagePadding =
+    imageResizeMode === 'contain' ? 0 : hasExplicitSize ? 0 : 12;
 
   const imageInnerWebStyle =
     hasExplicitSize && Platform.OS === 'web'
@@ -94,6 +95,7 @@ function TarotCard({
           maxWidth: '100%',
           maxHeight: '100%',
           objectFit: imageResizeMode === 'contain' ? 'contain' : 'cover',
+          imageRendering: 'auto',
         } as object)
       : undefined;
 

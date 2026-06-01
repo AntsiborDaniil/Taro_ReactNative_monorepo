@@ -71,26 +71,28 @@ function Library() {
           style={[
             styles.column,
             {
-              width: layout.contentWidth,
-              maxWidth: '100%',
+              width: '100%',
               alignSelf: 'center',
               paddingHorizontal: layout.padding,
             },
           ]}
         >
-          <Text
-            category={TEXT_TAGS.p2}
-            style={[
-              styles.introLead,
-              {
-                fontSize: layout.libraryIntroFontSize,
-                lineHeight: Math.round(layout.libraryIntroFontSize + 7),
-              },
-            ]}
-          >
-            {t('core:library.intro.lead')}
-          </Text>
-          {Boolean(t('core:library.section.subtitle').trim()) ? (
+          {layout.hasTabRail ? (
+            <Text
+              category={TEXT_TAGS.p2}
+              style={[
+                styles.introLead,
+                {
+                  fontSize: layout.libraryIntroFontSize,
+                  lineHeight: Math.round(layout.libraryIntroFontSize + 7),
+                },
+              ]}
+            >
+              {t('core:library.intro.lead')}
+            </Text>
+          ) : null}
+          {layout.hasTabRail &&
+          Boolean(t('core:library.section.subtitle').trim()) ? (
             <View
               style={{
                 marginTop: Math.round(layout.gap * 0.65),
@@ -122,17 +124,18 @@ function Library() {
             <View
               style={[
                 styles.grid,
+                layout.isStackedTiles && styles.gridStacked,
                 {
                   gap: layout.gap,
-                  justifyContent: layout.gridJustifyContent,
                 },
               ]}
             >
-              {LIBRARY_PLATES.map((item) => (
+              {LIBRARY_PLATES.map((item, index) => (
                 <CategoryCard
                   key={item.id}
                   card={item}
-                  tileWidth={layout.cardWidth}
+                  fullWidth={layout.isStackedTiles}
+                  tileWidth={layout.cardWidths[index] ?? layout.cardWidth}
                   tileHeight={layout.cardHeight}
                   cornerImageWidth={layout.cornerImageWidth}
                   cornerImageHeight={layout.cornerImageHeight}
@@ -141,6 +144,7 @@ function Library() {
                   tileSubtitleLineHeight={
                     layout.libraryTileSubtitleLineHeight
                   }
+                  isTileTitleMidViewport={layout.isTileTitleMidViewport}
                 />
               ))}
             </View>
@@ -189,6 +193,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     width: '100%',
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
+  },
+  gridStacked: {
+    flexDirection: 'column',
+    flexWrap: 'nowrap',
   },
   proWrapper: {
     display: 'flex',
