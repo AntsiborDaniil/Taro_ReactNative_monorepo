@@ -117,8 +117,8 @@ function SpreadCatalogCard({
         {guestNoAuthBadge && (
           <LinearGradient
             colors={[
-              'rgba(255, 252, 248, 0.96)',
-              'rgba(236, 244, 255, 0.94)',
+              getColorOpacity(COLORS.Primary, 22),
+              getColorOpacity(COLORS.Secondary, 28),
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   },
   imageShell: {
     width: '100%',
-    backgroundColor: getColorOpacity(COLORS.SpbSky4, 35),
+    backgroundColor: COLORS.SpbSky4,
     position: 'relative',
     overflow: 'hidden',
   },
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     }),
   },
   guestBadgeText: {
-    color: COLORS.Background,
+    color: COLORS.Content,
     letterSpacing: 0.2,
     fontWeight: '600',
     fontSize: 11,

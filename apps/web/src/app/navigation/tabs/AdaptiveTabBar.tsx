@@ -21,7 +21,7 @@ import { AnalyticAction, TabRoute } from 'shared/types';
 import {
   type AdaptiveTabVariant,
   TAB_BREAKPOINT_RAIL,
-  TAB_RAIL_LABEL_FONT_PX,
+  TAB_NAV_LABEL_FONT_PX,
 } from './adaptiveTabLayout';
 
 const TAB_ICON = {
@@ -296,10 +296,10 @@ const styles = StyleSheet.create({
   railLabel: {
     flex: 1,
     fontFamily: 'Montserrat-SemiBold',
-    fontSize: TAB_RAIL_LABEL_FONT_PX,
+    fontSize: TAB_NAV_LABEL_FONT_PX,
     letterSpacing: 0.15,
     ...(Platform.OS === 'web'
-      ? ({ lineHeight: TAB_RAIL_LABEL_FONT_PX } as object)
+      ? ({ lineHeight: Math.round(TAB_NAV_LABEL_FONT_PX * 1.25) } as object)
       : {}),
   },
   bottomBar: {

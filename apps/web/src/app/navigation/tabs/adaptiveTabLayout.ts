@@ -17,7 +17,11 @@ export const TAB_RAIL_WIDTH = TAB_RAIL_WIDTH_EXPANDED;
  * Кегль подписей **только** у левой навигационной рейки (sidebar).
  * Остальной UI использует `GLOBAL_UI_TEXT_PX` из `shared/themes/typography`.
  */
-export const TAB_RAIL_LABEL_FONT_PX = 18;
+/** Кегль подписей навбара: рейка слева и нижняя панель с подписями. */
+export const TAB_NAV_LABEL_FONT_PX = 16;
+
+/** @deprecated Используйте TAB_NAV_LABEL_FONT_PX */
+export const TAB_RAIL_LABEL_FONT_PX = TAB_NAV_LABEL_FONT_PX;
 
 export type AdaptiveTabVariant = 'compact' | 'labeled' | 'rail';
 

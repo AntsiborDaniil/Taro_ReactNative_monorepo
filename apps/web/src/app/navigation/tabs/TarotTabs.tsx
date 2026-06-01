@@ -20,6 +20,7 @@ import { AdaptiveTabBar } from './AdaptiveTabBar';
 import {
   getAdaptiveTabVariant,
   readTabRailCollapsedFromSession,
+  TAB_NAV_LABEL_FONT_PX,
   TAB_RAIL_COLLAPSED_SESSION_KEY,
   TAB_RAIL_WIDTH_COLLAPSED,
   TAB_RAIL_WIDTH_EXPANDED,
@@ -40,6 +41,7 @@ function TarotTabs() {
   const variant = getAdaptiveTabVariant(width);
   const isRail = variant === 'rail';
   const isBottomBar = !isRail;
+  const showBottomTabLabels = variant === 'labeled';
 
   const [railCollapsed, setRailCollapsed] = useState(() =>
     readTabRailCollapsedFromSession()
@@ -92,12 +94,18 @@ function TarotTabs() {
         <Tabs.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
+          sceneStyle: { backgroundColor: COLORS.Background },
           tabBarPosition: isRail ? 'left' : 'bottom',
-          tabBarShowLabel: false,
+          tabBarShowLabel: showBottomTabLabels,
           tabBarActiveTintColor: COLORS.Primary,
           tabBarInactiveTintColor: COLORS.Content,
-          tabBarItemStyle: { paddingTop: 4 },
-          tabBarIconStyle: { marginTop: 12 },
+          tabBarLabelStyle: {
+            fontSize: TAB_NAV_LABEL_FONT_PX,
+            fontFamily: 'Montserrat-SemiBold',
+            marginTop: 2,
+          },
+          tabBarItemStyle: { paddingTop: showBottomTabLabels ? 2 : 4 },
+          tabBarIconStyle: { marginTop: showBottomTabLabels ? 4 : 12 },
           tabBarStyle: isRail
             ? {
                 width: effectiveRailWidth,

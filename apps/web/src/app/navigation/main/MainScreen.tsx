@@ -7,6 +7,7 @@ import { Main } from 'pages/main';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { DataProvider, MultiProvider, useData } from 'shared/DataProvider';
 import { NavigationRoute, TabRoute } from 'shared/types';
+import { darkStackScreenOptions } from '../stackScreenOptions';
 import {
   LazyAffirmations,
   LazyCardsDictionary,
@@ -58,7 +59,7 @@ function MainScreen() {
         />,
       ]}
     >
-      <MainStack.Navigator screenOptions={{ headerShown: false }}>
+      <MainStack.Navigator screenOptions={darkStackScreenOptions}>
         <MainStack.Screen name={NavigationRoute.Main} component={Main} />
         <MainStack.Screen
           name={NavigationRoute.MoodAndEnergy}

@@ -5,11 +5,12 @@ export default {
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
-    userInterfaceStyle: 'light',
+    userInterfaceStyle: 'dark',
     scheme: 'myapp',
     web: {
       favicon: './assets/favicon.png',
       bundler: 'metro',
+      backgroundColor: '#171F2C',
     },
     plugins: [
       'expo-dev-client',

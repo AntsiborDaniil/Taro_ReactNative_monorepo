@@ -21,11 +21,23 @@
 
 html {
   font-size: var(--font-size-base, 12px);
+  background-color: #171f2c;
 }
 
 body {
   font-family: var(--font-family-base);
   line-height: var(--line-height-base);
+  background-color: #171f2c;
+  color: #f4f4f5;
+}
+
+#root {
+  background-color: #171f2c;
+}
+
+/* RN Web: не показывать белый фон под картинками во время загрузки */
+img {
+  background-color: transparent;
 }
 
 /* Плавные hover для нативных HTML-контролов (RN Web задаёт transition в JS отдельно). */

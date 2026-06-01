@@ -1,10 +1,11 @@
 import {
   ComponentType,
   lazy,
-  ReactNode,
+  type ReactNode,
   Suspense,
 } from 'react';
-import { Platform } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
+import { COLORS } from 'shared/themes';
 import { PageSkeleton } from 'shared/ui/Skeleton';
 
 type LazyScreenOptions = {
@@ -13,6 +14,10 @@ type LazyScreenOptions = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyComponent = ComponentType<any>;
+
+function LazyScreenFallback({ children }: { children: ReactNode }) {
+  return <View style={styles.fallback}>{children}</View>;
+}
 
 /**
  * Code-split screen for web; eager component on native.
@@ -27,7 +32,11 @@ export function createLazyScreen(
   }
 
   const LazyComponent = lazy(loader);
-  const fallback = options.fallback ?? <PageSkeleton />;
+  const fallback = (
+    <LazyScreenFallback>
+      {options.fallback ?? <PageSkeleton />}
+    </LazyScreenFallback>
+  );
 
   const LazyScreen: AnyComponent = (props) => (
     <Suspense fallback={fallback}>
@@ -39,3 +48,12 @@ export function createLazyScreen(
 
   return LazyScreen;
 }
+
+const styles = StyleSheet.create({
+  fallback: {
+    flex: 1,
+    width: '100%',
+    minHeight: '100%',
+    backgroundColor: COLORS.Background,
+  },
+});

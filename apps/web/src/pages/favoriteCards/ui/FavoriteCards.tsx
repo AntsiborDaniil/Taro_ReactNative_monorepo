@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
 import { tarotCards } from 'shared/api';
 import { useData } from 'shared/DataProvider';
-import { CardsList, CardsGridSkeleton, NoContent, ScreenLayout } from 'shared/ui';
+import { CardsList, CardsPageSkeleton, NoContent, ScreenLayout } from 'shared/ui';
 
 function FavoriteCards() {
   const { t } = useTranslation();
@@ -19,12 +19,7 @@ function FavoriteCards() {
   }, [favoritesCardsIds]);
 
   if (isLoading) {
-    return (
-      <ScreenLayout>
-        <Header showBackButton title={t('core:page.favouriteCards')} />
-        <CardsGridSkeleton />
-      </ScreenLayout>
-    );
+    return <CardsPageSkeleton />;
   }
 
   return (

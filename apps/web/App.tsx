@@ -6,12 +6,14 @@ import { ApplicationProvider } from '@ui-kitten/components';
 import { useFonts } from 'expo-font';
 import { TarotErrorBoundary } from 'pages/errorBoundary';
 import ErrorBoundary from 'react-native-error-boundary';
-import { LogBox, Platform } from 'react-native';
+import { LogBox, Platform, type ViewStyle } from 'react-native';
 import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
 } from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { tarotNavigationTheme } from './src/app/navigation/navigationTheme';
+import { appFontSources } from './src/shared/lib/web/appFonts';
 import { COLORS, myTheme } from 'shared/themes';
 import RootNavigator from './src/app/navigation/RootNavigator';
 import { navigationRef } from './src/app/navigation/navigationRef';
@@ -62,54 +64,48 @@ if (__DEV__ && Platform.OS === 'web') {
   });
 }
 
+const appShellStyle: ViewStyle = {
+  flex: 1,
+  backgroundColor: COLORS.Background,
+};
+
 export default function RootLayout() {
   const [isAppLoading, setIsAppLoading] = useState<boolean>(true);
 
   const loadingsContextData = useLoadings();
   const applicationConfigContextData = useApplicationConfig();
 
-  const [interLoaded, interError] = useFonts({
-    'Montserrat-Black': require('./assets/fonts/Montserrat-Black.ttf'),
-    'Montserrat-BlackItalic': require('./assets/fonts/Montserrat-BlackItalic.ttf'),
-    'Montserrat-Bold': require('./assets/fonts/Montserrat-Bold.ttf'),
-    'Montserrat-BoldItalic': require('./assets/fonts/Montserrat-BoldItalic.ttf'),
-    'Montserrat-ExtraBold': require('./assets/fonts/Montserrat-ExtraBold.ttf'),
-    'Montserrat-ExtraBoldItalic': require('./assets/fonts/Montserrat-ExtraBoldItalic.ttf'),
-    'Montserrat-ExtraLight': require('./assets/fonts/Montserrat-ExtraLight.ttf'),
-    'Montserrat-ExtraLightItalic': require('./assets/fonts/Montserrat-ExtraLightItalic.ttf'),
-    'Montserrat-Italic': require('./assets/fonts/Montserrat-Italic.ttf'),
-    'Montserrat-Light': require('./assets/fonts/Montserrat-Light.ttf'),
-    'Montserrat-LightItalic': require('./assets/fonts/Montserrat-LightItalic.ttf'),
-    'Montserrat-Medium': require('./assets/fonts/Montserrat-Medium.ttf'),
-    'Montserrat-MediumItalic': require('./assets/fonts/Montserrat-MediumItalic.ttf'),
-    'Montserrat-Regular': require('./assets/fonts/Montserrat-Regular.ttf'),
-    'Montserrat-SemiBold': require('./assets/fonts/Montserrat-SemiBold.ttf'),
-    'Montserrat-SemiBoldItalic': require('./assets/fonts/Montserrat-SemiBoldItalic.ttf'),
-    'Montserrat-Thin': require('./assets/fonts/Montserrat-Thin.ttf'),
-    'Montserrat-ThinItalic': require('./assets/fonts/Montserrat-ThinItalic.ttf'),
-  });
+  const [interLoaded, interError] = useFonts(appFontSources);
 
   const isResourcesLoading = !interLoaded && !interError;
 
   useEffect(() => {
     if (isResourcesLoading) return;
 
+    const holdMs = Platform.OS === 'web' ? 0 : 500;
     const timeout = setTimeout(() => {
       setIsAppLoading(false);
-    }, 500);
+    }, holdMs);
 
     return () => clearTimeout(timeout);
   }, [isResourcesLoading]);
 
   if (isAppLoading) {
-    return <AnimatedSplashScreen isLoading={isResourcesLoading} />;
+    return (
+      <SafeAreaProvider style={appShellStyle}>
+        <AnimatedSplashScreen isLoading={isResourcesLoading} />
+      </SafeAreaProvider>
+    );
   }
 
   return (
-    <SafeAreaProvider style={{ backgroundColor: COLORS.Background }}>
+    <SafeAreaProvider style={appShellStyle}>
       <ApplicationProvider {...eva} theme={{ ...eva.dark, ...myTheme }}>
         <DataProvider Context={LoadingsContext} value={loadingsContextData}>
-          <NavigationContainer ref={navigationRef}>
+          <NavigationContainer
+            ref={navigationRef}
+            theme={tarotNavigationTheme}
+          >
             {Platform.OS === 'web' ? (
               <>
                 <WebA11yRoot />

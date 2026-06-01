@@ -264,6 +264,7 @@ const styles = StyleService.create({
     position: 'relative',
     overflow: 'hidden',
     borderRadius: 18,
+    backgroundColor: COLORS.SpbSky4,
   },
   cornerInnerImageOnly: {
     justifyContent: 'center',
@@ -326,6 +327,7 @@ const styles = StyleService.create({
     flex: 1,
     justifyContent: 'flex-end',
     alignItems: 'flex-start',
+    backgroundColor: COLORS.SpbSky4,
   },
   cornerImage: {
     position: 'absolute',

@@ -1,5 +1,6 @@
 import { Image, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { COLORS } from '../../themes';
 import { useNativeNavigation } from '../../hooks';
 import { getImage } from '../../lib';
 import { NavigationRoute, TabRoute } from '../../types';
@@ -24,11 +25,13 @@ function NoContent({ title, onPress, buttonText, centered }: NoContentProps) {
       <Text style={styles.title} category={TEXT_TAGS.h3}>
         {title}
       </Text>
-      <Image
-        resizeMode="contain"
-        style={styles.image}
-        source={getImage(['core', 'notFound'])}
-      />
+      <View style={styles.imageWrap}>
+        <Image
+          resizeMode="contain"
+          style={styles.image}
+          source={getImage(['core', 'notFound'])}
+        />
+      </View>
       <Button
         style={styles.button}
         onPress={() => {
@@ -63,9 +66,21 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   title: { textAlign: 'center' },
+  imageWrap: {
+    width: '100%',
+    maxWidth: 360,
+    height: 300,
+    borderRadius: 20,
+    backgroundColor: COLORS.SpbSky4,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   image: {
     width: '100%',
-    height: 300,
+    height: '100%',
   },
   button: {
     width: '100%',

@@ -17,7 +17,7 @@ import { Spreads } from 'pages/spreads';
 import { SpreadsHistory } from 'pages/spreadsHistory';
 import { createLazyScreen } from 'shared/lib/web/lazyScreen';
 import {
-  CardsGridSkeleton,
+  CardsPageSkeleton,
   HistoryListSkeleton,
   PageSkeleton,
 } from 'shared/ui/Skeleton';
@@ -97,14 +97,14 @@ export const LazyCardsDictionary = createLazyScreen(
   () =>
     import('pages/cardsDictionary').then((m) => ({ default: m.CardsDictionary })),
   CardsDictionary,
-  { fallback: <CardsGridSkeleton /> }
+  { fallback: <CardsPageSkeleton withSuitChips /> }
 );
 
 export const LazyFavoriteCards = createLazyScreen(
   () =>
     import('pages/favoriteCards').then((m) => ({ default: m.FavoriteCards })),
   FavoriteCards,
-  { fallback: <CardsGridSkeleton /> }
+  { fallback: <CardsPageSkeleton /> }
 );
 
 export const LazySpreadReadings = createLazyScreen(

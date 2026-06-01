@@ -10,6 +10,7 @@ import {
   useTabsAndRoutes,
 } from 'shared/contexts/TabsAndRoutes';
 import { DataProvider, MultiProvider } from 'shared/DataProvider';
+import { preloadWebRoutes } from 'shared/lib/web/preloadWebRoutes';
 import { COLORS } from 'shared/themes';
 import { SlowConnectionBanner } from 'shared/ui/SlowConnectionBanner';
 import {
@@ -40,6 +41,10 @@ function GlobalProvider({ children }: GlobalProviderProps) {
 
   useEffect(() => {
     setBackgroundColorAsync(COLORS.Background2);
+  }, []);
+
+  useEffect(() => {
+    preloadWebRoutes();
   }, []);
 
   useEffect(() => {

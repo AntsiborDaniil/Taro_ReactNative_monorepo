@@ -172,6 +172,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderStyle: 'solid',
     borderWidth: 1,
+    backgroundColor: COLORS.SpbSky4,
   },
   /** Растягивание внутри flex-родителя, когда нет явных width/height */
   cardFlexFill: {

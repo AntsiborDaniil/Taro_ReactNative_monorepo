@@ -68,6 +68,7 @@ const styles = StyleService.create({
     borderRadius: 100,
     borderWidth: 1,
     borderColor: COLORS.Content,
+    backgroundColor: COLORS.SpbSky4,
   },
   container: {
     display: 'flex',

@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { NavigationRoute } from 'shared/types';
+import { darkStackScreenOptions } from '../stackScreenOptions';
 import {
   LazyAuth,
   LazyCardsDictionary,
@@ -24,7 +25,7 @@ function LibraryScreen() {
   return (
     <LibraryStack.Navigator
       initialRouteName={NavigationRoute.Library}
-      screenOptions={{ headerShown: false }}
+      screenOptions={darkStackScreenOptions}
     >
       <LibraryStack.Screen
         name={NavigationRoute.Library}

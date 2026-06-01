@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
     height: '100%',
     paddingTop: 8,
     gap: 16,
+    backgroundColor: COLORS.Background,
   },
   decorLayer: {
     ...StyleSheet.absoluteFillObject,
