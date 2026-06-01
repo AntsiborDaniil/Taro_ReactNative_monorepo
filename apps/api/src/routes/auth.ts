@@ -55,6 +55,8 @@ type PasswordBody = {
 type VerifyEmailBody = {
   email: string;
   code: string;
+  password?: string;
+  name?: string;
 };
 
 type ResendCodeBody = {
@@ -251,7 +253,9 @@ export const authRoute = async (
           required: ['email', 'code'],
           properties: {
             email: { type: 'string', format: 'email' },
-            code: { type: 'string', minLength: 4, maxLength: 12 },
+            code: { type: 'string', minLength: 6, maxLength: 8 },
+            password: { type: 'string', minLength: 1 },
+            name: { type: 'string' },
           },
         },
       },
@@ -261,6 +265,8 @@ export const authRoute = async (
         const session = await verifyEmailOtp({
           email: request.body.email,
           code: request.body.code,
+          password: request.body.password,
+          name: request.body.name,
         });
         return sendAuthSession(reply, request, session);
       } catch (error) {

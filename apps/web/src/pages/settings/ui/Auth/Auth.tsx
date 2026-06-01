@@ -40,6 +40,7 @@ import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { PressableWebState } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
+import { VerifyCodeBoxes } from './VerifyCodeBoxes';
 
 type AuthTab = 'signin' | 'signup';
 type AuthFormValues = {
@@ -174,6 +175,12 @@ function Auth() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResendingCode, setIsResendingCode] = useState(false);
   const [devVerificationCode, setDevVerificationCode] = useState<string | null>(
+    null
+  );
+  const [pendingSignupPassword, setPendingSignupPassword] = useState<
+    string | null
+  >(null);
+  const [pendingSignupName, setPendingSignupName] = useState<string | null>(
     null
   );
   const [authSubmitting, setAuthSubmitting] = useState(false);
@@ -414,9 +421,13 @@ function Auth() {
 
   const openEmailVerification = (
     email: string,
-    devCode?: string
+    devCode?: string,
+    signupPassword?: string,
+    signupName?: string
   ): void => {
     setPendingVerificationEmail(email);
+    setPendingSignupPassword(signupPassword ?? null);
+    setPendingSignupName(signupName ?? null);
     setDevVerificationCode(devCode ?? null);
     if (devCode) {
       setVerificationCode(devCode);
@@ -451,6 +462,8 @@ function Auth() {
     setPendingVerificationEmail(null);
     setVerificationCode('');
     setDevVerificationCode(null);
+    setPendingSignupPassword(null);
+    setPendingSignupName(null);
     reset({ name: '', email: '', password: '' });
 
     Toast.show({
@@ -516,7 +529,9 @@ function Auth() {
         if (responseBody.needsEmailVerification && responseBody.email) {
           openEmailVerification(
             responseBody.email,
-            responseBody.devVerificationCode
+            responseBody.devVerificationCode,
+            isSignUp ? values.password : undefined,
+            isSignUp ? values.name : undefined
           );
           return;
         }
@@ -534,7 +549,9 @@ function Auth() {
       if (responseBody.needsEmailVerification) {
         openEmailVerification(
           responseBody.email || values.email.trim(),
-          responseBody.devVerificationCode
+          responseBody.devVerificationCode,
+          isSignUp ? values.password : undefined,
+          isSignUp ? values.name : undefined
         );
         return;
       }
@@ -562,7 +579,7 @@ function Auth() {
   };
 
   const onVerifyEmail = async (): Promise<void> => {
-    if (!pendingVerificationEmail || verificationCode.trim().length < 4) {
+    if (!pendingVerificationEmail || verificationCode.trim().length < 6) {
       return;
     }
 
@@ -580,6 +597,10 @@ function Auth() {
           body: JSON.stringify({
             email: pendingVerificationEmail,
             code: verificationCode.trim(),
+            ...(pendingSignupPassword
+              ? { password: pendingSignupPassword }
+              : {}),
+            ...(pendingSignupName ? { name: pendingSignupName } : {}),
           }),
         }
       );
@@ -1183,26 +1204,15 @@ function Auth() {
               </View>
             ) : null}
 
-            <View style={styles.fieldWrap}>
-              <Text category={TEXT_TAGS.p2} style={styles.fieldLabel}>
-                {t('settings:auth.verify.code')}
-              </Text>
-              <TextInput
-                value={verificationCode}
-                onChangeText={setVerificationCode}
-                keyboardType="number-pad"
-                autoCapitalize="none"
-                autoComplete="one-time-code"
-                maxLength={8}
-                placeholder={t('settings:auth.verify.codePlaceholder')}
-                placeholderTextColor="rgba(255,255,255,0.42)"
-                style={[styles.input, styles.verifyCodeInput]}
-              />
-            </View>
+            <VerifyCodeBoxes
+              value={verificationCode}
+              onChange={setVerificationCode}
+              disabled={isVerifying}
+            />
 
             <Button
               disabled={
-                verificationCode.trim().length < 4 || isVerifying
+                verificationCode.trim().length < 6 || isVerifying
               }
               style={styles.submitButton}
               onPress={onVerifyEmail}
@@ -1227,6 +1237,8 @@ function Auth() {
                 setPendingVerificationEmail(null);
                 setVerificationCode('');
                 setDevVerificationCode(null);
+                setPendingSignupPassword(null);
+                setPendingSignupName(null);
                 setTab('signin');
               }}
               style={styles.verifyBackHit}

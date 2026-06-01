@@ -113,54 +113,47 @@ export async function signUp({
 
   const supabase = getSupabaseAnon();
   const normalizedEmail = email.trim().toLowerCase();
+  const trimmedName = name.trim();
 
-  const { data, error } = await supabase.auth.signUp({
+  // OTP email (6-digit code), not magic-link confirm — requires Supabase email OTP template.
+  const { error } = await supabase.auth.signInWithOtp({
     email: normalizedEmail,
-    password,
     options: {
-      data: { name: name.trim() },
+      shouldCreateUser: true,
+      data: { name: trimmedName },
     },
   });
 
   if (error) {
-    if (error.message.toLowerCase().includes('already registered')) {
+    const msg = error.message.toLowerCase();
+    if (
+      msg.includes('already registered') ||
+      msg.includes('already exists') ||
+      msg.includes('user already')
+    ) {
       throw new Error('USER_ALREADY_EXISTS');
     }
     throw error;
   }
 
-  if (!data.session || !data.user) {
-    logAuthEmail({
-      to: normalizedEmail,
-      kind: 'signup_confirmation',
-      simulated: false,
-    });
-    return { kind: 'emailVerification', email: normalizedEmail };
-  }
-
-  const publicUser = await getPublicUserByAccessToken(data.session.access_token);
-  if (!publicUser) {
-    throw new Error('USER_PROFILE_MISSING');
-  }
-
-  logAuthSignupComplete(publicUser.email, publicUser.id);
-
-  return {
-    kind: 'session',
-    session: mapSession(
-      data.session.access_token,
-      data.session.refresh_token,
-      publicUser
-    ),
-  };
+  logAuthEmail({
+    to: normalizedEmail,
+    kind: 'signup_confirmation',
+    simulated: false,
+  });
+  return { kind: 'emailVerification', email: normalizedEmail };
 }
 
 export async function verifyEmailOtp({
   email,
   code,
+  password,
+  name,
 }: {
   email: string;
   code: string;
+  password?: string;
+  name?: string;
 }): Promise<AuthSession> {
   if (useMemoryBackend()) {
     return memory.memoryVerifyEmailOtp({ email, code });
@@ -169,6 +162,10 @@ export async function verifyEmailOtp({
   const supabase = getSupabaseAnon();
   const normalizedEmail = email.trim().toLowerCase();
   const token = code.trim();
+
+  if (password) {
+    assertStrongPassword(password);
+  }
 
   const signupAttempt = await supabase.auth.verifyOtp({
     email: normalizedEmail,
@@ -191,6 +188,26 @@ export async function verifyEmailOtp({
 
   if (error || !data.session) {
     throw new Error('INVALID_VERIFICATION_CODE');
+  }
+
+  if (password && data.user) {
+    const admin = getSupabaseAdmin();
+    const metadata: Record<string, string> = {};
+    if (name?.trim()) {
+      metadata.name = name.trim();
+    }
+    const { error: pwError } = await admin.auth.admin.updateUserById(
+      data.user.id,
+      {
+        password,
+        ...(Object.keys(metadata).length > 0
+          ? { user_metadata: metadata }
+          : {}),
+      }
+    );
+    if (pwError) {
+      throw pwError;
+    }
   }
 
   const publicUser = await getPublicUserByAccessToken(data.session.access_token);
@@ -217,9 +234,9 @@ export async function resendEmailVerificationCode(
   }
 
   const supabase = getSupabaseAnon();
-  const { error } = await supabase.auth.resend({
-    type: 'signup',
+  const { error } = await supabase.auth.signInWithOtp({
     email: normalizedEmail,
+    options: { shouldCreateUser: false },
   });
 
   if (error) {

@@ -2,6 +2,9 @@
 
 Пошаговая инструкция для production.
 
+**Краткий чеклист «что сделать вручную»:** [docs/DEPLOY_YOUR_STEPS.md](docs/DEPLOY_YOUR_STEPS.md)  
+(фронт: `https://taro-react-native-monorepo.vercel.app`, Supabase ref: `urrbsxwlmsfedezwtglm`)
+
 ## Схема
 
 ```
@@ -61,7 +64,7 @@ supabase functions deploy motivation-habits --no-verify-jwt
 | Site URL | `https://your-app.vercel.app` |
 | Redirect URLs | `https://your-app.vercel.app/**`, `https://*.vercel.app/**` |
 
-**Authentication → Providers → Email:** включить Email, при необходимости отключить confirm email (как в локальном `config.toml`).
+**Authentication → Providers → Email:** включить Email. **Google:** включить провайдер (см. [docs/SUPABASE_PRODUCTION_AUTH.md](docs/SUPABASE_PRODUCTION_AUTH.md)). В шаблоне письма — `{{ .Token }}` для 6-значного кода.
 
 ---
 
@@ -87,7 +90,9 @@ Vercel не запускает долгоживущий Node-сервер — AP
 | `SUPABASE_ANON_KEY` | `eyJ...` |
 | `SUPABASE_SERVICE_ROLE_KEY` | `eyJ...` (секрет!) |
 | `OPENAI_API_KEY` | `sk-...` |
-| `CORS_ORIGIN` | `https://your-app.vercel.app` |
+| `CORS_ORIGIN` | `https://taro-react-native-monorepo-x59s.vercel.app` |
+| `WEB_APP_URL` | `https://taro-react-native-monorepo-x59s.vercel.app` |
+| `API_PUBLIC_URL` | `https://your-service.onrender.com` (URL Render после деплоя) |
 | `ALLOW_VERCEL_PREVIEW` | `1` |
 | `TAROT_DAILY_INTERPRET_LIMIT` | `10` |
 
@@ -120,8 +125,10 @@ Vercel не запускает долгоживущий Node-сервер — AP
 
 | Variable | Значение |
 |----------|----------|
-| `TAROT_API_PROXY_URL` | `https://tarot-api.onrender.com` (URL из шага 2, **без** слэша в конце) |
+| `TAROT_API_PROXY_URL` | URL Render из шага 2, **без** слэша в конце |
 | `EXPO_PUBLIC_TAROT_API_BASE_URL` | `same-origin` (или оставить пустым) |
+
+После деплоя: `pnpm deploy:check-health` или `RENDER_URL=https://...onrender.com pnpm deploy:check-health`
 
 При билде скрипт `generate-vercel-config.mjs` создаёт `vercel.json` с proxy `/api` → ваш BFF.
 

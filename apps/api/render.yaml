@@ -26,9 +26,9 @@ services:
       - key: OPENAI_API_KEY
         sync: false
       - key: CORS_ORIGIN
-        value: https://taro-react-native-monorepo-x59s.vercel.app
+        value: https://taro-react-native-monorepo.vercel.app
       - key: WEB_APP_URL
-        value: https://taro-react-native-monorepo-x59s.vercel.app
+        value: https://taro-react-native-monorepo.vercel.app
       - key: API_PUBLIC_URL
         sync: false
       - key: ALLOW_VERCEL_PREVIEW
