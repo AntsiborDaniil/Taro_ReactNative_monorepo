@@ -9,7 +9,8 @@ import {
 import { impactAsync, ImpactFeedbackStyle } from 'expo-haptics';
 import { DeckStyle } from 'shared/api';
 import { DEFAULT_SETTINGS } from 'shared/constants';
-import { AsyncMemoryKey, getValueForAsyncDeviceMemoryKey } from 'shared/lib';
+import { loadAppSettings } from 'shared/lib/cloudSettings/persistSettings';
+import { TAROT_AUTH_CHANGED_EVENT } from 'shared/lib/tarotAuthEvents';
 import { TAppearance, TSettings, TSound, TSpreadSettings } from 'shared/types';
 
 export type TApplicationConfigHookResult = {
@@ -32,23 +33,34 @@ export function useApplicationConfig(): TApplicationConfigHookResult {
     await impactAsync(ImpactFeedbackStyle.Light);
   }, [settings.sound?.vibration]);
 
-  useEffect(() => {
-    const getSettingsFromMemory = async () => {
-      const savedSettings = await getValueForAsyncDeviceMemoryKey<TSettings>(
-        AsyncMemoryKey.Settings
-      );
+  const reloadSettings = useCallback(async () => {
+    const savedSettings = await loadAppSettings();
+    setSettings(savedSettings);
+  }, []);
 
-      if (savedSettings) {
-        setSettings(savedSettings);
-      }
+  useEffect(() => {
+    void reloadSettings();
+  }, [reloadSettings]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const onAuthChanged = () => {
+      void reloadSettings();
     };
 
-    getSettingsFromMemory();
-  }, []);
+    window.addEventListener(TAROT_AUTH_CHANGED_EVENT, onAuthChanged);
+    return () => {
+      window.removeEventListener(TAROT_AUTH_CHANGED_EVENT, onAuthChanged);
+    };
+  }, [reloadSettings]);
 
   return useMemo(
     () => ({
       setSettings,
+      settings,
       appearance: {
         deckStyle:
           settings?.appearance?.deckStyle ?? DeckStyle.RiderWaiteOriginal,
@@ -58,9 +70,7 @@ export function useApplicationConfig(): TApplicationConfigHookResult {
       handleVibrationClick,
     }),
     [
-      settings?.appearance?.deckStyle,
-      settings?.sound,
-      settings?.spread,
+      settings,
       handleVibrationClick,
     ]
   );

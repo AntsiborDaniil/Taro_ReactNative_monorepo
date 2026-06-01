@@ -10,6 +10,7 @@ import type { AuthSessionUser, TarotDailyQuota } from './types';
 import { UserContext } from './UserContext';
 import { DataProvider } from 'shared/DataProvider';
 import { TAROT_AUTH_CHANGED_EVENT } from 'shared/lib/tarotAuthEvents';
+import { migrateLocalDataToCloud } from 'shared/lib/cloudMigration/migrateLocalToCloud';
 
 type MeResponse = {
   user: AuthSessionUser;
@@ -43,6 +44,9 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
       const body = (await response.json()) as MeResponse;
       setAuthUser(body.user);
       setTarotDaily(body.tarotDaily ?? null);
+      if (body.user?.id) {
+        void migrateLocalDataToCloud(body.user.id);
+      }
     } catch {
       setAuthUser(null);
       setTarotDaily(null);

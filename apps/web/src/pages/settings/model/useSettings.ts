@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { useData } from 'shared/DataProvider';
-import { AsyncMemoryKey, saveAsyncDeviceMemoryKey } from 'shared/lib';
+import { patchAppSettings } from 'shared/lib/cloudSettings/persistSettings';
 import {
   TSettingsFields,
   TSettingsHookParameters,
@@ -30,7 +30,7 @@ export function useSettings({
         };
 
         if (hasAutoSave) {
-          saveAsyncDeviceMemoryKey(AsyncMemoryKey.Settings, newValue).catch(
+          patchAppSettings({ [asyncMemoryKey]: newValue[asyncMemoryKey] }).catch(
             console.error
           );
         }

@@ -4,6 +4,13 @@
   "private": true,
   "scripts": {
     "dev:web": "pnpm --filter web dev",
-    "dev:api": "pnpm --filter api dev"
+    "dev:api": "pnpm --filter tarot-ai-api-sevice dev",
+    "build:web": "pnpm --filter web build",
+    "build:api": "pnpm --filter tarot-ai-api-sevice build",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset",
+    "supabase:push": "supabase db push",
+    "supabase:functions": "supabase functions serve --env-file apps/api/.env"
   }
 }
