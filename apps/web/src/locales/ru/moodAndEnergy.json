@@ -9,7 +9,7 @@
   "progress.assess": "Оцените свое состояние",
   "progress.createCard": "Создать карту",
   "progress": "Выполнено",
-  "signInRequired.title": "Войдите, чтобы оценивать состояние",
-  "signInRequired.body": "Запись настроения и энергии доступна только с аккаунтом.",
-  "signInRequired.cta": "Перейти в аккаунт"
+  "signInRequired.title": "Нужен вход в аккаунт",
+  "signInRequired.body": "Запись настроения доступна после входа.",
+  "signInRequired.cta": "Войти"
 }

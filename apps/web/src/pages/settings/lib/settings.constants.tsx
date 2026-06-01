@@ -75,11 +75,6 @@ export function getSettingsRoutes(
       url: NavigationRoute.DeckStyle,
     },
     {
-      icon: <Share width={isTablet ? 30 : 20} height={isTablet ? 30 : 20} />,
-      title: 'share.web',
-      onPress: shareApp,
-    },
-    {
       icon: <GetIcon width={isTablet ? 32 : 24} height={isTablet ? 32 : 24} />,
       title: 'mobile.app',
       onPress: () => opts?.onMobileAppPress?.(),

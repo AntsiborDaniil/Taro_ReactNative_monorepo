@@ -1,14 +1,20 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { CardsDictionary } from 'pages/cardsDictionary';
-import { DetailCard } from 'pages/detailCard';
-import { FavoriteCards } from 'pages/favoriteCards';
-import { Library } from 'pages/library';
-import { Auth, DeckStyle, Language, Settings, Sound } from 'pages/settings';
-import { SpreadReadings } from 'pages/spreadReadings';
-import { SpreadsHistory } from 'pages/spreadsHistory';
 import { useTranslation } from 'react-i18next';
 import { NavigationRoute } from 'shared/types';
-import { WebView } from 'shared/ui';
+import {
+  LazyAuth,
+  LazyCardsDictionary,
+  LazyDeckStyle,
+  LazyDetailCard,
+  LazyFavoriteCards,
+  LazyLanguage,
+  LazyLibrary,
+  LazySettings,
+  LazySound,
+  LazySpreadReadings,
+  LazySpreadsHistory,
+  LazyWebView,
+} from '../lazyScreens';
 
 const LibraryStack = createNativeStackNavigator();
 
@@ -20,45 +26,54 @@ function LibraryScreen() {
       initialRouteName={NavigationRoute.Library}
       screenOptions={{ headerShown: false }}
     >
-      <LibraryStack.Screen name={NavigationRoute.Library} component={Library} />
+      <LibraryStack.Screen
+        name={NavigationRoute.Library}
+        component={LazyLibrary}
+      />
       <LibraryStack.Screen
         name={NavigationRoute.CardsDictionary}
-        component={CardsDictionary}
+        component={LazyCardsDictionary}
       />
       <LibraryStack.Screen
         name={NavigationRoute.SpreadDetailCard}
-        component={DetailCard}
+        component={LazyDetailCard}
       />
       <LibraryStack.Screen
         name={NavigationRoute.FavoriteCards}
-        component={FavoriteCards}
+        component={LazyFavoriteCards}
       />
-      <LibraryStack.Screen name={NavigationRoute.Settings} component={Settings} />
-      <LibraryStack.Screen name={NavigationRoute.Language} component={Language} />
+      <LibraryStack.Screen
+        name={NavigationRoute.Settings}
+        component={LazySettings}
+      />
+      <LibraryStack.Screen
+        name={NavigationRoute.Language}
+        component={LazyLanguage}
+      />
       <LibraryStack.Screen
         name={NavigationRoute.SpreadsHistory}
-        component={SpreadsHistory}
+        component={LazySpreadsHistory}
       />
       <LibraryStack.Screen
         name={NavigationRoute.SpreadReadings}
-        component={SpreadReadings}
+        component={LazySpreadReadings}
       />
       <LibraryStack.Screen
         name={NavigationRoute.DeckStyle}
-        component={DeckStyle}
+        component={LazyDeckStyle}
       />
-      <LibraryStack.Screen name={NavigationRoute.Sound} component={Sound} />
-      <LibraryStack.Screen name={NavigationRoute.Auth} component={Auth} />
+      <LibraryStack.Screen name={NavigationRoute.Sound} component={LazySound} />
+      <LibraryStack.Screen name={NavigationRoute.Auth} component={LazyAuth} />
       <LibraryStack.Screen
         name={NavigationRoute.TermsOfUse}
-        component={WebView}
+        component={LazyWebView}
         initialParams={{
           url: `https://sanmarinotech.github.io/tarot-legal/terms_${i18n.language}.html`,
         }}
       />
       <LibraryStack.Screen
         name={NavigationRoute.PrivacyPolicy}
-        component={WebView}
+        component={LazyWebView}
         initialParams={{
           url: `https://sanmarinotech.github.io/tarot-legal/privacy_${i18n.language}.html`,
         }}

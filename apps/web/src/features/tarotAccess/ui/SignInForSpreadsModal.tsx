@@ -51,7 +51,8 @@ function SignInForSpreadsModal({
     });
   }, [closeModal, handleVibrationClick, navigation]);
 
-  const cardMaxW = Math.min(400, width - 32);
+  const cardMaxW = Math.min(Platform.OS === 'web' ? 360 : 400, width - 32);
+  const isWeb = Platform.OS === 'web';
 
   return (
     <View
@@ -76,17 +77,30 @@ function SignInForSpreadsModal({
           end={{ x: 1, y: 1 }}
           style={styles.rim}
         />
-        <View style={styles.inner}>
+        <View style={[styles.inner, isWeb && styles.innerCompact]}>
           <View style={styles.iconWrap}>
-            <PersonIcon width={56} height={56} fill={COLORS.Primary} />
+            <PersonIcon
+              width={isWeb ? 40 : 56}
+              height={isWeb ? 40 : 56}
+              fill={COLORS.Primary}
+            />
           </View>
-          <Text category={TEXT_TAGS.h3} style={styles.title}>
+          <Text
+            category={isWeb ? TEXT_TAGS.h4 : TEXT_TAGS.h3}
+            style={[styles.title, isWeb && styles.titleCompact]}
+          >
             {t('signInRequired.title')}
           </Text>
-          <Text category={TEXT_TAGS.p1} style={styles.subtitle}>
+          <Text
+            category={isWeb ? TEXT_TAGS.p2 : TEXT_TAGS.p1}
+            style={[styles.subtitle, isWeb && styles.subtitleCompact]}
+          >
             {t('signInRequired.body')}
           </Text>
-          <Button style={styles.button} onPress={goToAccount}>
+          <Button
+            style={[styles.button, isWeb && styles.buttonCompact]}
+            onPress={goToAccount}
+          >
             {t('signInRequired.cta')}
           </Button>
           <Button style={styles.secondary} onPress={handleClose}>
@@ -140,6 +154,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  innerCompact: {
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+    gap: 8,
+  },
   iconWrap: {
     marginBottom: 4,
   },
@@ -147,14 +166,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: COLORS.Content,
   },
+  titleCompact: {
+    fontSize: 17,
+    lineHeight: 22,
+  },
   subtitle: {
     textAlign: 'center',
     color: getColorOpacity(COLORS.Content, 78),
     lineHeight: 22,
   },
+  subtitleCompact: {
+    fontSize: 13,
+    lineHeight: 18,
+    maxWidth: 280,
+  },
   button: {
     marginTop: 8,
     minWidth: 220,
+  },
+  buttonCompact: {
+    marginTop: 4,
+    minWidth: 200,
   },
   secondary: {
     marginTop: 0,

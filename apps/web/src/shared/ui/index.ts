@@ -11,6 +11,8 @@ export * from './ProgressLines';
 export * from './Radio';
 export * from './RadioCard';
 export * from './ScreenLayout';
+export * from './Skeleton';
+export * from './SlowConnectionBanner';
 export * from './SwitchElement';
 export * from './TarotCard';
 export * from './TarotToast';

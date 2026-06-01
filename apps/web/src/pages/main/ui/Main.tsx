@@ -1,12 +1,7 @@
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Platform, SafeAreaView, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { MoodDashboard } from 'features/MoodDashboard';
-import { ScreenLayout } from 'shared/ui';
+import { DeferredMount } from 'shared/lib/web/DeferredMount';
+import { MainSectionSkeleton, ScreenLayout } from 'shared/ui';
 import { HabitWidget } from 'widgets/habitWidget';
 import { AffirmationsBlock } from './AffirmationsBlock';
 import { DayAdvice } from './DayAdvice';
@@ -43,15 +38,46 @@ function Main() {
             <View style={styles.sectionShell}>
               <DayAdvice />
             </View>
-            <View style={styles.sectionShell}>
-              <HabitWidget />
-            </View>
-            <View style={styles.sectionShell}>
-              <MoodDashboard isWidget horizontalInset={0} />
-            </View>
-            <View style={styles.sectionShell}>
-              <AffirmationsBlock />
-            </View>
+            {Platform.OS === 'web' ? (
+              <>
+                <View style={styles.sectionShell}>
+                  <DeferredMount
+                    delayMs={0}
+                    fallback={<MainSectionSkeleton />}
+                  >
+                    <HabitWidget />
+                  </DeferredMount>
+                </View>
+                <View style={styles.sectionShell}>
+                  <DeferredMount
+                    delayMs={64}
+                    fallback={<MainSectionSkeleton tall />}
+                  >
+                    <MoodDashboard isWidget horizontalInset={0} />
+                  </DeferredMount>
+                </View>
+                <View style={styles.sectionShell}>
+                  <DeferredMount
+                    delayMs={96}
+                    fallback={<MainSectionSkeleton />}
+                  >
+                    <AffirmationsBlock />
+                  </DeferredMount>
+                </View>
+              </>
+            ) : (
+              <>
+                <View style={styles.sectionShell}>
+                  <HabitWidget />
+                </View>
+                <View style={styles.sectionShell}>
+                  <MoodDashboard isWidget horizontalInset={0} />
+                </View>
+                <View style={styles.sectionShell}>
+                  <AffirmationsBlock />
+                </View>
+              </>
+            )}
           </View>
         </SafeAreaView>
       </ScrollView>

@@ -1,9 +1,11 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { DetailCard } from 'pages/detailCard';
-import { SpreadDescriptionChoice } from 'pages/spreadDescriptionChoice';
-import { SpreadReadings } from 'pages/spreadReadings';
-import { Spreads } from 'pages/spreads';
 import { NavigationRoute } from 'shared/types';
+import {
+  LazyDetailCard,
+  LazySpreadDescriptionChoice,
+  LazySpreadReadings,
+  LazySpreads,
+} from '../lazyScreens';
 
 const SpreadsStack = createNativeStackNavigator();
 
@@ -13,22 +15,18 @@ function SpreadsScreen() {
       initialRouteName={NavigationRoute.Spreads}
       screenOptions={{ headerShown: false }}
     >
-      {/*<SpreadsStack.Screen*/}
-      {/*  name={NavigationRoute.SpreadsGroups}*/}
-      {/*  component={SpreadsGroups}*/}
-      {/*/>*/}
-      <SpreadsStack.Screen name={NavigationRoute.Spreads} component={Spreads} />
+      <SpreadsStack.Screen name={NavigationRoute.Spreads} component={LazySpreads} />
       <SpreadsStack.Screen
         name={NavigationRoute.SpreadReadings}
-        component={SpreadReadings}
+        component={LazySpreadReadings}
       />
       <SpreadsStack.Screen
         name={NavigationRoute.SpreadDetailCard}
-        component={DetailCard}
+        component={LazyDetailCard}
       />
       <SpreadsStack.Screen
         name={NavigationRoute.SpreadDescriptionChoice}
-        component={SpreadDescriptionChoice}
+        component={LazySpreadDescriptionChoice}
       />
     </SpreadsStack.Navigator>
   );

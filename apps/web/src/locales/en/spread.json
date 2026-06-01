@@ -24,9 +24,9 @@
   "dailyLimit.title": "Daily spread limit reached",
   "dailyLimit.body": "You can complete up to 10 spreads per day while signed in. Try again tomorrow.",
 
-  "signInRequired.title": "Sign in to use spreads",
-  "signInRequired.body": "Tarot spreads are available only with an account. Sign in or create one to continue.",
-  "signInRequired.cta": "Open account",
+  "signInRequired.title": "Sign in required",
+  "signInRequired.body": "Spreads are available after you sign in or register.",
+  "signInRequired.cta": "Sign in",
 
   "guestSpread.badge": "No sign-in",
   "guestCatalog.banner": "“Yes or No” and “Daily advice” are available without signing in — look for the badge on the cards.",

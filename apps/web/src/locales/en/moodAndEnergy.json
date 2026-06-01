@@ -9,7 +9,7 @@
   "progress.assess": "Assess your condition",
   "progress.createCard": "Create card",
   "progress": "Progress",
-  "signInRequired.title": "Sign in to track your state",
-  "signInRequired.body": "Recording mood and energy is available only with an account.",
-  "signInRequired.cta": "Open account"
+  "signInRequired.title": "Sign in required",
+  "signInRequired.body": "Mood tracking is available after you sign in.",
+  "signInRequired.cta": "Sign in"
 }

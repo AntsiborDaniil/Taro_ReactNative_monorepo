@@ -32,9 +32,9 @@
   "deck.style.classic": "Classic",
   "deck.style.modern": "Modern Art",
 
-  "signInRequired.title": "Sign in to unlock this deck style",
-  "signInRequired.body": "The “Modern Art” deck is available only with an account. Sign in or create one to switch styles.",
-  "signInRequired.cta": "Open account",
+  "signInRequired.title": "Sign in required",
+  "signInRequired.body": "This deck style is available after you sign in.",
+  "signInRequired.cta": "Sign in",
 
   "share": "Share",
   "share.web": "Copy app link",

@@ -5,18 +5,27 @@ import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
 import { tarotCards } from 'shared/api';
 import { useData } from 'shared/DataProvider';
-import { CardsList, NoContent, ScreenLayout } from 'shared/ui';
+import { CardsList, CardsGridSkeleton, NoContent, ScreenLayout } from 'shared/ui';
 
 function FavoriteCards() {
   const { t } = useTranslation();
 
-  const { favoritesCardsIds } = useData({ Context: FavoritesContext });
+  const { favoritesCardsIds, isLoading } = useData({ Context: FavoritesContext });
 
   const cards = useMemo(() => {
     return Object.values(tarotCards).filter(
       (item) => favoritesCardsIds?.[item.id]
     );
   }, [favoritesCardsIds]);
+
+  if (isLoading) {
+    return (
+      <ScreenLayout>
+        <Header showBackButton title={t('core:page.favouriteCards')} />
+        <CardsGridSkeleton />
+      </ScreenLayout>
+    );
+  }
 
   return (
     <ScreenLayout>

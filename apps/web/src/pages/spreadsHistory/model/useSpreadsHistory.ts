@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getLastSpreadsPackIndex, getSpreadsHistoryPage } from 'entities/Spread';
 import { useTranslation } from 'react-i18next';
 import { TSpread } from 'shared/api';
@@ -12,6 +12,7 @@ type TSpreadSection = {
 
 type TSpreadsHistoryHookResult = {
   loading: boolean;
+  initialLoading: boolean;
   spreadsSections: TSpreadSection[];
   loadMore: () => Promise<void>;
 };
@@ -19,6 +20,7 @@ type TSpreadsHistoryHookResult = {
 export function useSpreadsHistory(): TSpreadsHistoryHookResult {
   const [spreads, setSpreads] = useState<TSpread[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [usesCloud, setUsesCloud] = useState(false);
   const [cloudOffset, setCloudOffset] = useState(0);
   const [cloudHasMore, setCloudHasMore] = useState(false);
@@ -26,7 +28,7 @@ export function useSpreadsHistory(): TSpreadsHistoryHookResult {
 
   const { t } = useTranslation();
 
-  const loadInitial = async () => {
+  const loadInitial = useCallback(async () => {
     const firstPage = await getSpreadsHistoryPage({ limit: 40, offset: 0 });
     setUsesCloud(firstPage.usesCloud);
     setSpreads(firstPage.spreads);
@@ -45,7 +47,7 @@ export function useSpreadsHistory(): TSpreadsHistoryHookResult {
         setLocalPackIndex(lastIndex);
       }
     }
-  };
+  }, []);
 
   const loadMore = async () => {
     try {
@@ -82,8 +84,9 @@ export function useSpreadsHistory(): TSpreadsHistoryHookResult {
   };
 
   useEffect(() => {
-    void loadInitial();
-  }, []);
+    setInitialLoading(true);
+    void loadInitial().finally(() => setInitialLoading(false));
+  }, [loadInitial]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -91,14 +94,15 @@ export function useSpreadsHistory(): TSpreadsHistoryHookResult {
     }
 
     const onAuthChanged = () => {
-      void loadInitial();
+      setInitialLoading(true);
+      void loadInitial().finally(() => setInitialLoading(false));
     };
 
     window.addEventListener(TAROT_AUTH_CHANGED_EVENT, onAuthChanged);
     return () => {
       window.removeEventListener(TAROT_AUTH_CHANGED_EVENT, onAuthChanged);
     };
-  }, []);
+  }, [loadInitial]);
 
   const spreadsSections = useMemo(() => {
     return spreads.reduce((acc: TSpreadSection[], currentValue) => {
@@ -128,6 +132,7 @@ export function useSpreadsHistory(): TSpreadsHistoryHookResult {
 
   return {
     loading,
+    initialLoading,
     spreadsSections,
     loadMore,
   };

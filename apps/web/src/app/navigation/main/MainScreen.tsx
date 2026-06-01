@@ -3,25 +3,27 @@ import { useNavigationState } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AffirmationsContext, useAffirmations } from 'entities/affirmations';
 import { MoodAndEnergyContext, useMoodAndEnergy } from 'entities/moodAndEnergy';
-import { Affirmations } from 'pages/affirmations';
-import { CardsDictionary } from 'pages/cardsDictionary';
-import { DayAdvice } from 'pages/dayAdvice';
-import { DetailCard } from 'pages/detailCard';
-import { FavoriteCards } from 'pages/favoriteCards';
-import { HabitChoose } from 'pages/habitChoose';
-import { HabitCreate } from 'pages/habitCreate';
-import { HabitWeek } from 'pages/habitWeek';
-import { GoalCelebration } from 'pages/goalCelebration';
 import { Main } from 'pages/main';
-import { MoodAndEnergyScreen } from 'pages/moodAndEnergy';
-import { MotivationScreen } from 'pages/motivation';
-import { SpreadDescriptionChoice } from 'pages/spreadDescriptionChoice';
-import { SpreadReadings } from 'pages/spreadReadings';
-import { Spreads } from 'pages/spreads';
-import { SpreadsHistory } from 'pages/spreadsHistory';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { DataProvider, MultiProvider, useData } from 'shared/DataProvider';
 import { NavigationRoute, TabRoute } from 'shared/types';
+import {
+  LazyAffirmations,
+  LazyCardsDictionary,
+  LazyDayAdvice,
+  LazyDetailCard,
+  LazyFavoriteCards,
+  LazyGoalCelebration,
+  LazyHabitChoose,
+  LazyHabitCreate,
+  LazyHabitWeek,
+  LazyMoodAndEnergyScreen,
+  LazyMotivationScreen,
+  LazySpreadDescriptionChoice,
+  LazySpreadReadings,
+  LazySpreads,
+  LazySpreadsHistory,
+} from '../lazyScreens';
 
 const MainStack = createNativeStackNavigator();
 
@@ -30,7 +32,7 @@ function MainScreen() {
 
   const moodAndEnergyContextData = useMoodAndEnergy();
 
-  const state = useNavigationState((state) => state);
+  const state = useNavigationState((navState) => navState);
 
   const { setSelectedTab } = useData({ Context: TabsAndRoutesContext });
 
@@ -52,7 +54,7 @@ function MainScreen() {
         <DataProvider
           Context={MoodAndEnergyContext}
           value={moodAndEnergyContextData}
-          key="AffirmationsContext"
+          key="MoodAndEnergyContext"
         />,
       ]}
     >
@@ -60,60 +62,60 @@ function MainScreen() {
         <MainStack.Screen name={NavigationRoute.Main} component={Main} />
         <MainStack.Screen
           name={NavigationRoute.MoodAndEnergy}
-          component={MoodAndEnergyScreen}
+          component={LazyMoodAndEnergyScreen}
         />
         <MainStack.Screen
           name={NavigationRoute.DayAdvice}
-          component={DayAdvice}
+          component={LazyDayAdvice}
         />
-        <MainStack.Screen name={NavigationRoute.Spreads} component={Spreads} />
+        <MainStack.Screen name={NavigationRoute.Spreads} component={LazySpreads} />
         <MainStack.Screen
           name={NavigationRoute.MotivationCard}
-          component={MotivationScreen}
+          component={LazyMotivationScreen}
         />
         <MainStack.Screen
           name={NavigationRoute.HabitCreate}
-          component={HabitCreate}
+          component={LazyHabitCreate}
         />
         <MainStack.Screen
           name={NavigationRoute.HabitChoose}
-          component={HabitChoose}
+          component={LazyHabitChoose}
         />
         <MainStack.Screen
           name={NavigationRoute.HabitsWeek}
-          component={HabitWeek}
+          component={LazyHabitWeek}
         />
         <MainStack.Screen
           name={NavigationRoute.GoalCelebration}
-          component={GoalCelebration}
+          component={LazyGoalCelebration}
         />
         <MainStack.Screen
           name={NavigationRoute.SpreadsHistory}
-          component={SpreadsHistory}
+          component={LazySpreadsHistory}
         />
         <MainStack.Screen
           name={NavigationRoute.Affirmations}
-          component={Affirmations}
+          component={LazyAffirmations}
         />
         <MainStack.Screen
           name={NavigationRoute.CardsDictionary}
-          component={CardsDictionary}
+          component={LazyCardsDictionary}
         />
         <MainStack.Screen
           name={NavigationRoute.FavoriteCards}
-          component={FavoriteCards}
+          component={LazyFavoriteCards}
         />
         <MainStack.Screen
           name={NavigationRoute.SpreadReadings}
-          component={SpreadReadings}
+          component={LazySpreadReadings}
         />
         <MainStack.Screen
           name={NavigationRoute.SpreadDescriptionChoice}
-          component={SpreadDescriptionChoice}
+          component={LazySpreadDescriptionChoice}
         />
         <MainStack.Screen
           name={NavigationRoute.SpreadDetailCard}
-          component={DetailCard}
+          component={LazyDetailCard}
         />
       </MainStack.Navigator>
     </MultiProvider>

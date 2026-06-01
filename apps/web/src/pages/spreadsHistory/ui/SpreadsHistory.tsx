@@ -1,5 +1,6 @@
 import { SectionList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Spinner } from '@ui-kitten/components';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import { useTranslation } from 'react-i18next';
@@ -9,9 +10,8 @@ import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { COLORS, getColorOpacity } from 'shared/themes';
 import { NavigationRoute } from 'shared/types';
-import { NoContent, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
+import { HistoryListSkeleton, NoContent, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { useSpreadsHistory } from '../model';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SpreadsGroups() {
   const { t } = useTranslation();
@@ -26,7 +26,12 @@ export default function SpreadsGroups() {
     Context: ApplicationConfigContext,
   });
 
-  const { spreadsSections, loadMore, loading } = useSpreadsHistory();
+  const { spreadsSections, loadMore, loading, initialLoading } =
+    useSpreadsHistory();
+
+  if (initialLoading) {
+    return <HistoryListSkeleton />;
+  }
 
   return (
     <ScreenLayout style={styles.wrapper}>

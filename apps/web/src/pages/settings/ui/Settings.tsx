@@ -37,7 +37,6 @@ import LanguagePickerModal from './Language/LanguagePickerModal';
 
 const WEB_ROW_KEYS_ACCOUNT = new Set(['account']);
 const WEB_ROW_KEYS_LOOK = new Set(['language', 'deck.style']);
-const WEB_ROW_KEYS_SHARE = new Set(['share.web']);
 const WEB_ROW_KEYS_MOBILE = new Set(['mobile.app']);
 
 function Settings() {
@@ -124,7 +123,6 @@ function Settings() {
       WEB_ROW_KEYS_ACCOUNT.has(r.title)
     );
     const lookRoutes = settingsRoutes.filter((r) => WEB_ROW_KEYS_LOOK.has(r.title));
-    const shareRoutes = settingsRoutes.filter((r) => WEB_ROW_KEYS_SHARE.has(r.title));
     const mobileRoutes = settingsRoutes.filter((r) => WEB_ROW_KEYS_MOBILE.has(r.title));
 
     return (
@@ -141,10 +139,6 @@ function Settings() {
           ]}
         >
           <View style={[webStyles.pageColumn, { maxWidth: contentMax }]}>
-            <Text category={TEXT_TAGS.h5} style={webStyles.pageHint}>
-              {t('settings:web.page.hint')}
-            </Text>
-
             <Text category={TEXT_TAGS.label} style={webStyles.sectionLabel}>
               {t('settings:section.game')}
             </Text>
@@ -237,47 +231,6 @@ function Settings() {
                     />
                   </Pressable>
                 </Fragment>
-              ))}
-            </View>
-
-            <Text category={TEXT_TAGS.label} style={webStyles.sectionLabel}>
-              {t('settings:section.share')}
-            </Text>
-            <View style={webStyles.card}>
-              {shareRoutes.map((route) => (
-                <Pressable
-                  key={route.title}
-                  accessibilityRole="button"
-                  onPress={() =>
-                    handlePress(route.url, route.title, route.onPress)
-                  }
-                  style={(s: PressableWebState) => {
-                    const { hovered, pressed } = s;
-                    return [
-                    webStyles.row,
-                    (hovered || pressed) && webStyles.rowActive,
-                  ];
-                  }}
-                >
-                  <View style={styles.iconWrapper}>
-                    <View style={styles.icon}>{route.icon}</View>
-                    <View style={webStyles.rowTextCol}>
-                      <Text
-                        category={TEXT_TAGS.h4}
-                        style={[styles.text, styles.settingsBody]}
-                      >
-                        {t(`settings:${route.title}`)}
-                      </Text>
-                      <Text category={TEXT_TAGS.p2} style={webStyles.rowHint}>
-                        {t('settings:share.web.hint')}
-                      </Text>
-                    </View>
-                  </View>
-                  <ChevronRightIcon
-                    width={isTablet ? 26 : 17}
-                    height={isTablet ? 26 : 17}
-                  />
-                </Pressable>
               ))}
             </View>
 
@@ -475,12 +428,6 @@ function createWebStyles() {
       width: '100%',
       alignSelf: 'center',
       gap: 10,
-    },
-    pageHint: {
-      color: COLORS.SpbSky1,
-      textAlign: 'center',
-      marginBottom: 8,
-      lineHeight: 20,
     },
     sectionLabel: {
       marginTop: 14,

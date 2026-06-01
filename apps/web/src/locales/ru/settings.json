@@ -32,9 +32,9 @@
   "deck.style.classic": "Классический",
   "deck.style.modern": "Современный модерн",
 
-  "signInRequired.title": "Войдите, чтобы открыть стиль колоды",
-  "signInRequired.body": "Стиль «Современный модерн» доступен только с аккаунтом. Войдите или зарегистрируйтесь, чтобы переключиться.",
-  "signInRequired.cta": "Перейти в аккаунт",
+  "signInRequired.title": "Нужен вход в аккаунт",
+  "signInRequired.body": "Этот стиль колоды доступен после входа.",
+  "signInRequired.cta": "Войти",
 
   "share": "Поделиться",
   "share.web": "Ссылка на приложение",

@@ -11,6 +11,7 @@ import {
 } from 'shared/contexts/TabsAndRoutes';
 import { DataProvider, MultiProvider } from 'shared/DataProvider';
 import { COLORS } from 'shared/themes';
+import { SlowConnectionBanner } from 'shared/ui/SlowConnectionBanner';
 import {
   ModalContainer,
   ModalsContext,
@@ -86,6 +87,7 @@ function GlobalProvider({ children }: GlobalProviderProps) {
         />,
       ]}
     >
+      <SlowConnectionBanner />
       {children}
       <BusinessComponent />
       <ModalContainer />

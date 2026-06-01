@@ -9,6 +9,7 @@ import {
 
 export type TFavoritesHookResult = {
   favoritesCardsIds: TSavedFavoriteCardsIds;
+  isLoading: boolean;
   addOrRemoveFavoriteCard: (
     card: TTarotCard | TSelectedTarotCard
   ) => Promise<void>;
@@ -18,6 +19,7 @@ export type TFavoritesHookResult = {
 export function useFavorites(): TFavoritesHookResult {
   const [favoritesCardsIds, setFavoritesCardsIds] =
     useState<TSavedFavoriteCardsIds>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   const reloadFavorites = useCallback(async () => {
     const fetchedFavoriteCards = await getFavoriteCards();
@@ -32,7 +34,8 @@ export function useFavorites(): TFavoritesHookResult {
   };
 
   useEffect(() => {
-    void reloadFavorites();
+    setIsLoading(true);
+    void reloadFavorites().finally(() => setIsLoading(false));
   }, [reloadFavorites]);
 
   useEffect(() => {
@@ -41,7 +44,8 @@ export function useFavorites(): TFavoritesHookResult {
     }
 
     const onAuthChanged = () => {
-      void reloadFavorites();
+      setIsLoading(true);
+      void reloadFavorites().finally(() => setIsLoading(false));
     };
 
     window.addEventListener(TAROT_AUTH_CHANGED_EVENT, onAuthChanged);
@@ -50,5 +54,10 @@ export function useFavorites(): TFavoritesHookResult {
     };
   }, [reloadFavorites]);
 
-  return { favoritesCardsIds, addOrRemoveFavoriteCard, reloadFavorites };
+  return {
+    favoritesCardsIds,
+    isLoading,
+    addOrRemoveFavoriteCard,
+    reloadFavorites,
+  };
 }
