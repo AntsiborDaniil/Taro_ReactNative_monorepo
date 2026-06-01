@@ -1,0 +1,68 @@
+image: docker:latest
+
+stages:
+  - build
+  - deploy
+
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+  OPENAI_API_KEY: $OPENAI_API_KEY
+  SUPABASE_URL: $SUPABASE_URL
+  SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
+  SUPABASE_SERVICE_ROLE_KEY: $SUPABASE_SERVICE_ROLE_KEY
+  CORS_ORIGIN: $CORS_ORIGIN
+  SSH_PRIVATE_KEY: $SSH_PRIVATE_KEY
+  SSH_PASSPHRASE: $SSH_PASSPHRASE
+  SERVER_IP: $SERVER_IP
+  SERVER_USER: deploy
+
+  PORT: 8080
+  TAROT_DAILY_INTERPRET_LIMIT: ${TAROT_DAILY_INTERPRET_LIMIT:-10}
+
+services:
+  - docker:dind
+
+before_script:
+  - mkdir -p ~/.ssh
+  - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+  - chmod 600 ~/.ssh/id_rsa
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PASSPHRASE" | ssh-add ~/.ssh/id_rsa
+  - ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+
+build:
+  stage: build
+  script:
+    - docker build -t api-tarot -f Dockerfile.prod .
+    - docker save api-tarot > api-tarot.tar
+  artifacts:
+    paths:
+      - api-tarot.tar
+  only:
+    - master
+  when: manual
+
+deploy:
+  stage: deploy
+  needs: ["build"]
+  script:
+    - |
+      ssh deploy@$SERVER_IP "cat > /opt/api-tarot/.env <<EOF
+      PORT=${PORT}
+      OPENAI_API_KEY=${OPENAI_API_KEY}
+      SUPABASE_URL=${SUPABASE_URL}
+      SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      CORS_ORIGIN=${CORS_ORIGIN}
+      TAROT_DAILY_INTERPRET_LIMIT=${TAROT_DAILY_INTERPRET_LIMIT}
+      NODE_ENV=production
+      EOF"
+    - scp api-tarot.tar deploy@$SERVER_IP:/opt/api-tarot/
+    - scp docker-compose.prod.yml deploy@$SERVER_IP:/opt/api-tarot/
+    - ssh deploy@$SERVER_IP "
+      sudo docker load < /opt/api-tarot/api-tarot.tar &&
+      cd /opt/api-tarot &&
+      sudo docker compose --env-file /opt/api-tarot/.env -f docker-compose.prod.yml up -d
+      "
+  only:
+    - master

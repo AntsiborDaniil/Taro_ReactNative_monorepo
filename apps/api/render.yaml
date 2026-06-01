@@ -1,0 +1,35 @@
+# Render.com — deploy apps/api as Web Service
+# Dashboard: New → Blueprint → repo root path: apps/api
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: tarot-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile.prod
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8080
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://taro-react-native-monorepo-x59s.vercel.app
+      - key: WEB_APP_URL
+        value: https://taro-react-native-monorepo-x59s.vercel.app
+      - key: API_PUBLIC_URL
+        sync: false
+      - key: ALLOW_VERCEL_PREVIEW
+        value: '1'
+      - key: TAROT_DAILY_INTERPRET_LIMIT
+        value: '10'

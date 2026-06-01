@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+  backend:
+    image: api-tarot
+    container_name: tarot_backend_prod
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: ${PORT:-8080}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      TAROT_DAILY_INTERPRET_LIMIT: ${TAROT_DAILY_INTERPRET_LIMIT:-10}
+    ports:
+      - "${PORT:-8080}:${PORT:-8080}"
