@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   sheet: {
     zIndex: 2,
     width: '100%',
-    borderRadius: 20,
+    borderRadius: 28,
     overflow: 'hidden',
     ...Platform.select({
       web: {
@@ -109,11 +109,11 @@ const styles = StyleSheet.create({
   },
   rim: {
     padding: 2,
-    borderRadius: 20,
+    borderRadius: 28,
   },
   inner: {
     backgroundColor: COLORS.Background2,
-    borderRadius: 18,
+    borderRadius: 26,
     paddingHorizontal: 22,
     paddingVertical: 24,
     alignItems: 'center',

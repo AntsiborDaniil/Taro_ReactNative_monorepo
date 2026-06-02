@@ -502,7 +502,7 @@ function createWebStyles() {
     modalCard: {
       width: '100%',
       maxWidth: 400,
-      borderRadius: 20,
+      borderRadius: 28,
       padding: 28,
       backgroundColor: COLORS.Background2,
       borderWidth: 1,

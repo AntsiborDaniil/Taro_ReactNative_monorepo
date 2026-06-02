@@ -435,9 +435,10 @@ function Auth() {
     Toast.show({
       type: 'success',
       text1: t('settings:auth.verify.sent'),
-      text2: devCode
-        ? `${t('settings:auth.verify.devHint')} ${devCode}`
-        : undefined,
+      text2:
+        __DEV__ && devCode
+          ? `${t('settings:auth.verify.devHint')} ${devCode}`
+          : undefined,
     });
   };
 
@@ -471,9 +472,7 @@ function Auth() {
       text1: options?.successTitle ?? t('settings:auth.success.title'),
       text2: options?.successTitle
         ? undefined
-        : useCookie
-          ? t('settings:auth.success.subtitle.cookie')
-          : t('settings:auth.success.subtitle'),
+        : t('settings:auth.success.subtitle'),
     });
 
     if (Platform.OS === 'web') {
@@ -680,9 +679,10 @@ function Auth() {
       Toast.show({
         type: 'success',
         text1: t('settings:auth.verify.sent'),
-        text2: body.devVerificationCode
-          ? `${t('settings:auth.verify.devHintResend')} ${body.devVerificationCode}`
-          : undefined,
+        text2:
+          __DEV__ && body.devVerificationCode
+            ? `${t('settings:auth.verify.devHintResend')} ${body.devVerificationCode}`
+            : undefined,
       });
     } catch {
       Toast.show({
@@ -1126,13 +1126,7 @@ function Auth() {
                   pressed && styles.paymentRowPressed,
                 ];
                 }}
-                onPress={() =>
-                  Toast.show({
-                    type: 'info',
-                    text1: t('settings:auth.payments.toast.title'),
-                    text2: t('settings:auth.payments.toast.subtitle'),
-                  })
-                }
+                onPress={() => setAddCardModalVisible(true)}
               >
                 <View style={styles.paymentRowLeft}>
                   <Text category={TEXT_TAGS.h4} style={styles.paymentBrand}>
@@ -1193,7 +1187,7 @@ function Auth() {
               })}
             </Text>
 
-            {devVerificationCode ? (
+            {__DEV__ && devVerificationCode ? (
               <View style={styles.devCodeBanner}>
                 <Text category={TEXT_TAGS.p2} style={styles.devCodeLabel}>
                   {t('settings:auth.verify.devHint')}
@@ -1416,44 +1410,24 @@ function Auth() {
                   <View style={styles.divider} />
                 </View>
 
-                <View style={styles.socialButtons}>
-                  <Pressable
-                    style={(s: PressableWebState) => {
-                      const { hovered, pressed } = s;
-                      return [
+                <Pressable
+                  style={(s: PressableWebState) => {
+                    const { hovered, pressed } = s;
+                    return [
                       styles.socialButton,
+                      styles.socialButtonFull,
                       hovered && styles.socialButtonHover,
                       pressed && styles.socialButtonPressed,
                     ];
-                    }}
-                    onPress={startGoogleSignIn}
-                  >
-                    <Text category={TEXT_TAGS.h4} style={styles.socialButtonText}>
-                      Google
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    style={(s: PressableWebState) => {
-                      const { hovered, pressed } = s;
-                      return [
-                      styles.socialButton,
-                      hovered && styles.socialButtonHover,
-                      pressed && styles.socialButtonPressed,
-                    ];
-                    }}
-                    onPress={() =>
-                      Toast.show({
-                        type: 'info',
-                        text1: t('settings:auth.socialSoon.title'),
-                        text2: t('settings:auth.socialSoon.apple'),
-                      })
-                    }
-                  >
-                    <Text category={TEXT_TAGS.h4} style={styles.socialButtonText}>
-                      Apple
-                    </Text>
-                  </Pressable>
-                </View>
+                  }}
+                  onPress={startGoogleSignIn}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('settings:auth.google')}
+                >
+                  <Text category={TEXT_TAGS.h4} style={styles.socialButtonText}>
+                    {t('settings:auth.google')}
+                  </Text>
+                </Pressable>
               </View>
             ) : (
               <View style={styles.formCard} key="signin-fields">
@@ -1543,44 +1517,24 @@ function Auth() {
                   <View style={styles.divider} />
                 </View>
 
-                <View style={styles.socialButtons}>
-                  <Pressable
-                    style={(s: PressableWebState) => {
-                      const { hovered, pressed } = s;
-                      return [
+                <Pressable
+                  style={(s: PressableWebState) => {
+                    const { hovered, pressed } = s;
+                    return [
                       styles.socialButton,
+                      styles.socialButtonFull,
                       hovered && styles.socialButtonHover,
                       pressed && styles.socialButtonPressed,
                     ];
-                    }}
-                    onPress={startGoogleSignIn}
-                  >
-                    <Text category={TEXT_TAGS.h4} style={styles.socialButtonText}>
-                      Google
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    style={(s: PressableWebState) => {
-                      const { hovered, pressed } = s;
-                      return [
-                      styles.socialButton,
-                      hovered && styles.socialButtonHover,
-                      pressed && styles.socialButtonPressed,
-                    ];
-                    }}
-                    onPress={() =>
-                      Toast.show({
-                        type: 'info',
-                        text1: t('settings:auth.socialSoon.title'),
-                        text2: t('settings:auth.socialSoon.apple'),
-                      })
-                    }
-                  >
-                    <Text category={TEXT_TAGS.h4} style={styles.socialButtonText}>
-                      Apple
-                    </Text>
-                  </Pressable>
-                </View>
+                  }}
+                  onPress={startGoogleSignIn}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('settings:auth.google')}
+                >
+                  <Text category={TEXT_TAGS.h4} style={styles.socialButtonText}>
+                    {t('settings:auth.google')}
+                  </Text>
+                </Pressable>
               </View>
             )}
           </View>
@@ -1928,16 +1882,11 @@ const styles = StyleSheet.create({
   dividerText: {
     color: 'rgba(216, 228, 247, 0.66)',
   },
-  socialButtons: {
-    flexDirection: 'row',
-    gap: 10,
-  },
   socialButton: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 48,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: 'rgba(176, 197, 236, 0.2)',
     backgroundColor: 'rgba(255,255,255,0.03)',
@@ -1951,6 +1900,9 @@ const styles = StyleSheet.create({
   socialButtonPressed: {
     opacity: 0.9,
     transform: [{ scale: 0.99 }],
+  },
+  socialButtonFull: {
+    width: '100%',
   },
   socialButtonText: {
     color: COLORS.Content,
@@ -1968,17 +1920,19 @@ const styles = StyleSheet.create({
   paymentModalSheet: {
     width: '100%',
     maxWidth: 420,
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 22,
-    gap: 14,
+    borderRadius: 28,
+    paddingHorizontal: 24,
+    paddingTop: 22,
+    paddingBottom: 24,
+    gap: 16,
     backgroundColor: 'rgba(24, 31, 45, 0.98)',
     borderWidth: 1,
     borderColor: 'rgba(148, 176, 226, 0.35)',
+    overflow: 'hidden',
     ...(Platform.OS === 'web'
       ? ({
-          boxShadow: '0 24px 48px rgba(0, 0, 0, 0.45)',
+          boxShadow:
+            '0 28px 56px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04)',
         } as object)
       : {
           elevation: 12,
@@ -1998,7 +1952,7 @@ const styles = StyleSheet.create({
   },
   paymentModalClose: {
     padding: 6,
-    borderRadius: 10,
+    borderRadius: 12,
     marginTop: -4,
     marginRight: -4,
     ...(Platform.OS === 'web'
@@ -2013,7 +1967,8 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   paymentModalButton: {
-    marginTop: 6,
+    marginTop: 8,
+    borderRadius: 14,
   },
   verifyTitle: {
     color: COLORS.Content,
