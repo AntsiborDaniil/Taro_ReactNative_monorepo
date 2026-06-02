@@ -130,7 +130,7 @@ Vercel не запускает долгоживущий Node-сервер — AP
 
 После деплоя: `pnpm deploy:check-health` или `RENDER_URL=https://...onrender.com pnpm deploy:check-health`
 
-При билде скрипт `generate-vercel-config.mjs` создаёт `vercel.json` с proxy `/api` → ваш BFF.
+`vercel.json` в репозитории уже содержит proxy `/api` → Render. Скрипт `generate-vercel-config.mjs` при билде перезаписывает его (env `TAROT_API_PROXY_URL` или дефолтный Render URL).
 
 ### 3.4 Проверка после деплоя
 
@@ -201,5 +201,5 @@ pnpm dev:web
 | `apps/api/` | Fastify BFF |
 | `apps/api/render.yaml` | Blueprint Render |
 | `apps/web/scripts/generate-vercel-config.mjs` | Proxy для Vercel |
-| `apps/web/vercel.json` | SPA fallback (локальный шаблон) |
+| `apps/web/vercel.json` | Proxy `/api` + SPA fallback |
 | `.github/workflows/supabase-deploy.yml` | CI для Supabase |

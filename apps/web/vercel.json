@@ -2,6 +2,14 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://taro-reactnative-monorepo.onrender.com/api/:path*"
+    },
+    {
+      "source": "/health",
+      "destination": "https://taro-reactnative-monorepo.onrender.com/health"
+    },
+    {
       "source": "/:path*",
       "destination": "/index.html"
     }
