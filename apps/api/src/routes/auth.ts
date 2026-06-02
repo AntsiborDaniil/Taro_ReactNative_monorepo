@@ -2,6 +2,7 @@ import {
   FastifyInstance,
   FastifyPluginOptions,
   FastifyReply,
+  FastifyRequest,
 } from 'fastify';
 import { AUTH_SESSION_COOKIE_NAME } from '../constants/authCookie';
 import {
@@ -10,6 +11,8 @@ import {
   wantsCookieOnlyBody,
 } from '../lib/authRequest';
 import { getPublicAppUrl, sanitizeOAuthNext } from '../lib/appUrls';
+import { redirectViaHtml } from '../lib/oauthPkceStorage';
+import { oauthCookieOptions } from '../lib/oauthPkceStorage';
 import { useMemoryBackend } from '../lib/devMode';
 import {
   changePassword,
@@ -68,7 +71,7 @@ function sendAuthSession(
   request: Parameters<typeof wantsCookieOnlyBody>[0],
   session: { token: string; refreshToken: string; user: unknown }
 ): ReturnType<FastifyReply['send']> {
-  setSessionCookie(reply, session.token);
+  setSessionCookie(request, reply, session.token);
 
   if (wantsCookieOnlyBody(request)) {
     return reply.send({ user: session.user });
@@ -93,28 +96,32 @@ function redirectToAppWithAuth(
   if (message) {
     url.searchParams.set('authMessage', message);
   }
-  reply.redirect(url.toString());
+  const target = url.toString();
+  if (status === 'success') {
+    redirectViaHtml(reply, target);
+    return;
+  }
+  reply.redirect(target);
 }
 
 const SESSION_COOKIE_MAX_AGE_SEC = 30 * 24 * 60 * 60;
 
-function setSessionCookie(reply: FastifyReply, token: string): void {
+function setSessionCookie(
+  request: FastifyRequest,
+  reply: FastifyReply,
+  token: string
+): void {
   reply.setCookie(AUTH_SESSION_COOKIE_NAME, token, {
-    path: '/',
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    ...oauthCookieOptions(request),
     maxAge: SESSION_COOKIE_MAX_AGE_SEC,
   });
 }
 
-function clearSessionCookie(reply: FastifyReply): void {
-  reply.clearCookie(AUTH_SESSION_COOKIE_NAME, {
-    path: '/',
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-  });
+function clearSessionCookie(
+  request: FastifyRequest,
+  reply: FastifyReply
+): void {
+  reply.clearCookie(AUTH_SESSION_COOKIE_NAME, oauthCookieOptions(request));
 }
 
 export const authRoute = async (
@@ -341,7 +348,7 @@ export const authRoute = async (
       try {
         const nextPath = sanitizeOAuthNext(request.query.next);
         const target = await getGoogleOAuthRedirectUrl(request, reply, nextPath);
-        return reply.redirect(target);
+        return redirectViaHtml(reply, target);
       } catch (error) {
         request.log.error(error);
         return redirectToAppWithAuth(
@@ -365,10 +372,13 @@ export const authRoute = async (
         memory: request.query.memory === '1',
       });
 
-      setSessionCookie(reply, session.token);
+      setSessionCookie(request, reply, session.token);
       return redirectToAppWithAuth(reply, nextPath, 'success');
     } catch (error) {
-      request.log.error(error);
+      request.log.error(
+        { err: error },
+        'OAuth callback failed'
+      );
       return redirectToAppWithAuth(
         reply,
         nextPath,
@@ -378,8 +388,8 @@ export const authRoute = async (
     }
   });
 
-  fastify.post('/auth/signout', async (_request, reply) => {
-    clearSessionCookie(reply);
+  fastify.post('/auth/signout', async (request, reply) => {
+    clearSessionCookie(request, reply);
     return reply.send({ ok: true });
   });
 

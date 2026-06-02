@@ -28,10 +28,13 @@ export function getApiPublicUrl(): string {
   return `http://127.0.0.1:${port}`;
 }
 
+/** Where the SPA lands after OAuth (web app reads ?auth= and opens account). */
+export const OAUTH_SPA_RETURN_PATH = '/';
+
 /** Prevent open redirects after OAuth. */
 export function sanitizeOAuthNext(next: string | undefined): string {
   if (!next || !next.startsWith('/') || next.startsWith('//')) {
-    return '/';
+    return OAUTH_SPA_RETURN_PATH;
   }
   return next;
 }

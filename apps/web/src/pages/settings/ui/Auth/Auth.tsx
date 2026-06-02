@@ -35,7 +35,10 @@ import {
   validateStrongPassword,
   type PasswordValidationCode,
 } from 'shared/lib/passwordPolicy';
-import { emitTarotAuthChanged } from 'shared/lib/tarotAuthEvents';
+import {
+  emitTarotAuthChanged,
+  TAROT_AUTH_CHANGED_EVENT,
+} from 'shared/lib/tarotAuthEvents';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { PressableWebState } from 'shared/types';
@@ -370,21 +373,7 @@ function Auth() {
     if (Platform.OS !== 'web' || typeof window === 'undefined') {
       return;
     }
-
-    const params = new URLSearchParams(window.location.search);
-    const authStatus = params.get('auth');
-    if (!authStatus) {
-      return;
-    }
-
-    const authMessage = params.get('authMessage');
-    params.delete('auth');
-    params.delete('authMessage');
-    const query = params.toString();
-    const cleaned = `${window.location.pathname}${query ? `?${query}` : ''}`;
-    window.history.replaceState({}, '', cleaned);
-
-    if (authStatus === 'success') {
+    const onAuthChanged = () => {
       void (async () => {
         try {
           const response = await fetch(
@@ -397,27 +386,19 @@ function Auth() {
           if (response.ok) {
             const meResponse = (await response.json()) as { user: AuthUser };
             setSession({ token: null, user: meResponse.user });
-            emitTarotAuthChanged();
-            Toast.show({
-              type: 'success',
-              text1: t('settings:auth.oauth.success'),
-            });
+          } else {
+            setSession(null);
           }
         } catch {
-          Toast.show({
-            type: 'error',
-            text1: t('settings:auth.oauth.error'),
-          });
+          setSession(null);
         }
       })();
-      return;
-    }
-
-    Toast.show({
-      type: 'error',
-      text1: authMessage || t('settings:auth.oauth.error'),
-    });
-  }, [t]);
+    };
+    window.addEventListener(TAROT_AUTH_CHANGED_EVENT, onAuthChanged);
+    return () => {
+      window.removeEventListener(TAROT_AUTH_CHANGED_EVENT, onAuthChanged);
+    };
+  }, []);
 
   const openEmailVerification = (
     email: string,

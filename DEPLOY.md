@@ -92,7 +92,7 @@ Vercel не запускает долгоживущий Node-сервер — AP
 | `OPENAI_API_KEY` | `sk-...` |
 | `CORS_ORIGIN` | `https://taro-react-native-monorepo-x59s.vercel.app` |
 | `WEB_APP_URL` | `https://taro-react-native-monorepo-x59s.vercel.app` |
-| `API_PUBLIC_URL` | `https://your-service.onrender.com` (URL Render после деплоя) |
+| `API_PUBLIC_URL` | `https://taro-react-native-monorepo.vercel.app` (тот же домен, что Vercel — для OAuth/PKCE) |
 | `ALLOW_VERCEL_PREVIEW` | `1` |
 | `TAROT_DAILY_INTERPRET_LIMIT` | `10` |
 

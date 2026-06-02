@@ -1,5 +1,6 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
   authCredentials,
   authRequestHeaders,
@@ -9,6 +10,7 @@ import {
 import type { AuthSessionUser, TarotDailyQuota } from './types';
 import { UserContext } from './UserContext';
 import { DataProvider } from 'shared/DataProvider';
+import { handleWebOAuthReturn } from 'shared/lib/handleWebOAuthReturn';
 import { TAROT_AUTH_CHANGED_EVENT } from 'shared/lib/tarotAuthEvents';
 import { migrateLocalDataToCloud } from 'shared/lib/cloudMigration/migrateLocalToCloud';
 
@@ -18,10 +20,10 @@ type MeResponse = {
 };
 
 export function WebUserSessionProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation('settings');
   const [authUser, setAuthUser] = useState<AuthSessionUser | null>(null);
   const [tarotDaily, setTarotDaily] = useState<TarotDailyQuota | null>(null);
   const [authSessionLoading, setAuthSessionLoading] = useState(true);
-
   const loadMe = useCallback(async () => {
     if (Platform.OS !== 'web') {
       setAuthSessionLoading(false);
@@ -58,6 +60,25 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void loadMe();
   }, [loadMe]);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      return;
+    }
+
+    const search = new URLSearchParams(
+      typeof window !== 'undefined' ? window.location.search : ''
+    );
+    if (!search.get('auth')) {
+      return;
+    }
+
+    void handleWebOAuthReturn({
+      loadSession: loadMe,
+      tSuccess: t('auth.oauth.success'),
+      tError: t('auth.oauth.error'),
+    });
+  }, [loadMe, t]);
 
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') {

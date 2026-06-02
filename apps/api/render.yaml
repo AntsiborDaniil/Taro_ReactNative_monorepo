@@ -30,7 +30,7 @@ services:
       - key: WEB_APP_URL
         value: https://taro-react-native-monorepo.vercel.app
       - key: API_PUBLIC_URL
-        sync: false
+        value: https://taro-react-native-monorepo.vercel.app
       - key: ALLOW_VERCEL_PREVIEW
         value: '1'
       - key: TAROT_DAILY_INTERPRET_LIMIT

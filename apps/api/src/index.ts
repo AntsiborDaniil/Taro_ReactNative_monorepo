@@ -33,6 +33,7 @@ async function bootstrap(): Promise<void> {
 
   const fastify = Fastify({
     logger: process.env.NODE_ENV === 'production',
+    trustProxy: true,
   });
 
   await fastify.register(cookie);
