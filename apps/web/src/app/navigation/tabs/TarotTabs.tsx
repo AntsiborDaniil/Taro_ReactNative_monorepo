@@ -178,12 +178,12 @@ function TarotTabs() {
           <Tabs.Screen
             name={TabRoute.SpreadsTab}
             component={SpreadsScreen}
-            options={{ title: t('nav.tab.spreads') }}
+            options={{ title: t('nav.tab.spreads'), lazy: true }}
           />
           <Tabs.Screen
             name={TabRoute.LibraryTab}
             component={LibraryScreen}
-            options={{ title: t('nav.tab.library') }}
+            options={{ title: t('nav.tab.library'), lazy: true }}
           />
         </Tabs.Navigator>
         {Platform.OS !== 'web' ? <TarotToast /> : null}

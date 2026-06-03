@@ -70,30 +70,30 @@ const appShellStyle: ViewStyle = {
 };
 
 export default function RootLayout() {
-  const [isAppLoading, setIsAppLoading] = useState<boolean>(true);
+  const skipSplashOnWeb = Platform.OS === 'web';
+  const [isAppLoading, setIsAppLoading] = useState<boolean>(!skipSplashOnWeb);
 
   const loadingsContextData = useLoadings();
   const applicationConfigContextData = useApplicationConfig();
 
-  const [interLoaded, interError] = useFonts(appFontSources);
-
-  const isResourcesLoading = !interLoaded && !interError;
+  useFonts(appFontSources);
 
   useEffect(() => {
-    if (isResourcesLoading) return;
+    if (skipSplashOnWeb) {
+      return;
+    }
 
-    const holdMs = Platform.OS === 'web' ? 0 : 500;
     const timeout = setTimeout(() => {
       setIsAppLoading(false);
-    }, holdMs);
+    }, 500);
 
     return () => clearTimeout(timeout);
-  }, [isResourcesLoading]);
+  }, [skipSplashOnWeb]);
 
   if (isAppLoading) {
     return (
       <SafeAreaProvider style={appShellStyle}>
-        <AnimatedSplashScreen isLoading={isResourcesLoading} />
+        <AnimatedSplashScreen isLoading={false} />
       </SafeAreaProvider>
     );
   }

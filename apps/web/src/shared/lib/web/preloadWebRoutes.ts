@@ -7,12 +7,10 @@ export function preloadWebRoutes(): void {
   }
 
   const run = () => {
-    void import('pages/spreads');
-    void import('pages/cardsDictionary');
-    void import('pages/favoriteCards');
-    void import('pages/spreadsHistory');
-    void import('pages/affirmations');
     void import('pages/settings');
+    void import('shared/lib/i18n/loadCardNamespace').then((m) =>
+      m.ensureCardNamespace()
+    );
   };
 
   if (typeof requestIdleCallback === 'function') {

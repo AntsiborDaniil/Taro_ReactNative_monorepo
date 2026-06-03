@@ -16,6 +16,7 @@ import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
 import { BookIcon, CardsIcon, ChevronLeftIcon, ChevronRightIcon, PlanetIcon } from 'shared/icons';
 import { blurActiveElement, WEB_HOVER_TRANSITION } from 'shared/lib';
+import { useWebVisualViewportInsets } from 'shared/lib/web/useWebVisualViewportInsets';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, TabRoute } from 'shared/types';
 import {
@@ -53,6 +54,7 @@ export function AdaptiveTabBar({
 }: AdaptiveTabBarProps): ReactElement {
   const { width } = useWindowDimensions();
   const safe = useSafeAreaInsets();
+  const webViewport = useWebVisualViewportInsets();
   const { selectedTab, setSelectedTab } = useData({ Context: TabsAndRoutesContext });
   const { handleVibrationClick } = useData({ Context: ApplicationConfigContext });
 
@@ -179,12 +181,18 @@ export function AdaptiveTabBar({
     );
   }
 
+  const webBottomInset =
+    Platform.OS === 'web'
+      ? Math.max(safe.bottom, webViewport.bottom, 8)
+      : 0;
+  const nativeBottomInset = Math.max(insets.bottom, safe.bottom, 6);
+
   const barHeight =
     Platform.OS === 'ios'
       ? 80
       : Platform.OS === 'web'
-        ? 64
-        : 60 + safe.bottom;
+        ? 56 + webBottomInset
+        : 60 + nativeBottomInset;
 
   return (
     <BottomTabBar
@@ -198,7 +206,7 @@ export function AdaptiveTabBar({
         {
           height: barHeight,
           paddingBottom:
-            Platform.OS === 'web' ? 8 : Math.max(insets.bottom, 6),
+            Platform.OS === 'web' ? webBottomInset : nativeBottomInset,
         },
       ]}
     />

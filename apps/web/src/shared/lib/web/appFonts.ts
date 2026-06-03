@@ -8,10 +8,6 @@ export const appFontSources =
         'Montserrat-Medium': require('../../../../assets/fonts/Montserrat-Medium.ttf'),
         'Montserrat-SemiBold': require('../../../../assets/fonts/Montserrat-SemiBold.ttf'),
         'Montserrat-Bold': require('../../../../assets/fonts/Montserrat-Bold.ttf'),
-        'Montserrat-Light': require('../../../../assets/fonts/Montserrat-Light.ttf'),
-        'Montserrat-ExtraBold': require('../../../../assets/fonts/Montserrat-ExtraBold.ttf'),
-        'Montserrat-Italic': require('../../../../assets/fonts/Montserrat-Italic.ttf'),
-        'Montserrat-Thin': require('../../../../assets/fonts/Montserrat-Thin.ttf'),
       }
     : {
         'Montserrat-Black': require('../../../../assets/fonts/Montserrat-Black.ttf'),

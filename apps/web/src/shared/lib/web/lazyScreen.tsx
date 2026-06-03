@@ -4,7 +4,7 @@ import {
   type ReactNode,
   Suspense,
 } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { COLORS } from 'shared/themes';
 import { PageSkeleton } from 'shared/ui/Skeleton';
 
@@ -19,18 +19,11 @@ function LazyScreenFallback({ children }: { children: ReactNode }) {
   return <View style={styles.fallback}>{children}</View>;
 }
 
-/**
- * Code-split screen for web; eager component on native.
- */
+/** Code-split screen (web + native). */
 export function createLazyScreen(
   loader: () => Promise<{ default: AnyComponent }>,
-  eager: AnyComponent,
   options: LazyScreenOptions = {}
 ): AnyComponent {
-  if (Platform.OS !== 'web') {
-    return eager;
-  }
-
   const LazyComponent = lazy(loader);
   const fallback = (
     <LazyScreenFallback>
@@ -44,7 +37,7 @@ export function createLazyScreen(
     </Suspense>
   );
 
-  LazyScreen.displayName = `Lazy(${eager.displayName ?? eager.name ?? 'Screen'})`;
+  LazyScreen.displayName = 'LazyScreen';
 
   return LazyScreen;
 }

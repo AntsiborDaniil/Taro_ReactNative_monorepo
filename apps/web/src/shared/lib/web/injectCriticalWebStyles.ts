@@ -21,6 +21,7 @@ export function injectCriticalWebStyles(): void {
       display: flex;
       flex: 1;
       min-height: 100vh;
+      min-height: 100dvh;
     }
   `;
   document.head.appendChild(style);

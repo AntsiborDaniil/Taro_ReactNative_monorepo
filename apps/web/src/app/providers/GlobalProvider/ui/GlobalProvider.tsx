@@ -1,4 +1,5 @@
 import { ReactNode, useEffect } from 'react';
+import { Platform } from 'react-native';
 import { FavoritesContext, useFavorites } from 'entities/favorites';
 import { HabitsContext, useHabits } from 'entities/habits';
 import { MotivationContext, useMotivation } from 'entities/tarotMotivation';
@@ -48,6 +49,10 @@ function GlobalProvider({ children }: GlobalProviderProps) {
   }, []);
 
   useEffect(() => {
+    if (Platform.OS === 'web') {
+      return;
+    }
+
     const lockOrientation = async () => {
       await ScreenOrientation.lockAsync(
         ScreenOrientation.OrientationLock.PORTRAIT_UP

@@ -3,7 +3,6 @@ import * as Localization from 'expo-localization';
 import i18next from 'i18next';
 import enAffirmations from 'locales/en/affirmations.json';
 import enAchievements from 'locales/en/achievements.json';
-import enCards from 'locales/en/card.json';
 import enCharacteristics from 'locales/en/characteristics.json';
 import enCore from 'locales/en/core.json';
 import enHabits from 'locales/en/habits.json';
@@ -15,7 +14,6 @@ import enSpread from 'locales/en/spread.json';
 import enSubscriptions from 'locales/en/subscriptions.json';
 import ruAffirmations from 'locales/ru/affirmations.json';
 import ruAchievements from 'locales/ru/achievements.json';
-import ruCards from 'locales/ru/card.json';
 import ruCharacteristics from 'locales/ru/characteristics.json';
 import ruCore from 'locales/ru/core.json';
 import ruHabits from 'locales/ru/habits.json';
@@ -66,7 +64,6 @@ export interface TranslationResources {
 
 const resources: Record<string, Partial<TranslationResources>> = {
   en: {
-    card: enCards,
     subscriptions: enSubscriptions,
     spread: enSpread,
     core: enCore,
@@ -80,7 +77,6 @@ const resources: Record<string, Partial<TranslationResources>> = {
     achievements: enAchievements,
   },
   ru: {
-    card: ruCards,
     subscriptions: ruSubscriptions,
     spread: ruSpread,
     core: ruCore,
@@ -125,8 +121,20 @@ const initI18next = async () => {
     resources,
     lng,
     fallbackLng: 'ru',
-    ns: ['card'],
-    defaultNS: 'card',
+    ns: [
+      'core',
+      'main',
+      'spread',
+      'settings',
+      'characteristics',
+      'subscriptions',
+      'hello',
+      'affirmations',
+      'moodAndEnergy',
+      'habits',
+      'achievements',
+    ],
+    defaultNS: 'core',
     interpolation: {
       escapeValue: false,
     },
