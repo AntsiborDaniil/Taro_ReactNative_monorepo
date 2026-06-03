@@ -1049,13 +1049,10 @@ function Auth() {
                   name="confirmPassword"
                   rules={{
                     required: t('settings:auth.validation.passwordRequired'),
-                    validate: (value) => {
-                      const newPassword = passwordForm.getValues('newPassword');
-                      if (value !== newPassword) {
-                        return t('settings:auth.password.mismatch');
-                      }
-                      return validateStrongPasswordMessage(value, t);
-                    },
+                    validate: (value) =>
+                      value === passwordForm.getValues('newPassword')
+                        ? true
+                        : t('settings:auth.password.mismatch'),
                   }}
                   render={({ field: { value, onChange, onBlur } }) => (
                     <TextInput

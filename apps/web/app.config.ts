@@ -1,8 +1,10 @@
 export default {
   expo: {
-    name: 'Mindful Web',
+    name: 'Mindful — Таро онлайн',
     slug: 'tarot-web',
     version: '1.0.0',
+    description:
+      'Онлайн-таро: расклады, карта дня, толкования карт. Tarot readings, spreads, and daily card.',
     orientation: 'portrait',
     icon: './assets/icon.png',
     userInterfaceStyle: 'dark',
@@ -11,6 +13,12 @@ export default {
       favicon: './assets/favicon.png',
       bundler: 'metro',
       backgroundColor: '#171F2C',
+      name: 'Mindful Tarot',
+      shortName: 'Mindful',
+      description:
+        'Таро онлайн: расклады, карта дня, значения карт. Online tarot spreads and readings.',
+      lang: 'ru',
+      themeColor: '#171F2C',
     },
     plugins: [
       'expo-dev-client',
