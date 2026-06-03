@@ -80,6 +80,56 @@ export async function getPublicUserByAccessToken(
   };
 }
 
+/** After OTP/password update, JWT getUser can fail — resolve by user id and ensure profile row. */
+async function resolvePublicUserAfterAuth(input: {
+  userId: string;
+  email: string;
+  name?: string;
+}): Promise<AuthPublicUser> {
+  const admin = getSupabaseAdmin();
+  const trimmedName = input.name?.trim() ?? '';
+
+  const { data: authData, error: authError } =
+    await admin.auth.admin.getUserById(input.userId);
+
+  const authUser = authData?.user;
+  if (authError || !authUser) {
+    throw new Error('USER_RESOLVE_FAILED');
+  }
+
+  const email = (authUser.email ?? input.email).trim().toLowerCase();
+  const name =
+    trimmedName ||
+    (authUser.user_metadata?.name as string | undefined)?.trim() ||
+    '';
+
+  await admin.from('profiles').upsert(
+    {
+      id: input.userId,
+      email,
+      name,
+    },
+    { onConflict: 'id' }
+  );
+
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('id, email, name, created_at')
+    .eq('id', input.userId)
+    .maybeSingle();
+
+  if (profile) {
+    return mapProfile(profile);
+  }
+
+  return {
+    id: input.userId,
+    email,
+    name,
+    createdAt: authUser.created_at ?? new Date().toISOString(),
+  };
+}
+
 function mapSession(
   accessToken: string,
   refreshToken: string,
@@ -210,10 +260,12 @@ export async function verifyEmailOtp({
     }
   }
 
-  const publicUser = await getPublicUserByAccessToken(data.session.access_token);
-  if (!publicUser) {
-    throw new Error('USER_PROFILE_MISSING');
-  }
+  const userId = data.user?.id ?? data.session.user.id;
+  const publicUser = await resolvePublicUserAfterAuth({
+    userId,
+    email: normalizedEmail,
+    name,
+  });
 
   logAuthSignupComplete(publicUser.email, publicUser.id);
 

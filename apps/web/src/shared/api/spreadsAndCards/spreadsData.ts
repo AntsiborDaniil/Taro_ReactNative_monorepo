@@ -244,58 +244,6 @@ export const universalSpreads: Record<string, TSpread> = {
       },
     ],
   },
-  flame: {
-    name: 'spread:universal_flame.name',
-    description: 'spread:universal_flame.description',
-    id: SpreadName.Universal_Flame,
-    category: SpreadsCategory.Universal,
-    img: '',
-    cardsCount: 12,
-    cardsPosition: [],
-    selectedCards: [],
-    availableSubscriptions: [
-      SubscriptionType.Freemium,
-      SubscriptionType.Practice,
-    ],
-    cardsOrder: [
-      {
-        meaning: 'universal_flame.сardMeaning.0',
-      },
-      {
-        meaning: 'universal_flame.сardMeaning.1',
-      },
-      {
-        meaning: 'universal_flame.сardMeaning.2',
-      },
-      {
-        meaning: 'universal_flame.сardMeaning.3',
-      },
-      {
-        meaning: 'universal_flame.сardMeaning.4',
-      },
-      {
-        meaning: 'universal_flame.сardMeaning.5',
-      },
-      {
-        meaning: 'universal_flame.сardMeaning.6',
-      },
-      {
-        meaning: 'universal_flame.сardMeaning.7',
-      },
-      {
-        meaning: 'universal_flame.сardMeaning.8',
-      },
-      {
-        meaning: 'universal_flame.сardMeaning.9',
-      },
-      {
-        meaning: 'universal_flame.сardMeaning.10',
-      },
-      {
-        meaning: 'universal_flame.сardMeaning.11',
-      },
-    ],
-  },
   horseshoe: {
     name: 'spread:universal_horseshoe.name',
     description: 'spread:universal_horseshoe.description',
@@ -532,7 +480,6 @@ export const spreadsData: TSpreadCategory[] = [
     spreads: [
       universalSpreads.celticCross,
       universalSpreads.pyramid,
-      universalSpreads.flame,
       universalSpreads.horseshoe,
     ],
   },

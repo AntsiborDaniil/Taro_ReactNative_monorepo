@@ -295,6 +295,16 @@ export const authRoute = async (
           });
         }
 
+        if (
+          error instanceof Error &&
+          error.message === 'USER_RESOLVE_FAILED'
+        ) {
+          request.log.error(error);
+          return reply.status(500).send({
+            message: 'Account was created but could not be loaded. Try signing in.',
+          });
+        }
+
         request.log.error(error);
         return reply.status(500).send({
           message: 'Could not verify email',

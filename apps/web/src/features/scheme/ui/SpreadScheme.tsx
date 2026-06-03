@@ -15,7 +15,6 @@ import { ThematicCareerFinance } from './ThematicCareerFinance';
 import { ThematicLove } from './ThematicLove';
 import { ThematicRelationship } from './ThematicRelationship';
 import { UniversalCelticCross } from './UniversalCelticCross';
-import { UniversalFlame } from './UniversalFlame';
 import { UniversalHorseshoe } from './UniversalHorseshoe';
 import { UniversalPyramid } from './UniversalPyramid';
 
@@ -34,7 +33,6 @@ const SchemeMapping: TSchemeMapping = {
   [SpreadName.Universal_CelticCross]: UniversalCelticCross,
   [SpreadName.Universal_Pyramid]: UniversalPyramid,
   [SpreadName.Universal_Horseshoe]: UniversalHorseshoe,
-  [SpreadName.Universal_Flame]: UniversalFlame,
   // Для выбора
   [SpreadName.Choice_Crossroad]: ChoicePerspective,
   [SpreadName.Choice_TwoPaths]: ChoiceTwoPaths,
