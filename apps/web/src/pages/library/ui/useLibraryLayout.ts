@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
+import { useWebBottomTabBarInset } from 'shared/lib/web/useWebViewportInsets';
 import {
   TAB_BREAKPOINT_LABELED,
   TAB_BREAKPOINT_RAIL,
@@ -131,6 +132,7 @@ export type LibraryLayout = {
 export function useLibraryLayout(): LibraryLayout {
   const { width: W, height: H } = useWindowDimensions();
   const { sceneContentWidth } = useTabRailLayout();
+  const bottomTabInset = useWebBottomTabBarInset();
 
   return useMemo(() => {
     const hasTabRail = W >= TAB_BREAKPOINT_RAIL;
@@ -247,12 +249,15 @@ export function useLibraryLayout(): LibraryLayout {
       librarySectionTitleFontSize,
       libraryTileSubtitleFontSize,
       libraryTileSubtitleLineHeight,
-      scrollBottomPad: Math.round(Math.max(28, v(36))),
+      scrollBottomPad: Math.round(
+        Math.max(28, v(36)) +
+          (Platform.OS === 'web' && W < TAB_BREAKPOINT_RAIL ? bottomTabInset : 0)
+      ),
       isNarrow: layoutW < TAB_BREAKPOINT_LABELED,
       hasTabRail,
       columnCount,
       gridShellPadding,
       isTileTitleMidViewport: isLibraryTileTitleMidViewport(layoutW),
     };
-  }, [W, H, sceneContentWidth]);
+  }, [W, H, sceneContentWidth, bottomTabInset]);
 }

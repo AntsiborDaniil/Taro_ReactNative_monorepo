@@ -10,6 +10,7 @@ import {
 import { Layout } from '@ui-kitten/components';
 import type { CSSProperties, ReactNode } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useWebViewportInsets } from 'shared/lib/web/useWebViewportInsets';
 import { COLORS } from '../../themes';
 
 type ScreenLayoutProps = {
@@ -19,6 +20,16 @@ type ScreenLayoutProps = {
 
 function ScreenLayout({ children, style }: ScreenLayoutProps): ReactNode {
   const insets = useSafeAreaInsets();
+  const viewportInsets = useWebViewportInsets();
+  const layoutInsets =
+    Platform.OS === 'web'
+      ? {
+          top: Math.max(insets.top, viewportInsets.top),
+          bottom: Math.max(insets.bottom, viewportInsets.bottom),
+          left: Math.max(insets.left, viewportInsets.left),
+          right: Math.max(insets.right, viewportInsets.right),
+        }
+      : insets;
   const { width } = useWindowDimensions();
   const isCompact = width < 760;
   const isWide = width > 1280;
@@ -80,10 +91,10 @@ function ScreenLayout({ children, style }: ScreenLayoutProps): ReactNode {
           style={StyleSheet.flatten([
             styles.layout,
             {
-              paddingLeft: insets.left,
-              paddingRight: insets.right,
-              paddingTop: Math.max(insets.top, isCompact ? 6 : 8),
-              paddingBottom: insets.bottom,
+              paddingLeft: layoutInsets.left,
+              paddingRight: layoutInsets.right,
+              paddingTop: Math.max(layoutInsets.top, isCompact ? 6 : 8),
+              paddingBottom: layoutInsets.bottom,
               gap: isCompact ? 12 : 16,
             },
             style as StyleProp<ViewStyle>,

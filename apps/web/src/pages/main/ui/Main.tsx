@@ -42,7 +42,7 @@ function Main() {
               <>
                 <View style={styles.sectionShell}>
                   <DeferredMount
-                    delayMs={0}
+                    delayMs={120}
                     fallback={<MainSectionSkeleton />}
                   >
                     <HabitWidget />
@@ -50,7 +50,7 @@ function Main() {
                 </View>
                 <View style={styles.sectionShell}>
                   <DeferredMount
-                    delayMs={64}
+                    delayMs={240}
                     fallback={<MainSectionSkeleton tall />}
                   >
                     <MoodDashboard isWidget horizontalInset={0} />
@@ -58,7 +58,7 @@ function Main() {
                 </View>
                 <View style={styles.sectionShell}>
                   <DeferredMount
-                    delayMs={96}
+                    delayMs={360}
                     fallback={<MainSectionSkeleton />}
                   >
                     <AffirmationsBlock />

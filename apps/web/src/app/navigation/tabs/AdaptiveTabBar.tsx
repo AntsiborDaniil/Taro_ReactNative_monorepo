@@ -16,7 +16,10 @@ import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
 import { BookIcon, CardsIcon, ChevronLeftIcon, ChevronRightIcon, PlanetIcon } from 'shared/icons';
 import { blurActiveElement, WEB_HOVER_TRANSITION } from 'shared/lib';
-import { useWebVisualViewportInsets } from 'shared/lib/web/useWebVisualViewportInsets';
+import {
+  useWebViewportInsets,
+  WEB_TAB_BAR_CONTENT_HEIGHT,
+} from 'shared/lib/web/useWebViewportInsets';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, TabRoute } from 'shared/types';
 import {
@@ -54,7 +57,7 @@ export function AdaptiveTabBar({
 }: AdaptiveTabBarProps): ReactElement {
   const { width } = useWindowDimensions();
   const safe = useSafeAreaInsets();
-  const webViewport = useWebVisualViewportInsets();
+  const viewportInsets = useWebViewportInsets();
   const { selectedTab, setSelectedTab } = useData({ Context: TabsAndRoutesContext });
   const { handleVibrationClick } = useData({ Context: ApplicationConfigContext });
 
@@ -183,30 +186,41 @@ export function AdaptiveTabBar({
 
   const webBottomInset =
     Platform.OS === 'web'
-      ? Math.max(safe.bottom, webViewport.bottom, 8)
+      ? Math.max(viewportInsets.bottom, insets.bottom, safe.bottom)
       : 0;
-  const nativeBottomInset = Math.max(insets.bottom, safe.bottom, 6);
-
   const barHeight =
     Platform.OS === 'ios'
       ? 80
       : Platform.OS === 'web'
-        ? 56 + webBottomInset
-        : 60 + nativeBottomInset;
+        ? WEB_TAB_BAR_CONTENT_HEIGHT + webBottomInset + 8
+        : 60 + safe.bottom;
+
+  const tabBarInsets =
+    Platform.OS === 'web'
+      ? {
+          ...insets,
+          bottom: webBottomInset,
+        }
+      : insets;
 
   return (
     <BottomTabBar
       state={state}
       descriptors={descriptors}
       navigation={navigation}
-      insets={insets}
+      insets={tabBarInsets}
       style={[
         styles.bottomBar,
         styles.bottomBarCompact,
         {
           height: barHeight,
+          ...(Platform.OS === 'web'
+            ? ({
+                marginBottom: webBottomInset,
+              } as object)
+            : {}),
           paddingBottom:
-            Platform.OS === 'web' ? webBottomInset : nativeBottomInset,
+            Platform.OS === 'web' ? 8 : Math.max(insets.bottom, 6),
         },
       ]}
     />

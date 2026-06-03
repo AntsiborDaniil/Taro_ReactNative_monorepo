@@ -21,24 +21,7 @@ const SEO = {
     'таро, таро онлайн, расклад таро, гадание на таро, карты таро, карта дня таро, значение карт таро, tarot, tarot online, tarot reading, daily tarot card, tarot spreads, mindful tarot',
 };
 
-const criticalStyle = `
-    <style id="tarot-critical-web">
-      html, body, #root {
-        background-color: #171f2c;
-        color: #f4f4f5;
-        min-height: 100%;
-        margin: 0;
-      }
-      #root {
-        display: flex;
-        flex: 1;
-        min-height: 100vh;
-        min-height: 100dvh;
-      }
-    </style>`;
-
 const metaBlock = `
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content="${SEO.description}" />
     <meta name="keywords" content="${SEO.keywords}" />
     <meta name="theme-color" content="#171F2C" />
@@ -65,17 +48,19 @@ let html = fs.readFileSync(indexPath, 'utf8');
 html = html.replace(/<html lang="[^"]*">/, '<html lang="ru">');
 html = html.replace(/<title>[^<]*<\/title>/, `<title>${SEO.title}</title>`);
 
-if (!html.includes('id="tarot-critical-web"')) {
-  html = html.replace(/<head>/, `<head>${criticalStyle}`);
+const viewportMeta =
+  '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />';
+if (html.includes('name="viewport"')) {
+  html = html.replace(
+    /<meta[^>]*name="viewport"[^>]*>/i,
+    viewportMeta
+  );
+} else {
+  html = html.replace(/<head>/, `<head>\n    ${viewportMeta}`);
 }
 
 if (!html.includes('name="description"')) {
   html = html.replace(/<head>/, `<head>${metaBlock}`);
-} else if (!html.includes('viewport-fit=cover')) {
-  html = html.replace(
-    /<meta name="viewport"[^>]*>/,
-    '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />'
-  );
 }
 
 fs.writeFileSync(indexPath, html);

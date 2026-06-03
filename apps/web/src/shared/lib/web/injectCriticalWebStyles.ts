@@ -16,6 +16,7 @@ export function injectCriticalWebStyles(): void {
       background-color: #171f2c;
       color: #f4f4f5;
       min-height: 100%;
+      min-height: 100dvh;
     }
     #root {
       display: flex;

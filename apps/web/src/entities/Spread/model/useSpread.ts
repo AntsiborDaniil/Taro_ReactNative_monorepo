@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import type { LayoutChangeEvent } from 'react-native';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ensureCardNamespace } from 'shared/lib/i18n/loadCardNamespace';
 import Toast from 'react-native-toast-message';
 import { DailyTarotLimitModal, SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import {
@@ -188,8 +187,6 @@ export function useSpread({
   const selectSpread = async (
     value: TSpread
   ): Promise<{ shouldRedirectToSpreadReading: boolean }> => {
-    await ensureCardNamespace();
-
     if (__DEV__) {
       console.log(`${DAY_CARD_DEBUG} selectSpread:start`, {
         spreadId: value.id,

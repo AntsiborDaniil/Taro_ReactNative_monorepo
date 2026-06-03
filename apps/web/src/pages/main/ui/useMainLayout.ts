@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useWebVisualViewportInsets } from 'shared/lib/web/useWebVisualViewportInsets';
+import { TAB_BREAKPOINT_RAIL } from 'app/navigation/tabs/adaptiveTabLayout';
+import { useWebBottomTabBarInset } from 'shared/lib/web/useWebViewportInsets';
 
 const MAX_CONTENT_WIDTH = 1280;
 const BASE_W = 375;
@@ -27,8 +27,7 @@ export type MainLayout = {
  */
 export function useMainLayout(): MainLayout {
   const { width: W, height: H } = useWindowDimensions();
-  const safe = useSafeAreaInsets();
-  const webViewport = useWebVisualViewportInsets();
+  const bottomTabInset = useWebBottomTabBarInset();
 
   return useMemo(() => {
     const isCompact = W < 430;
@@ -42,14 +41,11 @@ export function useMainLayout(): MainLayout {
     const bottomMargin = Math.round(
       Math.min(56, Math.max(isCompact ? 16 : 24, (H / 812) * 36))
     );
-    let scrollBottomPad = Math.round(
-      Math.max(isCompact ? 12 : 18, (H / 812) * 24)
+    const mobileWebTabPad =
+      Platform.OS === 'web' && W < TAB_BREAKPOINT_RAIL ? bottomTabInset : 0;
+    const scrollBottomPad = Math.round(
+      Math.max(isCompact ? 12 : 18, (H / 812) * 24) + mobileWebTabPad
     );
-
-    if (Platform.OS === 'web' && W < 768) {
-      const tabBarClearance = 56 + Math.max(safe.bottom, webViewport.bottom, 8);
-      scrollBottomPad = Math.max(scrollBottomPad, tabBarClearance + 12);
-    }
 
     return {
       contentWidth,
@@ -58,5 +54,5 @@ export function useMainLayout(): MainLayout {
       bottomMargin,
       scrollBottomPad,
     };
-  }, [H, W, safe.bottom, webViewport.bottom]);
+  }, [W, H, bottomTabInset]);
 }

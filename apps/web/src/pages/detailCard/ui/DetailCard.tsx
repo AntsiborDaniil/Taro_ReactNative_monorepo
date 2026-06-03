@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -13,7 +13,6 @@ import { TarotCardReadingsDefault } from 'features/TarotCardReadings';
 import { TarotCardDirection, tarotCards } from 'shared/api';
 import { TNavigationParams } from 'shared/hooks';
 import { getTarotCardReadings } from 'shared/lib';
-import { ensureCardNamespace } from 'shared/lib/i18n/loadCardNamespace';
 import { COLORS } from 'shared/themes';
 import { NoContent, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 
@@ -23,10 +22,6 @@ export default function DetailCard() {
   );
 
   const { t } = useTranslation();
-
-  useEffect(() => {
-    void ensureCardNamespace();
-  }, []);
 
   const route = useRoute<RouteProp<TNavigationParams>>(); // Получаем объект маршрута
   const { id } = route.params || {};

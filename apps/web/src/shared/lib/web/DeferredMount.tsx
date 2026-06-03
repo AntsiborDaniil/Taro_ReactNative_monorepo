@@ -23,12 +23,18 @@ export function DeferredMount({
       return;
     }
 
+    const mount = () => setReady(true);
+
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      const id = window.setTimeout(() => setReady(true), delayMs);
+      if (typeof requestIdleCallback === 'function') {
+        const id = requestIdleCallback(mount, { timeout: delayMs + 120 });
+        return () => cancelIdleCallback(id);
+      }
+      const id = window.setTimeout(mount, delayMs);
       return () => window.clearTimeout(id);
     }
 
-    const id = setTimeout(() => setReady(true), delayMs);
+    const id = setTimeout(mount, delayMs);
     return () => clearTimeout(id);
   }, [delayMs]);
 

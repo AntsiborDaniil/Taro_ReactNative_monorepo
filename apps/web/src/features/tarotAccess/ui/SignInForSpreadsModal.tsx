@@ -9,7 +9,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useWebViewportInsets } from 'shared/lib/web/useWebViewportInsets';
 import { PersonIcon } from 'shared/icons';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
@@ -29,7 +29,7 @@ function SignInForSpreadsModal({
 }: SignInForSpreadsModalProps) {
   const { t } = useTranslation(i18nNamespace);
   const { t: tCore } = useTranslation('core');
-  const insets = useSafeAreaInsets();
+  const insets = useWebViewportInsets();
   const { width } = useWindowDimensions();
   const navigation = useNativeNavigation();
 

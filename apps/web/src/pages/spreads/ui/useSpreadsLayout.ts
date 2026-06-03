@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
-import { useWindowDimensions } from 'react-native';
+import { Platform, useWindowDimensions } from 'react-native';
+import { TAB_BREAKPOINT_RAIL } from 'app/navigation/tabs/adaptiveTabLayout';
+import { useWebBottomTabBarInset } from 'shared/lib/web/useWebViewportInsets';
 import { GLOBAL_UI_TEXT_PX } from 'shared/themes/typography';
 
 const MAX_CONTENT_WIDTH = 1280;
@@ -34,6 +36,7 @@ export type SpreadsLayout = {
 
 export function useSpreadsLayout(): SpreadsLayout {
   const { width: W, height: H } = useWindowDimensions();
+  const bottomTabInset = useWebBottomTabBarInset();
 
   return useMemo(() => {
     const contentWidth = Math.min(W, MAX_CONTENT_WIDTH);
@@ -60,7 +63,11 @@ export function useSpreadsLayout(): SpreadsLayout {
     const sectionTitleSize = GLOBAL_UI_TEXT_PX;
     const sectionTitleLine = Math.round(sectionTitleSize * 1.35);
 
-    const scrollBottomPad = Math.round(Math.max(24, v(32)));
+    const mobileWebTabPad =
+      Platform.OS === 'web' && W < TAB_BREAKPOINT_RAIL ? bottomTabInset : 0;
+    const scrollBottomPad = Math.round(
+      Math.max(24, v(32)) + mobileWebTabPad
+    );
 
     const cardBorderRadius = Math.round(Math.min(24, Math.max(12, W * 0.018)));
     const textPadH = Math.round(Math.min(26, Math.max(14, W * 0.045)));
@@ -92,5 +99,5 @@ export function useSpreadsLayout(): SpreadsLayout {
       lockIconSize,
       imageFadeHeight,
     };
-  }, [W, H]);
+  }, [W, H, bottomTabInset]);
 }
