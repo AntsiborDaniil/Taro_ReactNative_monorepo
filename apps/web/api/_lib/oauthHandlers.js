@@ -1,31 +1,24 @@
 const { createClient } = require('@supabase/supabase-js');
 const {
   clearPkceCookies,
-  createPkceStorage,
   redirectToApp,
   redirectOAuthProvider,
   setSessionCookie,
 } = require('./oauthCookies');
 const {
-  getSupabaseAnonKey,
+  buildGoogleAuthorizeUrl,
+  exchangeCodeForSession,
+  generatePkcePair,
+  signPkceParam,
+  verifyPkceParam,
+} = require('./oauthPkce');
+const {
   getSupabaseServiceRoleKey,
   getSupabaseUrl,
   getRequestOrigin,
   oauthCallbackUrl,
   sanitizeOAuthNext,
 } = require('./oauthEnv');
-
-function createOAuthClient(req, res) {
-  return createClient(getSupabaseUrl(), getSupabaseAnonKey(), {
-    auth: {
-      flowType: 'pkce',
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false,
-      storage: createPkceStorage(req, res),
-    },
-  });
-}
 
 async function getPublicUser(accessToken) {
   const admin = createClient(getSupabaseUrl(), getSupabaseServiceRoleKey(), {
@@ -66,46 +59,41 @@ async function getPublicUser(accessToken) {
 
 async function handleGoogleOAuthStart(req, res) {
   const nextPath = sanitizeOAuthNext(req.query.next);
-  const supabase = createOAuthClient(req, res);
-  const redirectTo = oauthCallbackUrl(nextPath, req);
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo,
-      skipBrowserRedirect: true,
-    },
+  const { verifier, challenge, method } = generatePkcePair();
+  const pkceToken = signPkceParam(verifier);
+  const redirectTo = `${oauthCallbackUrl(nextPath, req)}&pkce=${encodeURIComponent(pkceToken)}`;
+  const authUrl = buildGoogleAuthorizeUrl({
+    redirectTo,
+    challenge,
+    method,
   });
 
-  if (error || !data?.url) {
-    throw error ?? new Error('OAUTH_URL_MISSING');
-  }
-
-  redirectOAuthProvider(res, data.url);
+  redirectOAuthProvider(res, authUrl);
 }
 
 async function handleGoogleOAuthCallback(req, res) {
   const nextPath = sanitizeOAuthNext(req.query.next);
   const code = typeof req.query.code === 'string' ? req.query.code : undefined;
+  const pkceToken =
+    typeof req.query.pkce === 'string' ? req.query.pkce : undefined;
 
   if (!code) {
     throw new Error('OAUTH_CODE_MISSING');
   }
-
-  const supabase = createOAuthClient(req, res);
-  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-  clearPkceCookies(req, res);
-
-  if (error || !data?.session) {
-    throw error ?? new Error('OAUTH_SESSION_MISSING');
+  if (!pkceToken) {
+    throw new Error('PKCE_TOKEN_MISSING');
   }
 
-  const publicUser = await getPublicUser(data.session.access_token);
+  const codeVerifier = verifyPkceParam(pkceToken);
+  const session = await exchangeCodeForSession(code, codeVerifier);
+  clearPkceCookies(req, res);
+
+  const publicUser = await getPublicUser(session.access_token);
   if (!publicUser) {
     throw new Error('USER_PROFILE_MISSING');
   }
 
-  setSessionCookie(res, data.session.access_token);
+  setSessionCookie(res, session.access_token);
   redirectToApp(
     res,
     req,
@@ -115,6 +103,7 @@ async function handleGoogleOAuthCallback(req, res) {
 }
 
 function handleOAuthError(res, req, nextPath, message) {
+  clearPkceCookies(req, res);
   redirectToApp(
     res,
     req,

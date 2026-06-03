@@ -16,6 +16,17 @@ module.exports = async function handler(req, res) {
     await handleGoogleOAuthCallback(req, res);
   } catch (error) {
     console.error('[vercel oauth/callback]', error);
-    handleOAuthError(res, req, nextPath, 'Could not complete Google sign-in');
+    const detail =
+      error?.code === 'pkce_code_verifier_not_found'
+        ? 'PKCE verifier missing — retry sign-in'
+        : error?.message;
+    handleOAuthError(
+      res,
+      req,
+      nextPath,
+      detail && detail.length < 120
+        ? `Could not complete Google sign-in (${detail})`
+        : 'Could not complete Google sign-in'
+    );
   }
 };
