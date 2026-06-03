@@ -192,7 +192,7 @@ export function AdaptiveTabBar({
     Platform.OS === 'ios'
       ? 80
       : Platform.OS === 'web'
-        ? WEB_TAB_BAR_CONTENT_HEIGHT + webBottomInset + 8
+        ? WEB_TAB_BAR_CONTENT_HEIGHT + 8
         : 60 + safe.bottom;
 
   const tabBarInsets =

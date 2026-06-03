@@ -114,5 +114,6 @@ export function useWebBottomTabBarInset(): number {
   if (Platform.OS !== 'web') {
     return insets.bottom;
   }
-  return WEB_TAB_BAR_CONTENT_HEIGHT + insets.bottom + 8;
+  /** Tab bar height + browser chrome below the bar. */
+  return WEB_TAB_BAR_CONTENT_HEIGHT + insets.bottom + 16;
 }
