@@ -1,11 +1,5 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Platform,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Platform, StyleSheet, useWindowDimensions } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { CommonActions } from '@react-navigation/native';
@@ -19,7 +13,9 @@ import { blurActiveElement } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, TabRoute } from 'shared/types';
 import { TarotToast } from 'shared/ui';
+import LibraryScreen from '../library/LibraryScreen';
 import MainScreen from '../main/MainScreen';
+import SpreadsScreen from '../spreads/SpreadsScreen';
 import { AdaptiveTabBar } from './AdaptiveTabBar';
 import {
   getAdaptiveTabVariant,
@@ -31,17 +27,6 @@ import {
   TAB_RAIL_WIDTH_EXPANDED,
 } from './adaptiveTabLayout';
 import { TabRailLayoutProvider } from './TabRailLayoutContext';
-
-const LazySpreadsScreen = lazy(() => import('../spreads/SpreadsScreen'));
-const LazyLibraryScreen = lazy(() => import('../library/LibraryScreen'));
-
-function TabScreenFallback() {
-  return (
-    <View style={styles.tabFallback}>
-      <ActivityIndicator color={COLORS.Primary} size="large" />
-    </View>
-  );
-}
 
 const TAB_ICON = {
   [TabRoute.MainTab]: PlanetIcon,
@@ -201,24 +186,14 @@ function TarotTabs() {
           />
           <Tabs.Screen
             name={TabRoute.SpreadsTab}
+            component={SpreadsScreen}
             options={{ title: t('nav.tab.spreads') }}
-          >
-            {() => (
-              <Suspense fallback={<TabScreenFallback />}>
-                <LazySpreadsScreen />
-              </Suspense>
-            )}
-          </Tabs.Screen>
+          />
           <Tabs.Screen
             name={TabRoute.LibraryTab}
+            component={LibraryScreen}
             options={{ title: t('nav.tab.library') }}
-          >
-            {() => (
-              <Suspense fallback={<TabScreenFallback />}>
-                <LazyLibraryScreen />
-              </Suspense>
-            )}
-          </Tabs.Screen>
+          />
         </Tabs.Navigator>
         {Platform.OS !== 'web' ? <TarotToast /> : null}
       </TabRailLayoutProvider>
@@ -231,12 +206,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.Background2,
     borderWidth: 0,
     backgroundColor: COLORS.Background2,
-  },
-  tabFallback: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.Background,
   },
 });
 

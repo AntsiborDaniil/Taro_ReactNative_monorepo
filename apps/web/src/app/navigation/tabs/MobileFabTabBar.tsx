@@ -2,14 +2,18 @@ import AppMetrica from '@appmetrica/react-native-analytics';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { CommonActions } from '@react-navigation/native';
 import { ReactElement, useCallback, useState } from 'react';
-import {
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import Animated, {
+  Easing,
+  Extrapolation,
+  interpolate,
+  type SharedValue,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
@@ -21,6 +25,8 @@ import { AnalyticAction, TabRoute } from 'shared/types';
 
 const FAB_SIZE = 56;
 const ACTION_GAP = 10;
+const OPEN_SPRING = { damping: 15, stiffness: 240, mass: 0.85 };
+const CLOSE_TIMING = { duration: 220, easing: Easing.in(Easing.cubic) };
 
 const TAB_ITEMS = [
   {
@@ -40,6 +46,81 @@ const TAB_ITEMS = [
   },
 ] as const;
 
+type FabActionItemProps = {
+  index: number;
+  Icon: (typeof TAB_ITEMS)[number]['Icon'];
+  label: string;
+  focused: boolean;
+  openProgress: SharedValue<number>;
+  onPress: () => void;
+};
+
+function FabActionItem({
+  index,
+  Icon,
+  label,
+  focused,
+  openProgress,
+  onPress,
+}: FabActionItemProps) {
+  const animatedStyle = useAnimatedStyle(() => {
+    const stagger = index * 0.1;
+    const progress = interpolate(
+      openProgress.value,
+      [stagger, Math.min(stagger + 0.55, 1)],
+      [0, 1],
+      Extrapolation.CLAMP
+    );
+
+    return {
+      opacity: progress,
+      transform: [
+        { translateY: interpolate(progress, [0, 1], [28, 0]) },
+        { scale: interpolate(progress, [0, 1], [0.72, 1]) },
+      ],
+    };
+  });
+
+  return (
+    <Animated.View
+      style={[styles.actionAnimatedWrap, animatedStyle]}
+      pointerEvents="box-none"
+    >
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ selected: focused }}
+        accessibilityLabel={label}
+        onPress={onPress}
+        style={(pressState) => {
+          const hovered =
+            Platform.OS === 'web' &&
+            (pressState as { hovered?: boolean }).hovered;
+          return [
+            styles.actionPressable,
+            hovered && styles.actionPressableHover,
+            pressState.pressed && styles.actionPressablePressed,
+          ];
+        }}
+      >
+        <View
+          style={[styles.actionChip, focused && styles.actionChipFocused]}
+        >
+          <Icon
+            width={22}
+            height={22}
+            fill={focused ? COLORS.Primary : COLORS.Content}
+          />
+          <Text
+            style={[styles.actionLabel, focused && styles.actionLabelFocused]}
+          >
+            {label}
+          </Text>
+        </View>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
 type MobileFabTabBarProps = BottomTabBarProps;
 
 export function MobileFabTabBar({
@@ -47,12 +128,27 @@ export function MobileFabTabBar({
   navigation,
 }: MobileFabTabBarProps): ReactElement {
   const { t } = useTranslation('core');
-  const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const openProgress = useSharedValue(0);
   const viewportInsets = useWebViewportInsets();
   const { selectedTab, setSelectedTab } = useData({ Context: TabsAndRoutesContext });
   const { handleVibrationClick } = useData({ Context: ApplicationConfigContext });
 
   const focusedRoute = state.routes[state.index]?.name as TabRoute;
+
+  const setOpen = useCallback(
+    (next: boolean) => {
+      setMenuOpen(next);
+      openProgress.value = next
+        ? withSpring(1, OPEN_SPRING)
+        : withTiming(0, CLOSE_TIMING);
+    },
+    [openProgress]
+  );
+
+  const toggleOpen = useCallback(() => {
+    setOpen(!menuOpen);
+  }, [menuOpen, setOpen]);
 
   const navigateTo = useCallback(
     async (routeName: TabRoute) => {
@@ -74,96 +170,100 @@ export function MobileFabTabBar({
       navigation.navigate(routeName);
       setSelectedTab?.(routeName);
     },
-    [handleVibrationClick, navigation, selectedTab, setSelectedTab]
+    [handleVibrationClick, navigation, selectedTab, setOpen, setSelectedTab]
   );
 
   const anchorBottom = 16 + viewportInsets.bottom;
   const anchorLeft = 16 + viewportInsets.left;
 
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(openProgress.value, [0, 1], [0, 1]),
+  }));
+
+  const fabStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        rotate: `${interpolate(openProgress.value, [0, 1], [0, 90])}deg`,
+      },
+      {
+        scale: interpolate(openProgress.value, [0, 0.5, 1], [1, 1.06, 1]),
+      },
+    ],
+  }));
+
+  const planetIconStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(openProgress.value, [0, 0.35], [1, 0]),
+    transform: [
+      { scale: interpolate(openProgress.value, [0, 0.35], [1, 0.6]) },
+    ],
+  }));
+
+  const crossIconStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(openProgress.value, [0.45, 1], [0, 1]),
+    transform: [
+      { scale: interpolate(openProgress.value, [0.45, 1], [0.6, 1]) },
+    ],
+  }));
+
+  const actionsColumnStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(openProgress.value, [0, 0.2], [0, 1]),
+  }));
+
   return (
     <View style={styles.host} pointerEvents="box-none">
-      {open ? (
+      <Animated.View
+        style={[styles.backdrop, backdropStyle]}
+        pointerEvents={menuOpen ? 'auto' : 'none'}
+      >
         <Pressable
-          style={styles.backdrop}
+          style={StyleSheet.absoluteFill}
           onPress={() => setOpen(false)}
           accessibilityRole="button"
           accessibilityLabel={t('nav.fab.close')}
         />
-      ) : null}
+      </Animated.View>
 
       <View
-        style={[
-          styles.anchor,
-          { left: anchorLeft, bottom: anchorBottom },
-        ]}
+        style={[styles.anchor, { left: anchorLeft, bottom: anchorBottom }]}
         pointerEvents="box-none"
       >
-        {open ? (
-          <View style={styles.actionsColumn} pointerEvents="box-none">
-            {TAB_ITEMS.map(({ route, Icon, labelKey }) => {
-              const focused = route === focusedRoute;
-              return (
-                <Pressable
-                  key={route}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: focused }}
-                  accessibilityLabel={t(labelKey)}
-                  onPress={() => navigateTo(route)}
-                  style={(pressState) => {
-                    const hovered =
-                      Platform.OS === 'web' &&
-                      (pressState as { hovered?: boolean }).hovered;
-                    return [
-                      styles.actionPressable,
-                      hovered && styles.actionPressableHover,
-                      pressState.pressed && styles.actionPressablePressed,
-                    ];
-                  }}
-                >
-                  <View
-                    style={[
-                      styles.actionChip,
-                      focused && styles.actionChipFocused,
-                    ]}
-                  >
-                    <Icon
-                      width={22}
-                      height={22}
-                      fill={focused ? COLORS.Primary : COLORS.Content}
-                    />
-                    <Text
-                      style={[
-                        styles.actionLabel,
-                        focused && styles.actionLabelFocused,
-                      ]}
-                    >
-                      {t(labelKey)}
-                    </Text>
-                  </View>
-                </Pressable>
-              );
-            })}
-          </View>
-        ) : null}
+        <Animated.View
+          style={[styles.actionsColumn, actionsColumnStyle]}
+          pointerEvents={menuOpen ? 'box-none' : 'none'}
+        >
+          {TAB_ITEMS.map(({ route, Icon, labelKey }, index) => (
+            <FabActionItem
+              key={route}
+              index={index}
+              Icon={Icon}
+              label={t(labelKey)}
+              focused={route === focusedRoute}
+              openProgress={openProgress}
+              onPress={() => navigateTo(route)}
+            />
+          ))}
+        </Animated.View>
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={
-            open ? t('nav.fab.close') : t('nav.fab.open')
-          }
-          accessibilityState={{ expanded: open }}
-          onPress={() => setOpen((value) => !value)}
-          style={(pressState) => [
-            styles.fab,
-            open && styles.fabOpen,
-            pressState.pressed && styles.fabPressed,
-          ]}
+          accessibilityLabel={menuOpen ? t('nav.fab.close') : t('nav.fab.open')}
+          accessibilityState={{ expanded: menuOpen }}
+          onPress={toggleOpen}
         >
-          {open ? (
-            <CrossIcon width={26} height={26} fill={COLORS.Background} />
-          ) : (
-            <PlanetIcon width={28} height={28} fill={COLORS.Background} />
-          )}
+          <Animated.View
+            style={[
+              styles.fab,
+              fabStyle,
+              menuOpen && styles.fabOpen,
+            ]}
+          >
+            <Animated.View style={[styles.fabIconLayer, planetIconStyle]}>
+              <PlanetIcon width={28} height={28} fill={COLORS.Background} />
+            </Animated.View>
+            <Animated.View style={[styles.fabIconLayer, crossIconStyle]}>
+              <CrossIcon width={26} height={26} fill={COLORS.Content} />
+            </Animated.View>
+          </Animated.View>
         </Pressable>
       </View>
     </View>
@@ -211,6 +311,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: ACTION_GAP,
     marginBottom: 12,
+  },
+  actionAnimatedWrap: {
+    alignItems: 'flex-start',
   },
   actionPressable: {
     borderRadius: 28,
@@ -267,7 +370,6 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web'
       ? ({
           boxShadow: '0 10px 28px rgba(246, 192, 27, 0.45)',
-          transition: 'transform 0.2s ease',
         } as object)
       : {
           shadowColor: COLORS.Primary,
@@ -287,7 +389,9 @@ const styles = StyleSheet.create({
         } as object)
       : {}),
   },
-  fabPressed: {
-    transform: [{ scale: 0.96 }],
+  fabIconLayer: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
