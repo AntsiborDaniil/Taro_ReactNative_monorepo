@@ -93,6 +93,8 @@
   "nav.tab.main": "Home",
   "nav.tab.spreads": "Spreads",
   "nav.tab.library": "Library",
+  "nav.fab.open": "Open navigation menu",
+  "nav.fab.close": "Close navigation menu",
 
   "nav.rail.collapse": "Collapse sidebar",
   "nav.rail.expand": "Expand sidebar",

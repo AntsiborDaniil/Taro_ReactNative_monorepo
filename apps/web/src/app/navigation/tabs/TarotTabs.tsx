@@ -20,6 +20,17 @@ import { COLORS } from 'shared/themes';
 import { AnalyticAction, TabRoute } from 'shared/types';
 import { TarotToast } from 'shared/ui';
 import MainScreen from '../main/MainScreen';
+import { AdaptiveTabBar } from './AdaptiveTabBar';
+import {
+  getAdaptiveTabVariant,
+  isWebMobileFabNav,
+  readTabRailCollapsedFromSession,
+  TAB_NAV_LABEL_FONT_PX,
+  TAB_RAIL_COLLAPSED_SESSION_KEY,
+  TAB_RAIL_WIDTH_COLLAPSED,
+  TAB_RAIL_WIDTH_EXPANDED,
+} from './adaptiveTabLayout';
+import { TabRailLayoutProvider } from './TabRailLayoutContext';
 
 const LazySpreadsScreen = lazy(() => import('../spreads/SpreadsScreen'));
 const LazyLibraryScreen = lazy(() => import('../library/LibraryScreen'));
@@ -31,16 +42,6 @@ function TabScreenFallback() {
     </View>
   );
 }
-import { AdaptiveTabBar } from './AdaptiveTabBar';
-import {
-  getAdaptiveTabVariant,
-  readTabRailCollapsedFromSession,
-  TAB_NAV_LABEL_FONT_PX,
-  TAB_RAIL_COLLAPSED_SESSION_KEY,
-  TAB_RAIL_WIDTH_COLLAPSED,
-  TAB_RAIL_WIDTH_EXPANDED,
-} from './adaptiveTabLayout';
-import { TabRailLayoutProvider } from './TabRailLayoutContext';
 
 const TAB_ICON = {
   [TabRoute.MainTab]: PlanetIcon,
@@ -54,9 +55,10 @@ function TarotTabs() {
   const { t } = useTranslation('core');
   const { width } = useWindowDimensions();
   const variant = getAdaptiveTabVariant(width);
+  const isFabNav = isWebMobileFabNav(width);
   const isRail = variant === 'rail';
-  const isBottomBar = !isRail;
-  const showBottomTabLabels = variant === 'labeled';
+  const isBottomBar = !isRail && !isFabNav;
+  const showBottomTabLabels = variant === 'labeled' && !isFabNav;
 
   const [railCollapsed, setRailCollapsed] = useState(() =>
     readTabRailCollapsedFromSession()
@@ -136,10 +138,17 @@ function TarotTabs() {
                     } as object)
                   : {}),
               }
-            : {
-                borderTopWidth: 0,
-                ...styles.tabBar,
-              },
+            : isFabNav
+              ? {
+                  display: 'none',
+                  height: 0,
+                  opacity: 0,
+                  overflow: 'hidden',
+                }
+              : {
+                  borderTopWidth: 0,
+                  ...styles.tabBar,
+                },
           tabBarIcon: ({ color }) => {
             const Icon = TAB_ICON[route.name as TabRoute];
             return <Icon width={iconSize} height={iconSize} fill={color} />;

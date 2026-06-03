@@ -24,9 +24,11 @@ import { COLORS } from 'shared/themes';
 import { AnalyticAction, TabRoute } from 'shared/types';
 import {
   type AdaptiveTabVariant,
+  isWebMobileFabNav,
   TAB_BREAKPOINT_RAIL,
   TAB_NAV_LABEL_FONT_PX,
 } from './adaptiveTabLayout';
+import { MobileFabTabBar } from './MobileFabTabBar';
 
 const TAB_ICON = {
   [TabRoute.MainTab]: PlanetIcon,
@@ -80,6 +82,10 @@ export function AdaptiveTabBar({
     },
     [handleVibrationClick, navigation, selectedTab, setSelectedTab]
   );
+
+  if (isWebMobileFabNav(width)) {
+    return <MobileFabTabBar state={state} descriptors={descriptors} navigation={navigation} insets={insets} />;
+  }
 
   if (variant === 'rail' && width >= TAB_BREAKPOINT_RAIL) {
     return (

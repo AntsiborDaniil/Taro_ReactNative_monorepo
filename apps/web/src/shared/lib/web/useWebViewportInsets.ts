@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Platform } from 'react-native';
+import { Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+const TAB_BREAKPOINT_RAIL = 900;
+const WEB_FAB_NAV_SIZE = 56;
+
+function isWebMobileFabNav(width: number): boolean {
+  return Platform.OS === 'web' && width < TAB_BREAKPOINT_RAIL;
+}
 
 export type LayoutViewportInsets = {
   top: number;
@@ -111,9 +117,16 @@ export const WEB_TAB_BAR_CONTENT_HEIGHT = 56;
 
 export function useWebBottomTabBarInset(): number {
   const insets = useWebViewportInsets();
+  const { width } = useWindowDimensions();
   if (Platform.OS !== 'web') {
     return insets.bottom;
   }
-  /** Tab bar height + browser chrome below the bar. */
+  if (isWebMobileFabNav(width)) {
+    return WEB_FAB_NAV_SIZE + insets.bottom + 16;
+  }
+  if (width >= TAB_BREAKPOINT_RAIL) {
+    return insets.bottom + 8;
+  }
+  /** Tablet bottom tab bar + browser chrome. */
   return WEB_TAB_BAR_CONTENT_HEIGHT + insets.bottom + 16;
 }
