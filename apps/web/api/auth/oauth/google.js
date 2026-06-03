@@ -16,6 +16,6 @@ module.exports = async function handler(req, res) {
     await handleGoogleOAuthStart(req, res);
   } catch (error) {
     console.error('[vercel oauth/google]', error);
-    handleOAuthError(res, nextPath, 'Could not complete Google sign-in');
+    handleOAuthError(res, req, nextPath, 'Could not complete Google sign-in');
   }
 };

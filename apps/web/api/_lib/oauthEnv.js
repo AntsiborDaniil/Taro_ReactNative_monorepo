@@ -12,14 +12,32 @@ function requireEnv(name) {
   return value;
 }
 
-function getWebAppOrigin() {
+function headerValue(value) {
+  if (Array.isArray(value)) {
+    return value[0];
+  }
+  return value;
+}
+
+/** Prefer WEB_APP_URL; else the host the user actually hit (not deployment-only VERCEL_URL). */
+function getRequestOrigin(req) {
   const configured = process.env.WEB_APP_URL?.trim();
   if (configured) {
     return stripTrailingSlash(configured);
   }
+
+  const forwardedHost = headerValue(req?.headers?.['x-forwarded-host']);
+  const host = forwardedHost || headerValue(req?.headers?.host);
+  if (host) {
+    const proto =
+      headerValue(req?.headers?.['x-forwarded-proto'])?.split(',')[0]?.trim() ||
+      'https';
+    return stripTrailingSlash(`${proto}://${host}`);
+  }
+
   const vercel = process.env.VERCEL_URL?.trim();
   if (vercel) {
-    return `https://${vercel.replace(/^https?:\/\//, '')}`;
+    return stripTrailingSlash(`https://${vercel.replace(/^https?:\/\//, '')}`);
   }
   return 'http://localhost:8081';
 }
@@ -48,14 +66,14 @@ function sanitizeOAuthNext(next) {
   return raw;
 }
 
-function oauthCallbackUrl(nextPath) {
-  const base = getWebAppOrigin();
+function oauthCallbackUrl(nextPath, req) {
+  const base = getRequestOrigin(req);
   return `${base}/api/auth/oauth/callback?next=${encodeURIComponent(nextPath)}`;
 }
 
 module.exports = {
   requireEnv,
-  getWebAppOrigin,
+  getRequestOrigin,
   getSupabaseUrl,
   getSupabaseAnonKey,
   getSupabaseServiceRoleKey,

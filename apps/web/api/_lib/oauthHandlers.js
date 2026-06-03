@@ -3,14 +3,14 @@ const {
   clearPkceCookies,
   createPkceStorage,
   redirectToApp,
-  redirectViaHtml,
+  redirectOAuthProvider,
   setSessionCookie,
 } = require('./oauthCookies');
 const {
   getSupabaseAnonKey,
   getSupabaseServiceRoleKey,
   getSupabaseUrl,
-  getWebAppOrigin,
+  getRequestOrigin,
   oauthCallbackUrl,
   sanitizeOAuthNext,
 } = require('./oauthEnv');
@@ -67,7 +67,7 @@ async function getPublicUser(accessToken) {
 async function handleGoogleOAuthStart(req, res) {
   const nextPath = sanitizeOAuthNext(req.query.next);
   const supabase = createOAuthClient(req, res);
-  const redirectTo = oauthCallbackUrl(nextPath);
+  const redirectTo = oauthCallbackUrl(nextPath, req);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -81,7 +81,7 @@ async function handleGoogleOAuthStart(req, res) {
     throw error ?? new Error('OAUTH_URL_MISSING');
   }
 
-  redirectViaHtml(res, data.url);
+  redirectOAuthProvider(res, data.url);
 }
 
 async function handleGoogleOAuthCallback(req, res) {
@@ -106,11 +106,22 @@ async function handleGoogleOAuthCallback(req, res) {
   }
 
   setSessionCookie(res, data.session.access_token);
-  redirectToApp(res, `${getWebAppOrigin()}${nextPath}`, 'success');
+  redirectToApp(
+    res,
+    req,
+    `${getRequestOrigin(req)}${nextPath}`,
+    'success'
+  );
 }
 
-function handleOAuthError(res, nextPath, message) {
-  redirectToApp(res, `${getWebAppOrigin()}${nextPath}`, 'error', message);
+function handleOAuthError(res, req, nextPath, message) {
+  redirectToApp(
+    res,
+    req,
+    `${getRequestOrigin(req)}${nextPath}`,
+    'error',
+    message
+  );
 }
 
 module.exports = {
