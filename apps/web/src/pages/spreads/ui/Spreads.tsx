@@ -1,4 +1,5 @@
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { useMobileFabScrollOnScroll } from 'app/navigation/tabs/MobileFabScrollContext';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
@@ -43,6 +44,7 @@ export default function Spreads() {
     selectedTab === TabRoute.SpreadsTab ? TabRoute.SpreadsTab : TabRoute.MainTab;
 
   const showWebGuestBanner = Platform.OS === 'web' && !isAuthenticated;
+  const onFabScroll = useMobileFabScrollOnScroll();
 
   return (
     <ScreenLayout>
@@ -52,6 +54,8 @@ export default function Spreads() {
         titleStyle={layout.columns === 1 ? spreadsHeaderTitle.mobile : undefined}
       />
       <ScrollView
+        onScroll={onFabScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={[
           styles.scrollInner,
           { paddingBottom: layout.scrollBottomPad },

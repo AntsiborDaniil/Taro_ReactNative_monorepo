@@ -26,6 +26,7 @@ import {
   TAB_RAIL_WIDTH_COLLAPSED,
   TAB_RAIL_WIDTH_EXPANDED,
 } from './adaptiveTabLayout';
+import { MobileFabScrollProvider } from './MobileFabScrollContext';
 import { TabRailLayoutProvider } from './TabRailLayoutContext';
 
 const TAB_ICON = {
@@ -93,6 +94,7 @@ function TarotTabs() {
   return (
     <DataProvider Context={SpreadContext} value={spreadContextData}>
       <TabRailLayoutProvider value={railLayoutValue}>
+        <MobileFabScrollProvider>
         <Tabs.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
@@ -196,6 +198,7 @@ function TarotTabs() {
           />
         </Tabs.Navigator>
         {Platform.OS !== 'web' ? <TarotToast /> : null}
+        </MobileFabScrollProvider>
       </TabRailLayoutProvider>
     </DataProvider>
   );

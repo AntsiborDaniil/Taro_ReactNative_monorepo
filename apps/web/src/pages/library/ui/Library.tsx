@@ -1,4 +1,5 @@
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useMobileFabScrollOnScroll } from 'app/navigation/tabs/MobileFabScrollContext';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { UserContext } from 'entities/user';
@@ -29,6 +30,8 @@ function Library() {
   });
 
   const navigation = useNativeNavigation();
+
+  const onFabScroll = useMobileFabScrollOnScroll();
 
   const handlePress = async () => {
     AppMetrica.reportEvent(AnalyticAction.ClickSettings);
@@ -61,6 +64,8 @@ function Library() {
         rightAction={handlePress}
       />
       <ScrollView
+        onScroll={onFabScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={[
           styles.scrollInner,
           { paddingBottom: layout.scrollBottomPad },

@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
 export const TAB_BREAKPOINT_RAIL = 900;
 
 /** Web mobile: круглая FAB-навигация вместо нижней панели. */
-export const WEB_FAB_NAV_SIZE = 56;
+export const WEB_FAB_NAV_SIZE = 48;
 
 export function isWebMobileFabNav(width: number): boolean {
   return Platform.OS === 'web' && width < TAB_BREAKPOINT_RAIL;

@@ -1,4 +1,5 @@
 import { Platform, SafeAreaView, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useMobileFabScrollOnScroll } from 'app/navigation/tabs/MobileFabScrollContext';
 import { MoodDashboard } from 'features/MoodDashboard';
 import { DeferredMount } from 'shared/lib/web/DeferredMount';
 import { MainSectionSkeleton, ScreenLayout } from 'shared/ui';
@@ -11,10 +12,13 @@ function Main() {
   const layout = useMainLayout();
   const { width } = useWindowDimensions();
   const isCompact = width < 430;
+  const onFabScroll = useMobileFabScrollOnScroll();
 
   return (
     <ScreenLayout>
       <ScrollView
+        onScroll={onFabScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={[
           styles.scrollContent,
           { paddingBottom: layout.scrollBottomPad },

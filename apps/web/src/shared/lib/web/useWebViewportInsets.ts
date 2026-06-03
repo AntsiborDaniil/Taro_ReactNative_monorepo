@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const TAB_BREAKPOINT_RAIL = 900;
-const WEB_FAB_NAV_SIZE = 56;
+const WEB_FAB_NAV_SIZE = 48;
 
 function isWebMobileFabNav(width: number): boolean {
   return Platform.OS === 'web' && width < TAB_BREAKPOINT_RAIL;
@@ -122,7 +122,7 @@ export function useWebBottomTabBarInset(): number {
     return insets.bottom;
   }
   if (isWebMobileFabNav(width)) {
-    return insets.bottom + 8;
+    return WEB_FAB_NAV_SIZE + insets.bottom + 16;
   }
   if (width >= TAB_BREAKPOINT_RAIL) {
     return insets.bottom + 8;
