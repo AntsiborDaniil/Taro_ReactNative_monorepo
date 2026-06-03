@@ -75,7 +75,8 @@ function FabActionItem({
     return {
       opacity: progress,
       transform: [
-        { translateY: interpolate(progress, [0, 1], [28, 0]) },
+        { translateY: interpolate(progress, [0, 1], [-24, 0]) },
+        { translateX: interpolate(progress, [0, 1], [16, 0]) },
         { scale: interpolate(progress, [0, 1], [0.72, 1]) },
       ],
     };
@@ -173,8 +174,8 @@ export function MobileFabTabBar({
     [handleVibrationClick, navigation, selectedTab, setOpen, setSelectedTab]
   );
 
-  const anchorBottom = 16 + viewportInsets.bottom;
-  const anchorLeft = 16 + viewportInsets.left;
+  const anchorTop = 12 + viewportInsets.top;
+  const anchorRight = 16 + viewportInsets.right;
 
   const backdropStyle = useAnimatedStyle(() => ({
     opacity: interpolate(openProgress.value, [0, 1], [0, 1]),
@@ -224,9 +225,27 @@ export function MobileFabTabBar({
       </Animated.View>
 
       <View
-        style={[styles.anchor, { left: anchorLeft, bottom: anchorBottom }]}
+        style={[styles.anchor, { top: anchorTop, right: anchorRight }]}
         pointerEvents="box-none"
       >
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={menuOpen ? t('nav.fab.close') : t('nav.fab.open')}
+          accessibilityState={{ expanded: menuOpen }}
+          onPress={toggleOpen}
+        >
+          <Animated.View
+            style={[styles.fab, fabStyle, menuOpen && styles.fabOpen]}
+          >
+            <Animated.View style={[styles.fabIconLayer, planetIconStyle]}>
+              <PlanetIcon width={28} height={28} fill={COLORS.Background} />
+            </Animated.View>
+            <Animated.View style={[styles.fabIconLayer, crossIconStyle]}>
+              <CrossIcon width={26} height={26} fill={COLORS.Content} />
+            </Animated.View>
+          </Animated.View>
+        </Pressable>
+
         <Animated.View
           style={[styles.actionsColumn, actionsColumnStyle]}
           pointerEvents={menuOpen ? 'box-none' : 'none'}
@@ -243,28 +262,6 @@ export function MobileFabTabBar({
             />
           ))}
         </Animated.View>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={menuOpen ? t('nav.fab.close') : t('nav.fab.open')}
-          accessibilityState={{ expanded: menuOpen }}
-          onPress={toggleOpen}
-        >
-          <Animated.View
-            style={[
-              styles.fab,
-              fabStyle,
-              menuOpen && styles.fabOpen,
-            ]}
-          >
-            <Animated.View style={[styles.fabIconLayer, planetIconStyle]}>
-              <PlanetIcon width={28} height={28} fill={COLORS.Background} />
-            </Animated.View>
-            <Animated.View style={[styles.fabIconLayer, crossIconStyle]}>
-              <CrossIcon width={26} height={26} fill={COLORS.Content} />
-            </Animated.View>
-          </Animated.View>
-        </Pressable>
       </View>
     </View>
   );
@@ -298,7 +295,7 @@ const styles = StyleSheet.create({
   },
   anchor: {
     position: 'absolute',
-    alignItems: 'flex-start',
+    alignItems: 'flex-end',
     zIndex: 130,
     ...(Platform.OS === 'web'
       ? ({
@@ -307,13 +304,13 @@ const styles = StyleSheet.create({
       : {}),
   },
   actionsColumn: {
-    flexDirection: 'column-reverse',
-    alignItems: 'flex-start',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
     gap: ACTION_GAP,
-    marginBottom: 12,
+    marginTop: 12,
   },
   actionAnimatedWrap: {
-    alignItems: 'flex-start',
+    alignItems: 'flex-end',
   },
   actionPressable: {
     borderRadius: 28,

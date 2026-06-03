@@ -122,7 +122,7 @@ export function useWebBottomTabBarInset(): number {
     return insets.bottom;
   }
   if (isWebMobileFabNav(width)) {
-    return WEB_FAB_NAV_SIZE + insets.bottom + 16;
+    return insets.bottom + 8;
   }
   if (width >= TAB_BREAKPOINT_RAIL) {
     return insets.bottom + 8;
