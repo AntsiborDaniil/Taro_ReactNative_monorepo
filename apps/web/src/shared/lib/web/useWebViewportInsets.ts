@@ -1,3 +1,4 @@
+import { useMobileFabHostScreen } from 'app/navigation/tabs/MobileFabScrollContext';
 import { useEffect, useState } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -118,10 +119,14 @@ export const WEB_TAB_BAR_CONTENT_HEIGHT = 56;
 export function useWebBottomTabBarInset(): number {
   const insets = useWebViewportInsets();
   const { width } = useWindowDimensions();
+  const fabHostScreen = useMobileFabHostScreen();
   if (Platform.OS !== 'web') {
     return insets.bottom;
   }
   if (isWebMobileFabNav(width)) {
+    if (!fabHostScreen) {
+      return insets.bottom + 16;
+    }
     return WEB_FAB_NAV_SIZE + insets.bottom + 16;
   }
   if (width >= TAB_BREAKPOINT_RAIL) {

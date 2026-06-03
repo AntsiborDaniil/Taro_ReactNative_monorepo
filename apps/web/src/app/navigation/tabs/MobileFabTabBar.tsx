@@ -1,7 +1,7 @@
 import AppMetrica from '@appmetrica/react-native-analytics';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { CommonActions } from '@react-navigation/native';
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Animated, {
@@ -25,9 +25,11 @@ import { AnalyticAction, TabRoute } from 'shared/types';
 import {
   markFabDiscoveredInSession,
   readFabDiscoveredFromSession,
+  useMobileFabScrollContext,
   useMobileFabPeekVisible,
   useMobileFabRevealOnRouteChange,
 } from './MobileFabScrollContext';
+import { isFabHostScreenFromTabState } from './mobileFabVisibility';
 
 const FAB_SIZE = 48;
 const ACTION_SIZE = 44;
@@ -138,16 +140,34 @@ export function MobileFabTabBar({
   const discoverOpacity = useSharedValue(fabDiscovered ? 1 : 0.88);
   const viewportInsets = useWebViewportInsets();
   const fabPeekVisible = useMobileFabPeekVisible();
+  const fabScrollCtx = useMobileFabScrollContext();
   const { selectedTab, setSelectedTab } = useData({ Context: TabsAndRoutesContext });
   const { handleVibrationClick } = useData({ Context: ApplicationConfigContext });
 
   const focusedRoute = state.routes[state.index]?.name as TabRoute;
   useMobileFabRevealOnRouteChange(focusedRoute);
 
+  const isFabHostScreen = useMemo(
+    () => isFabHostScreenFromTabState(state),
+    [state]
+  );
+  const wasFabHostRef = useRef(isFabHostScreen);
+
+  useEffect(() => {
+    fabScrollCtx?.setFabHostScreen(isFabHostScreen);
+  }, [fabScrollCtx, isFabHostScreen]);
+
+  useEffect(() => {
+    if (isFabHostScreen && !wasFabHostRef.current) {
+      fabScrollCtx?.setFabPeekVisible(true);
+    }
+    wasFabHostRef.current = isFabHostScreen;
+  }, [fabScrollCtx, isFabHostScreen]);
+
   const anchorBottom = 16 + viewportInsets.bottom;
   const anchorLeft = 16 + viewportInsets.left;
 
-  const shouldShowFab = menuOpen || fabPeekVisible;
+  const shouldShowFab = isFabHostScreen && (menuOpen || fabPeekVisible);
 
   useEffect(() => {
     peekHide.value = withTiming(shouldShowFab ? 0 : 1, PEEK_HIDE_TIMING);
@@ -174,6 +194,12 @@ export function MobileFabTabBar({
   const toggleOpen = useCallback(() => {
     setOpen(!menuOpen);
   }, [menuOpen, setOpen]);
+
+  useEffect(() => {
+    if (!isFabHostScreen && menuOpen) {
+      setOpen(false);
+    }
+  }, [isFabHostScreen, menuOpen, setOpen]);
 
   const navigateTo = useCallback(
     async (routeName: TabRoute) => {

@@ -17,6 +17,9 @@ const SCROLL_DELTA_SHOW = 6;
 type MobileFabScrollContextValue = {
   fabPeekVisible: boolean;
   setFabPeekVisible: (visible: boolean) => void;
+  /** Main / Library / Spreads listing — FAB chrome and bottom inset apply. */
+  fabHostScreen: boolean;
+  setFabHostScreen: (host: boolean) => void;
 };
 
 const MobileFabScrollContext = createContext<MobileFabScrollContextValue | null>(
@@ -25,10 +28,16 @@ const MobileFabScrollContext = createContext<MobileFabScrollContextValue | null>
 
 export function MobileFabScrollProvider({ children }: { children: ReactNode }) {
   const [fabPeekVisible, setFabPeekVisible] = useState(true);
+  const [fabHostScreen, setFabHostScreen] = useState(true);
 
   const value = useMemo(
-    () => ({ fabPeekVisible, setFabPeekVisible }),
-    [fabPeekVisible]
+    () => ({
+      fabPeekVisible,
+      setFabPeekVisible,
+      fabHostScreen,
+      setFabHostScreen,
+    }),
+    [fabPeekVisible, fabHostScreen]
   );
 
   return (
@@ -38,7 +47,7 @@ export function MobileFabScrollProvider({ children }: { children: ReactNode }) {
   );
 }
 
-function useMobileFabScrollContext(): MobileFabScrollContextValue | null {
+export function useMobileFabScrollContext(): MobileFabScrollContextValue | null {
   return useContext(MobileFabScrollContext);
 }
 
@@ -76,6 +85,11 @@ export function useMobileFabScrollOnScroll(): (
 export function useMobileFabPeekVisible(): boolean {
   const ctx = useMobileFabScrollContext();
   return ctx?.fabPeekVisible ?? true;
+}
+
+export function useMobileFabHostScreen(): boolean {
+  const ctx = useMobileFabScrollContext();
+  return ctx?.fabHostScreen ?? true;
 }
 
 /** Show FAB when switching tabs (peek was hidden while scrolling). */
