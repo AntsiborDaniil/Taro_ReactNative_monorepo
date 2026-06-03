@@ -1,10 +1,10 @@
 /** Vercel serverless OAuth — env (set in Vercel project settings). */
 
-function stripTrailingSlash(url: string): string {
+function stripTrailingSlash(url) {
   return url.replace(/\/$/, '');
 }
 
-export function requireEnv(name: string): string {
+function requireEnv(name) {
   const value = process.env[name]?.trim();
   if (!value) {
     throw new Error(`Missing environment variable: ${name}`);
@@ -12,7 +12,7 @@ export function requireEnv(name: string): string {
   return value;
 }
 
-export function getWebAppOrigin(): string {
+function getWebAppOrigin() {
   const configured = process.env.WEB_APP_URL?.trim();
   if (configured) {
     return stripTrailingSlash(configured);
@@ -24,23 +24,23 @@ export function getWebAppOrigin(): string {
   return 'http://localhost:8081';
 }
 
-export function getSupabaseUrl(): string {
+function getSupabaseUrl() {
   return requireEnv('SUPABASE_URL');
 }
 
-export function getSupabaseAnonKey(): string {
+function getSupabaseAnonKey() {
   return requireEnv('SUPABASE_ANON_KEY');
 }
 
-export function getSupabaseServiceRoleKey(): string {
+function getSupabaseServiceRoleKey() {
   return requireEnv('SUPABASE_SERVICE_ROLE_KEY');
 }
 
-export function isProduction(): boolean {
+function isProduction() {
   return process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
 }
 
-export function sanitizeOAuthNext(next: unknown): string {
+function sanitizeOAuthNext(next) {
   const raw = typeof next === 'string' ? next : '/';
   if (!raw.startsWith('/') || raw.startsWith('//')) {
     return '/';
@@ -48,7 +48,18 @@ export function sanitizeOAuthNext(next: unknown): string {
   return raw;
 }
 
-export function oauthCallbackUrl(nextPath: string): string {
+function oauthCallbackUrl(nextPath) {
   const base = getWebAppOrigin();
   return `${base}/api/auth/oauth/callback?next=${encodeURIComponent(nextPath)}`;
 }
+
+module.exports = {
+  requireEnv,
+  getWebAppOrigin,
+  getSupabaseUrl,
+  getSupabaseAnonKey,
+  getSupabaseServiceRoleKey,
+  isProduction,
+  sanitizeOAuthNext,
+  oauthCallbackUrl,
+};

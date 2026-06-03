@@ -64,8 +64,6 @@
     "cookie": "^1.0.2"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0",
-    "@vercel/node": "^5.0.0",
     "@babel/core": "^7.25.2",
     "@types/react": "~19.0.10",
     "@types/react-native-get-random-values": "^1",

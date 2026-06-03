@@ -1,29 +1,21 @@
-import { createClient } from '@supabase/supabase-js';
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import {
+const { createClient } = require('@supabase/supabase-js');
+const {
   clearPkceCookies,
   createPkceStorage,
   redirectToApp,
   redirectViaHtml,
   setSessionCookie,
-} from './oauthCookies';
-import {
+} = require('./oauthCookies');
+const {
   getSupabaseAnonKey,
   getSupabaseServiceRoleKey,
   getSupabaseUrl,
   getWebAppOrigin,
   oauthCallbackUrl,
   sanitizeOAuthNext,
-} from './oauthEnv';
+} = require('./oauthEnv');
 
-type PublicUser = {
-  id: string;
-  name: string;
-  email: string;
-  createdAt: string;
-};
-
-function createOAuthClient(req: VercelRequest, res: VercelResponse) {
+function createOAuthClient(req, res) {
   return createClient(getSupabaseUrl(), getSupabaseAnonKey(), {
     auth: {
       flowType: 'pkce',
@@ -35,7 +27,7 @@ function createOAuthClient(req: VercelRequest, res: VercelResponse) {
   });
 }
 
-async function getPublicUser(accessToken: string): Promise<PublicUser | null> {
+async function getPublicUser(accessToken) {
   const admin = createClient(getSupabaseUrl(), getSupabaseServiceRoleKey(), {
     auth: { autoRefreshToken: false, persistSession: false },
   });
@@ -67,15 +59,12 @@ async function getPublicUser(accessToken: string): Promise<PublicUser | null> {
   return {
     id: user.id,
     email: user.email ?? '',
-    name: (user.user_metadata?.name as string | undefined) ?? '',
+    name: user.user_metadata?.name ?? '',
     createdAt: user.created_at ?? new Date().toISOString(),
   };
 }
 
-export async function handleGoogleOAuthStart(
-  req: VercelRequest,
-  res: VercelResponse
-): Promise<void> {
+async function handleGoogleOAuthStart(req, res) {
   const nextPath = sanitizeOAuthNext(req.query.next);
   const supabase = createOAuthClient(req, res);
   const redirectTo = oauthCallbackUrl(nextPath);
@@ -88,17 +77,14 @@ export async function handleGoogleOAuthStart(
     },
   });
 
-  if (error || !data.url) {
+  if (error || !data?.url) {
     throw error ?? new Error('OAUTH_URL_MISSING');
   }
 
   redirectViaHtml(res, data.url);
 }
 
-export async function handleGoogleOAuthCallback(
-  req: VercelRequest,
-  res: VercelResponse
-): Promise<void> {
+async function handleGoogleOAuthCallback(req, res) {
   const nextPath = sanitizeOAuthNext(req.query.next);
   const code = typeof req.query.code === 'string' ? req.query.code : undefined;
 
@@ -110,7 +96,7 @@ export async function handleGoogleOAuthCallback(
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   clearPkceCookies(req, res);
 
-  if (error || !data.session) {
+  if (error || !data?.session) {
     throw error ?? new Error('OAUTH_SESSION_MISSING');
   }
 
@@ -123,10 +109,12 @@ export async function handleGoogleOAuthCallback(
   redirectToApp(res, `${getWebAppOrigin()}${nextPath}`, 'success');
 }
 
-export function handleOAuthError(
-  res: VercelResponse,
-  nextPath: string,
-  message: string
-): void {
+function handleOAuthError(res, nextPath, message) {
   redirectToApp(res, `${getWebAppOrigin()}${nextPath}`, 'error', message);
 }
+
+module.exports = {
+  handleGoogleOAuthStart,
+  handleGoogleOAuthCallback,
+  handleOAuthError,
+};
