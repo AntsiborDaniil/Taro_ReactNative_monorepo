@@ -127,10 +127,16 @@ Vercel не запускает долгоживущий Node-сервер — AP
 |----------|----------|
 | `TAROT_API_PROXY_URL` | URL Render из шага 2, **без** слэша в конце |
 | `EXPO_PUBLIC_TAROT_API_BASE_URL` | `same-origin` (или оставить пустым) |
+| `WEB_APP_URL` | `https://your-app.vercel.app` (для OAuth redirect) |
+| `SUPABASE_URL` | тот же, что на Render |
+| `SUPABASE_ANON_KEY` | публичный anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | service role (секрет; только для serverless OAuth) |
+
+Google OAuth (`/api/auth/oauth/google` и `/callback`) выполняется **на Vercel** (папка `apps/web/api/`), а не через proxy на Render — так PKCE-cookie остаётся на одном домене. Остальные `/api/*` по-прежнему проксируются на Render.
 
 После деплоя: `pnpm deploy:check-health` или `RENDER_URL=https://...onrender.com pnpm deploy:check-health`
 
-`vercel.json` в репозитории уже содержит proxy `/api` → Render. Скрипт `generate-vercel-config.mjs` при билде перезаписывает его (env `TAROT_API_PROXY_URL` или дефолтный Render URL).
+`vercel.json` генерируется скриптом `generate-vercel-config.mjs` при билде: proxy `/api` → Render, **кроме** `/api/auth/oauth/*`.
 
 ### 3.4 Проверка после деплоя
 
@@ -150,7 +156,8 @@ Vercel не запускает долгоживущий Node-сервер — AP
 - [ ] `CORS_ORIGIN` содержит production Vercel URL
 - [ ] `TAROT_API_PROXY_URL` в Vercel указывает на Render API
 - [ ] `EXPO_PUBLIC_TAROT_API_BASE_URL=same-origin` на Vercel
-- [ ] Sign up / sign in / spread / favorites работают
+- [ ] На Vercel заданы `SUPABASE_*` и `WEB_APP_URL` (для Google OAuth)
+- [ ] Sign up / sign in / Google / spread / favorites работают
 
 ---
 
@@ -189,6 +196,7 @@ pnpm dev:web
 | CORS error | Добавьте Vercel URL в `CORS_ORIGIN` на API |
 | Cookie не ставится | Сайт только по HTTPS; `secure: true` в production |
 | `/api` 404 на Vercel | Не задан `TAROT_API_PROXY_URL` или не пересобран проект |
+| Google `auth=error`, PKCE в логах Render | OAuth должен идти на Vercel (`apps/web/api/`); задайте `SUPABASE_*` и `WEB_APP_URL` на Vercel, redeploy |
 | Render cold start | Free tier засыпает — первый запрос медленный |
 
 ---
@@ -201,5 +209,6 @@ pnpm dev:web
 | `apps/api/` | Fastify BFF |
 | `apps/api/render.yaml` | Blueprint Render |
 | `apps/web/scripts/generate-vercel-config.mjs` | Proxy для Vercel |
+| `apps/web/api/auth/oauth/` | Google OAuth на Vercel (PKCE + cookie) |
 | `apps/web/vercel.json` | Proxy `/api` + SPA fallback |
 | `.github/workflows/supabase-deploy.yml` | CI для Supabase |

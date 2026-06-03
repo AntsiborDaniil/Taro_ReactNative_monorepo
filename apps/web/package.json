@@ -59,9 +59,12 @@
     "rn-emoji-keyboard": "^1.7.0",
     "simplex-noise": "^4.0.3",
     "uuid": "^11.1.0",
-    "victory-native": "^41.20.1"
+    "victory-native": "^41.20.1",
+    "@supabase/supabase-js": "^2.49.8",
+    "cookie": "^1.0.2"
   },
   "devDependencies": {
+    "@vercel/node": "^5.0.0",
     "@babel/core": "^7.25.2",
     "@types/react": "~19.0.10",
     "@types/react-native-get-random-values": "^1",
