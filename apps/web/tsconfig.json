@@ -57,7 +57,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "api/**/*.ts",
     "declarations.d.ts"
-  ]
+  ],
+  "exclude": ["api"]
 }
