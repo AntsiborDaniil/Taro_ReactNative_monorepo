@@ -11,7 +11,10 @@ import type { AuthSessionUser, TarotDailyQuota } from './types';
 import { UserContext } from './UserContext';
 import { DataProvider } from 'shared/DataProvider';
 import { handleWebOAuthReturn } from 'shared/lib/handleWebOAuthReturn';
-import { TAROT_AUTH_CHANGED_EVENT } from 'shared/lib/tarotAuthEvents';
+import {
+  TAROT_AUTH_CHANGED_EVENT,
+  type TarotAuthChangedDetail,
+} from 'shared/lib/tarotAuthEvents';
 import { migrateLocalDataToCloud } from 'shared/lib/cloudMigration/migrateLocalToCloud';
 
 type MeResponse = {
@@ -24,7 +27,7 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
   const [authUser, setAuthUser] = useState<AuthSessionUser | null>(null);
   const [tarotDaily, setTarotDaily] = useState<TarotDailyQuota | null>(null);
   const [authSessionLoading, setAuthSessionLoading] = useState(true);
-  const loadMe = useCallback(async () => {
+  const loadMe = useCallback(async (fallbackUser?: AuthSessionUser) => {
     if (Platform.OS !== 'web') {
       setAuthSessionLoading(false);
       return;
@@ -38,8 +41,13 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        setAuthUser(null);
-        setTarotDaily(null);
+        if (fallbackUser) {
+          setAuthUser(fallbackUser);
+          setTarotDaily(null);
+        } else {
+          setAuthUser(null);
+          setTarotDaily(null);
+        }
         return;
       }
 
@@ -50,8 +58,13 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
         void migrateLocalDataToCloud(body.user.id);
       }
     } catch {
-      setAuthUser(null);
-      setTarotDaily(null);
+      if (fallbackUser) {
+        setAuthUser(fallbackUser);
+        setTarotDaily(null);
+      } else {
+        setAuthUser(null);
+        setTarotDaily(null);
+      }
     } finally {
       setAuthSessionLoading(false);
     }
@@ -84,8 +97,9 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
     if (Platform.OS !== 'web' || typeof window === 'undefined') {
       return;
     }
-    const onAuthChanged = () => {
-      void loadMe();
+    const onAuthChanged = (event: Event) => {
+      const detail = (event as CustomEvent<TarotAuthChangedDetail>).detail;
+      void loadMe(detail?.user);
     };
     window.addEventListener(TAROT_AUTH_CHANGED_EVENT, onAuthChanged);
     return () => {

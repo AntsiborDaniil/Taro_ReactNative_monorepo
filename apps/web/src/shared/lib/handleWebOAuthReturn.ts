@@ -4,6 +4,19 @@ import { navigationRef } from 'app/navigation/navigationRef';
 import { emitTarotAuthChanged } from 'shared/lib/tarotAuthEvents';
 import { NavigationRoute, TabRoute } from 'shared/types';
 
+/** Opens Library → Account (личный кабинет). */
+export function navigateToAuthAccount(): void {
+  if (!navigationRef.isReady()) {
+    return;
+  }
+  navigationRef.navigate('TarotTabs', {
+    screen: TabRoute.LibraryTab,
+    params: {
+      screen: NavigationRoute.Auth,
+    },
+  });
+}
+
 export type OAuthReturnResult = 'success' | 'error' | null;
 
 /**
@@ -37,20 +50,8 @@ export async function handleWebOAuthReturn(params: {
       await params.loadSession();
       emitTarotAuthChanged();
 
-      const navigateToAccount = (): void => {
-        if (!navigationRef.isReady()) {
-          return;
-        }
-        navigationRef.navigate('TarotTabs', {
-          screen: TabRoute.LibraryTab,
-          params: {
-            screen: NavigationRoute.Auth,
-          },
-        });
-      };
-
-      navigateToAccount();
-      setTimeout(navigateToAccount, 100);
+      navigateToAuthAccount();
+      setTimeout(navigateToAuthAccount, 100);
 
       Toast.show({
         type: 'success',

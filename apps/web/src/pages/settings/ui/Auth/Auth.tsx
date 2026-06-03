@@ -35,9 +35,11 @@ import {
   validateStrongPassword,
   type PasswordValidationCode,
 } from 'shared/lib/passwordPolicy';
+import { navigateToAuthAccount } from 'shared/lib/handleWebOAuthReturn';
 import {
   emitTarotAuthChanged,
   TAROT_AUTH_CHANGED_EVENT,
+  type TarotAuthChangedDetail,
 } from 'shared/lib/tarotAuthEvents';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
@@ -87,6 +89,37 @@ type AuthApiBody = {
   email?: string;
   devVerificationCode?: string;
 };
+
+async function fetchAuthMeUser(): Promise<AuthUser | null> {
+  try {
+    const response = await fetch(`${getTarotAiApiBaseUrl()}/api/auth/me`, {
+      credentials: authCredentials(),
+      headers: authRequestHeaders(null),
+    });
+    if (!response.ok) {
+      return null;
+    }
+    const meResponse = (await response.json()) as { user: AuthUser };
+    return meResponse.user ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Cookie from verify/sign-in may apply one tick later — retry /me before syncing global session. */
+async function resolveUserAfterCookieAuth(fallbackUser: AuthUser): Promise<AuthUser> {
+  const delaysMs = [0, 80, 200];
+  for (const delayMs of delaysMs) {
+    if (delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+    const fromMe = await fetchAuthMeUser();
+    if (fromMe) {
+      return fromMe;
+    }
+  }
+  return fallbackUser;
+}
 
 async function parseAuthResponse(
   response: Response
@@ -373,24 +406,17 @@ function Auth() {
     if (Platform.OS !== 'web' || typeof window === 'undefined') {
       return;
     }
-    const onAuthChanged = () => {
+    const onAuthChanged = (event: Event) => {
+      const hintedUser = (event as CustomEvent<TarotAuthChangedDetail>).detail
+        ?.user;
       void (async () => {
-        try {
-          const response = await fetch(
-            `${getTarotAiApiBaseUrl()}/api/auth/me`,
-            {
-              credentials: authCredentials(),
-              headers: authRequestHeaders(null),
-            }
-          );
-          if (response.ok) {
-            const meResponse = (await response.json()) as { user: AuthUser };
-            setSession({ token: null, user: meResponse.user });
-          } else {
-            setSession(null);
-          }
-        } catch {
-          setSession(null);
+        const fromMe = await fetchAuthMeUser();
+        if (fromMe) {
+          setSession({ token: null, user: fromMe });
+          return;
+        }
+        if (hintedUser) {
+          setSession({ token: null, user: hintedUser });
         }
       })();
     };
@@ -427,8 +453,11 @@ function Auth() {
     body: { user: AuthUser; token?: string },
     options?: { successTitle?: string }
   ): Promise<void> => {
+    let resolvedUser = body.user;
+
     if (useCookie) {
-      setSession({ token: null, user: body.user });
+      resolvedUser = await resolveUserAfterCookieAuth(body.user);
+      setSession({ token: null, user: resolvedUser });
     } else if (body.token) {
       const nextSession: AuthSessionData = {
         token: body.token,
@@ -457,7 +486,9 @@ function Auth() {
     });
 
     if (Platform.OS === 'web') {
-      emitTarotAuthChanged();
+      emitTarotAuthChanged(resolvedUser);
+      navigateToAuthAccount();
+      setTimeout(navigateToAuthAccount, 100);
     }
   };
 
