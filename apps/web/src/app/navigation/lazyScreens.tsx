@@ -25,6 +25,9 @@ import { WebView } from 'shared/ui';
 
 const pageFallback = <PageSkeleton />;
 
+const CARD_I18N = { i18nNamespaces: ['card'] };
+const AFFIRMATIONS_I18N = { i18nNamespaces: ['affirmations'] };
+
 export const LazyMoodAndEnergyScreen = createLazyScreen(
   () =>
     import('pages/moodAndEnergy').then((m) => ({
@@ -37,7 +40,7 @@ export const LazyMoodAndEnergyScreen = createLazyScreen(
 export const LazyDayAdvice = createLazyScreen(
   () => import('pages/dayAdvice').then((m) => ({ default: m.DayAdvice })),
   DayAdvice,
-  { fallback: pageFallback }
+  { fallback: pageFallback, ...CARD_I18N }
 );
 
 export const LazySpreads = createLazyScreen(
@@ -50,7 +53,7 @@ export const LazyMotivationScreen = createLazyScreen(
   () =>
     import('pages/motivation').then((m) => ({ default: m.MotivationScreen })),
   MotivationScreen,
-  { fallback: pageFallback }
+  { fallback: pageFallback, ...CARD_I18N }
 );
 
 export const LazyHabitCreate = createLazyScreen(
@@ -90,28 +93,28 @@ export const LazySpreadsHistory = createLazyScreen(
 export const LazyAffirmations = createLazyScreen(
   () => import('pages/affirmations').then((m) => ({ default: m.Affirmations })),
   Affirmations,
-  { fallback: pageFallback }
+  { fallback: pageFallback, ...AFFIRMATIONS_I18N }
 );
 
 export const LazyCardsDictionary = createLazyScreen(
   () =>
     import('pages/cardsDictionary').then((m) => ({ default: m.CardsDictionary })),
   CardsDictionary,
-  { fallback: <CardsPageSkeleton withSuitChips /> }
+  { fallback: <CardsPageSkeleton withSuitChips />, ...CARD_I18N }
 );
 
 export const LazyFavoriteCards = createLazyScreen(
   () =>
     import('pages/favoriteCards').then((m) => ({ default: m.FavoriteCards })),
   FavoriteCards,
-  { fallback: <CardsPageSkeleton /> }
+  { fallback: <CardsPageSkeleton />, ...CARD_I18N }
 );
 
 export const LazySpreadReadings = createLazyScreen(
   () =>
     import('pages/spreadReadings').then((m) => ({ default: m.SpreadReadings })),
   SpreadReadings,
-  { fallback: pageFallback }
+  { fallback: pageFallback, ...CARD_I18N }
 );
 
 export const LazySpreadDescriptionChoice = createLazyScreen(
@@ -120,13 +123,13 @@ export const LazySpreadDescriptionChoice = createLazyScreen(
       default: m.SpreadDescriptionChoice,
     })),
   SpreadDescriptionChoice,
-  { fallback: pageFallback }
+  { fallback: pageFallback, ...CARD_I18N }
 );
 
 export const LazyDetailCard = createLazyScreen(
   () => import('pages/detailCard').then((m) => ({ default: m.DetailCard })),
   DetailCard,
-  { fallback: pageFallback }
+  { fallback: pageFallback, ...CARD_I18N }
 );
 
 export const LazySettings = createLazyScreen(
