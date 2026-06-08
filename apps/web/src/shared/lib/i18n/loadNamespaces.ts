@@ -1,9 +1,9 @@
+import { Platform } from 'react-native';
 import i18next from 'i18next';
 
 export const ALLOWED_I18N_LANGUAGES = ['en', 'ru'] as const;
 export type AppLanguage = (typeof ALLOWED_I18N_LANGUAGES)[number];
 
-/** Bundled at startup — one active language only (~50 KB). */
 export const STARTUP_I18N_NAMESPACES = [
   'core',
   'main',
@@ -17,49 +17,18 @@ export const STARTUP_I18N_NAMESPACES = [
   'achievements',
 ] as const;
 
-/** Loaded on demand — card.json is ~13–23 MB per language. */
+/** Loaded on demand — card.json is ~13–23 MB (fetch on web, import on native). */
 export const LAZY_I18N_NAMESPACES = ['card', 'affirmations'] as const;
 
-type Namespace = (typeof STARTUP_I18N_NAMESPACES)[number] | (typeof LAZY_I18N_NAMESPACES)[number];
-
-type LocaleModule = { default?: Record<string, unknown> } | Record<string, unknown>;
-
-const LOCALE_LOADERS: Record<
-  AppLanguage,
-  Partial<Record<Namespace, () => Promise<LocaleModule>>>
-> = {
-  en: {
-    core: () => import('locales/en/core.json'),
-    main: () => import('locales/en/main.json'),
-    settings: () => import('locales/en/settings.json'),
-    spread: () => import('locales/en/spread.json'),
-    characteristics: () => import('locales/en/characteristics.json'),
-    subscriptions: () => import('locales/en/subscriptions.json'),
-    hello: () => import('locales/en/hello.json'),
-    moodAndEnergy: () => import('locales/en/moodAndEnergy.json'),
-    habits: () => import('locales/en/habits.json'),
-    achievements: () => import('locales/en/achievements.json'),
-    affirmations: () => import('locales/en/affirmations.json'),
-    card: () => import('locales/en/card.json'),
-  },
-  ru: {
-    core: () => import('locales/ru/core.json'),
-    main: () => import('locales/ru/main.json'),
-    settings: () => import('locales/ru/settings.json'),
-    spread: () => import('locales/ru/spread.json'),
-    characteristics: () => import('locales/ru/characteristics.json'),
-    subscriptions: () => import('locales/ru/subscriptions.json'),
-    hello: () => import('locales/ru/hello.json'),
-    moodAndEnergy: () => import('locales/ru/moodAndEnergy.json'),
-    habits: () => import('locales/ru/habits.json'),
-    achievements: () => import('locales/ru/achievements.json'),
-    affirmations: () => import('locales/ru/affirmations.json'),
-    card: () => import('locales/ru/card.json'),
-  },
-};
+type StartupNamespace = (typeof STARTUP_I18N_NAMESPACES)[number];
+type LazyNamespace = (typeof LAZY_I18N_NAMESPACES)[number];
 
 const loadedKeys = new Set<string>();
 const inflight = new Map<string, Promise<void>>();
+
+function bundleKey(lng: AppLanguage, ns: string): string {
+  return `${lng}:${ns}`;
+}
 
 function normalizeLanguage(lng: string): AppLanguage {
   return ALLOWED_I18N_LANGUAGES.includes(lng as AppLanguage)
@@ -67,11 +36,47 @@ function normalizeLanguage(lng: string): AppLanguage {
     : 'en';
 }
 
-function bundleKey(lng: AppLanguage, ns: string): string {
-  return `${lng}:${ns}`;
+/** Native fallback when JSON is not served as a static file. */
+const NATIVE_LAZY_LOADERS: Record<
+  AppLanguage,
+  Record<LazyNamespace, () => Promise<{ default?: Record<string, unknown> }>>
+> = {
+  en: {
+    card: () => import('locales/en/card.json'),
+    affirmations: () => import('locales/en/affirmations.json'),
+  },
+  ru: {
+    card: () => import('locales/ru/card.json'),
+    affirmations: () => import('locales/ru/affirmations.json'),
+  },
+};
+
+async function loadLazyNamespaceWeb(
+  lng: AppLanguage,
+  ns: LazyNamespace
+): Promise<void> {
+  const response = await fetch(`/locales/${lng}/${ns}.json`, {
+    cache: 'force-cache',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch /locales/${lng}/${ns}.json (${response.status})`);
+  }
+
+  const data = (await response.json()) as Record<string, unknown>;
+  i18next.addResourceBundle(lng, ns, data, true, true);
 }
 
-async function loadNamespace(lng: AppLanguage, ns: Namespace): Promise<void> {
+async function loadLazyNamespaceNative(
+  lng: AppLanguage,
+  ns: LazyNamespace
+): Promise<void> {
+  const mod = await NATIVE_LAZY_LOADERS[lng][ns]();
+  const data = mod.default ?? mod;
+  i18next.addResourceBundle(lng, ns, data, true, true);
+}
+
+async function loadLazyNamespace(lng: AppLanguage, ns: LazyNamespace): Promise<void> {
   const key = bundleKey(lng, ns);
 
   if (loadedKeys.has(key) || i18next.hasResourceBundle(lng, ns)) {
@@ -85,15 +90,17 @@ async function loadNamespace(lng: AppLanguage, ns: Namespace): Promise<void> {
     return;
   }
 
-  const loader = LOCALE_LOADERS[lng][ns];
-  if (!loader) {
-    return;
-  }
-
   const promise = (async () => {
-    const mod = await loader();
-    const data = (mod as { default?: Record<string, unknown> }).default ?? mod;
-    i18next.addResourceBundle(lng, ns, data, true, true);
+    if (Platform.OS === 'web') {
+      try {
+        await loadLazyNamespaceWeb(lng, ns);
+      } catch {
+        /* dev: JSON not in public/ — fall back to metro dynamic import */
+        await loadLazyNamespaceNative(lng, ns);
+      }
+    } else {
+      await loadLazyNamespaceNative(lng, ns);
+    }
     loadedKeys.add(key);
   })();
 
@@ -106,7 +113,7 @@ async function loadNamespace(lng: AppLanguage, ns: Namespace): Promise<void> {
   }
 }
 
-/** Load translation namespaces for a language (dynamic import = separate JS chunk). */
+/** Load heavy namespaces (card, affirmations). */
 export async function ensureI18nNamespaces(
   ...args: [...string[], AppLanguage] | string[]
 ): Promise<void> {
@@ -120,18 +127,21 @@ export async function ensureI18nNamespaces(
   }
 
   await Promise.all(
-    namespaces.map((ns) => loadNamespace(lng, ns as Namespace))
+    namespaces.map((ns) => {
+      if (!LAZY_I18N_NAMESPACES.includes(ns as LazyNamespace)) {
+        return Promise.resolve();
+      }
+      return loadLazyNamespace(lng, ns as LazyNamespace);
+    })
   );
 }
 
-export async function loadStartupLanguageBundles(lng: AppLanguage): Promise<void> {
-  await ensureI18nNamespaces(...STARTUP_I18N_NAMESPACES, lng);
-}
-
-/** Preload heavy card texts during idle time (current language). */
+/** Preload card texts during idle (web: static JSON in /locales). */
 export function preloadCardTranslationsIdle(): void {
   const run = () => {
-    void ensureI18nNamespaces('card');
+    void ensureI18nNamespaces('card').catch(() => {
+      /* optional prefetch — ignore failures */
+    });
   };
 
   if (typeof requestIdleCallback === 'function') {

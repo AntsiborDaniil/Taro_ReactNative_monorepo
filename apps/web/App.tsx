@@ -82,9 +82,7 @@ export default function RootLayout() {
     Platform.OS === 'web' ? false : !interLoaded && !interError;
 
   useEffect(() => {
-    void i18nReady
-      .then(() => setIsI18nReady(true))
-      .catch(() => setIsI18nReady(true));
+    void i18nReady.then(() => setIsI18nReady(true));
   }, []);
 
   useEffect(() => {

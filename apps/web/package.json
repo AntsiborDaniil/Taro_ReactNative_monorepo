@@ -8,7 +8,7 @@
     "sync:responsive-tokens": "node scripts/sync-responsive-tokens-css.mjs",
     "dev:client": "expo start --dev-client",
     "prebuild": "node scripts/generate-vercel-config.mjs",
-    "build": "node scripts/generate-vercel-config.mjs && expo export --platform web && node scripts/inject-seo-html.mjs",
+    "build": "node scripts/generate-vercel-config.mjs && expo export --platform web && node scripts/inject-seo-html.mjs && node scripts/copy-lazy-locales.mjs",
     "build:export": "expo export --platform web",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },

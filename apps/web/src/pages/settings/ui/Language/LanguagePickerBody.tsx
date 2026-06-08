@@ -6,7 +6,6 @@ import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { useTranslation } from 'react-i18next';
 import { useData } from 'shared/DataProvider';
 import { Checked } from 'shared/icons';
-import { loadStartupLanguageBundles, type AppLanguage } from 'shared/lib/i18n/loadNamespaces';
 import { isTablet } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction } from 'shared/types';
@@ -37,7 +36,6 @@ function LanguagePickerBody({
   const handleChangeLanguage = async (lang: string) => {
     await handleVibrationClick?.();
     await AsyncStorage.setItem('language', lang);
-    await loadStartupLanguageBundles(lang as AppLanguage);
     await i18n.changeLanguage(lang);
     AppMetrica.reportEvent(AnalyticAction.ClickChangeLanguage, {
       lang: LANGUAGES.find((l) => l.value === lang)?.title ?? lang,
