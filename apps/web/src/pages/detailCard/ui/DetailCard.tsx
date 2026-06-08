@@ -23,7 +23,7 @@ export default function DetailCard() {
   );
 
   const { t } = useTranslation();
-  const { scrollRef, fabVisible, onScroll, scrollToTop } = useScrollToTopFab();
+  const { scrollRef, onScroll, scrollToTop } = useScrollToTopFab();
 
   const route = useRoute<RouteProp<TNavigationParams>>();
   const { id } = route.params || {};
@@ -43,73 +43,93 @@ export default function DetailCard() {
   }
 
   return (
-    <ScreenLayout>
-      <Header title={t(card.name)} />
-      <View style={styles.scrollHost}>
-        <ScrollView
-          ref={scrollRef}
-          onScroll={onScroll}
-          scrollEventThrottle={16}
-          showsVerticalScrollIndicator={false}
-        >
-          <Layout style={styles.content}>
-            <SafeAreaView style={styles.direction}>
-              <TouchableOpacity
-                activeOpacity={1}
-                onPress={() => setDirection(TarotCardDirection.Upright)}
-              >
-                <Text
-                  category={TEXT_TAGS.h3}
-                  style={
-                    direction === TarotCardDirection.Upright
-                      ? styles.selected
-                      : undefined
-                  }
+    <ScreenLayout style={styles.screen}>
+      <View style={styles.page}>
+        <Header title={t(card.name)} />
+        <View style={styles.scrollHost}>
+          <ScrollView
+            ref={scrollRef}
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            onScroll={onScroll}
+            scrollEventThrottle={16}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled
+          >
+            <Layout style={styles.content}>
+              <SafeAreaView style={styles.direction}>
+                <TouchableOpacity
+                  activeOpacity={1}
+                  onPress={() => setDirection(TarotCardDirection.Upright)}
                 >
-                  {t('core:card.upright')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={1}
-                onPress={() => setDirection(TarotCardDirection.Reversed)}
-              >
-                <Text
-                  category={TEXT_TAGS.h3}
-                  style={
-                    direction === TarotCardDirection.Reversed
-                      ? styles.selected
-                      : undefined
-                  }
+                  <Text
+                    category={TEXT_TAGS.h3}
+                    style={
+                      direction === TarotCardDirection.Upright
+                        ? styles.selected
+                        : undefined
+                    }
+                  >
+                    {t('core:card.upright')}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={1}
+                  onPress={() => setDirection(TarotCardDirection.Reversed)}
                 >
-                  {t('core:card.reversed')}
-                </Text>
-              </TouchableOpacity>
-            </SafeAreaView>
-            <TarotCardReadingsDefault
-              card={getTarotCardReadings({
-                card,
-                keys: ['keywords', 'description'],
-                direction,
-              })}
-            />
-          </Layout>
-        </ScrollView>
-        <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+                  <Text
+                    category={TEXT_TAGS.h3}
+                    style={
+                      direction === TarotCardDirection.Reversed
+                        ? styles.selected
+                        : undefined
+                    }
+                  >
+                    {t('core:card.reversed')}
+                  </Text>
+                </TouchableOpacity>
+              </SafeAreaView>
+              <TarotCardReadingsDefault
+                card={getTarotCardReadings({
+                  card,
+                  keys: ['keywords', 'description'],
+                  direction,
+                })}
+              />
+            </Layout>
+          </ScrollView>
+        </View>
+        <ScrollToTopFab alwaysVisible onPress={scrollToTop} />
       </View>
     </ScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollHost: {
+  screen: {
     flex: 1,
-    position: 'relative',
     minHeight: 0,
   },
+  page: {
+    flex: 1,
+    minHeight: 0,
+    position: 'relative',
+  },
+  scrollHost: {
+    flex: 1,
+    minHeight: 0,
+    overflow: 'hidden',
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 88,
+  },
   content: {
-    minHeight: '100%',
     gap: 16,
-    paddingBottom: 32,
+    backgroundColor: 'transparent',
   },
   direction: {
     flexDirection: 'row',

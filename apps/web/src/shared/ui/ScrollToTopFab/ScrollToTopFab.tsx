@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -5,36 +7,53 @@ import { UpIcon } from 'shared/icons';
 import { COLORS } from 'shared/themes';
 
 type ScrollToTopFabProps = {
-  visible: boolean;
+  /** Show after scroll (default). Ignored when alwaysVisible is true. */
+  visible?: boolean;
+  /** Pin on screen — not tied to mobile nav FAB host/scroll hide logic. */
+  alwaysVisible?: boolean;
   onPress: () => void;
   bottomOffset?: number;
 };
 
 function ScrollToTopFab({
-  visible,
+  visible = false,
+  alwaysVisible = false,
   onPress,
   bottomOffset = 20,
 }: ScrollToTopFabProps) {
   const { bottom, right } = useSafeAreaInsets();
   const { t } = useTranslation('core');
+  const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
 
-  return (
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      setPortalRoot(document.body);
+    }
+  }, []);
+
+  const shouldShow = alwaysVisible || visible;
+
+  if (!shouldShow) {
+    return null;
+  }
+
+  const fab = (
     <View
-      pointerEvents={visible ? 'box-none' : 'none'}
+      pointerEvents="box-none"
       style={[
         styles.host,
         {
           bottom: bottom + bottomOffset,
           right: Math.max(16, right + 12),
-          opacity: visible ? 1 : 0,
         },
       ]}
+      {...(Platform.OS === 'web'
+        ? ({ 'data-scroll-to-top-fab': 'true' } as Record<string, string>)
+        : {})}
     >
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('a11y.scrollToTop')}
-        accessibilityState={{ disabled: !visible }}
-        disabled={!visible}
         onPress={onPress}
         style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}
       >
@@ -42,14 +61,28 @@ function ScrollToTopFab({
       </Pressable>
     </View>
   );
+
+  if (Platform.OS === 'web' && portalRoot) {
+    return createPortal(fab, portalRoot);
+  }
+
+  return fab;
 }
 
 const FAB_SIZE = 48;
 
 const styles = StyleSheet.create({
   host: {
-    position: 'absolute',
-    zIndex: 40,
+    ...Platform.select({
+      web: {
+        position: 'fixed' as const,
+        zIndex: 10050,
+      },
+      default: {
+        position: 'absolute',
+        zIndex: 100,
+      },
+    }),
   },
   fab: {
     width: FAB_SIZE,
