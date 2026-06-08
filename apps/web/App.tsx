@@ -31,7 +31,7 @@ import { LoadingsContext, useLoadings } from './src/shared/contexts/Loadings';
 import { DataProvider } from './src/shared/DataProvider';
 import { AIAnimation, TarotToast } from './src/shared/ui';
 
-import './i18n';
+import i18nReady from './i18n';
 
 if (__DEV__ && Platform.OS === 'web') {
   const originalConsoleError = console.error.bind(console);
@@ -71,6 +71,7 @@ const appShellStyle: ViewStyle = {
 
 export default function RootLayout() {
   const [isAppLoading, setIsAppLoading] = useState<boolean>(true);
+  const [isI18nReady, setIsI18nReady] = useState(false);
 
   const loadingsContextData = useLoadings();
   const applicationConfigContextData = useApplicationConfig();
@@ -81,21 +82,29 @@ export default function RootLayout() {
     Platform.OS === 'web' ? false : !interLoaded && !interError;
 
   useEffect(() => {
+    void i18nReady
+      .then(() => setIsI18nReady(true))
+      .catch(() => setIsI18nReady(true));
+  }, []);
+
+  useEffect(() => {
     if (Platform.OS === 'web') {
-      setIsAppLoading(false);
+      if (isI18nReady) {
+        setIsAppLoading(false);
+      }
       return;
     }
 
-    if (isResourcesLoading) return;
+    if (isResourcesLoading || !isI18nReady) return;
 
     const timeout = setTimeout(() => {
       setIsAppLoading(false);
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [isResourcesLoading]);
+  }, [isResourcesLoading, isI18nReady]);
 
-  if (Platform.OS !== 'web' && isAppLoading) {
+  if (!isI18nReady || (Platform.OS !== 'web' && isAppLoading)) {
     return (
       <SafeAreaProvider style={appShellStyle}>
         <AnimatedSplashScreen isLoading={isResourcesLoading} />

@@ -87,10 +87,13 @@ const initI18next = async () => {
   await loadStartupLanguageBundles(lng);
 
   if (lng !== 'ru') {
-    await ensureI18nNamespaces('core', 'ru');
+    await loadStartupLanguageBundles('ru');
   }
 
   return i18next;
 };
 
-export default initI18next();
+/** Resolves when startup translation bundles for the active language are loaded. */
+export const i18nReady = initI18next();
+
+export default i18nReady;
