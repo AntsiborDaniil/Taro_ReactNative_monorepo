@@ -138,6 +138,16 @@ function setSessionCookie(res, accessToken) {
   );
 }
 
+function clearSessionCookie(res) {
+  appendSetCookie(
+    res,
+    serialize(AUTH_SESSION_COOKIE_NAME, '', {
+      ...baseCookieOptions(),
+      maxAge: 0,
+    })
+  );
+}
+
 /** 302 — browsers persist Set-Cookie before leaving to Google (unlike meta/JS redirect). */
 function redirectOAuthProvider(res, targetUrl) {
   res.status(302);
@@ -183,6 +193,7 @@ module.exports = {
   createPkceStorage,
   clearPkceCookies,
   setSessionCookie,
+  clearSessionCookie,
   redirectOAuthProvider,
   redirectViaHtml,
   redirectToApp,

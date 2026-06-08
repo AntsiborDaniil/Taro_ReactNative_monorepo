@@ -165,6 +165,17 @@ export async function signUp({
   const normalizedEmail = email.trim().toLowerCase();
   const trimmedName = name.trim();
 
+  const admin = getSupabaseAdmin();
+  const { data: existingProfile } = await admin
+    .from('profiles')
+    .select('id')
+    .ilike('email', normalizedEmail)
+    .maybeSingle();
+
+  if (existingProfile) {
+    throw new Error('USER_ALREADY_EXISTS');
+  }
+
   // OTP email (6-digit code), not magic-link confirm — requires Supabase email OTP template.
   const { error } = await supabase.auth.signInWithOtp({
     email: normalizedEmail,

@@ -15,10 +15,10 @@ const DEFAULT_API_BASE = 'https://taro-reactnative-monorepo.onrender.com';
 const envBase = (process.env.TAROT_API_PROXY_URL || '').trim().replace(/\/$/, '');
 const apiBase = envBase || DEFAULT_API_BASE;
 
-// OAuth (/api/auth/oauth/*) is handled by Vercel serverless in apps/web/api/ — do not proxy.
+// /api/auth/* → Vercel serverless (sets HttpOnly cookie on app domain). Other /api/* → BFF proxy.
 const rewrites = [
   {
-    source: '/api/((?!auth/oauth).*)',
+    source: '/api/((?!auth/).*)',
     destination: `${apiBase}/api/$1`,
   },
   {
@@ -37,7 +37,7 @@ if (envBase) {
 } else {
   console.log(`[vercel] API proxy → ${apiBase} (default)`);
 }
-console.log('[vercel] Google OAuth: serverless at api/auth/oauth/* (not proxied)');
+console.log('[vercel] Auth: serverless at api/auth/* (session cookie on app domain)');
 
 const config = {
   outputDirectory: 'dist',

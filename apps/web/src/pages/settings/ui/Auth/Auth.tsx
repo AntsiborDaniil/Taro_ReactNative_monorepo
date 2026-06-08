@@ -106,9 +106,9 @@ async function fetchAuthMeUser(): Promise<AuthUser | null> {
   }
 }
 
-/** Cookie from verify/sign-in may apply one tick later — retry /me before syncing global session. */
-async function resolveUserAfterCookieAuth(fallbackUser: AuthUser): Promise<AuthUser> {
-  const delaysMs = [0, 80, 200];
+/** Cookie from verify/sign-in must be readable via /me before we treat the user as signed in. */
+async function resolveUserAfterCookieAuth(): Promise<AuthUser> {
+  const delaysMs = [0, 80, 200, 400];
   for (const delayMs of delaysMs) {
     if (delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, delayMs));
@@ -118,7 +118,7 @@ async function resolveUserAfterCookieAuth(fallbackUser: AuthUser): Promise<AuthU
       return fromMe;
     }
   }
-  return fallbackUser;
+  throw new Error('SESSION_COOKIE_MISSING');
 }
 
 async function parseAuthResponse(
@@ -220,6 +220,9 @@ function Auth() {
     null
   );
   const [authSubmitting, setAuthSubmitting] = useState(false);
+  const [existingAccountModalVisible, setExistingAccountModalVisible] =
+    useState(false);
+  const [existingAccountEmail, setExistingAccountEmail] = useState('');
 
   const useCookie = authUsesCookie();
 
@@ -449,25 +452,50 @@ function Auth() {
     });
   };
 
+  const handleExistingAccountSignIn = (): void => {
+    setExistingAccountModalVisible(false);
+    setTab('signin');
+    reset({
+      name: '',
+      email: existingAccountEmail,
+      password: '',
+    });
+    clearErrors();
+  };
+
   const applyAuthenticatedSession = async (
     body: { user: AuthUser; token?: string },
     options?: { successTitle?: string }
   ): Promise<void> => {
     let resolvedUser = body.user;
 
-    if (useCookie) {
-      resolvedUser = await resolveUserAfterCookieAuth(body.user);
-      setSession({ token: null, user: resolvedUser });
-    } else if (body.token) {
-      const nextSession: AuthSessionData = {
-        token: body.token,
-        user: body.user,
-      };
-      await AsyncStorage.setItem(
-        AUTH_SESSION_STORAGE_KEY,
-        JSON.stringify(nextSession)
-      );
-      setSession(nextSession);
+    try {
+      if (useCookie) {
+        resolvedUser = await resolveUserAfterCookieAuth();
+        setSession({ token: null, user: resolvedUser });
+      } else if (body.token) {
+        const nextSession: AuthSessionData = {
+          token: body.token,
+          user: body.user,
+        };
+        await AsyncStorage.setItem(
+          AUTH_SESSION_STORAGE_KEY,
+          JSON.stringify(nextSession)
+        );
+        setSession(nextSession);
+      }
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === 'SESSION_COOKIE_MISSING'
+      ) {
+        Toast.show({
+          type: 'error',
+          text1: t('settings:auth.error.sessionCookie'),
+        });
+        return;
+      }
+      throw error;
     }
 
     setPendingVerificationEmail(null);
@@ -537,6 +565,11 @@ function Auth() {
       }
 
       if (!response.ok) {
+        if (response.status === 409 && isSignUp) {
+          setExistingAccountEmail(values.email.trim());
+          setExistingAccountModalVisible(true);
+          return;
+        }
         if (responseBody.needsEmailVerification && responseBody.email) {
           openEmailVerification(
             responseBody.email,
@@ -1592,6 +1625,55 @@ function Auth() {
               onPress={() => setAddCardModalVisible(false)}
             >
               {t('settings:auth.payments.modal.close')}
+            </Button>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        transparent
+        animationType="fade"
+        visible={existingAccountModalVisible}
+        onRequestClose={() => setExistingAccountModalVisible(false)}
+      >
+        <View style={styles.paymentModalRoot}>
+          <Pressable
+            style={styles.paymentModalBackdrop}
+            onPress={() => setExistingAccountModalVisible(false)}
+            accessibilityRole="button"
+            accessibilityLabel={t('settings:auth.existingAccount.close')}
+          />
+          <View style={styles.paymentModalSheet}>
+            <View style={styles.paymentModalHeader}>
+              <Text
+                category={TEXT_TAGS.h3}
+                style={styles.paymentModalTitle}
+              >
+                {t('settings:auth.existingAccount.title')}
+              </Text>
+              <Pressable
+                onPress={() => setExistingAccountModalVisible(false)}
+                style={({ pressed }) => [
+                  styles.paymentModalClose,
+                  pressed && styles.paymentModalClosePressed,
+                ]}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel={t('settings:auth.existingAccount.close')}
+              >
+                <CrossIcon width={22} height={22} />
+              </Pressable>
+            </View>
+            <Text category={TEXT_TAGS.p2} style={styles.paymentModalBody}>
+              {t('settings:auth.existingAccount.body', {
+                email: existingAccountEmail,
+              })}
+            </Text>
+            <Button
+              style={styles.paymentModalButton}
+              onPress={handleExistingAccountSignIn}
+            >
+              {t('settings:auth.existingAccount.signIn')}
             </Button>
           </View>
         </View>

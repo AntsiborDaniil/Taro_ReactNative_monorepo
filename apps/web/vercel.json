@@ -2,7 +2,7 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/api/((?!auth/oauth).*)",
+      "source": "/api/((?!auth/).*)",
       "destination": "https://taro-reactnative-monorepo.onrender.com/api/$1"
     },
     {
