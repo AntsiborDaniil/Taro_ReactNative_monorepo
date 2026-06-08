@@ -17,11 +17,16 @@ export const STARTUP_I18N_NAMESPACES = [
   'achievements',
 ] as const;
 
-/** Loaded on demand — card.json is ~13–23 MB (fetch on web, import on native). */
 export const LAZY_I18N_NAMESPACES = ['card', 'affirmations'] as const;
 
 type StartupNamespace = (typeof STARTUP_I18N_NAMESPACES)[number];
 type LazyNamespace = (typeof LAZY_I18N_NAMESPACES)[number];
+type AnyNamespace = StartupNamespace | LazyNamespace;
+
+const ALL_FETCH_NAMESPACES: readonly AnyNamespace[] = [
+  ...STARTUP_I18N_NAMESPACES,
+  ...LAZY_I18N_NAMESPACES,
+];
 
 const loadedKeys = new Set<string>();
 const inflight = new Map<string, Promise<void>>();
@@ -33,17 +38,27 @@ function bundleKey(lng: AppLanguage, ns: string): string {
 function normalizeLanguage(lng: string): AppLanguage {
   return ALLOWED_I18N_LANGUAGES.includes(lng as AppLanguage)
     ? (lng as AppLanguage)
-    : 'en';
+    : 'ru';
 }
 
-/** Native fallback when JSON is not served as a static file. */
-const NATIVE_LAZY_LOADERS: Record<
+/** Native: dynamic import fallback when /locales is unavailable. */
+const NATIVE_FETCH_FALLBACK: Record<
   AppLanguage,
-  Record<LazyNamespace, () => Promise<{ default?: Record<string, unknown> }>>
+  Partial<Record<AnyNamespace, () => Promise<{ default?: Record<string, unknown> }>>>
 > = {
   en: {
-    card: () => import('locales/en/card.json'),
+    core: () => import('locales/en/core.json'),
+    main: () => import('locales/en/main.json'),
+    settings: () => import('locales/en/settings.json'),
+    spread: () => import('locales/en/spread.json'),
+    characteristics: () => import('locales/en/characteristics.json'),
+    subscriptions: () => import('locales/en/subscriptions.json'),
+    hello: () => import('locales/en/hello.json'),
+    moodAndEnergy: () => import('locales/en/moodAndEnergy.json'),
+    habits: () => import('locales/en/habits.json'),
+    achievements: () => import('locales/en/achievements.json'),
     affirmations: () => import('locales/en/affirmations.json'),
+    card: () => import('locales/en/card.json'),
   },
   ru: {
     card: () => import('locales/ru/card.json'),
@@ -51,10 +66,10 @@ const NATIVE_LAZY_LOADERS: Record<
   },
 };
 
-async function loadLazyNamespaceWeb(
+async function fetchLocaleJson(
   lng: AppLanguage,
-  ns: LazyNamespace
-): Promise<void> {
+  ns: AnyNamespace
+): Promise<Record<string, unknown>> {
   const response = await fetch(`/locales/${lng}/${ns}.json`, {
     cache: 'force-cache',
   });
@@ -63,20 +78,22 @@ async function loadLazyNamespaceWeb(
     throw new Error(`Failed to fetch /locales/${lng}/${ns}.json (${response.status})`);
   }
 
-  const data = (await response.json()) as Record<string, unknown>;
-  i18next.addResourceBundle(lng, ns, data, true, true);
+  return (await response.json()) as Record<string, unknown>;
 }
 
-async function loadLazyNamespaceNative(
+async function importLocaleJsonNative(
   lng: AppLanguage,
-  ns: LazyNamespace
-): Promise<void> {
-  const mod = await NATIVE_LAZY_LOADERS[lng][ns]();
-  const data = mod.default ?? mod;
-  i18next.addResourceBundle(lng, ns, data, true, true);
+  ns: AnyNamespace
+): Promise<Record<string, unknown>> {
+  const loader = NATIVE_FETCH_FALLBACK[lng][ns];
+  if (!loader) {
+    throw new Error(`No native fallback for ${lng}/${ns}`);
+  }
+  const mod = await loader();
+  return (mod.default ?? mod) as Record<string, unknown>;
 }
 
-async function loadLazyNamespace(lng: AppLanguage, ns: LazyNamespace): Promise<void> {
+async function loadNamespace(lng: AppLanguage, ns: AnyNamespace): Promise<void> {
   const key = bundleKey(lng, ns);
 
   if (loadedKeys.has(key) || i18next.hasResourceBundle(lng, ns)) {
@@ -91,16 +108,19 @@ async function loadLazyNamespace(lng: AppLanguage, ns: LazyNamespace): Promise<v
   }
 
   const promise = (async () => {
+    let data: Record<string, unknown>;
+
     if (Platform.OS === 'web') {
-      try {
-        await loadLazyNamespaceWeb(lng, ns);
-      } catch {
-        /* dev: JSON not in public/ — fall back to metro dynamic import */
-        await loadLazyNamespaceNative(lng, ns);
-      }
+      data = await fetchLocaleJson(lng, ns);
     } else {
-      await loadLazyNamespaceNative(lng, ns);
+      try {
+        data = await fetchLocaleJson(lng, ns);
+      } catch {
+        data = await importLocaleJsonNative(lng, ns);
+      }
     }
+
+    i18next.addResourceBundle(lng, ns, data, true, true);
     loadedKeys.add(key);
   })();
 
@@ -113,11 +133,21 @@ async function loadLazyNamespace(lng: AppLanguage, ns: LazyNamespace): Promise<v
   }
 }
 
-/** Load heavy namespaces (card, affirmations). */
+/** Fetch all startup namespaces for a language (used when switching to EN). */
+export async function loadStartupLanguageBundles(lng: AppLanguage): Promise<void> {
+  if (lng === 'ru') {
+    return;
+  }
+  await Promise.all(
+    STARTUP_I18N_NAMESPACES.map((ns) => loadNamespace(lng, ns))
+  );
+}
+
+/** Load namespaces on demand (card, affirmations, or any via fetch). */
 export async function ensureI18nNamespaces(
   ...args: [...string[], AppLanguage] | string[]
 ): Promise<void> {
-  let lng = normalizeLanguage(i18next.language || 'en');
+  let lng = normalizeLanguage(i18next.language || 'ru');
   let namespaces = args as string[];
 
   const last = namespaces[namespaces.length - 1];
@@ -127,27 +157,6 @@ export async function ensureI18nNamespaces(
   }
 
   await Promise.all(
-    namespaces.map((ns) => {
-      if (!LAZY_I18N_NAMESPACES.includes(ns as LazyNamespace)) {
-        return Promise.resolve();
-      }
-      return loadLazyNamespace(lng, ns as LazyNamespace);
-    })
+    namespaces.map((ns) => loadNamespace(lng, ns as AnyNamespace))
   );
-}
-
-/** Preload card texts during idle (web: static JSON in /locales). */
-export function preloadCardTranslationsIdle(): void {
-  const run = () => {
-    void ensureI18nNamespaces('card').catch(() => {
-      /* optional prefetch — ignore failures */
-    });
-  };
-
-  if (typeof requestIdleCallback === 'function') {
-    requestIdleCallback(run, { timeout: 12000 });
-    return;
-  }
-
-  setTimeout(run, 4000);
 }

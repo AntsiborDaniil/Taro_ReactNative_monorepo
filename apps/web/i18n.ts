@@ -1,16 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
 import i18next from 'i18next';
-import enAchievements from 'locales/en/achievements.json';
-import enCharacteristics from 'locales/en/characteristics.json';
-import enCore from 'locales/en/core.json';
-import enHabits from 'locales/en/habits.json';
-import enHello from 'locales/en/hello.json';
-import enMain from 'locales/en/main.json';
-import enMoodAndEnergy from 'locales/en/moodAndEnergy.json';
-import enSettings from 'locales/en/settings.json';
-import enSpread from 'locales/en/spread.json';
-import enSubscriptions from 'locales/en/subscriptions.json';
+import { Platform } from 'react-native';
 import ruAchievements from 'locales/ru/achievements.json';
 import ruCharacteristics from 'locales/ru/characteristics.json';
 import ruCore from 'locales/ru/core.json';
@@ -23,62 +14,29 @@ import ruSpread from 'locales/ru/spread.json';
 import ruSubscriptions from 'locales/ru/subscriptions.json';
 import {
   ALLOWED_I18N_LANGUAGES,
+  loadStartupLanguageBundles,
   STARTUP_I18N_NAMESPACES,
   type AppLanguage,
 } from 'shared/lib/i18n/loadNamespaces';
 import { initReactI18next } from 'react-i18next';
 
 export interface TranslationResources {
-  card: {
-    [key: string]: string;
-  };
-  spread: {
-    [key: string]: string;
-  };
-  core: {
-    [key: string]: string;
-  };
-  main: {
-    [key: string]: string;
-  };
-  characteristics: {
-    [key: string]: string;
-  };
-  settings: {
-    [key: string]: string;
-  };
-  subscriptions: {
-    [key: string]: string;
-  };
-  hello: {
-    [key: string]: string;
-  };
+  card: { [key: string]: string };
+  spread: { [key: string]: string };
+  core: { [key: string]: string };
+  main: { [key: string]: string };
+  characteristics: { [key: string]: string };
+  settings: { [key: string]: string };
+  subscriptions: { [key: string]: string };
+  hello: { [key: string]: string };
   affirmations: Record<string, unknown>;
-  moodAndEnergy: {
-    [key: string]: string;
-  };
-  habits: {
-    [key: string]: string;
-  };
-  achievements: {
-    [key: string]: string | Record<string, string>;
-  };
+  moodAndEnergy: { [key: string]: string };
+  habits: { [key: string]: string };
+  achievements: { [key: string]: string | Record<string, string> };
 }
 
-/** Static startup bundles (~100 KB per language) — reliable in Expo web export. */
-const STARTUP_RESOURCES: Record<AppLanguage, Partial<TranslationResources>> = {
-  en: {
-    core: enCore,
-    main: enMain,
-    settings: enSettings,
-    spread: enSpread,
-    characteristics: enCharacteristics,
-    subscriptions: enSubscriptions,
-    hello: enHello,
-    moodAndEnergy: enMoodAndEnergy,
-    habits: enHabits,
-    achievements: enAchievements,
-  },
+/** Russian UI strings ship in the main bundle — always available on first paint. */
+const RU_RESOURCES = {
   ru: {
     core: ruCore,
     main: ruMain,
@@ -93,26 +51,44 @@ const STARTUP_RESOURCES: Record<AppLanguage, Partial<TranslationResources>> = {
   },
 };
 
+function readWebLanguageSync(): AppLanguage {
+  if (typeof window === 'undefined') {
+    return 'ru';
+  }
+  try {
+    const saved = window.localStorage.getItem('language');
+    if (saved === 'en' || saved === 'ru') {
+      return saved;
+    }
+  } catch {
+    /* ignore */
+  }
+  return 'ru';
+}
+
 const getInitLanguage = async (): Promise<AppLanguage> => {
+  if (Platform.OS === 'web') {
+    return readWebLanguageSync();
+  }
+
   const languageFromLocalization =
-    Localization.getLocales()?.[0]?.languageCode ?? 'en';
+    Localization.getLocales()?.[0]?.languageCode ?? 'ru';
 
   try {
     const savedLanguage = await AsyncStorage.getItem('language');
-
     const candidate =
       savedLanguage ||
       (ALLOWED_I18N_LANGUAGES.includes(languageFromLocalization as AppLanguage)
         ? languageFromLocalization
-        : 'en');
+        : 'ru');
 
     return ALLOWED_I18N_LANGUAGES.includes(candidate as AppLanguage)
       ? (candidate as AppLanguage)
-      : 'en';
+      : 'ru';
   } catch {
     return ALLOWED_I18N_LANGUAGES.includes(languageFromLocalization as AppLanguage)
       ? (languageFromLocalization as AppLanguage)
-      : 'en';
+      : 'ru';
   }
 };
 
@@ -124,16 +100,22 @@ const initI18next = async () => {
     fallbackLng: 'ru',
     defaultNS: 'core',
     ns: [...STARTUP_I18N_NAMESPACES],
-    resources: STARTUP_RESOURCES,
+    resources: RU_RESOURCES,
+    /** Keys in JSON use dots literally: "dailyCard.title", "nav.tab.main". */
+    keySeparator: false,
+    nsSeparator: ':',
     interpolation: {
       escapeValue: false,
     },
   });
 
+  if (lng === 'en') {
+    await loadStartupLanguageBundles('en');
+  }
+
   return i18next;
 };
 
-/** Resolves when i18n is initialized with startup translation bundles. */
 export const i18nReady = initI18next();
 
 export default i18nReady;

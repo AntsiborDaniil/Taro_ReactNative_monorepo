@@ -1,5 +1,4 @@
 import { Platform } from 'react-native';
-import { preloadCardTranslationsIdle } from 'shared/lib/i18n/loadNamespaces';
 
 /** Подгружает частые чанки после первого кадра — меньше пауз при навигации. */
 export function preloadWebRoutes(): void {
@@ -14,7 +13,6 @@ export function preloadWebRoutes(): void {
     void import('pages/spreadsHistory');
     void import('pages/affirmations');
     void import('pages/settings');
-    preloadCardTranslationsIdle();
   };
 
   if (typeof requestIdleCallback === 'function') {

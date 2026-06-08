@@ -10,7 +10,7 @@
       "destination": "https://taro-reactnative-monorepo.onrender.com/health"
     },
     {
-      "source": "/:path*",
+      "source": "/((?!locales/).*)",
       "destination": "/index.html"
     }
   ],

@@ -25,9 +25,9 @@ const rewrites = [
     source: '/health',
     destination: `${apiBase}/health`,
   },
-  // SPA fallback (must be last — Vercel uses first match)
+  // SPA fallback — exclude /locales/* so JSON is served as static files
   {
-    source: '/:path*',
+    source: '/((?!locales/).*)',
     destination: '/index.html',
   },
 ];
