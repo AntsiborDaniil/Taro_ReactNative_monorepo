@@ -40,9 +40,11 @@ import {
 } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute } from 'shared/types';
-import { Button, ScreenLayout } from 'shared/ui';
+import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
+import { spreadInnerStyles } from 'shared/lib/spreadInnerUi';
 import { CardDescription } from '../CardDescription';
+import SpreadStepper from '../SpreadStepper/SpreadStepper';
 
 const PHONE_MAX_WIDTH = 640;
 
@@ -197,12 +199,15 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
     );
   }
 
+  const stepperStep = isSpreadCompleted && !isSimpleSpread ? 3 : 2;
+
   return (
     <ScreenLayout>
       <Header
         backAction={handleBackToSpreads}
         title={t(spread?.name ?? '') ?? 'Выбор карт'}
       />
+      {!isSimpleSpread && <SpreadStepper activeStep={stepperStep} />}
       <DataProvider
         Context={AnimationCarouselContext}
         value={animationCarouselContextData}
@@ -210,20 +215,27 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
         <KeyboardAwareScrollView
           style={{ flex: 1, position: 'relative' }}
           contentContainerStyle={styles.scrollContent}
-          enableOnAndroid={true} // Включает поддержку на Android
-          extraScrollHeight={100} // Дополнительное пространство для прокрутки
+          enableOnAndroid
+          extraScrollHeight={100}
         >
           <View style={styles.wrapper}>
             {!isSimpleSpread && (
-              <View style={styles.scheme}>
+              <View style={[spreadInnerStyles.glassPanel, styles.scheme]}>
                 <SpreadScheme hasRotation={false} isChoicePage />
               </View>
             )}
             {isSpreadCompleted && !isSimpleSpread ? (
-              <View style={styles.summary}>
-                <ChoiceTriangle width={60} height={60} />
+              <View style={spreadInnerStyles.completionPanel}>
+                <ChoiceTriangle width={56} height={56} />
+                <Text
+                  category={TEXT_TAGS.h4}
+                  weight="bold"
+                  style={spreadInnerStyles.completionTitle}
+                >
+                  {t('spread:flow.completedTitle')}
+                </Text>
                 <Button
-                  style={styles.button}
+                  style={[styles.button, spreadInnerStyles.stickyCta]}
                   onPress={handleNavigateToSpreadReading}
                 >
                   {t('core:choice.completed')}
@@ -239,14 +251,15 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
                       source={getImage([
                         'spreads',
                         'flatIllustration',
-                        'simple_YesNo',
+                        spread?.id ?? 'simple_YesNo',
                       ])}
                     />
                   )}
                 {spread?.id === SpreadName.Simple_DaySuggest ||
                 !isSimpleSpread ||
                 hasAskedQuestion ? (
-                  <View style={styles.cardPickerCenter}>
+                  <View style={spreadInnerStyles.altarZone}>
+                    <View style={spreadInnerStyles.altarGlow} pointerEvents="none" />
                     <AnimatedCard />
                     <CoverFlowCardCarousel
                       style={
@@ -255,18 +268,23 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
                           : styles.carousel
                       }
                     />
+                    {!isSimpleSpread && (
+                      <Text category={TEXT_TAGS.p2} style={spreadInnerStyles.altarHint}>
+                        {t('spread:flow.pickHint')}
+                      </Text>
+                    )}
                   </View>
                 ) : (
-                  <View style={styles.questionWrapper}>
+                  <View style={[spreadInnerStyles.glassPanel, styles.questionWrapper]}>
+                    <Text style={spreadInnerStyles.sectionLabel}>
+                      {t('spread:flow.questionSection')}
+                    </Text>
                     <Question />
                     {interpretationLoading ? (
                       <ActivityIndicator color={COLORS.Primary} />
                     ) : (
                       <Button
-                        style={{
-                          height: verticalScale(46),
-                          borderRadius: 32,
-                        }}
+                        style={spreadInnerStyles.stickyCta}
                         onPress={handlePressMakeSpread}
                       >
                         {t('core:button.makeSpread')}
@@ -290,46 +308,34 @@ const styles = StyleSheet.create({
   },
   questionWrapper: {
     width: '100%',
-    maxWidth: 480,
+    maxWidth: 520,
     alignSelf: 'center',
     alignItems: 'stretch',
-    paddingHorizontal: 12,
-    paddingVertical: 20,
-    gap: 12,
-  },
-  cardPickerCenter: {
-    width: '100%',
-    minHeight: 300,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
-    paddingVertical: 16,
-    position: 'relative',
+    gap: 14,
+    marginHorizontal: 16,
   },
   wrapper: {
     flexGrow: 1,
     marginBottom: 48,
+    gap: 16,
   },
   description: {
-    marginTop: 24,
-    marginLeft: 16,
-    marginRight: 16,
-  },
-  summary: {
-    alignItems: 'center',
-    padding: 16,
-    paddingTop: 30,
-    gap: 30,
+    marginTop: 8,
+    marginHorizontal: 16,
   },
   image: {
     width: '100%',
-    height: isTablet ? verticalScale(450) : verticalScale(380),
-    padding: 16,
-    borderRadius: 16,
-    opacity: 0.7,
+    height: isTablet ? verticalScale(320) : verticalScale(260),
+    marginHorizontal: 16,
+    borderRadius: 20,
+    opacity: 0.85,
+    borderWidth: 1,
+    borderColor: 'rgba(173, 173, 177, 0.2)',
   },
-  button: { width: '100%', height: verticalScale(46), borderRadius: 32 },
-  scheme: { paddingLeft: 16, paddingRight: 16 },
+  button: { width: '100%' },
+  scheme: {
+    marginHorizontal: 16,
+  },
   carousel: {
     marginTop: 8,
     alignSelf: 'center',

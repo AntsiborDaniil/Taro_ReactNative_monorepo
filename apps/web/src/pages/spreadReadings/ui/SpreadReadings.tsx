@@ -11,6 +11,8 @@ import { useData } from 'shared/DataProvider';
 import { CopyIcon } from 'shared/icons';
 import { isTablet } from 'shared/lib';
 import { COLORS } from 'shared/themes';
+import SpreadStepper from 'pages/spreadDescriptionChoice/ui/SpreadStepper/SpreadStepper';
+import { SpreadsCategory } from 'shared/api';
 import { ScreenLayout } from 'shared/ui';
 
 function SpreadReadings() {
@@ -44,6 +46,9 @@ function SpreadReadings() {
           }
           rightAction={spread?.interpretation ? handlePressCopy : undefined}
         />
+        {spread?.category !== SpreadsCategory.Simple && (
+          <SpreadStepper activeStep={3} />
+        )}
       </View>
       <View style={styles.contentWrap}>
         <TarotCardReadingsSpread cardIndex={cardIndex} />

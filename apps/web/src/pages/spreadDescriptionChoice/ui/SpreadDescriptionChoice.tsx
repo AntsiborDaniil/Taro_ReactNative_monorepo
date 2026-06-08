@@ -19,13 +19,14 @@ import {
   getValueForAsyncDeviceMemoryKey,
   isGuestFreeSpreadId,
   moderateScale,
-  verticalScale,
 } from 'shared/lib';
-import { COLORS } from 'shared/themes';
 import { AnalyticAction } from 'shared/types';
 import { Button, NoContent, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
+import { spreadInnerStyles } from 'shared/lib/spreadInnerUi';
 import { CardDescription } from './CardDescription';
+import SpreadHeroBanner from './SpreadHeroBanner/SpreadHeroBanner';
+import SpreadStepper from './SpreadStepper/SpreadStepper';
 import { SpreadCardsChoice } from './SpreadCardsChoice';
 
 function SpreadDescriptionChoice() {
@@ -132,31 +133,45 @@ function SpreadDescriptionChoice() {
   return (
     <ScreenLayout>
       <Header backAction={handleBackToSpreads} title="" />
+      <SpreadStepper activeStep={1} />
       <KeyboardAwareScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 48 }}
-        enableOnAndroid={true} // Включает поддержку на Android
-        extraScrollHeight={100} // Дополнительное пространство для прокрутки
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        enableOnAndroid
+        extraScrollHeight={100}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.wrapper}>
-          <SpreadScheme hasRotation={true} />
-          <Text style={styles.title} weight="bold" category={TEXT_TAGS.h2}>
-            {t(spread.name)}
-          </Text>
-          <Text style={styles.category}>
-            {t(spreadsDataNames[spread.category])}
-          </Text>
-          <Text>{t(spread.description)}</Text>
+          <SpreadHeroBanner
+            spread={spread}
+            categoryLabel={t(spreadsDataNames[spread.category])}
+          />
 
-          <Question />
+          <View style={spreadInnerStyles.glassPanel}>
+            <Text style={spreadInnerStyles.sectionLabel}>
+              {t('spread:flow.positionsTitle')}
+            </Text>
+            <SpreadScheme hasRotation />
+          </View>
+
+          <Text category={TEXT_TAGS.p2} style={spreadInnerStyles.descriptionText}>
+            {t(spread.description)}
+          </Text>
+
+          <View style={spreadInnerStyles.glassPanel}>
+            <Text style={spreadInnerStyles.sectionLabel}>
+              {t('spread:flow.questionSection')}
+            </Text>
+            <Question />
+          </View>
 
           <Button
-            style={{ height: verticalScale(46), borderRadius: 32 }}
+            style={spreadInnerStyles.stickyCta}
             onPress={handlePressMakeSpread}
           >
             {t('core:button.makeSpread')}
           </Button>
+
           <CardDescription />
         </View>
       </KeyboardAwareScrollView>
@@ -165,18 +180,16 @@ function SpreadDescriptionChoice() {
 }
 
 const styles = StyleSheet.create({
-  title: {
-    textAlign: 'center',
+  scroll: {
+    flex: 1,
   },
-  category: {
-    textAlign: 'center',
-    color: COLORS.SpbSky2,
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 48,
   },
   wrapper: {
-    paddingLeft: 16,
-    paddingRight: 16,
-    paddingBottom: 48,
-    gap: moderateScale(16),
+    paddingHorizontal: 16,
+    gap: moderateScale(18),
   },
 });
 

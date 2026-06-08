@@ -28,7 +28,8 @@ import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { ChevronLeftIcon, LeafIcon, ReverseIcon } from 'shared/icons';
 import { moderateScale } from 'shared/lib';
-import { COLORS } from 'shared/themes';
+import { spreadInnerStyles } from 'shared/lib/spreadInnerUi';
+import { COLORS, getColorOpacity } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { Button, NoContent, TarotCard, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
@@ -237,20 +238,21 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
           progress={progress}
           data={carouselData}
           dotStyle={{
-            width: carouselWidth / cardsCount - 4 - 16 / (cardsCount - 2),
-            height: 8,
-            borderRadius: 6,
-            backgroundColor: COLORS.SpbSky3,
+            width: Math.max(24, carouselWidth / cardsCount - 8),
+            height: 6,
+            borderRadius: 3,
+            backgroundColor: getColorOpacity(COLORS.SpbSky1, 28),
           }}
           activeDotStyle={{
             overflow: 'hidden',
-            borderRadius: 6,
+            borderRadius: 3,
             backgroundColor: COLORS.Primary,
           }}
           containerStyle={{
-            gap: 4,
+            gap: 6,
             paddingHorizontal: 16,
-            paddingBottom: 16,
+            paddingTop: 8,
+            paddingBottom: 12,
           }}
           horizontal
         />
@@ -288,19 +290,26 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                 <SafeAreaView style={styles.content}>
                   <View style={styles.contentInner}>
                     <View style={styles.paddingWrapper}>
-                      <Text category={TEXT_TAGS.h3} style={styles.orderMeaning}>
+                      <Text style={spreadInnerStyles.readingPositionLabel}>
+                        {t('spread:flow.step.read')}
+                      </Text>
+                      <Text
+                        category={TEXT_TAGS.h3}
+                        style={spreadInnerStyles.readingPositionTitle}
+                      >
                         {t('spread:summaryTitle')}
                       </Text>
                     </View>
-                    <View style={styles.spreadSchemeContainer}>
+                    <View style={[styles.spreadSchemeContainer, spreadInnerStyles.glassPanel]}>
                       <SpreadScheme hasRotation={false} isChoicePage />
                     </View>
                     <View style={styles.paddingWrapper}>
                       <Pressable
-                        style={styles.summaryContainer}
+                        style={spreadInnerStyles.summaryScroll}
                         onPress={handlePressToUnlock}
                       >
-                        <Text style={styles.summaryText} key="meaning">
+                        <View style={spreadInnerStyles.summaryScrollAccent} />
+                        <Text style={spreadInnerStyles.summaryText} key="meaning">
                           {interpretation ?? ''}
                         </Text>
                         {!spread?.interpretation && <PressToUnlock />}
@@ -386,11 +395,19 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                     ]}
                   >
                     {!!spread?.cardsOrder?.length && (
-                      <Text category={TEXT_TAGS.h3} style={styles.orderMeaning}>
-                        {t(
-                          `spread:${spread?.cardsOrder?.[index - (hasSummary ? 1 : 0)]?.meaning ?? ''}`
-                        )}
-                      </Text>
+                      <View>
+                        <Text style={spreadInnerStyles.readingPositionLabel}>
+                          {`${t('core:card')} ${index - (hasSummary ? 1 : 0) + 1}`}
+                        </Text>
+                        <Text
+                          category={TEXT_TAGS.h3}
+                          style={spreadInnerStyles.readingPositionTitle}
+                        >
+                          {t(
+                            `spread:${spread?.cardsOrder?.[index - (hasSummary ? 1 : 0)]?.meaning ?? ''}`
+                          )}
+                        </Text>
+                      </View>
                     )}
 
                     <SafeAreaView
@@ -420,9 +437,9 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                       )}
                       <View
                         style={[
+                          spreadInnerStyles.readingCardFrame,
                           styles.cardFrame,
-                          isDaySuggest && styles.cardFrameDaySuggest,
-                          { width: cardWidth, height: cardHeight },
+                          { width: cardWidth + 8, height: cardHeight + 8 },
                         ]}
                       >
                         <TarotCard
@@ -432,7 +449,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                           height={cardHeight}
                           styleCard={[
                             styles.readingCard,
-                            isDaySuggest && styles.readingCardDaySuggest,
                             { width: cardWidth, height: cardHeight },
                           ]}
                         />
@@ -494,15 +510,11 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                         />
                       </View>
                       {card.direction === TarotCardDirection.Reversed && (
-                        <View style={styles.reversedContainer}>
-                          <Text category={TEXT_TAGS.h3} style={styles.title}>
+                        <View style={spreadInnerStyles.reversedChip}>
+                          <ReverseIcon width={18} height={18} />
+                          <Text style={spreadInnerStyles.reversedChipText}>
                             {t('spread:reverseCard')}
                           </Text>
-                          <ReverseIcon
-                            width={24}
-                            height={24}
-                            style={{ marginBottom: 2 }}
-                          />
                         </View>
                       )}
                     </View>

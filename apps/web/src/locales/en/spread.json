@@ -14,6 +14,14 @@
   "selfDevelopment.name.multiple": "Self-Discovery",
   "choice.name.multiple": "Decision Making",
 
+  "flow.step.prepare": "Prepare",
+  "flow.step.choose": "Pick cards",
+  "flow.step.read": "Reading",
+  "flow.positionsTitle": "Spread positions",
+  "flow.pickHint": "Swipe the deck and pick a card",
+  "flow.questionSection": "Your question",
+  "flow.completedTitle": "All cards are in place",
+
   "question.tooltip": "To get an accurate response from Tarot cards, ask questions clearly and specifically. Formulate your query to be open-ended (e.g., 'What do I need to know about...?' or 'How should I proceed with...?'), and avoid simple 'yes/no' questions. Focus on your situation, be sincere and open. The cards reflect your energy, so ask with clear intent and without rushing",
   "question.placeholder": "Ask the cards a question",
   "question.error": "A question needs to be asked",
