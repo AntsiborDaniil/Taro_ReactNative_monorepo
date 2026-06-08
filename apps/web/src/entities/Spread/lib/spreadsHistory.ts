@@ -40,6 +40,7 @@ async function consumeTarotDailySlotOnServer(): Promise<boolean> {
           'X-Web-Cookie-Auth': '1',
           ...authRequestHeaders(null),
         },
+        body: JSON.stringify({}),
       }
     );
     if (res.ok) {
