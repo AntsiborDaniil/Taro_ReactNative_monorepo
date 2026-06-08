@@ -8,10 +8,19 @@ import {
   addCloudFavorite,
   favoriteIdsToRecord,
   fetchCloudFavoriteIds,
+  isCloudSessionActive,
   removeCloudFavorite,
 } from 'shared/api/cloud';
 
 export type TSavedFavoriteCardsIds = Record<string, boolean>;
+
+export type SaveFavoriteAction = 'add' | 'remove';
+
+export type SaveFavoriteResult = {
+  ok: boolean;
+  favorites: TSavedFavoriteCardsIds;
+  action: SaveFavoriteAction;
+};
 
 async function loadLocalFavorites(): Promise<TSavedFavoriteCardsIds> {
   try {
@@ -35,34 +44,49 @@ async function saveLocalFavorites(
   );
 }
 
-export async function saveFavoriteCard(
+function buildNextFavorites(
+  current: TSavedFavoriteCardsIds,
   cardId: string
-): Promise<TSavedFavoriteCardsIds> {
+): { next: TSavedFavoriteCardsIds; action: SaveFavoriteAction } {
+  const isLiked = !!current[cardId];
+  const next: TSavedFavoriteCardsIds = { ...current };
+
+  if (isLiked) {
+    delete next[cardId];
+    return { next, action: 'remove' };
+  }
+
+  next[cardId] = true;
+  return { next, action: 'add' };
+}
+
+export async function saveFavoriteCard(
+  cardId: string,
+  currentFavorites?: TSavedFavoriteCardsIds
+): Promise<SaveFavoriteResult> {
+  const current = currentFavorites ?? (await getFavoriteCards());
+  const { next, action } = buildNextFavorites(current, cardId);
+
   try {
-    const current = await getFavoriteCards();
-    const isLiked = !!current[cardId];
-    const next: TSavedFavoriteCardsIds = { ...current };
-
-    if (isLiked) {
-      delete next[cardId];
-    } else {
-      next[cardId] = true;
-    }
-
-    await saveLocalFavorites(next);
-
     if (Platform.OS === 'web') {
-      if (isLiked) {
-        await removeCloudFavorite(cardId);
-      } else {
-        await addCloudFavorite(cardId);
+      const usesCloud = await isCloudSessionActive();
+      if (usesCloud) {
+        const cloudOk =
+          action === 'remove'
+            ? await removeCloudFavorite(cardId)
+            : await addCloudFavorite(cardId);
+
+        if (!cloudOk) {
+          return { ok: false, favorites: current, action };
+        }
       }
     }
 
-    return next;
+    await saveLocalFavorites(next);
+    return { ok: true, favorites: next, action };
   } catch (error) {
     console.error('Не удалось сохранить избранную карту:', error);
-    return {};
+    return { ok: false, favorites: current, action };
   }
 }
 

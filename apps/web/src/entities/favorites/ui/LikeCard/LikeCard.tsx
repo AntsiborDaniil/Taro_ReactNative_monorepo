@@ -8,8 +8,10 @@ import { useNativeNavigation } from 'shared/hooks';
 import { HeartIcon } from 'shared/icons';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
-import { FavoritesContext } from '../../model';
+import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
+import { FavoritesContext } from '../../model';
+import { FavoriteLikeErrorModal } from '../FavoriteLikeErrorModal';
 
 export type LikeCardProps = {
   card: TTarotCard | TSelectedTarotCard;
@@ -21,10 +23,9 @@ function LikeCard({ card, onAdditionalPress }: LikeCardProps) {
     Context: FavoritesContext,
   });
 
+  const { showModal } = useData({ Context: ModalsContext });
   const navigation = useNativeNavigation();
-
   const { selectedTab } = useData({ Context: TabsAndRoutesContext });
-
   const { t } = useTranslation();
 
   return (
@@ -34,9 +35,10 @@ function LikeCard({ card, onAdditionalPress }: LikeCardProps) {
         onPress={async () => {
           await onAdditionalPress?.();
 
-          addOrRemoveFavoriteCard?.(card);
+          const wasLiked = !!favoritesCardsIds?.[card.id];
+          const result = await addOrRemoveFavoriteCard?.(card);
 
-          if (!favoritesCardsIds?.[card.id]) {
+          if (result?.ok && result.action === 'add') {
             Toast.show({
               type: 'success',
               text1: t('core:card.added1'),
@@ -46,11 +48,13 @@ function LikeCard({ card, onAdditionalPress }: LikeCardProps) {
                   screen: NavigationRoute.FavoriteCards,
                 }),
             });
+          } else if (result && !result.ok && result.action === 'add') {
+            showModal?.(<FavoriteLikeErrorModal />);
           }
 
           AppMetrica.reportEvent(AnalyticAction.ClickLikeTarotCard, {
-            [card.name]: !favoritesCardsIds?.[card.id],
-            like: !favoritesCardsIds?.[card.id],
+            [card.name]: !wasLiked,
+            like: !wasLiked,
           });
         }}
       >
@@ -71,7 +75,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'flex-end',
-    // width: '80%',
   },
 });
 

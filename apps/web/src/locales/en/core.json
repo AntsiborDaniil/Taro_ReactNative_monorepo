@@ -6,6 +6,8 @@
   "card.reversed": "Reversed",
   "card.added1": "Tarot card added to favorites.",
   "card.added2": "Press to view",
+  "card.favoriteError.title": "Could not add to favorites",
+  "card.favoriteError.body": "Check your internet connection and try again.",
 
   "ai.error1": "The mists of fate have veiled the Tarot cards.",
   "ai.error2": "Let the stars align and try again.",
