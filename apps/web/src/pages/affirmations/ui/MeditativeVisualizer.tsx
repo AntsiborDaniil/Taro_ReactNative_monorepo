@@ -9,7 +9,10 @@ import {
   usePathValue,
   vec,
 } from '@shopify/react-native-skia';
-import { AffirmationsContext, TAffirmationTexts } from 'entities/affirmations';
+import {
+  AffirmationsContext,
+  getAffirmationItemsForCategory,
+} from 'entities/affirmations';
 import { useTranslation } from 'react-i18next';
 import {
   Easing,
@@ -169,14 +172,12 @@ function MeditativeVisualizer({ visualSize }: MeditativeVisualizerProps) {
     });
   }, Skia.Path.Make());
 
-  const texts = t(
-    `affirmations:affirmationsItems.${selectedAffirmationCategory}`,
-    {
-      returnObjects: true,
-    }
-  ) as TAffirmationTexts[];
+  const texts = getAffirmationItemsForCategory(
+    t,
+    selectedAffirmationCategory
+  );
 
-  const selectedTexts = texts?.find(
+  const selectedTexts = texts.find(
     (item) => item.id === selectedAffirmation?.texts.id
   );
 

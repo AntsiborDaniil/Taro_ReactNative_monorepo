@@ -2,5 +2,8 @@
   "headerTitle": "Главная страница",
 
   "popularSpreads": "Популярные расклады",
-  "popularRituals": "Популярные Ритуалы"
+  "popularRituals": "Популярные Ритуалы",
+
+  "affirmationsBlock.title": "Аффирмации",
+  "affirmationsBlock.caption": "Для вас есть аффирмация"
 }

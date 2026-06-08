@@ -9,9 +9,9 @@ import {
 } from 'shared/lib';
 import { gradientPallets } from 'shared/themes';
 import { UserContext } from '../../user';
+import { getAffirmationItemsForCategory } from '../lib/getAffirmationItems';
 import {
   AffirmationCategory,
-  TAffirmationTexts,
   TSavedAffirmations,
   TSelectedAffirmation,
 } from './types';
@@ -28,7 +28,7 @@ export function useAffirmations(): TAffirmationsHookResult {
   const [selectedAffirmationCategory, setSelectedAffirmationCategory] =
     useState<AffirmationCategory | null>(null);
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const { isAuthenticated } = useData({ Context: UserContext });
 
@@ -61,9 +61,7 @@ export function useAffirmations(): TAffirmationsHookResult {
         return;
       }
 
-      const affirmations = t(`affirmations:affirmationsItems.${category}`, {
-        returnObjects: true,
-      }) as TAffirmationTexts[];
+      const affirmations = getAffirmationItemsForCategory(t, category);
 
       if (!affirmations.length) {
         return;
@@ -97,6 +95,30 @@ export function useAffirmations(): TAffirmationsHookResult {
     },
     [t, canAccessCategory]
   );
+
+  useEffect(() => {
+    const retryAfterAffirmationsLoad = (lng: string, ns: string) => {
+      if (ns !== 'affirmations' || selectedAffirmation) {
+        return;
+      }
+
+      const category =
+        selectedAffirmationCategory ?? AffirmationCategory.General;
+      void handleSelectedAffirmationCategory(category);
+    };
+
+    i18n.on('loaded', retryAfterAffirmationsLoad);
+    i18n.on('added', retryAfterAffirmationsLoad);
+    return () => {
+      i18n.off('loaded', retryAfterAffirmationsLoad);
+      i18n.off('added', retryAfterAffirmationsLoad);
+    };
+  }, [
+    i18n,
+    selectedAffirmation,
+    selectedAffirmationCategory,
+    handleSelectedAffirmationCategory,
+  ]);
 
   useEffect(() => {
     if (selectedAffirmationCategory && selectedAffirmation) {

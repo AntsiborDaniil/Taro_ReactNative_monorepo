@@ -71,10 +71,10 @@ function AffirmationsBlock(): ReactElement {
         <View style={styles.content}>
           <View style={styles.texts}>
             <Text category={TEXT_TAGS.h3}>
-              {t('affirmations:affirmations')}
+              {t('main:affirmationsBlock.title')}
             </Text>
             <Text style={styles.caption} category={TEXT_TAGS.label}>
-              {t('affirmations:hasAffirmation')}
+              {t('main:affirmationsBlock.caption')}
             </Text>
           </View>
           <Image

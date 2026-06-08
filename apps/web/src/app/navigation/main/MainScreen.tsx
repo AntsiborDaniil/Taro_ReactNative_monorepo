@@ -6,6 +6,7 @@ import { MoodAndEnergyContext, useMoodAndEnergy } from 'entities/moodAndEnergy';
 import { Main } from 'pages/main';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { DataProvider, MultiProvider, useData } from 'shared/DataProvider';
+import { ensureI18nNamespaces } from 'shared/lib/i18n/loadNamespaces';
 import { NavigationRoute, TabRoute } from 'shared/types';
 import { darkStackScreenOptions } from '../stackScreenOptions';
 import {
@@ -43,6 +44,10 @@ function MainScreen() {
     setSelectedTab?.(currentTab as TabRoute);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
+
+  useEffect(() => {
+    void ensureI18nNamespaces('affirmations');
+  }, []);
 
   return (
     <MultiProvider
