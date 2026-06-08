@@ -39,7 +39,11 @@ function TarotSchemeCard({
   onLayout,
   style,
 }: TarotSchemeCardProps) {
-  const { hasRotation: hasRotationContext, isChoicePage } = useData({
+  const {
+    hasRotation: hasRotationContext,
+    isChoicePage,
+    cardSize: contextCardSize,
+  } = useData({
     Context: SchemeContext,
   });
 
@@ -70,7 +74,7 @@ function TarotSchemeCard({
     <View
       style={[
         styles.container,
-        { ...(cardSize ?? SCHEME_CARD_SIZE) },
+        { ...(cardSize ?? contextCardSize ?? SCHEME_CARD_SIZE) },
         style,
         isHorizontal ? styles.horizontal : null,
       ]}

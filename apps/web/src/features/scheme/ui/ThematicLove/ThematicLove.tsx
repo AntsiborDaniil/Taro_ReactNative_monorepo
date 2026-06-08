@@ -25,14 +25,14 @@ function ThematicLove({ onLayout, style }: TThematicLoveProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: '100%',
-    gap: 24,
+    alignSelf: 'center',
+    gap: 16,
   },
   row: {
-    width: '100%',
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 24,
+    gap: 12,
+    flexWrap: 'wrap',
   },
 });
 

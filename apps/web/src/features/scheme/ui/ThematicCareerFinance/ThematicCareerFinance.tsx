@@ -49,8 +49,8 @@ function ThematicCareerFinance({
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: '100%',
-    gap: 16,
+    alignSelf: 'center',
+    gap: 12,
   },
   row: {
     flexDirection: 'row',

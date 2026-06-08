@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   },
   button: { width: '100%' },
   scheme: {
-    marginHorizontal: 16,
+    marginHorizontal: 0,
   },
   carousel: {
     marginTop: 8,

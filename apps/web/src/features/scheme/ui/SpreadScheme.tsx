@@ -2,13 +2,13 @@ import { StyleSheet, View, ViewStyle } from 'react-native';
 import { SpreadContext } from 'entities/Spread';
 import { useTranslation } from 'react-i18next';
 import { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
-// import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SpreadName, SpreadsCategory } from 'shared/api';
 import { DataProvider, useData } from 'shared/DataProvider';
 import { Text, TEXT_TAGS } from 'shared/ui';
-import { SchemeContext, TSchemeMapping } from '../model';
+import { SchemeContext, TSchemeMapping, useSchemeLayoutMetrics } from '../model';
 import { ChoicePerspective } from './ChoicePerspective';
 import { ChoiceTwoPaths } from './ChoiceTwoPaths';
+import SchemeFitContainer from './SchemeFitContainer/SchemeFitContainer';
 import { SelfDevelopmentMirror } from './SelfDevelopmentMirror';
 import { SelfDevelopmentPerspective } from './SelfDevelopmentPerspective';
 import { ThematicCareerFinance } from './ThematicCareerFinance';
@@ -25,18 +25,14 @@ type TSpreadSchemeProps = {
 };
 
 const SchemeMapping: TSchemeMapping = {
-  // Тематические
   [SpreadName.Thematic_Relationship]: ThematicRelationship,
   [SpreadName.Thematic_Love]: ThematicLove,
   [SpreadName.Thematic_CareerFinance]: ThematicCareerFinance,
-  // Универсальные
   [SpreadName.Universal_CelticCross]: UniversalCelticCross,
   [SpreadName.Universal_Pyramid]: UniversalPyramid,
   [SpreadName.Universal_Horseshoe]: UniversalHorseshoe,
-  // Для выбора
   [SpreadName.Choice_Crossroad]: ChoicePerspective,
   [SpreadName.Choice_TwoPaths]: ChoiceTwoPaths,
-  // Для самопознания
   [SpreadName.SelfDevelopment_Mirror]: SelfDevelopmentMirror,
   [SpreadName.SelfDevelopment_ShadowSide]: SelfDevelopmentPerspective,
 };
@@ -48,8 +44,7 @@ function SpreadScheme({
 }: TSpreadSchemeProps) {
   const { t } = useTranslation('core');
   const { spread, handleLayoutCard } = useData({ Context: SpreadContext });
-
-  // const insets = useSafeAreaInsets();
+  const { cardSize, gapScale } = useSchemeLayoutMetrics();
 
   if (!spread?.id) {
     return null;
@@ -81,33 +76,13 @@ function SpreadScheme({
       value={{
         hasRotation,
         isChoicePage,
+        cardSize,
+        gapScale,
       }}
     >
-      {/*{spread.cardsPosition.map((item) => (*/}
-      {/*  <View*/}
-      {/*    style={{*/}
-      {/*      position: 'absolute',*/}
-      {/*      width: 4,*/}
-      {/*      height: 4,*/}
-      {/*      backgroundColor: 'red',*/}
-      {/*      left: item.x,*/}
-      {/*      top: item.y,*/}
-      {/*      zIndex: 1000,*/}
-      {/*    }}*/}
-      {/*  />*/}
-      {/*))}*/}
-      {/*<View*/}
-      {/*  style={{*/}
-      {/*    position: 'absolute',*/}
-      {/*    width: 4,*/}
-      {/*    height: 4,*/}
-      {/*    backgroundColor: 'red',*/}
-      {/*    left: 0,*/}
-      {/*    top: 0,*/}
-      {/*    zIndex: 1000,*/}
-      {/*  }}*/}
-      {/*/>*/}
-      <Scheme style={style} onLayout={handleLayoutCard} />
+      <SchemeFitContainer>
+        <Scheme style={style} onLayout={handleLayoutCard} />
+      </SchemeFitContainer>
     </DataProvider>
   );
 }

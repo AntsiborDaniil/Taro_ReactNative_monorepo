@@ -1,5 +1,6 @@
 import { SafeAreaView, StyleSheet, View } from 'react-native';
-import { TCardSchemeProps } from '../../model';
+import { useData } from 'shared/DataProvider';
+import { SchemeContext, TCardSchemeProps } from '../../model';
 import { TarotSchemeCard } from '../TarotSchemeCard';
 
 type TSelfDevelopmentMirrorProps = TCardSchemeProps;
@@ -8,10 +9,14 @@ function SelfDevelopmentMirror({
   onLayout,
   style,
 }: TSelfDevelopmentMirrorProps) {
+  const { gapScale = 1 } = useData({ Context: SchemeContext });
+  const rowGap = Math.max(8, Math.round(32 * gapScale));
+  const colGap = Math.max(8, Math.round(24 * gapScale));
+
   return (
     <SafeAreaView style={[styles.wrapper, style]}>
-      <View style={styles.row}>
-        <View style={styles.column}>
+      <View style={[styles.row, { gap: rowGap }]}>
+        <View style={[styles.column, { gap: colGap }]}>
           {[...Array(3)].map((_, index) => (
             <TarotSchemeCard
               key={index}
@@ -20,7 +25,7 @@ function SelfDevelopmentMirror({
             />
           ))}
         </View>
-        <View style={[styles.column, styles.center]}>
+        <View style={[styles.column, styles.center, { gap: colGap }]}>
           {[...Array(2)].map((_, index) => (
             <TarotSchemeCard
               key={index + 8}
@@ -29,7 +34,7 @@ function SelfDevelopmentMirror({
             />
           ))}
         </View>
-        <View style={styles.column}>
+        <View style={[styles.column, { gap: colGap }]}>
           {[...Array(3)].map((_, index) => (
             <TarotSchemeCard
               key={index + 3}
@@ -39,7 +44,7 @@ function SelfDevelopmentMirror({
           ))}
         </View>
       </View>
-      <View style={styles.row}>
+      <View style={[styles.row, { gap: rowGap }]}>
         <TarotSchemeCard content={8} onLayout={onLayout?.(7)} />
         <TarotSchemeCard content={7} onLayout={onLayout?.(6)} />
       </View>
@@ -49,16 +54,14 @@ function SelfDevelopmentMirror({
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: '100%',
-    gap: 24,
+    alignSelf: 'center',
+    gap: 16,
   },
   row: {
     flexDirection: 'row',
-    gap: 32,
     justifyContent: 'center',
   },
   column: {
-    gap: 24,
     flexDirection: 'column-reverse',
   },
   center: {

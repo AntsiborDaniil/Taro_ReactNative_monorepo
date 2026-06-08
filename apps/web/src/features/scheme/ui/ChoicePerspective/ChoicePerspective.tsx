@@ -48,11 +48,11 @@ function ChoicePerspective({ onLayout, style }: TChoicePerspectiveProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: '100%',
+    alignSelf: 'center',
     gap: 8,
   },
   row: {
-    gap: 16,
+    gap: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },

@@ -43,13 +43,14 @@ function UniversalPyramid({ onLayout, style }: TUniversalPyramidProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: '100%',
-    gap: 16,
+    alignSelf: 'center',
+    gap: 12,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 16,
+    gap: 10,
+    flexWrap: 'wrap',
   },
 });
 

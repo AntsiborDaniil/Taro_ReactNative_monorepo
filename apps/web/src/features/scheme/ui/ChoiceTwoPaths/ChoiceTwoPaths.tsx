@@ -36,9 +36,9 @@ function ChoiceTwoPaths({ onLayout, style }: TChoiceTwoPathsProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: '100%',
+    alignSelf: 'center',
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
     justifyContent: 'center',
   },
   rows: {
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 10,
     justifyContent: 'space-between',
   },
 });

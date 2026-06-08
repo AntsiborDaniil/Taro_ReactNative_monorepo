@@ -29,16 +29,17 @@ function ThematicRelationship({ onLayout, style }: TThematicRelationshipProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: '100%',
-    gap: 24,
+    alignSelf: 'center',
+    gap: 16,
     flexDirection: 'column-reverse',
   },
   row: {
     flexDirection: 'row',
+    gap: 8,
   },
   container: {
     alignItems: 'center',
-    width: '50%',
+    flex: 1,
   },
 });
 

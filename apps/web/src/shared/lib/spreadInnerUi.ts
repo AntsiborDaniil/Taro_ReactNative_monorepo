@@ -18,6 +18,7 @@ export const spreadInnerStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: getColorOpacity(COLORS.SpbSky1, 28),
     padding: 16,
+    overflow: 'visible',
     ...Platform.select({
       web: {
         boxShadow: '0 10px 28px rgba(0, 0, 0, 0.22)',

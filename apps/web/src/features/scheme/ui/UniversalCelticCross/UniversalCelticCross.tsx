@@ -43,14 +43,15 @@ function UniversalCelticCross({ onLayout, style }: TUniversalCelticCrossProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: '100%',
+    alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
   row: {
     flexDirection: 'row',
-    gap: 24,
-    marginBottom: 24,
+    gap: 10,
+    marginBottom: 12,
   },
   center: {
     position: 'relative',
