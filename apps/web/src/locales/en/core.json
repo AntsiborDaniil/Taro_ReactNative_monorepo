@@ -99,6 +99,7 @@
   "nav.rail.collapse": "Collapse sidebar",
   "nav.rail.expand": "Expand sidebar",
 
+  "a11y.scrollToTop": "Scroll to top",
   "a11y.back": "Go back",
   "a11y.settings": "Open settings",
   "a11y.headerActions": "Open actions",

@@ -11,6 +11,7 @@ export * from './ProgressLines';
 export * from './Radio';
 export * from './RadioCard';
 export * from './ScreenLayout';
+export * from './ScrollToTopFab';
 export * from './Skeleton';
 export * from './SlowConnectionBanner';
 export * from './SwitchElement';

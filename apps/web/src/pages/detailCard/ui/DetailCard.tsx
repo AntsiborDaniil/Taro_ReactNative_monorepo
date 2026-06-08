@@ -4,6 +4,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Layout } from '@ui-kitten/components';
@@ -11,10 +12,10 @@ import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
 import { TarotCardReadingsDefault } from 'features/TarotCardReadings';
 import { TarotCardDirection, tarotCards } from 'shared/api';
-import { TNavigationParams } from 'shared/hooks';
+import { TNavigationParams, useScrollToTopFab } from 'shared/hooks';
 import { getTarotCardReadings } from 'shared/lib';
 import { COLORS } from 'shared/themes';
-import { NoContent, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
+import { NoContent, ScreenLayout, ScrollToTopFab, Text, TEXT_TAGS } from 'shared/ui';
 
 export default function DetailCard() {
   const [direction, setDirection] = useState<TarotCardDirection>(
@@ -22,8 +23,9 @@ export default function DetailCard() {
   );
 
   const { t } = useTranslation();
+  const { scrollRef, fabVisible, onScroll, scrollToTop } = useScrollToTopFab();
 
-  const route = useRoute<RouteProp<TNavigationParams>>(); // Получаем объект маршрута
+  const route = useRoute<RouteProp<TNavigationParams>>();
   const { id } = route.params || {};
 
   const card = tarotCards[id ?? ''] || null;
@@ -43,60 +45,72 @@ export default function DetailCard() {
   return (
     <ScreenLayout>
       <Header title={t(card.name)} />
-      <ScrollView>
-        <Layout
-          style={{
-            height: '100%',
-            gap: 16,
-            paddingBottom: 32,
-          }}
+      <View style={styles.scrollHost}>
+        <ScrollView
+          ref={scrollRef}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          showsVerticalScrollIndicator={false}
         >
-          <SafeAreaView style={styles.direction}>
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={() => setDirection(TarotCardDirection.Upright)}
-            >
-              <Text
-                category={TEXT_TAGS.h3}
-                style={
-                  direction === TarotCardDirection.Upright
-                    ? styles.selected
-                    : undefined
-                }
+          <Layout style={styles.content}>
+            <SafeAreaView style={styles.direction}>
+              <TouchableOpacity
+                activeOpacity={1}
+                onPress={() => setDirection(TarotCardDirection.Upright)}
               >
-                {t('core:card.upright')}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={() => setDirection(TarotCardDirection.Reversed)}
-            >
-              <Text
-                category={TEXT_TAGS.h3}
-                style={
-                  direction === TarotCardDirection.Reversed
-                    ? styles.selected
-                    : undefined
-                }
+                <Text
+                  category={TEXT_TAGS.h3}
+                  style={
+                    direction === TarotCardDirection.Upright
+                      ? styles.selected
+                      : undefined
+                  }
+                >
+                  {t('core:card.upright')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={1}
+                onPress={() => setDirection(TarotCardDirection.Reversed)}
               >
-                {t('core:card.reversed')}
-              </Text>
-            </TouchableOpacity>
-          </SafeAreaView>
-          <TarotCardReadingsDefault
-            card={getTarotCardReadings({
-              card,
-              keys: ['keywords', 'description'],
-              direction,
-            })}
-          />
-        </Layout>
-      </ScrollView>
+                <Text
+                  category={TEXT_TAGS.h3}
+                  style={
+                    direction === TarotCardDirection.Reversed
+                      ? styles.selected
+                      : undefined
+                  }
+                >
+                  {t('core:card.reversed')}
+                </Text>
+              </TouchableOpacity>
+            </SafeAreaView>
+            <TarotCardReadingsDefault
+              card={getTarotCardReadings({
+                card,
+                keys: ['keywords', 'description'],
+                direction,
+              })}
+            />
+          </Layout>
+        </ScrollView>
+        <ScrollToTopFab visible={fabVisible} onPress={scrollToTop} />
+      </View>
     </ScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollHost: {
+    flex: 1,
+    position: 'relative',
+    minHeight: 0,
+  },
+  content: {
+    minHeight: '100%',
+    gap: 16,
+    paddingBottom: 32,
+  },
   direction: {
     flexDirection: 'row',
     gap: 16,
