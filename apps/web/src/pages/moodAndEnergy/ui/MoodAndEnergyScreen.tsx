@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
 import { MoodDashboard } from 'features/MoodDashboard';
 import { useData } from 'shared/DataProvider';
-import { useNativeNavigation } from 'shared/hooks';
+import { shouldPromptWebSignIn } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { NavigationRoute, TabRoute } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -29,11 +29,7 @@ function MoodAndEnergyScreen(_props: MoodAndEnergyScreenProps): ReactElement {
     Context: MoodAndEnergyContext,
   });
 
-  if (
-    Platform.OS === 'web' &&
-    !authSessionLoading &&
-    isAuthenticated === false
-  ) {
+  if (shouldPromptWebSignIn(isAuthenticated, authSessionLoading)) {
     return (
       <ScreenLayout>
         <Header title={t('core:yourState')} />

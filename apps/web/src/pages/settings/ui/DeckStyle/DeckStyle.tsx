@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
 import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { useData } from 'shared/DataProvider';
-import { AsyncMemorySettingKey } from 'shared/lib';
+import { Platform } from 'react-native';
+import { AsyncMemorySettingKey, isWebAuthConfirmed } from 'shared/lib';
 import { AnalyticAction } from 'shared/types';
 import { CardsList, ScreenLayout } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
@@ -21,7 +22,7 @@ function DeckStyle() {
     asyncMemoryKey: AsyncMemorySettingKey.Appearance,
   });
 
-  const { isAuthenticated } = useData({ Context: UserContext });
+  const { isAuthenticated, authSessionLoading } = useData({ Context: UserContext });
 
   const { showModal } = useData({ Context: ModalsContext });
 
@@ -39,7 +40,12 @@ function DeckStyle() {
       >
         <CardsList
           hasSelectStatus
-          isAllUnlocked={isAuthenticated}
+          isAllUnlocked={
+            Platform.OS === 'web'
+              ? isWebAuthConfirmed(isAuthenticated, authSessionLoading) ||
+                authSessionLoading === true
+              : Boolean(isAuthenticated)
+          }
           cards={DECK_STYLES}
           onPressLocked={async () => {
             await handleVibrationClick?.();

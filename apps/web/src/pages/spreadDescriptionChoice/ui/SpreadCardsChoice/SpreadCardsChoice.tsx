@@ -36,6 +36,8 @@ import {
   getValueForAsyncDeviceMemoryKey,
   isGuestFreeSpreadId,
   isTablet,
+  shouldPromptWebSignIn,
+  isWebAuthConfirmed,
   verticalScale,
 } from 'shared/lib';
 import { COLORS } from 'shared/themes';
@@ -74,7 +76,7 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
     Context: SpreadContext,
   });
 
-  const { isPractitioner, isAuthenticated, tarotDaily } = useData({
+  const { isPractitioner, isAuthenticated, authSessionLoading, tarotDaily } = useData({
     Context: UserContext,
   });
 
@@ -84,8 +86,7 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
 
   const handlePressMakeSpread = useCallback(async () => {
     if (
-      Platform.OS === 'web' &&
-      !isAuthenticated &&
+      shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
       spread &&
       !isGuestFreeSpreadId(spread.id)
     ) {
@@ -98,7 +99,7 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
       const used = tarotDaily?.used ?? 0;
       const limit = tarotDaily?.limit ?? 10;
       isLocked =
-        Boolean(isAuthenticated) &&
+        isWebAuthConfirmed(isAuthenticated, authSessionLoading) &&
         !!spread &&
         !isGuestFreeSpreadId(spread.id) &&
         used >= limit;
@@ -133,6 +134,7 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
     question,
     isPractitioner,
     isAuthenticated,
+    authSessionLoading,
     tarotDaily?.used,
     tarotDaily?.limit,
     checkErrors,

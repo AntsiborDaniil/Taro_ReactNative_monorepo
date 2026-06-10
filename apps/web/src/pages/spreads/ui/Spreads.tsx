@@ -12,7 +12,7 @@ import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { DeckStyle } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { blurActiveElement, getImage, isGuestFreeSpreadId } from 'shared/lib';
+import { blurActiveElement, getImage, isGuestFreeSpreadId, isWebGuestSession, shouldPromptWebSignIn } from 'shared/lib';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { COLORS, getColorOpacity } from 'shared/themes';
@@ -26,7 +26,7 @@ export default function Spreads() {
   const layout = useSpreadsLayout();
 
   const { showModal } = useData({ Context: ModalsContext });
-  const { subscriptionType, isAuthenticated } = useData({ Context: UserContext });
+  const { subscriptionType, isAuthenticated, authSessionLoading } = useData({ Context: UserContext });
   const { selectSpread, spreadsSections } = useData({
     Context: SpreadContext,
   });
@@ -43,7 +43,7 @@ export default function Spreads() {
   const spreadsNavigatorTab =
     selectedTab === TabRoute.SpreadsTab ? TabRoute.SpreadsTab : TabRoute.MainTab;
 
-  const showWebGuestBanner = Platform.OS === 'web' && !isAuthenticated;
+  const showWebGuestBanner = isWebGuestSession(isAuthenticated, authSessionLoading);
   const onFabScroll = useMobileFabScrollOnScroll();
 
   return (
@@ -126,7 +126,7 @@ export default function Spreads() {
 
                     const guestFree = isGuestFreeSpreadId(item.id);
                     const guestBadge =
-                      Platform.OS === 'web' && !isAuthenticated && guestFree;
+                      isWebGuestSession(isAuthenticated, authSessionLoading) && guestFree;
 
                     return (
                       <SpreadCatalogCard
@@ -160,8 +160,7 @@ export default function Spreads() {
                           }
 
                           if (
-                            Platform.OS === 'web' &&
-                            !isAuthenticated &&
+                            shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
                             !guestFree
                           ) {
                             showModal?.(<SignInForSpreadsModal />);

@@ -41,6 +41,7 @@ import {
   TAROT_AUTH_CHANGED_EVENT,
   type TarotAuthChangedDetail,
 } from 'shared/lib/tarotAuthEvents';
+import { fetchAuthMeSession } from 'shared/lib/web/fetchAuthMeSession';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { PressableWebState } from 'shared/types';
@@ -91,32 +92,15 @@ type AuthApiBody = {
 };
 
 async function fetchAuthMeUser(): Promise<AuthUser | null> {
-  try {
-    const response = await fetch(`${getTarotAiApiBaseUrl()}/api/auth/me`, {
-      credentials: authCredentials(),
-      headers: authRequestHeaders(null),
-    });
-    if (!response.ok) {
-      return null;
-    }
-    const meResponse = (await response.json()) as { user: AuthUser };
-    return meResponse.user ?? null;
-  } catch {
-    return null;
-  }
+  const session = await fetchAuthMeSession({ retryUnauthorized: false });
+  return session?.user ?? null;
 }
 
 /** Cookie from verify/sign-in must be readable via /me before we treat the user as signed in. */
 async function resolveUserAfterCookieAuth(): Promise<AuthUser> {
-  const delaysMs = [0, 80, 200, 400];
-  for (const delayMs of delaysMs) {
-    if (delayMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
-    const fromMe = await fetchAuthMeUser();
-    if (fromMe) {
-      return fromMe;
-    }
+  const session = await fetchAuthMeSession();
+  if (session?.user) {
+    return session.user;
   }
   throw new Error('SESSION_COOKIE_MISSING');
 }
@@ -314,29 +298,22 @@ function Auth() {
   useEffect(() => {
     const loadSession = async () => {
       if (useCookie) {
+        let loadedUser: AuthUser | null = null;
         try {
-          const response = await fetch(
-            `${getTarotAiApiBaseUrl()}/api/auth/me`,
-            {
-              credentials: authCredentials(),
-              headers: {
-                ...authRequestHeaders(null),
-              },
-            }
-          );
+          const session = await fetchAuthMeSession();
 
-          if (!response.ok) {
+          if (!session?.user) {
             setSession(null);
           } else {
-            const meResponse = (await response.json()) as { user: AuthUser };
-            setSession({ token: null, user: meResponse.user });
+            loadedUser = session.user;
+            setSession({ token: null, user: session.user });
           }
         } catch {
           setSession(null);
         } finally {
           setIsSessionLoading(false);
           if (Platform.OS === 'web') {
-            emitTarotAuthChanged();
+            emitTarotAuthChanged(loadedUser ?? undefined);
           }
         }
         return;

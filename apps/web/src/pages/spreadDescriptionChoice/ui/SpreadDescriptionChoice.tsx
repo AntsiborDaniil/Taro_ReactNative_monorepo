@@ -19,6 +19,8 @@ import {
   getValueForAsyncDeviceMemoryKey,
   isGuestFreeSpreadId,
   moderateScale,
+  shouldPromptWebSignIn,
+  isWebAuthConfirmed,
 } from 'shared/lib';
 import { AnalyticAction } from 'shared/types';
 import { Button, NoContent, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -37,7 +39,7 @@ function SpreadDescriptionChoice() {
 
   const { spread, checkErrors, question } = useData({ Context: SpreadContext });
 
-  const { isPractitioner, isAuthenticated, tarotDaily } = useData({
+  const { isPractitioner, isAuthenticated, authSessionLoading, tarotDaily } = useData({
     Context: UserContext,
   });
 
@@ -49,8 +51,7 @@ function SpreadDescriptionChoice() {
 
   const handlePressMakeSpread = useCallback(async () => {
     if (
-      Platform.OS === 'web' &&
-      !isAuthenticated &&
+      shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
       spread &&
       !isGuestFreeSpreadId(spread.id)
     ) {
@@ -63,7 +64,7 @@ function SpreadDescriptionChoice() {
       const used = tarotDaily?.used ?? 0;
       const limit = tarotDaily?.limit ?? 10;
       isLocked =
-        Boolean(isAuthenticated) &&
+        isWebAuthConfirmed(isAuthenticated, authSessionLoading) &&
         !!spread &&
         !isGuestFreeSpreadId(spread.id) &&
         used >= limit;
@@ -95,6 +96,7 @@ function SpreadDescriptionChoice() {
   }, [
     checkErrors,
     isAuthenticated,
+    authSessionLoading,
     isPractitioner,
     question,
     showModal,

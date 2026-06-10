@@ -8,7 +8,7 @@ import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { DeckStyle, TSpread } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { getImage, isGuestFreeSpreadId } from 'shared/lib';
+import { getImage, isGuestFreeSpreadId, shouldPromptWebSignIn, isWebGuestSession } from 'shared/lib';
 import { horizontalScale } from 'shared/lib/responsive/responsive';
 import {
   AnalyticAction,
@@ -34,7 +34,7 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
     Context: ApplicationConfigContext,
   });
 
-  const { subscriptionType, isAuthenticated } = useData({
+  const { subscriptionType, isAuthenticated, authSessionLoading } = useData({
     Context: UserContext,
   });
 
@@ -48,7 +48,7 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
   const guestFree = isGuestFreeSpreadId(spread?.id);
 
   const isLocked =
-    (Platform.OS === 'web' && !isAuthenticated && !guestFree) ||
+    (isWebGuestSession(isAuthenticated, authSessionLoading) && !guestFree) ||
     (Platform.OS !== 'web' && isSubscriptionLocked);
 
   const { selectSpread } = useData({
@@ -76,7 +76,7 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
 
         await handleVibrationClick?.();
 
-        if (Platform.OS === 'web' && !isAuthenticated && !guestFree) {
+        if (shouldPromptWebSignIn(isAuthenticated, authSessionLoading) && !guestFree) {
           showModal?.(<SignInForSpreadsModal />);
           return;
         }

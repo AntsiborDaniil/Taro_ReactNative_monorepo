@@ -27,6 +27,8 @@ import {
   getTarotCardReadings,
   isGuestFreeSpreadId,
   isTablet,
+  shouldPromptWebSignIn,
+  isWebAuthConfirmed,
 } from 'shared/lib';
 import { AsyncMemoryKey } from 'shared/lib/deviceMemory';
 import { AnalyticAction } from 'shared/types';
@@ -106,7 +108,7 @@ export function useSpread({
 
   const { setIsFullScreenLoading } = useData({ Context: LoadingsContext });
 
-  const { isPractitioner, isAuthenticated, tarotDaily } = useData({
+  const { isPractitioner, isAuthenticated, authSessionLoading, tarotDaily } = useData({
     Context: UserContext,
   });
 
@@ -327,7 +329,7 @@ export function useSpread({
       needsSlot &&
       !isGuestFreeSpreadId(spread.id)
     ) {
-      if (!isAuthenticated) {
+      if (shouldPromptWebSignIn(isAuthenticated, authSessionLoading)) {
         showModal?.(createElement(SignInForSpreadsModal));
         return false;
       }
@@ -469,7 +471,7 @@ export function useSpread({
 
     if (
       Platform.OS === 'web' &&
-      !isAuthenticated &&
+      shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
       spread?.id === SpreadName.Simple_YesNo &&
       spread
     ) {
@@ -491,8 +493,7 @@ export function useSpread({
     }
 
     if (
-      Platform.OS === 'web' &&
-      !isAuthenticated &&
+      shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
       !isGuestFreeSpreadId(spread?.id)
     ) {
       showModal?.(createElement(SignInForSpreadsModal));
@@ -500,8 +501,7 @@ export function useSpread({
     }
 
     if (
-      Platform.OS === 'web' &&
-      isAuthenticated &&
+      isWebAuthConfirmed(isAuthenticated, authSessionLoading) &&
       (tarotDaily?.used ?? 0) >= (tarotDaily?.limit ?? 10)
     ) {
       showModal?.(createElement(DailyTarotLimitModal));

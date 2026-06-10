@@ -104,8 +104,10 @@ const SelectCategory = ({ layout }: SelectCategoryProps) => {
 
   const { handleSelectedAffirmationCategory, selectedAffirmationCategory } =
     useData({ Context: AffirmationsContext });
-  const { isAuthenticated } = useData({ Context: UserContext });
-  const canAccessLockedCategories = Boolean(isAuthenticated);
+  const { isAuthenticated, authSessionLoading } = useData({ Context: UserContext });
+  const canAccessLockedCategories =
+    Boolean(isAuthenticated) ||
+    (Platform.OS === 'web' && authSessionLoading === true);
   const { showModal } = useData({ Context: ModalsContext });
 
   const { t } = useTranslation();

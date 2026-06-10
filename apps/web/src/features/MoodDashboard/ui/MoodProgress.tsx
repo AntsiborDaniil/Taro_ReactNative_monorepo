@@ -14,7 +14,7 @@ import { type ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { WEB_HOVER_TRANSITION } from 'shared/lib';
+import { WEB_HOVER_TRANSITION, shouldPromptWebSignIn } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { NavigationRoute, TabRoute, PressableWebState } from 'shared/types';
 import { Text, TEXT_TAGS } from 'shared/ui';
@@ -58,10 +58,7 @@ function MoodProgress({
       return;
     }
 
-    const needsWebAuth =
-      Platform.OS === 'web' &&
-      !authSessionLoading &&
-      isAuthenticated === false;
+    const needsWebAuth = shouldPromptWebSignIn(isAuthenticated, authSessionLoading);
 
     if (needsWebAuth) {
       showModal?.(

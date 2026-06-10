@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useData } from 'shared/DataProvider';
 import {
@@ -30,12 +31,14 @@ export function useAffirmations(): TAffirmationsHookResult {
 
   const { t, i18n } = useTranslation();
 
-  const { isAuthenticated } = useData({ Context: UserContext });
+  const { isAuthenticated, authSessionLoading } = useData({ Context: UserContext });
 
   const canAccessCategory = useCallback(
     (category: AffirmationCategory) =>
-      category === AffirmationCategory.General || Boolean(isAuthenticated),
-    [isAuthenticated]
+      category === AffirmationCategory.General ||
+      Boolean(isAuthenticated) ||
+      (Platform.OS === 'web' && authSessionLoading === true),
+    [authSessionLoading, isAuthenticated]
   );
 
   const handleSelectedAffirmationCategory = useCallback(
