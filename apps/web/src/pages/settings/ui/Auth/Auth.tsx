@@ -440,9 +440,28 @@ function Auth() {
     clearErrors();
   };
 
+  const redirectToSignInAfterVerify = (email: string): void => {
+    setPendingVerificationEmail(null);
+    setVerificationCode('');
+    setDevVerificationCode(null);
+    setPendingSignupPassword(null);
+    setPendingSignupName(null);
+    setTab('signin');
+    reset({ name: '', email, password: '' });
+    clearErrors();
+    Toast.show({
+      type: 'success',
+      text1: t('settings:auth.verify.successSignIn'),
+    });
+  };
+
   const applyAuthenticatedSession = async (
     body: { user: AuthUser; token?: string },
-    options?: { successTitle?: string }
+    options?: {
+      successTitle?: string;
+      /** After verify: on cookie failure, open sign-in with this email prefilled. */
+      redirectToSignInOnSessionError?: string;
+    }
   ): Promise<void> => {
     let resolvedUser = body.user;
 
@@ -466,6 +485,11 @@ function Auth() {
         error instanceof Error &&
         error.message === 'SESSION_COOKIE_MISSING'
       ) {
+        const fallbackEmail = options?.redirectToSignInOnSessionError?.trim();
+        if (fallbackEmail) {
+          redirectToSignInAfterVerify(fallbackEmail);
+          return;
+        }
         Toast.show({
           type: 'error',
           text1: t('settings:auth.error.sessionCookie'),
@@ -650,7 +674,11 @@ function Auth() {
 
       await applyAuthenticatedSession(
         { user: body.user, token: body.token },
-        { successTitle: t('settings:auth.verify.success') }
+        {
+          successTitle: t('settings:auth.verify.success'),
+          redirectToSignInOnSessionError:
+            pendingVerificationEmail ?? body.user.email,
+        }
       );
     } catch {
       Toast.show({
