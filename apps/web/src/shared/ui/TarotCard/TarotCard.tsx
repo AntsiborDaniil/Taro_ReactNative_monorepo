@@ -27,6 +27,7 @@ type TarotCardProps = {
   height?: DimensionValue;
   imageResizeMode?: ImageResizeMode;
   direction?: TarotCardDirection;
+  pointerEvents?: 'auto' | 'none' | 'box-none' | 'box-only';
 };
 
 function TarotCard({
@@ -39,6 +40,7 @@ function TarotCard({
   customAppearance,
   styleCard,
   direction = TarotCardDirection.Upright,
+  pointerEvents = 'auto',
 }: TarotCardProps) {
   const { appearance } = useData({ Context: ApplicationConfigContext });
   const selectedAppearance =
@@ -101,6 +103,7 @@ function TarotCard({
 
   return (
     <Animated.View
+      pointerEvents={pointerEvents}
       style={[
         styles.card,
         hasExplicitSize ? styles.cardExplicitOuter : styles.cardFlexFill,

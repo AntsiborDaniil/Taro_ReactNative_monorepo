@@ -1,8 +1,9 @@
 import { ReactElement, useMemo } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { PressToUnlock } from 'entities/Spread';
 import { useTranslation } from 'react-i18next';
 import { TSelectedTarotCard } from 'shared/api';
+import { webCardMeaningsProps } from 'shared/lib/web/webScrollClasses';
 import { SeparatorIcon } from 'shared/icons';
 import { moderateScale } from 'shared/lib';
 import { COLORS } from 'shared/themes';
@@ -28,11 +29,11 @@ function TarotMeanings({
 
     if (interpretation) {
       texts.push(
-        <TouchableOpacity
+        <Pressable
           key="summary"
           onPress={onPressInterpretation}
           style={styles.textContainer}
-          activeOpacity={1}
+          delayPressIn={Platform.OS === 'web' ? 180 : undefined}
         >
           <Text category={TEXT_TAGS.h3} style={styles.textTitle}>
             {t('spread:summaryTitle')}
@@ -41,7 +42,7 @@ function TarotMeanings({
             {interpretation}
           </Text>
           {hasBlur && <PressToUnlock />}
-        </TouchableOpacity>
+        </Pressable>
       );
     }
 
@@ -90,7 +91,7 @@ function TarotMeanings({
   }, [card.advice, card.description, interpretation, t]);
 
   return (
-    <View style={styles.content}>
+    <View style={styles.content} {...webCardMeaningsProps()}>
       {card.advice && (
         <View key="meaning-block">
           <View style={styles.adviceContainer}>
@@ -137,7 +138,6 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   textContainer: {
-    overflow: 'hidden',
     borderRadius: 16,
     gap: 16,
     alignItems: 'stretch',

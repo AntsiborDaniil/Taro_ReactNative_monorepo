@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -15,6 +14,7 @@ import { TarotCardReadingsDefault } from 'features/TarotCardReadings';
 import { TarotCardDirection, tarotCards } from 'shared/api';
 import { TNavigationParams, useScrollToTopFab } from 'shared/hooks';
 import { getTarotCardReadings } from 'shared/lib';
+import { webVerticalScrollProps } from 'shared/lib/web/webScrollClasses';
 import { COLORS } from 'shared/themes';
 import { NoContent, ScreenLayout, ScrollToTopFab, Text, TEXT_TAGS } from 'shared/ui';
 
@@ -56,9 +56,7 @@ export default function DetailCard() {
             scrollEventThrottle={16}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled
-            {...(Platform.OS === 'web'
-              ? ({ className: 'tarot-web-scroll-y' } as { className?: string })
-              : {})}
+            {...webVerticalScrollProps()}
           >
             <Layout style={styles.content}>
               <SafeAreaView style={styles.direction}>

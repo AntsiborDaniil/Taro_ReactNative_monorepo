@@ -28,6 +28,7 @@ import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { ChevronLeftIcon, LeafIcon, ReverseIcon } from 'shared/icons';
 import { moderateScale } from 'shared/lib';
+import { webVerticalScrollProps } from 'shared/lib/web/webScrollClasses';
 import { spreadInnerStyles } from 'shared/lib/spreadInnerUi';
 import { COLORS, getColorOpacity } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
@@ -287,9 +288,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                 key={index}
                 style={[styles.carouselItemScroll, styles.summaryWrapper]}
                 nestedScrollEnabled
-                {...(Platform.OS === 'web'
-                  ? ({ className: 'tarot-web-scroll-y' } as { className?: string })
-                  : {})}
+                {...webVerticalScrollProps()}
               >
                 <SafeAreaView style={styles.content}>
                   <View style={styles.contentInner}>
@@ -390,9 +389,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                   : undefined
               }
               nestedScrollEnabled
-              {...(Platform.OS === 'web'
-                ? ({ className: 'tarot-web-scroll-y' } as { className?: string })
-                : {})}
+              {...webVerticalScrollProps()}
             >
               <SafeAreaView style={[styles.content, isDaySuggest && styles.daySuggestContent]}>
                 <View style={[styles.contentInner, isDaySuggest && styles.daySuggestContentInner]}>

@@ -1,6 +1,13 @@
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { navigationRef } from '../../navigation/navigationRef';
+import { useWebPointerDragScroll } from 'shared/lib/web/useWebPointerDragScroll';
+import {
+  WEB_CARD_MEANINGS_CLASS,
+  WEB_CARD_TILE_CLASS,
+  WEB_SCROLL_Y_CLASS,
+  WEB_SCROLL_Y_DRAGGING_CLASS,
+} from 'shared/lib/web/webScrollClasses';
 
 const STYLE_ID = 'tarot-web-a11y-global';
 
@@ -34,13 +41,32 @@ body {
   overscroll-behavior-x: contain;
   touch-action: pan-x;
 }
-.tarot-web-scroll-y {
+.${WEB_SCROLL_Y_CLASS} {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
   touch-action: pan-y;
 }
+.${WEB_CARD_MEANINGS_CLASS} {
+  touch-action: pan-y;
+}
+[data-tarot-card-tile],
+.${WEB_CARD_TILE_CLASS} {
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
 @media (pointer: fine) {
+  .${WEB_SCROLL_Y_CLASS} {
+    cursor: grab;
+  }
+  .${WEB_CARD_MEANINGS_CLASS} {
+    cursor: grab;
+  }
+  .${WEB_SCROLL_Y_CLASS}.${WEB_SCROLL_Y_DRAGGING_CLASS},
+  .${WEB_SCROLL_Y_CLASS}.${WEB_SCROLL_Y_DRAGGING_CLASS} * {
+    cursor: grabbing !important;
+  }
   *:focus-visible {
     outline: 2px solid rgba(246, 192, 27, 0.95);
     outline-offset: 2px;
@@ -53,6 +79,8 @@ body {
  * (тачпад / жест «отскок» у края, без ухода истории браузера).
  */
 export function WebA11yRoot() {
+  useWebPointerDragScroll();
+
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof document === 'undefined') {
       return;
