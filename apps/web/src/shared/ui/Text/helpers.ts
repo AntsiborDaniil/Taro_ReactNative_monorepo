@@ -1,5 +1,6 @@
 import { StyleProp, StyleSheet } from 'react-native';
 import { TextStyle } from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
+import { TYPOGRAPHY_PX_BY_TIER } from 'shared/themes/responsive-tokens';
 import {
   resolveCategoryPx,
   toResponsiveFontPx,
@@ -69,6 +70,19 @@ export function getTextStyles({
     ...textStyle,
     fontSize: resolvedFontSize,
   };
+
+  // lineHeight в StyleSheet часто задаётся через moderateScale при импорте модуля,
+  // а fontSize пересчитывается на каждый рендер — на web это даёт огромные межстрочные отступы.
+  if (typeof base.lineHeight === 'number' && resolvedFontSize > 0) {
+    const bodyLineHeightRatio =
+      24 / TYPOGRAPHY_PX_BY_TIER.laptop.body;
+    const ratio =
+      typeof explicitSize === 'number' && explicitSize > 0
+        ? base.lineHeight / explicitSize
+        : bodyLineHeightRatio;
+
+    textStyle.lineHeight = Math.round(resolvedFontSize * ratio);
+  }
 
   return textStyle;
 }

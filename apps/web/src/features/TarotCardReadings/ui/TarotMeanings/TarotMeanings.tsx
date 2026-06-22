@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { TSelectedTarotCard } from 'shared/api';
 import { webCardMeaningsProps } from 'shared/lib/web/webScrollClasses';
 import { SeparatorIcon } from 'shared/icons';
-import { moderateScale } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { Text, TEXT_TAGS } from 'shared/ui';
 
@@ -130,11 +129,11 @@ const styles = StyleSheet.create({
   },
   adviceTextCommon: {
     color: COLORS.Background,
-    lineHeight: moderateScale(24),
+    lineHeight: 24,
     textAlign: 'left',
   },
   commonText: {
-    lineHeight: moderateScale(24),
+    lineHeight: 24,
     textAlign: 'left',
   },
   textContainer: {

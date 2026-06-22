@@ -27,7 +27,6 @@ import { SpreadName, SpreadsCategory, TarotCardDirection } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { ChevronLeftIcon, LeafIcon, ReverseIcon } from 'shared/icons';
-import { moderateScale } from 'shared/lib';
 import { webVerticalScrollProps } from 'shared/lib/web/webScrollClasses';
 import { spreadInnerStyles } from 'shared/lib/spreadInnerUi';
 import { COLORS, getColorOpacity } from 'shared/themes';
@@ -639,7 +638,7 @@ const styles = StyleSheet.create({
   },
   summaryText: {
     color: COLORS.Background,
-    lineHeight: moderateScale(24),
+    lineHeight: 24,
     textAlign: 'left',
   },
   titleContainer: {
