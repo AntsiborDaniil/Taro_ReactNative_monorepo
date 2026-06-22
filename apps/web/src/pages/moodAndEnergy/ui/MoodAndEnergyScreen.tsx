@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
 import { MoodDashboard } from 'features/MoodDashboard';
 import { useData } from 'shared/DataProvider';
+import { useNativeNavigation } from 'shared/hooks';
 import { shouldPromptWebSignIn } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { NavigationRoute, TabRoute } from 'shared/types';
