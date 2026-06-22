@@ -34,6 +34,12 @@ body {
   overscroll-behavior-x: contain;
   touch-action: pan-x;
 }
+.tarot-web-scroll-y {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+}
 @media (pointer: fine) {
   *:focus-visible {
     outline: 2px solid rgba(246, 192, 27, 0.95);

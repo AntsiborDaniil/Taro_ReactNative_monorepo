@@ -286,6 +286,10 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
               <ScrollView
                 key={index}
                 style={[styles.carouselItemScroll, styles.summaryWrapper]}
+                nestedScrollEnabled
+                {...(Platform.OS === 'web'
+                  ? ({ className: 'tarot-web-scroll-y' } as { className?: string })
+                  : {})}
               >
                 <SafeAreaView style={styles.content}>
                   <View style={styles.contentInner}>
@@ -385,6 +389,10 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                     ]
                   : undefined
               }
+              nestedScrollEnabled
+              {...(Platform.OS === 'web'
+                ? ({ className: 'tarot-web-scroll-y' } as { className?: string })
+                : {})}
             >
               <SafeAreaView style={[styles.content, isDaySuggest && styles.daySuggestContent]}>
                 <View style={[styles.contentInner, isDaySuggest && styles.daySuggestContentInner]}>
@@ -617,7 +625,10 @@ const styles = StyleSheet.create({
   },
   carouselItemScroll: {
     width: '100%',
-    height: '100%',
+    ...Platform.select({
+      web: { flex: 1, minHeight: 0 },
+      default: { height: '100%' },
+    }),
   },
   summaryWrapper: {
     position: 'relative',

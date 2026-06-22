@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -55,6 +56,9 @@ export default function DetailCard() {
             scrollEventThrottle={16}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled
+            {...(Platform.OS === 'web'
+              ? ({ className: 'tarot-web-scroll-y' } as { className?: string })
+              : {})}
           >
             <Layout style={styles.content}>
               <SafeAreaView style={styles.direction}>
