@@ -2,6 +2,8 @@ import { useMobileFabHostScreen } from 'app/navigation/tabs/MobileFabScrollConte
 import { useEffect, useState } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { readTelegramSafeAreaInsets } from './telegramWebApp';
+
 const TAB_BREAKPOINT_RAIL = 900;
 const WEB_FAB_NAV_SIZE = 48;
 
@@ -105,11 +107,13 @@ export function useWebViewportInsets(): LayoutViewportInsets {
     };
   }
 
+  const telegramInsets = readTelegramSafeAreaInsets();
+
   return {
-    top: Math.max(safe.top, webExtra.top),
-    bottom: Math.max(safe.bottom, webExtra.bottom),
-    left: Math.max(safe.left, webExtra.left),
-    right: Math.max(safe.right, webExtra.right),
+    top: Math.max(safe.top, webExtra.top, telegramInsets.top),
+    bottom: Math.max(safe.bottom, webExtra.bottom, telegramInsets.bottom),
+    left: Math.max(safe.left, webExtra.left, telegramInsets.left),
+    right: Math.max(safe.right, webExtra.right, telegramInsets.right),
   };
 }
 

@@ -33,3 +33,7 @@ export function assertSupabaseEnv(): void {
   getSupabaseAnonKey();
   getSupabaseServiceRoleKey();
 }
+
+export function getTelegramBotToken(): string {
+  return requireEnv('TELEGRAM_BOT_TOKEN');
+}

@@ -467,6 +467,10 @@ function Auth() {
 
     try {
       if (useCookie) {
+        setSession({ token: null, user: body.user });
+      }
+
+      if (useCookie) {
         resolvedUser = await resolveUserAfterCookieAuth();
         setSession({ token: null, user: resolvedUser });
       } else if (body.token) {

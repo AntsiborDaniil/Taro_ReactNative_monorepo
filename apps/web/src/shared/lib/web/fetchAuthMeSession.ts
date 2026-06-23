@@ -13,7 +13,7 @@ export type AuthMeSession = {
   tarotDaily?: TarotDailyQuota | null;
 };
 
-const ME_RETRY_DELAYS_MS = [0, 80, 200, 400, 800];
+const ME_RETRY_DELAYS_MS = [0, 100, 250, 500, 1000, 2000];
 
 export async function fetchAuthMeSession(options?: {
   retryUnauthorized?: boolean;

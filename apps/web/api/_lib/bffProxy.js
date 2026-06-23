@@ -3,7 +3,7 @@ const { AUTH_SESSION_COOKIE_NAME, setSessionCookie, clearSessionCookie } = requi
 const DEFAULT_BFF = 'https://taro-reactnative-monorepo.onrender.com';
 
 /** Routes that create a session — we set tarot_session on the Vercel domain from JSON token. */
-const SESSION_BODY_ROUTES = new Set(['signin', 'signup', 'verify-email']);
+const SESSION_BODY_ROUTES = new Set(['signin', 'signup', 'verify-email', 'telegram']);
 
 const CLEAR_SESSION_ROUTES = new Set(['signout']);
 

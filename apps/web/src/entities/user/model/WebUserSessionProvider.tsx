@@ -7,6 +7,7 @@ import { UserContext } from './UserContext';
 import { DataProvider } from 'shared/DataProvider';
 import { handleWebOAuthReturn } from 'shared/lib/handleWebOAuthReturn';
 import { fetchAuthMeSession } from 'shared/lib/web/fetchAuthMeSession';
+import { tryAuthenticateTelegramMiniApp } from 'shared/lib/web/telegramWebApp';
 import {
   TAROT_AUTH_CHANGED_EVENT,
   type TarotAuthChangedDetail,
@@ -34,6 +35,7 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
     }
 
     try {
+      await tryAuthenticateTelegramMiniApp();
       const session = await fetchAuthMeSession();
 
       if (session?.user) {

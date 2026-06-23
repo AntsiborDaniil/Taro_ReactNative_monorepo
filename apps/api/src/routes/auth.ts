@@ -21,6 +21,7 @@ import {
   resendEmailVerificationCode,
   signIn,
   signUp,
+  signInWithTelegram,
   updateProfile,
   verifyEmailOtp,
 } from '../services/authService';
@@ -64,6 +65,10 @@ type VerifyEmailBody = {
 
 type ResendCodeBody = {
   email: string;
+};
+
+type TelegramAuthBody = {
+  initData: string;
 };
 
 function sendAuthSession(
@@ -397,6 +402,41 @@ export const authRoute = async (
       );
     }
   });
+
+  fastify.post<{ Body: TelegramAuthBody }>(
+    '/auth/telegram',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          required: ['initData'],
+          properties: {
+            initData: { type: 'string', minLength: 1 },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const session = await signInWithTelegram(request.body.initData);
+        return sendAuthSession(reply, request, session);
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.message === 'INVALID_TELEGRAM_INIT_DATA'
+        ) {
+          return reply.status(401).send({
+            message: 'Invalid Telegram session',
+          });
+        }
+
+        request.log.error(error);
+        return reply.status(500).send({
+          message: 'Could not sign in with Telegram',
+        });
+      }
+    }
+  );
 
   fastify.post('/auth/signout', async (request, reply) => {
     clearSessionCookie(request, reply);

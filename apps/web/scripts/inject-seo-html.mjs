@@ -22,6 +22,7 @@ const SEO = {
 };
 
 const metaBlock = `
+    <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
     <meta name="description" content="${SEO.description}" />
     <meta name="keywords" content="${SEO.keywords}" />
     <meta name="theme-color" content="#171F2C" />

@@ -8,6 +8,12 @@ import {
   createOAuthSupabaseClient,
 } from '../lib/supabaseOAuth';
 import { getSupabaseAdmin, getSupabaseAnon } from '../lib/supabase';
+import {
+  telegramDisplayName,
+  telegramSyntheticEmail,
+  telegramUserPassword,
+  validateTelegramWebAppInitData,
+} from '../lib/telegramWebApp';
 import * as memory from '../dev/memoryBackend';
 
 export type AuthPublicUser = {
@@ -269,6 +275,16 @@ export async function verifyEmailOtp({
     if (pwError) {
       throw pwError;
     }
+
+    const { data: signInData, error: signInError } =
+      await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password,
+      });
+    if (signInError || !signInData.session) {
+      throw signInError ?? new Error('SIGNIN_AFTER_VERIFY_FAILED');
+    }
+    data = { ...data, session: signInData.session, user: signInData.user ?? data.user };
   }
 
   const userId = data.user?.id ?? data.session.user.id;
@@ -485,6 +501,110 @@ export async function completeOAuthCallback(
   return mapSession(
     data.session.access_token,
     data.session.refresh_token,
+    publicUser
+  );
+}
+
+export async function signInWithTelegram(initData: string): Promise<AuthSession> {
+  const validated = validateTelegramWebAppInitData(initData);
+  if (!validated) {
+    throw new Error('INVALID_TELEGRAM_INIT_DATA');
+  }
+
+  if (useMemoryBackend()) {
+    throw new Error('TELEGRAM_AUTH_REQUIRES_SUPABASE');
+  }
+
+  const telegramId = validated.user.id;
+  const email = telegramSyntheticEmail(telegramId);
+  const password = telegramUserPassword(telegramId);
+  const displayName = telegramDisplayName(validated.user);
+  const admin = getSupabaseAdmin();
+  const anon = getSupabaseAnon();
+
+  const { data: existingProfile } = await admin
+    .from('profiles')
+    .select('id, email, name, created_at, telegram_id')
+    .eq('telegram_id', telegramId)
+    .maybeSingle();
+
+  if (!existingProfile) {
+    const { data: created, error: createError } =
+      await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          name: displayName,
+          telegram_id: telegramId,
+          telegram_username: validated.user.username ?? null,
+          provider: 'telegram',
+        },
+      });
+
+    if (createError) {
+      if (createError.message?.toLowerCase().includes('already')) {
+        const { data: signInExisting, error: signInExistingError } =
+          await anon.auth.signInWithPassword({ email, password });
+        if (signInExistingError || !signInExisting.session) {
+          throw signInExistingError ?? new Error('TELEGRAM_SIGNIN_FAILED');
+        }
+        const publicUser = await resolvePublicUserAfterAuth({
+          userId: signInExisting.user!.id,
+          email,
+          name: displayName,
+        });
+        await admin
+          .from('profiles')
+          .update({ telegram_id: telegramId })
+          .eq('id', publicUser.id);
+        return mapSession(
+          signInExisting.session.access_token,
+          signInExisting.session.refresh_token,
+          publicUser
+        );
+      }
+      throw createError;
+    }
+
+    const userId = created.user?.id;
+    if (!userId) {
+      throw new Error('TELEGRAM_USER_CREATE_FAILED');
+    }
+
+    await admin.from('profiles').upsert(
+      {
+        id: userId,
+        email,
+        name: displayName,
+        telegram_id: telegramId,
+      },
+      { onConflict: 'id' }
+    );
+  }
+
+  const { data: signInData, error: signInError } =
+    await anon.auth.signInWithPassword({ email, password });
+
+  if (signInError || !signInData.session) {
+    throw signInError ?? new Error('TELEGRAM_SIGNIN_FAILED');
+  }
+
+  const userId = signInData.user?.id ?? signInData.session.user.id;
+  const publicUser = await resolvePublicUserAfterAuth({
+    userId,
+    email,
+    name: displayName,
+  });
+
+  await admin
+    .from('profiles')
+    .update({ telegram_id: telegramId })
+    .eq('id', publicUser.id);
+
+  return mapSession(
+    signInData.session.access_token,
+    signInData.session.refresh_token,
     publicUser
   );
 }

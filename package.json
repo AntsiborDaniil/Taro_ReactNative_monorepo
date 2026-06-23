@@ -5,12 +5,14 @@
   "scripts": {
     "dev:web": "pnpm --filter web dev",
     "dev:api": "pnpm --filter tarot-ai-api-sevice dev",
+    "dev:bot": "pnpm --filter tarot-telegram-bot dev",
     "build:web": "pnpm --filter web build",
     "build:api": "pnpm --filter tarot-ai-api-sevice build",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset",
     "supabase:push": "supabase db push",
+    "deploy:check-health": "bash scripts/check-production-health.sh",
     "supabase:functions": "supabase functions serve --env-file apps/api/.env"
   }
 }
