@@ -1,10 +1,10 @@
 import { Bot } from 'grammy';
-import { config } from './config.js';
+import { config } from './config';
 import {
   openMiniAppInlineKeyboard,
   openMiniAppReplyKeyboard,
-} from './keyboards.js';
-import { helpText, openAppHintText, welcomeText } from './messages.js';
+} from './keyboards';
+import { helpText, openAppHintText, welcomeText } from './messages';
 
 const bot = new Bot(config.botToken);
 

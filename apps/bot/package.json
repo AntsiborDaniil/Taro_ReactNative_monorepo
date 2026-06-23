@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "tsx watch src/index.ts",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
     "start": "node dist/index.js"
   },
   "dependencies": {
@@ -15,7 +15,8 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.3",
-    "tsx": "^4.19.4",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
     "typescript": "5.8.3"
   }
 }

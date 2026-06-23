@@ -1,5 +1,5 @@
 import { InlineKeyboard, Keyboard } from 'grammy';
-import { config } from './config.js';
+import { config } from './config';
 
 const OPEN_APP_LABEL = '🔮 Открыть Mindful Tarot';
 
