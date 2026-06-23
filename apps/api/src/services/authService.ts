@@ -287,7 +287,12 @@ export async function verifyEmailOtp({
     data = { ...data, session: signInData.session, user: signInData.user ?? data.user };
   }
 
-  const userId = data.user?.id ?? data.session.user.id;
+  const session = data.session;
+  if (!session) {
+    throw new Error('INVALID_VERIFICATION_CODE');
+  }
+
+  const userId = data.user?.id ?? session.user.id;
   const publicUser = await resolvePublicUserAfterAuth({
     userId,
     email: normalizedEmail,
@@ -297,8 +302,8 @@ export async function verifyEmailOtp({
   logAuthSignupComplete(publicUser.email, publicUser.id);
 
   return mapSession(
-    data.session.access_token,
-    data.session.refresh_token,
+    session.access_token,
+    session.refresh_token,
     publicUser
   );
 }
