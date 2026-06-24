@@ -16,7 +16,6 @@ import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
-import { PaidContent } from 'features/paidContent';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { ChevronRightIcon, CrossIcon, ReverseIcon } from 'shared/icons';
@@ -30,7 +29,6 @@ import { COLORS, SETTINGS_TYPOGRAPHY } from 'shared/themes';
 import { appStoreLinks } from 'shared/utils';
 import { AnalyticAction, NavigationRoute, PressableWebState, TabRoute } from 'shared/types';
 import { Button, ScreenLayout, SwitchElement, Text, TEXT_TAGS } from 'shared/ui';
-import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { APP_AGREEMENTS, getSettingsRoutes } from '../lib';
 import { useSettings } from '../model';
 import LanguagePickerModal from './Language/LanguagePickerModal';
@@ -50,8 +48,6 @@ function Settings() {
     hasAutoSave: true,
     asyncMemoryKey: AsyncMemorySettingKey.Spread,
   });
-
-  const { showModal } = useData({ Context: ModalsContext });
 
   const { spread: spreadSettings, handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
@@ -83,12 +79,6 @@ function Settings() {
 
     if (Platform.OS === 'web' && screen === NavigationRoute.Language) {
       setLanguageModalOpen(true);
-      return;
-    }
-
-    if (title === 'payments') {
-      showModal?.(<PaidContent />);
-
       return;
     }
 

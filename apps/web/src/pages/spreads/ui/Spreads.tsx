@@ -7,7 +7,6 @@ import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
-import { PaidContent } from 'features/paidContent';
 import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { DeckStyle } from 'shared/api';
 import { useData } from 'shared/DataProvider';
@@ -26,7 +25,7 @@ export default function Spreads() {
   const layout = useSpreadsLayout();
 
   const { showModal } = useData({ Context: ModalsContext });
-  const { subscriptionType, isAuthenticated, authSessionLoading } = useData({ Context: UserContext });
+  const { isAuthenticated, authSessionLoading } = useData({ Context: UserContext });
   const { selectSpread, spreadsSections } = useData({
     Context: SpreadContext,
   });
@@ -119,11 +118,6 @@ export default function Spreads() {
                   ]}
                 >
                   {data.data.map((item) => {
-                    const isLocked = !item.availableSubscriptions.some(
-                      (subscriptionItem) =>
-                        subscriptionItem === subscriptionType
-                    );
-
                     const guestFree = isGuestFreeSpreadId(item.id);
                     const guestBadge =
                       isWebGuestSession(isAuthenticated, authSessionLoading) && guestFree;
@@ -138,7 +132,7 @@ export default function Spreads() {
                           DeckStyle.FlatIllustration,
                           item.id,
                         ])}
-                        isLocked={isLocked}
+                        isLocked={false}
                         guestNoAuthBadge={guestBadge}
                         width={layout.cardWidth}
                         imageAreaHeight={layout.previewHeight}
@@ -147,17 +141,12 @@ export default function Spreads() {
                             AnalyticAction.ClickSpreadInCategory,
                             {
                               spread: item.name,
-                              isLocked,
+                              isLocked: false,
                             }
                           );
 
                           blurActiveElement();
                           await handleVibrationClick?.();
-
-                          if (isLocked) {
-                            showModal?.(<PaidContent />);
-                            return;
-                          }
 
                           if (
                             shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&

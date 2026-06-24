@@ -14,7 +14,6 @@ import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { LikeCard } from 'entities/favorites';
 import { PressToUnlock, SpreadContext } from 'entities/Spread';
-import { UserContext } from 'entities/user';
 import { LoremIpsum } from 'lorem-ipsum';
 import { useTranslation } from 'react-i18next';
 import { useSharedValue } from 'react-native-reanimated';
@@ -32,8 +31,6 @@ import { spreadInnerStyles } from 'shared/lib/spreadInnerUi';
 import { COLORS, getColorOpacity } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { Button, NoContent, TarotCard, Text, TEXT_TAGS } from 'shared/ui';
-import { ModalsContext } from 'shared/ui/ModalsProvider';
-import { PaidContent } from '../../../paidContent';
 import { SpreadScheme } from '../../../scheme';
 import { TarotCharacteristics } from '../TarotCharacteristics';
 import TarotMeanings from '../TarotMeanings/TarotMeanings';
@@ -77,10 +74,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
   useEffect(() => {
     setMeasuredCarouselHeight(null);
   }, [windowHeight, tabBarHeight, sceneContentWidth]);
-
-  const { isPractitioner } = useData({ Context: UserContext });
-
-  const { showModal } = useData({ Context: ModalsContext });
 
   const progress = useSharedValue<number>(0);
 
@@ -126,14 +119,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
 
   const handlePressToUnlock = async () => {
     await handleVibrationClick?.();
-
-    if (isPractitioner) {
-      handleGetAIInterpretation?.();
-
-      return;
-    }
-
-    showModal?.(<PaidContent />);
+    handleGetAIInterpretation?.();
   };
 
   useEffect(() => {

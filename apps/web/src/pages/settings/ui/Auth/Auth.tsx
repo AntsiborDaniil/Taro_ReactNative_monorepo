@@ -19,7 +19,6 @@ import {
   CrossIcon,
   EyeHideIcon,
   EyeShowIcon,
-  Payments,
 } from 'shared/icons';
 import {
   authCredentials,
@@ -187,7 +186,6 @@ function Auth() {
   const [passwordSaving, setPasswordSaving] = useState(false);
   /** Сбрасывает дерево гостевой формы после выхода (RN Web иначе может «наследовать» ноду первого инпута). */
   const [guestAuthEpoch, setGuestAuthEpoch] = useState(0);
-  const [addCardModalVisible, setAddCardModalVisible] = useState(false);
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState<
     string | null
   >(null);
@@ -1162,66 +1160,6 @@ function Auth() {
             </View>
 
             <View style={styles.formCard}>
-              <Text category={TEXT_TAGS.h4} style={styles.sectionTitle}>
-                {t('settings:auth.payments.sectionTitle')}
-              </Text>
-              <Text category={TEXT_TAGS.p2} style={styles.paymentsHint}>
-                {t('settings:auth.payments.stub')}
-              </Text>
-              <Pressable
-                style={(s: PressableWebState) => {
-                  const { hovered, pressed } = s;
-                  return [
-                  styles.paymentRow,
-                  hovered && styles.paymentRowHover,
-                  pressed && styles.paymentRowPressed,
-                ];
-                }}
-                onPress={() => setAddCardModalVisible(true)}
-              >
-                <View style={styles.paymentRowLeft}>
-                  <Text category={TEXT_TAGS.h4} style={styles.paymentBrand}>
-                    Visa / Mastercard
-                  </Text>
-                  <Text category={TEXT_TAGS.p2} style={styles.paymentMasked}>
-                    •••• •••• •••• 4242
-                  </Text>
-                </View>
-                <View style={styles.demoBadge}>
-                  <Text category={TEXT_TAGS.p2} style={styles.demoBadgeText}>
-                    {t('settings:auth.payments.demo')}
-                  </Text>
-                </View>
-              </Pressable>
-              <Pressable
-                style={(s: PressableWebState) => {
-                  const { hovered, pressed } = s;
-                  return [
-                  styles.addPaymentButton,
-                  hovered && styles.addPaymentButtonHover,
-                  pressed && styles.addPaymentButtonPressed,
-                ];
-                }}
-                onPress={() => setAddCardModalVisible(true)}
-                accessibilityRole="button"
-                accessibilityLabel={t('settings:auth.payments.addCard')}
-              >
-                <View style={styles.addPaymentIconWrap}>
-                  <Payments width={24} height={20} fill={COLORS.Primary} />
-                </View>
-                <View style={styles.addPaymentTextCol}>
-                  <Text category={TEXT_TAGS.h4} style={styles.addPaymentTitle}>
-                    {t('settings:auth.payments.addCard')}
-                  </Text>
-                  <Text category={TEXT_TAGS.p2} style={styles.addPaymentHint}>
-                    {t('settings:auth.payments.addCardHint')}
-                  </Text>
-                </View>
-                <ChevronRightIcon width={20} height={20} />
-              </Pressable>
-            </View>
-
-            <View style={styles.formCard}>
               <Button style={styles.submitButton} onPress={handleSignOut}>
                 {t('settings:auth.signOut')}
               </Button>
@@ -1591,53 +1529,6 @@ function Auth() {
           </View>
         )}
       </ScrollView>
-
-      <Modal
-        transparent
-        animationType="fade"
-        visible={addCardModalVisible}
-        onRequestClose={() => setAddCardModalVisible(false)}
-      >
-        <View style={styles.paymentModalRoot}>
-          <Pressable
-            style={styles.paymentModalBackdrop}
-            onPress={() => setAddCardModalVisible(false)}
-            accessibilityRole="button"
-            accessibilityLabel={t('settings:auth.payments.modal.close')}
-          />
-          <View style={styles.paymentModalSheet}>
-            <View style={styles.paymentModalHeader}>
-              <Text
-                category={TEXT_TAGS.h3}
-                style={styles.paymentModalTitle}
-              >
-                {t('settings:auth.payments.modal.title')}
-              </Text>
-              <Pressable
-                onPress={() => setAddCardModalVisible(false)}
-                style={({ pressed }) => [
-                  styles.paymentModalClose,
-                  pressed && styles.paymentModalClosePressed,
-                ]}
-                hitSlop={12}
-                accessibilityRole="button"
-                accessibilityLabel={t('settings:auth.payments.modal.close')}
-              >
-                <CrossIcon width={22} height={22} />
-              </Pressable>
-            </View>
-            <Text category={TEXT_TAGS.p2} style={styles.paymentModalBody}>
-              {t('settings:auth.payments.modal.body')}
-            </Text>
-            <Button
-              style={styles.paymentModalButton}
-              onPress={() => setAddCardModalVisible(false)}
-            >
-              {t('settings:auth.payments.modal.close')}
-            </Button>
-          </View>
-        </View>
-      </Modal>
 
       <Modal
         transparent

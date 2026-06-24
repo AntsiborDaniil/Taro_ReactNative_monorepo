@@ -1,29 +1,20 @@
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useMobileFabScrollOnScroll } from 'app/navigation/tabs/MobileFabScrollContext';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
-import { UserContext } from 'entities/user';
 import { CategoryCard } from 'features';
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
-import { PaidContent } from 'features/paidContent';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { StarsPro } from 'shared/icons';
-import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
-import { ScreenLayout, Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
-import { ModalsContext } from 'shared/ui/ModalsProvider';
+import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { LIBRARY_PLATES } from '../lib';
 import { useLibraryLayout } from './useLibraryLayout';
 
 function Library() {
   const { t } = useTranslation();
   const layout = useLibraryLayout();
-
-  const { isPractitioner } = useData({ Context: UserContext });
-
-  const { showModal } = useData({ Context: ModalsContext });
 
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
@@ -46,19 +37,6 @@ function Library() {
   return (
     <ScreenLayout>
       <Header
-        leftContent={
-          isPractitioner ? (
-            <TouchableOpacity
-              onPress={() => showModal?.(<PaidContent />)}
-              style={styles.proWrapper}
-            >
-              <StarsPro width={20} height={20} />
-              <Text style={styles.pro} weight={TEXT_WEIGHT.bold}>
-                PRO
-              </Text>
-            </TouchableOpacity>
-          ) : null
-        }
         showBackButton={false}
         title={t('core:library')}
         rightAction={handlePress}
@@ -204,19 +182,6 @@ const styles = StyleSheet.create({
   gridStacked: {
     flexDirection: 'column',
     flexWrap: 'nowrap',
-  },
-  proWrapper: {
-    display: 'flex',
-    position: 'absolute',
-    zIndex: 20,
-    flexDirection: 'row',
-    paddingHorizontal: 4,
-    borderRadius: 4,
-    backgroundColor: COLORS.Primary,
-  },
-  pro: {
-    color: COLORS.Background,
-    fontSize: 22,
   },
 });
 

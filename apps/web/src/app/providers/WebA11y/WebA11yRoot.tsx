@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { navigationRef } from '../../navigation/navigationRef';
 import { useWebPointerDragScroll } from 'shared/lib/web/useWebPointerDragScroll';
+import { useWebSwipeBack } from 'shared/lib/web/useWebSwipeBack';
+import { useTelegramBackButton } from 'shared/lib/web/useTelegramBackButton';
 import {
   WEB_CARD_MEANINGS_CLASS,
   WEB_CARD_TILE_CLASS,
@@ -80,6 +82,8 @@ body {
  */
 export function WebA11yRoot() {
   useWebPointerDragScroll();
+  useWebSwipeBack();
+  useTelegramBackButton();
 
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof document === 'undefined') {
