@@ -27,7 +27,7 @@ function FavoriteCards() {
       <Header showBackButton title={t('core:page.favouriteCards')} />
       <ScrollView style={styles.wrapper}>
         {cards.length ? (
-          <CardsList cards={cards} />
+          <CardsList cards={cards} mobileSingleColumn />
         ) : (
           <NoContent title={t('core:favoriteCards.noCards')} />
         )}

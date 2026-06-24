@@ -40,6 +40,8 @@ type CardsListProps<T> = {
   onPressLocked?: () => void;
   /** Плотная сетка (напр. словарь карт): крупные карты, фиксированные брейкпоинты по ширине. */
   preferCompactTiles?: boolean;
+  /** Одна колонка на узком экране (напр. избранные карты). */
+  mobileSingleColumn?: boolean;
 };
 
 type CardGridItemProps<T extends BaseTarotCardProps> = {
@@ -158,6 +160,7 @@ function CardsList<T extends BaseTarotCardProps>({
   onPress,
   onPressLocked,
   preferCompactTiles,
+  mobileSingleColumn,
 }: CardsListProps<T>) {
   const { t } = useTranslation();
   const { width: windowWidth } = useWindowDimensions();
@@ -199,7 +202,17 @@ function CardsList<T extends BaseTarotCardProps>({
   const isMobileDictionaryGrid =
     preferCompactTiles && containerWidth < TAB_BREAKPOINT_RAIL;
 
+  const isMobileSingleColumnGrid =
+    mobileSingleColumn && containerWidth < TAB_BREAKPOINT_RAIL;
+
+  const isMobileStackLayout =
+    isMobileDictionaryGrid || isMobileSingleColumnGrid;
+
   const numColumns = useMemo(() => {
+    if (isMobileSingleColumnGrid) {
+      return 1;
+    }
+
     if (preferCompactTiles) {
       if (containerWidth >= 1480) return 6;
       if (containerWidth >= 1180) return 5;
@@ -212,12 +225,16 @@ function CardsList<T extends BaseTarotCardProps>({
     if (containerWidth >= 1100) return 4;
     if (containerWidth >= 760) return 3;
     return 2;
-  }, [containerWidth, preferCompactTiles]);
+  }, [containerWidth, preferCompactTiles, isMobileSingleColumnGrid]);
 
   const cardWidth = useMemo(() => {
     const raw = Math.floor(
       (containerWidth - gridGap * Math.max(0, numColumns - 1)) / numColumns
     );
+    if (isMobileSingleColumnGrid) {
+      return Math.min(280, Math.max(160, raw));
+    }
+
     if (preferCompactTiles) {
       if (isMobileDictionaryGrid) {
         return Math.min(
@@ -239,6 +256,7 @@ function CardsList<T extends BaseTarotCardProps>({
     preferCompactTiles,
     gridGap,
     isMobileDictionaryGrid,
+    isMobileSingleColumnGrid,
   ]);
 
   const cardHeight = useMemo(
@@ -290,8 +308,7 @@ function CardsList<T extends BaseTarotCardProps>({
     ]
   );
 
-  const useWebScrollTap =
-    isMobileDictionaryGrid && Platform.OS === 'web';
+  const useWebScrollTap = isMobileStackLayout && Platform.OS === 'web';
 
   const listEmpty =
     cards.length === 0 ? (
@@ -318,7 +335,7 @@ function CardsList<T extends BaseTarotCardProps>({
         isSelected={appearance?.deckStyle === item.customAppearance}
         customAppearance={item.customAppearance}
         useWebScrollTap={useWebScrollTap}
-        useScrollFriendlyTap={isMobileDictionaryGrid}
+        useScrollFriendlyTap={isMobileStackLayout}
         onOpen={() => {
           void openCard(item);
         }}
@@ -328,7 +345,7 @@ function CardsList<T extends BaseTarotCardProps>({
   };
 
   // FlatList внутри ScrollView на web/mobile перехватывает touch — на мобилке plain map.
-  if (isMobileDictionaryGrid) {
+  if (isMobileStackLayout) {
     return (
       <SafeAreaView style={styles.wrapper}>
         <View style={styles.listContent}>

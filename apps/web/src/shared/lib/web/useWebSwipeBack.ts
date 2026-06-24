@@ -2,20 +2,53 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { navigationRef } from 'app/navigation/navigationRef';
 
-const EDGE_ZONE_PX = 28;
-const SWIPE_THRESHOLD_PX = 56;
-const MAX_VERTICAL_DRIFT_PX = 48;
+const SWIPE_THRESHOLD_PX = 40;
+const MAX_VERTICAL_DRIFT_PX = 64;
+
+const INTERACTIVE_SELECTOR = [
+  'input',
+  'textarea',
+  'select',
+  'button',
+  'a[href]',
+  'summary',
+  'label',
+  '[contenteditable="true"]',
+  '[role="button"]',
+  '[role="link"]',
+  '[role="tab"]',
+  '[role="menuitem"]',
+  '[role="switch"]',
+  '[role="checkbox"]',
+  '[role="radio"]',
+  '[role="slider"]',
+  '[role="spinbutton"]',
+  '[role="combobox"]',
+  '[role="listbox"]',
+  '[role="option"]',
+  '[role="textbox"]',
+  '[data-tarot-card-tile]',
+  '.tarot-web-scroll-x',
+  '[data-tarot-no-swipe-back]',
+].join(', ');
 
 function isSwipeExcluded(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) {
     return false;
   }
 
-  return Boolean(
-    target.closest(
-      'input, textarea, select, [contenteditable="true"], [role="textbox"], [data-tarot-card-tile], .tarot-web-scroll-x, [data-tarot-no-swipe-back]'
-    )
+  if (target.closest(INTERACTIVE_SELECTOR)) {
+    return true;
+  }
+
+  const interactive = target.closest(
+    '[tabindex]:not([tabindex="-1"]), [onclick], [data-pressable="true"]'
   );
+  if (interactive instanceof HTMLElement) {
+    return true;
+  }
+
+  return false;
 }
 
 function tryGoBack(): void {
@@ -26,7 +59,8 @@ function tryGoBack(): void {
 }
 
 /**
- * Web / Telegram Mini App: swipe from the left edge to go to the previous screen.
+ * Web / Telegram Mini App: swipe right anywhere on the page to go back,
+ * unless the gesture starts on an interactive control.
  */
 export function useWebSwipeBack(): void {
   useEffect(() => {
@@ -45,11 +79,6 @@ export function useWebSwipeBack(): void {
       }
 
       const touch = event.touches[0];
-      if (touch.clientX > EDGE_ZONE_PX) {
-        tracking = false;
-        return;
-      }
-
       startX = touch.clientX;
       startY = touch.clientY;
       tracking = true;
