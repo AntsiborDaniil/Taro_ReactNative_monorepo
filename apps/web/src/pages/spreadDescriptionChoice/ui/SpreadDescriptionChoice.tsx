@@ -124,12 +124,7 @@ function SpreadDescriptionChoice() {
   }
 
   if (isSimpleSpread || isSelectingCards) {
-    return (
-      <SpreadCardsChoice
-        isSimpleSpread={isSimpleSpread}
-        scrollToPickerOnMount={isSelectingCards && !isSimpleSpread}
-      />
-    );
+    return <SpreadCardsChoice isSimpleSpread={isSimpleSpread} />;
   }
 
   return (

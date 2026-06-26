@@ -21,6 +21,8 @@ import { useData } from 'shared/DataProvider';
 import { useRotateAnimation } from 'shared/hooks';
 import { TAnimationCarouselHookResult } from './types';
 
+const FLIGHT_EASING = Easing.bezier(0.33, 0, 0.2, 1);
+
 export function useAnimationCarousel(): TAnimationCarouselHookResult {
   const { width: screenWidth } = useWindowDimensions();
   const flyingCardSize = getFlyingCardSize(screenWidth);
@@ -69,27 +71,23 @@ export function useAnimationCarousel(): TAnimationCarouselHookResult {
     centerX: number,
     centerY: number,
     sliderWidth = sliderCardSize.width,
-    _sliderHeight = sliderCardSize.height
+    sliderHeight = sliderCardSize.height
   ) => {
-    const gap = Math.max(4, Math.round(sliderWidth * 0.05));
+    const gap = Math.max(6, Math.round(sliderWidth * 0.04));
     const previewW = flyingCardSize.width;
     const previewH = flyingCardSize.height;
 
     let left = centerX + sliderWidth / 2 + gap;
-    const top = centerY - previewH / 2;
+    const top = centerY + (sliderHeight - previewH) / 2;
 
-    if (left + previewW > screenWidth - 10) {
-      left = centerX - sliderWidth / 2 - gap - previewW;
-    }
-
-    if (left < 8) {
-      left = Math.max(8, centerX - previewW / 2);
+    if (left + previewW > screenWidth - 8) {
+      left = screenWidth - previewW - 8;
     }
 
     prevPositionRef.current = { x: left, y: top };
     translateX.value = left;
     translateY.value = top;
-    scale.value = 0.9;
+    scale.value = 0.92;
     opacity.value = 0;
   };
 
@@ -107,7 +105,7 @@ export function useAnimationCarousel(): TAnimationCarouselHookResult {
       return;
     }
 
-    opacity.value = withTiming(0, { duration: 200 }, (finished) => {
+    opacity.value = withTiming(0, { duration: 220 }, (finished) => {
       if (finished) {
         runOnJS(applyHiddenReset)();
       }
@@ -117,35 +115,32 @@ export function useAnimationCarousel(): TAnimationCarouselHookResult {
   const handleAnimate = (index?: number) => {
     const slotIndex = spread?.selectedCards?.length ?? 0;
     const targetPosition = spread?.cardsPosition?.[slotIndex];
-    const isWideLayout = screenWidth >= 768;
-    const duration = isWideLayout
-      ? Math.round(ANIMATED_CARD_TIMEOUT * 0.78)
-      : ANIMATED_CARD_TIMEOUT;
-    const liftDelta = isWideLayout ? 12 : 20;
-    const appearPause = Math.round(duration * 0.14);
+    const duration = ANIMATED_CARD_TIMEOUT;
+    const appearPause = Math.round(duration * 0.18);
+    const flyDelay = appearPause + 60;
+    const flyDuration = Math.round(duration * 0.78);
 
-    opacity.value = withTiming(1, { duration: 160 });
+    const startX = translateX.value;
+    const startY = translateY.value;
+
+    opacity.value = withTiming(1, { duration: 200, easing: Easing.out(Easing.cubic) });
     scale.value = withSequence(
-      withTiming(1.05, { duration: 180, easing: Easing.out(Easing.cubic) }),
-      withTiming(1, { duration: 140, easing: Easing.inOut(Easing.cubic) }),
-      withDelay(appearPause, withTiming(1, { duration: 1 }))
+      withTiming(1.04, { duration: 200, easing: Easing.out(Easing.cubic) }),
+      withTiming(1, { duration: 160, easing: Easing.inOut(Easing.cubic) })
     );
 
     if (!targetPosition) {
-      translateY.value = withSequence(
-        withTiming(translateY.value - 72, {
-          duration: duration * 0.45,
-          easing: Easing.out(Easing.cubic),
-        }),
-        withTiming(translateY.value, {
-          duration: duration * 0.35,
-          easing: Easing.inOut(Easing.cubic),
+      translateX.value = withDelay(
+        flyDelay,
+        withTiming(startX + 48, {
+          duration: flyDuration,
+          easing: FLIGHT_EASING,
         })
       );
 
       setTimeout(() => {
         resetFlyingCard();
-      }, duration + 40);
+      }, flyDelay + flyDuration + 40);
 
       return;
     }
@@ -163,62 +158,44 @@ export function useAnimationCarousel(): TAnimationCarouselHookResult {
       SCHEME_CARD_SIZE.height +
       (Platform.OS === 'android' ? flyingCardSize.height * 0.08 : 0);
 
-    const liftY = translateY.value - liftDelta;
-    const flyDelay = appearPause + 80;
-
     if (isHorizontalCard) {
       rotate.value = withDelay(
-        flyDelay + duration * 0.3,
+        flyDelay + flyDuration * 0.35,
         withTiming(90, {
-          duration: duration * 0.32,
-          easing: Easing.inOut(Easing.cubic),
+          duration: flyDuration * 0.4,
+          easing: FLIGHT_EASING,
         })
       );
     }
 
     translateX.value = withDelay(
       flyDelay,
-      withSequence(
-        withTiming(translateX.value, {
-          duration: duration * 0.1,
-          easing: Easing.out(Easing.cubic),
-        }),
-        withTiming(targetX, {
-          duration: duration * 0.68,
-          easing: Easing.inOut(Easing.cubic),
-        })
-      )
+      withTiming(targetX, {
+        duration: flyDuration,
+        easing: FLIGHT_EASING,
+      })
     );
 
     translateY.value = withDelay(
       flyDelay,
-      withSequence(
-        withTiming(liftY, {
-          duration: duration * 0.14,
-          easing: Easing.out(Easing.cubic),
-        }),
-        withTiming(targetY, {
-          duration: duration * 0.7,
-          easing: Easing.inOut(Easing.cubic),
-        })
-      )
+      withTiming(targetY, {
+        duration: flyDuration,
+        easing: FLIGHT_EASING,
+      })
     );
 
     scale.value = withDelay(
       flyDelay,
-      withSequence(
-        withTiming(1.02, { duration: duration * 0.12 }),
-        withTiming(landingScale, {
-          duration: duration * 0.72,
-          easing: Easing.inOut(Easing.cubic),
-        })
-      )
+      withTiming(landingScale, {
+        duration: flyDuration,
+        easing: FLIGHT_EASING,
+      })
     );
 
     setTimeout(() => {
       void handleVibrationClick?.();
       resetFlyingCard();
-    }, flyDelay + duration + 40);
+    }, flyDelay + flyDuration + 40);
   };
 
   return {

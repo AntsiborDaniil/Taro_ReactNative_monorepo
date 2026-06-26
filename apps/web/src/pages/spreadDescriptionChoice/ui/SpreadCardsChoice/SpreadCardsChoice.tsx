@@ -41,7 +41,6 @@ import {
   shouldPromptWebSignIn,
   verticalScale,
 } from 'shared/lib';
-import { scrollToSpreadPickerWithRetries, SPREAD_PICKER_SLIDER_ID } from 'shared/lib/scrollToSpreadPicker';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -54,20 +53,13 @@ const PHONE_MAX_WIDTH = 640;
 
 type SpreadCardsChoiceProps = {
   isSimpleSpread?: boolean;
-  /** After «Сделать расклад» on the previous step — scroll to the card picker. */
-  scrollToPickerOnMount?: boolean;
 };
 
 function SpreadCardsChoice({
   isSimpleSpread,
-  scrollToPickerOnMount = false,
 }: SpreadCardsChoiceProps) {
   const attemptsCount = useRef<number>(0);
   const [hasAskedQuestion, setHasAskedQuestion] = useState(false);
-  const scrollRef = useRef<KeyboardAwareScrollView>(null);
-  const pickerZoneRef = useRef<View>(null);
-  const sliderScrollRef = useRef<View>(null);
-  const didInitialScrollRef = useRef(false);
 
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
@@ -103,43 +95,6 @@ function SpreadCardsChoice({
     spread?.id === SpreadName.Simple_DaySuggest ||
     !isSimpleSpread ||
     hasAskedQuestion;
-
-  const scrollToPicker = useCallback(() => {
-    scrollToSpreadPickerWithRetries(
-      sliderScrollRef.current ?? pickerZoneRef.current,
-      scrollRef.current,
-      [0, 180, 420, 720, 1100, 1450],
-      SPREAD_PICKER_SLIDER_ID
-    );
-  }, []);
-
-  useEffect(() => {
-    if (!showCardPicker) {
-      return;
-    }
-
-    const shouldScroll =
-      scrollToPickerOnMount && !didInitialScrollRef.current
-        ? true
-        : hasAskedQuestion && isSimpleSpread;
-
-    if (!shouldScroll) {
-      return;
-    }
-
-    didInitialScrollRef.current = true;
-    const timer = setTimeout(() => {
-      scrollToPicker();
-    }, Platform.OS === 'web' ? 640 : 420);
-
-    return () => clearTimeout(timer);
-  }, [
-    showCardPicker,
-    scrollToPickerOnMount,
-    hasAskedQuestion,
-    isSimpleSpread,
-    scrollToPicker,
-  ]);
 
   const handlePressMakeSpread = useCallback(async () => {
     if (
@@ -184,7 +139,6 @@ function SpreadCardsChoice({
     }
 
     setHasAskedQuestion(true);
-    setTimeout(() => scrollToPicker(), Platform.OS === 'web' ? 680 : 480);
   }, [
     spread?.id,
     spread?.name,
@@ -195,7 +149,6 @@ function SpreadCardsChoice({
     checkErrors,
     showModal,
     handleVibrationClick,
-    scrollToPicker,
     t,
   ]);
 
@@ -276,7 +229,6 @@ function SpreadCardsChoice({
         value={animationCarouselContextData}
       >
         <KeyboardAwareScrollView
-          ref={scrollRef}
           style={{ flex: 1, position: 'relative' }}
           contentContainerStyle={styles.scrollContent}
           enableOnAndroid
@@ -321,27 +273,16 @@ function SpreadCardsChoice({
                     />
                   )}
                 {showCardPicker ? (
-                  <View
-                    ref={pickerZoneRef}
-                    style={spreadInnerStyles.altarZone}
-                    collapsable={false}
-                  >
+                  <View style={spreadInnerStyles.altarZone}>
                     <View style={spreadInnerStyles.altarGlow} pointerEvents="none" />
                     <AnimatedCard />
-                    <View
-                      ref={sliderScrollRef}
-                      nativeID={SPREAD_PICKER_SLIDER_ID}
-                      collapsable={false}
-                      style={styles.sliderAnchor}
-                    >
-                      <CoverFlowCardCarousel
-                        style={
-                          isSimpleSpread
-                            ? styles.carouselSimpleSpread
-                            : styles.carousel
-                        }
-                      />
-                    </View>
+                    <CoverFlowCardCarousel
+                      style={
+                        isSimpleSpread
+                          ? styles.carouselSimpleSpread
+                          : styles.carousel
+                      }
+                    />
                     {!isSimpleSpread && (
                       <Text category={TEXT_TAGS.p2} style={spreadInnerStyles.altarHint}>
                         {t('spread:flow.pickHint')}
@@ -413,10 +354,6 @@ const styles = StyleSheet.create({
   carousel: {
     marginTop: 8,
     alignSelf: 'center',
-  },
-  sliderAnchor: {
-    width: '100%',
-    alignItems: 'center',
   },
   carouselSimpleSpread: {
     marginTop: 0,
