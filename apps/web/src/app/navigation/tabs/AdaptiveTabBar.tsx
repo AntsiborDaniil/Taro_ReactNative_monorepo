@@ -1,6 +1,6 @@
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { BottomTabBar, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { CommonActions } from '@react-navigation/native';
+import { createResetTabToRootAction } from '../resetTabToRoot';
 import { ReactElement, useCallback } from 'react';
 import {
   Platform,
@@ -68,12 +68,7 @@ export function AdaptiveTabBar({
       blurActiveElement();
       await handleVibrationClick?.();
       if (routeName === selectedTab) {
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: routeName }],
-          })
-        );
+        navigation.dispatch(createResetTabToRootAction(routeName));
         return;
       }
       AppMetrica.reportEvent(AnalyticAction.ClickTab, { tabName: routeName });

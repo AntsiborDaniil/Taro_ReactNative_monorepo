@@ -128,6 +128,7 @@
   "auth.validation.nameMin": "Имя должно быть не короче 2 символов",
   "auth.validation.emailRequired": "Введите email",
   "auth.validation.emailInvalid": "Некорректный email",
+  "auth.validation.emailNoGmail": "Используйте любую почту, кроме Gmail (например Outlook, Yandex, Mail.ru)",
   "auth.validation.passwordRequired": "Введите пароль",
   "auth.validation.passwordMin": "Пароль должен быть не короче 8 символов",
   "auth.validation.passwordTooShort": "Минимум 8 символов",

@@ -3,9 +3,6 @@ import { Platform } from 'react-native';
 import { v4 as uuidv4 } from 'uuid';
 import {
   TSpread,
-  authCredentials,
-  authRequestHeaders,
-  getTarotAiApiBaseUrl,
 } from 'shared/api';
 import {
   createCloudSpread,
@@ -20,37 +17,13 @@ import {
   getValueForAsyncDeviceMemoryKey,
   saveAsyncDeviceMemoryKey,
 } from 'shared/lib';
-import { emitTarotAuthChanged } from 'shared/lib/tarotAuthEvents';
 import { isGuestFreeSpreadId } from 'shared/lib/tarotGuestSpreads';
 
 const CLOUD_PAGE_SIZE = 20;
 
 async function consumeTarotDailySlotOnServer(): Promise<boolean> {
-  if (Platform.OS !== 'web') {
-    return true;
-  }
-  try {
-    const res = await fetch(
-      `${getTarotAiApiBaseUrl()}/api/tarot/daily/consume`,
-      {
-        method: 'POST',
-        credentials: authCredentials(),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Web-Cookie-Auth': '1',
-          ...authRequestHeaders(null),
-        },
-        body: JSON.stringify({}),
-      }
-    );
-    if (res.ok) {
-      emitTarotAuthChanged();
-      return true;
-    }
-    return false;
-  } catch {
-    return false;
-  }
+  // Authenticated web users have no daily spread cap.
+  return true;
 }
 
 export type SpreadsHistoryPage = {

@@ -1,6 +1,6 @@
 import AppMetrica from '@appmetrica/react-native-analytics';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { CommonActions } from '@react-navigation/native';
+import { createResetTabToRootAction } from '../resetTabToRoot';
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -208,12 +208,7 @@ export function MobileFabTabBar({
       await handleVibrationClick?.();
 
       if (routeName === selectedTab) {
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: routeName }],
-          })
-        );
+        navigation.dispatch(createResetTabToRootAction(routeName));
         return;
       }
 

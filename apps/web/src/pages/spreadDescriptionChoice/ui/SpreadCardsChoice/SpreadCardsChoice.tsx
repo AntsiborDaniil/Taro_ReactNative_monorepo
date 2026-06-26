@@ -22,7 +22,7 @@ import {
 } from 'features/carousel';
 import { Header } from 'features/header';
 import { useSpreadCatalogBack } from 'features/header/useSpreadCatalogBack';
-import { DailyTarotLimitModal, SignInForSpreadsModal } from 'features/tarotAccess/ui';
+import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { Question } from 'features/Question';
 import { SpreadScheme } from 'features/scheme';
 import { SpreadName } from 'shared/api';
@@ -37,7 +37,6 @@ import {
   isGuestFreeSpreadId,
   isTablet,
   shouldPromptWebSignIn,
-  isWebAuthConfirmed,
   verticalScale,
 } from 'shared/lib';
 import { COLORS } from 'shared/themes';
@@ -76,7 +75,7 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
     Context: SpreadContext,
   });
 
-  const { isPractitioner, isAuthenticated, authSessionLoading, tarotDaily } = useData({
+  const { isPractitioner, isAuthenticated, authSessionLoading } = useData({
     Context: UserContext,
   });
 
@@ -95,15 +94,7 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
     }
 
     let isLocked = false;
-    if (Platform.OS === 'web') {
-      const used = tarotDaily?.used ?? 0;
-      const limit = tarotDaily?.limit ?? 10;
-      isLocked =
-        isWebAuthConfirmed(isAuthenticated, authSessionLoading) &&
-        !!spread &&
-        !isGuestFreeSpreadId(spread.id) &&
-        used >= limit;
-    } else {
+    if (Platform.OS !== 'web') {
       const currentAmountSpreads = await getValueForAsyncDeviceMemoryKey<
         Record<string, string>
       >(AsyncMemoryKey.LimitOfSpreads);
@@ -119,7 +110,7 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
     });
 
     if (!isPractitioner && isLocked) {
-      showModal?.(<DailyTarotLimitModal />);
+      showModal?.(<SignInForSpreadsModal />);
       return;
     }
 
@@ -135,8 +126,6 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
     isPractitioner,
     isAuthenticated,
     authSessionLoading,
-    tarotDaily?.used,
-    tarotDaily?.limit,
     checkErrors,
     showModal,
   ]);
@@ -148,7 +137,10 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
       });
     }
 
-    await handleGetAIInterpretation?.();
+    const ok = (await handleGetAIInterpretation?.()) ?? false;
+    if (!ok) {
+      return;
+    }
 
     // @ts-expect-error wrong route
     navigation.navigate(NavigationRoute.SpreadReadings);

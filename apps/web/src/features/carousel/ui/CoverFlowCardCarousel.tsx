@@ -96,6 +96,9 @@ function CoverFlowCardCarousel({
         overlayControls && { width: carouselWidth, height: carouselHeight },
         style,
       ]}
+      {...(Platform.OS === 'web'
+        ? ({ 'data-tarot-no-swipe-back': true } as object)
+        : {})}
     >
       <Carousel
         ref={ref}
@@ -103,6 +106,12 @@ function CoverFlowCardCarousel({
         loop={true}
         width={carouselWidth}
         height={carouselHeight}
+        scrollAnimationDuration={1100}
+        mode="parallax"
+        modeConfig={{
+          parallaxScrollingScale: 0.86,
+          parallaxScrollingOffset: 54,
+        }}
         style={[
           styles.carousel,
           overlayControls && styles.carouselOverlay,

@@ -1,16 +1,23 @@
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { navigationRef } from 'app/navigation/navigationRef';
+import { LoadingsContext } from 'shared/contexts/Loadings';
+import { useData } from 'shared/DataProvider';
 import {
   ensureTelegramWebAppScript,
   initTelegramWebAppChrome,
   isTelegramMiniApp,
 } from './telegramWebApp';
 
-function syncTelegramBackButton(): void {
+function syncTelegramBackButton(blockBack: boolean): void {
   const tg = window.Telegram?.WebApp;
   const backButton = tg?.BackButton;
   if (!backButton) {
+    return;
+  }
+
+  if (blockBack) {
+    backButton.hide();
     return;
   }
 
@@ -28,6 +35,8 @@ function syncTelegramBackButton(): void {
  * Telegram Mini App: native back button in the client chrome.
  */
 export function useTelegramBackButton(): void {
+  const { isFullScreenLoading } = useData({ Context: LoadingsContext });
+
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') {
       return;
@@ -61,9 +70,11 @@ export function useTelegramBackButton(): void {
       };
 
       backButton.onClick(clickHandler);
-      syncTelegramBackButton();
 
-      const interval = window.setInterval(syncTelegramBackButton, 400);
+      const interval = window.setInterval(() => {
+        syncTelegramBackButton(isFullScreenLoading);
+      }, 400);
+      syncTelegramBackButton(isFullScreenLoading);
 
       return () => {
         window.clearInterval(interval);
@@ -84,5 +95,5 @@ export function useTelegramBackButton(): void {
         backButton.hide();
       }
     };
-  }, []);
+  }, [isFullScreenLoading]);
 }

@@ -1,4 +1,4 @@
-import React, { memo, useRef } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import {
   ImageSourcePropType,
   LayoutChangeEvent,
@@ -11,10 +11,17 @@ import {
 } from 'react-native';
 import { SpreadContext } from 'entities/Spread';
 import type { AnimatedProps } from 'react-native-reanimated';
-import Animated from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { ANIMATED_CARD_TIMEOUT } from 'shared/constants';
 import { useData } from 'shared/DataProvider';
 import { getImage } from 'shared/lib';
+import { COLORS } from 'shared/themes';
 import { AnimationCarouselContext } from '../model';
 
 interface Props extends AnimatedProps<ViewProps> {
@@ -44,6 +51,20 @@ function SlideItem({
   });
 
   const isAnimating = useRef(false);
+  const pressScale = useSharedValue(1);
+  const selectGlow = useSharedValue(0);
+
+  const pressAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pressScale.value }],
+    borderColor: `rgba(246, 192, 27, ${0.2 + selectGlow.value * 0.8})`,
+    borderWidth: 1 + selectGlow.value * 2,
+  }));
+
+  useEffect(() => {
+    if (!isSelected) {
+      selectGlow.value = withTiming(0, { duration: 180 });
+    }
+  }, [isSelected, selectGlow]);
 
   const handlePress = () => {
     if (!isSelected || isAnimating.current) {
@@ -57,6 +78,11 @@ function SlideItem({
     }
 
     isAnimating.current = true;
+    pressScale.value = withSequence(
+      withSpring(0.9, { damping: 14, stiffness: 320 }),
+      withSpring(1.04, { damping: 12, stiffness: 260 }),
+      withSpring(1, { damping: 16, stiffness: 280 })
+    );
 
     const preSelectedTarotCard = handlePreSelectTarotCard?.();
     if (__DEV__) {
@@ -80,6 +106,10 @@ function SlideItem({
           });
         }
         if (cardWasSelected) {
+          selectGlow.value = withSequence(
+            withTiming(1, { duration: 160 }),
+            withTiming(0.35, { duration: 420 })
+          );
           onAdditionalClick?.();
           if (__DEV__) {
             console.log(`${DAY_CARD_DEBUG} slidePress:navigate`);
@@ -146,7 +176,10 @@ function SlideItem({
       onKeyDown={onKeyDown}
       style={styles.pressable}
     >
-      <Animated.View style={[styles.container, style]} {...animatedViewProps}>
+      <Animated.View
+        style={[styles.container, style, pressAnimatedStyle]}
+        {...animatedViewProps}
+      >
         <Animated.View style={isSelected ? null : styles.overlay} />
         <Animated.Image
           style={styles.card}
@@ -186,7 +219,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderWidth: 1,
-    borderColor: 'white',
+    borderColor: COLORS.Content,
     borderRadius: 12,
     overlayColor: 'black',
   },

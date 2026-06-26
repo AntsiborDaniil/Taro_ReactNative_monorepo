@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { navigationRef } from 'app/navigation/navigationRef';
+import { LoadingsContext } from 'shared/contexts/Loadings';
+import { useData } from 'shared/DataProvider';
 
 const SWIPE_THRESHOLD_PX = 40;
 const MAX_VERTICAL_DRIFT_PX = 64;
@@ -63,6 +65,8 @@ function tryGoBack(): void {
  * unless the gesture starts on an interactive control.
  */
 export function useWebSwipeBack(): void {
+  const { isFullScreenLoading } = useData({ Context: LoadingsContext });
+
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof document === 'undefined') {
       return;
@@ -73,6 +77,11 @@ export function useWebSwipeBack(): void {
     let tracking = false;
 
     const onTouchStart = (event: TouchEvent): void => {
+      if (isFullScreenLoading) {
+        tracking = false;
+        return;
+      }
+
       if (event.touches.length !== 1 || isSwipeExcluded(event.target)) {
         tracking = false;
         return;
@@ -113,5 +122,5 @@ export function useWebSwipeBack(): void {
       document.removeEventListener('touchend', onTouchEnd);
       document.removeEventListener('touchcancel', onTouchCancel);
     };
-  }, []);
+  }, [isFullScreenLoading]);
 }

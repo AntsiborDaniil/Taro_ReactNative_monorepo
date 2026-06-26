@@ -7,7 +7,7 @@ import type { LayoutChangeEvent } from 'react-native';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { DailyTarotLimitModal, SignInForSpreadsModal } from 'features/tarotAccess/ui';
+import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import {
   SpreadName,
   SpreadsCategory,
@@ -28,7 +28,6 @@ import {
   isGuestFreeSpreadId,
   isTablet,
   shouldPromptWebSignIn,
-  isWebAuthConfirmed,
 } from 'shared/lib';
 import { AsyncMemoryKey } from 'shared/lib/deviceMemory';
 import { AnalyticAction } from 'shared/types';
@@ -74,7 +73,7 @@ export type TSpreadHookResult = {
   setQuestion: (value: string) => void;
   checkErrors: () => TErrors;
   selectFullSpread: (value: TSpread) => void;
-  handleGetAIInterpretation: () => Promise<void>;
+  handleGetAIInterpretation: () => Promise<boolean>;
   handleLayoutCard: (index: number) => (event: LayoutChangeEvent) => void;
   handlePreSelectTarotCard: () => TTarotCard;
   handleSelectTarotCard: (card?: TTarotCard) => Promise<boolean>;
@@ -108,7 +107,7 @@ export function useSpread({
 
   const { setIsFullScreenLoading } = useData({ Context: LoadingsContext });
 
-  const { isPractitioner, isAuthenticated, authSessionLoading, tarotDaily } = useData({
+  const { isPractitioner, isAuthenticated, authSessionLoading } = useData({
     Context: UserContext,
   });
 
@@ -333,12 +332,6 @@ export function useSpread({
         showModal?.(createElement(SignInForSpreadsModal));
         return false;
       }
-      const used = tarotDaily?.used ?? 0;
-      const limit = tarotDaily?.limit ?? 10;
-      if (used >= limit) {
-        showModal?.(createElement(DailyTarotLimitModal));
-        return false;
-      }
     }
 
     setSelectedCardsIds((prevState) => ({
@@ -458,7 +451,7 @@ export function useSpread({
     });
   };
 
-  const handleGetAIInterpretation = async (): Promise<void> => {
+  const handleGetAIInterpretation = async (): Promise<boolean> => {
     const freeUseOfAI = await AsyncStorage.getItem(AsyncMemoryKey.FreeUseOfAI);
 
     if (
@@ -466,7 +459,7 @@ export function useSpread({
       spread?.id === SpreadName.Simple_DaySuggest ||
       spread?.interpretation
     ) {
-      return;
+      return Boolean(spread?.interpretation);
     }
 
     if (
@@ -489,7 +482,7 @@ export function useSpread({
           question: savedSpread.question ?? spread.question ?? '',
         });
       }
-      return;
+      return true;
     }
 
     if (
@@ -497,15 +490,7 @@ export function useSpread({
       !isGuestFreeSpreadId(spread?.id)
     ) {
       showModal?.(createElement(SignInForSpreadsModal));
-      return;
-    }
-
-    if (
-      isWebAuthConfirmed(isAuthenticated, authSessionLoading) &&
-      (tarotDaily?.used ?? 0) >= (tarotDaily?.limit ?? 10)
-    ) {
-      showModal?.(createElement(DailyTarotLimitModal));
-      return;
+      return false;
     }
 
     const AIRequestBody = getAIRequestBody({
@@ -513,6 +498,10 @@ export function useSpread({
       spread,
       language: i18n.language,
     });
+
+    if (!AIRequestBody) {
+      return false;
+    }
 
     try {
       setIsFullScreenLoading?.(true);
@@ -535,8 +524,6 @@ export function useSpread({
       if (!aiInterpretationResponse.ok) {
         if (aiInterpretationResponse.status === 401) {
           showModal?.(createElement(SignInForSpreadsModal));
-        } else if (aiInterpretationResponse.status === 429) {
-          showModal?.(createElement(DailyTarotLimitModal));
         } else {
           Toast.show({
             type: 'error',
@@ -544,7 +531,7 @@ export function useSpread({
             text2: t('core:ai.error2'),
           });
         }
-        return;
+        return false;
       }
 
       const interpretation: string = (await aiInterpretationResponse.json())
@@ -562,8 +549,6 @@ export function useSpread({
             ...savedSpread,
             question: savedSpread.question ?? spread.question ?? '',
           });
-        } else if (Platform.OS === 'web') {
-          showModal?.(createElement(DailyTarotLimitModal));
         }
       }
 
@@ -574,6 +559,8 @@ export function useSpread({
       if (!isPractitioner && !freeUseOfAI) {
         await AsyncStorage.setItem(AsyncMemoryKey.FreeUseOfAI, '1');
       }
+
+      return true;
     } catch (e: any) {
       Toast.show({
         type: 'error',
@@ -582,6 +569,7 @@ export function useSpread({
       });
 
       AppMetrica.reportError('AI interpretation Error', e.message);
+      return false;
     } finally {
       setIsFullScreenLoading?.(false);
       setInterpretationLoading(false);

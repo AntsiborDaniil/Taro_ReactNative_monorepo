@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Platform, StyleSheet, useWindowDimensions } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { CommonActions } from '@react-navigation/native';
+import { createResetTabToRootAction } from '../resetTabToRoot';
 import { useTranslation } from 'react-i18next';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext, useSpread } from 'entities/Spread';
@@ -167,10 +167,7 @@ function TarotTabs() {
             const tabName = e.target?.split('-')[0];
             if (tabName === selectedTab) {
               navigation.dispatch(
-                CommonActions.reset({
-                  index: 0,
-                  routes: [{ name: tabName as TabRoute }],
-                })
+                createResetTabToRootAction(tabName as TabRoute)
               );
               return;
             }

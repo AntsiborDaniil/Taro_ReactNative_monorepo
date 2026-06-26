@@ -80,7 +80,11 @@ function CardDescription({ style }: CardDescriptionProps) {
                 isSpreadCompleted
                   ? async () => {
                       await handleVibrationClick?.();
-                      await handleGetAIInterpretation?.();
+                      const ok =
+                        (await handleGetAIInterpretation?.()) ?? false;
+                      if (!ok) {
+                        return;
+                      }
                       // @ts-expect-error wrong route
                       navigation.navigate(NavigationRoute.SpreadReadings, {
                         cardIndex: index + 1,

@@ -26,8 +26,11 @@ import {
   authSignHeaders,
   authUsesCookie,
   getTarotAiApiBaseUrl,
-  startGoogleSignIn,
 } from 'shared/api';
+import {
+  EMAIL_RE,
+  isValidNonGmailEmail,
+} from 'shared/lib/emailValidation';
 import {
   passwordValidationCodeToI18nKey,
   strongPasswordFormRules,
@@ -77,8 +80,24 @@ type PasswordFormValues = {
   confirmPassword: string;
 };
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const AUTH_SESSION_STORAGE_KEY = 'authSession';
+
+function validateAuthEmail(
+  value: string,
+  t: (key: string) => string
+): true | string {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return t('settings:auth.validation.emailRequired');
+  }
+  if (!EMAIL_RE.test(trimmed)) {
+    return t('settings:auth.validation.emailInvalid');
+  }
+  if (!isValidNonGmailEmail(trimmed)) {
+    return t('settings:auth.validation.emailNoGmail');
+  }
+  return true;
+}
 
 type AuthApiBody = {
   user?: AuthUser;
@@ -901,7 +920,6 @@ function Auth() {
     profileForm.clearErrors();
     setShowPassword(false);
     setShowAccountPassword(false);
-    setAddCardModalVisible(false);
     setGuestAuthEpoch((n) => n + 1);
     setSession(null);
     if (Platform.OS === 'web') {
@@ -1321,10 +1339,7 @@ function Auth() {
                     name="email"
                     rules={{
                       required: t('settings:auth.validation.emailRequired'),
-                      validate: (value) =>
-                        EMAIL_RE.test(value)
-                          ? true
-                          : t('settings:auth.validation.emailInvalid'),
+                      validate: (value) => validateAuthEmail(value, t),
                     }}
                     render={({ field: { value, onChange, onBlur } }) => (
                       <TextInput
@@ -1390,33 +1405,6 @@ function Auth() {
                     ? t('settings:auth.loading')
                     : submitLabel}
                 </Button>
-
-                <View style={styles.dividerRow}>
-                  <View style={styles.divider} />
-                  <Text category={TEXT_TAGS.p2} style={styles.dividerText}>
-                    {t('settings:auth.or')}
-                  </Text>
-                  <View style={styles.divider} />
-                </View>
-
-                <Pressable
-                  style={(s: PressableWebState) => {
-                    const { hovered, pressed } = s;
-                    return [
-                      styles.socialButton,
-                      styles.socialButtonFull,
-                      hovered && styles.socialButtonHover,
-                      pressed && styles.socialButtonPressed,
-                    ];
-                  }}
-                  onPress={startGoogleSignIn}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('settings:auth.google')}
-                >
-                  <Text category={TEXT_TAGS.h4} style={styles.socialButtonText}>
-                    {t('settings:auth.google')}
-                  </Text>
-                </Pressable>
               </View>
             ) : (
               <View style={styles.formCard} key="signin-fields">
@@ -1429,10 +1417,7 @@ function Auth() {
                     name="email"
                     rules={{
                       required: t('settings:auth.validation.emailRequired'),
-                      validate: (value) =>
-                        EMAIL_RE.test(value)
-                          ? true
-                          : t('settings:auth.validation.emailInvalid'),
+                      validate: (value) => validateAuthEmail(value, t),
                     }}
                     render={({ field: { value, onChange, onBlur } }) => (
                       <TextInput
@@ -1497,33 +1482,6 @@ function Auth() {
                     ? t('settings:auth.loading')
                     : submitLabel}
                 </Button>
-
-                <View style={styles.dividerRow}>
-                  <View style={styles.divider} />
-                  <Text category={TEXT_TAGS.p2} style={styles.dividerText}>
-                    {t('settings:auth.or')}
-                  </Text>
-                  <View style={styles.divider} />
-                </View>
-
-                <Pressable
-                  style={(s: PressableWebState) => {
-                    const { hovered, pressed } = s;
-                    return [
-                      styles.socialButton,
-                      styles.socialButtonFull,
-                      hovered && styles.socialButtonHover,
-                      pressed && styles.socialButtonPressed,
-                    ];
-                  }}
-                  onPress={startGoogleSignIn}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('settings:auth.google')}
-                >
-                  <Text category={TEXT_TAGS.h4} style={styles.socialButtonText}>
-                    {t('settings:auth.google')}
-                  </Text>
-                </Pressable>
               </View>
             )}
           </View>

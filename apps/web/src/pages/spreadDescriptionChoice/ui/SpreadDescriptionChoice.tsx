@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Header } from 'features/header';
 import { useSpreadCatalogBack } from 'features/header/useSpreadCatalogBack';
-import { DailyTarotLimitModal, SignInForSpreadsModal } from 'features/tarotAccess/ui';
+import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import Question from 'features/Question/ui/Question';
 import { SpreadScheme } from 'features/scheme';
 import { SpreadsCategory, spreadsDataNames } from 'shared/api';
@@ -20,7 +20,6 @@ import {
   isGuestFreeSpreadId,
   moderateScale,
   shouldPromptWebSignIn,
-  isWebAuthConfirmed,
 } from 'shared/lib';
 import { AnalyticAction } from 'shared/types';
 import { Button, NoContent, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -39,7 +38,7 @@ function SpreadDescriptionChoice() {
 
   const { spread, checkErrors, question } = useData({ Context: SpreadContext });
 
-  const { isPractitioner, isAuthenticated, authSessionLoading, tarotDaily } = useData({
+  const { isPractitioner, isAuthenticated, authSessionLoading } = useData({
     Context: UserContext,
   });
 
@@ -60,15 +59,7 @@ function SpreadDescriptionChoice() {
     }
 
     let isLocked = false;
-    if (Platform.OS === 'web') {
-      const used = tarotDaily?.used ?? 0;
-      const limit = tarotDaily?.limit ?? 10;
-      isLocked =
-        isWebAuthConfirmed(isAuthenticated, authSessionLoading) &&
-        !!spread &&
-        !isGuestFreeSpreadId(spread.id) &&
-        used >= limit;
-    } else {
+    if (Platform.OS !== 'web') {
       const currentAmountSpreads = await getValueForAsyncDeviceMemoryKey<
         Record<string, string>
       >(AsyncMemoryKey.LimitOfSpreads);
@@ -84,7 +75,7 @@ function SpreadDescriptionChoice() {
     await handleVibrationClick?.();
 
     if (!isPractitioner && isLocked) {
-      showModal?.(<DailyTarotLimitModal />);
+      showModal?.(<SignInForSpreadsModal />);
       return;
     }
 
@@ -101,8 +92,6 @@ function SpreadDescriptionChoice() {
     question,
     showModal,
     spread?.name,
-    tarotDaily?.limit,
-    tarotDaily?.used,
     handleVibrationClick,
     spread?.id,
   ]);

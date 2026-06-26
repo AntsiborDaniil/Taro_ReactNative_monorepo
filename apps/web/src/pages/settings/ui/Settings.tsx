@@ -1,7 +1,5 @@
-import { Fragment, useCallback, useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import {
-  Linking,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -18,30 +16,29 @@ import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { ChevronRightIcon, CrossIcon, ReverseIcon } from 'shared/icons';
+import { ChevronRightIcon, ReverseIcon } from 'shared/icons';
 import {
   AsyncMemorySettingKey,
   isTablet,
   moderateScale,
   WEB_HOVER_TRANSITION,
 } from 'shared/lib';
+import { isTelegramMiniApp } from 'shared/lib/web/telegramWebApp';
 import { COLORS, SETTINGS_TYPOGRAPHY } from 'shared/themes';
-import { appStoreLinks } from 'shared/utils';
 import { AnalyticAction, NavigationRoute, PressableWebState, TabRoute } from 'shared/types';
-import { Button, ScreenLayout, SwitchElement, Text, TEXT_TAGS } from 'shared/ui';
+import { ScreenLayout, SwitchElement, Text, TEXT_TAGS } from 'shared/ui';
 import { APP_AGREEMENTS, getSettingsRoutes } from '../lib';
 import { useSettings } from '../model';
 import LanguagePickerModal from './Language/LanguagePickerModal';
 
 const WEB_ROW_KEYS_ACCOUNT = new Set(['account']);
 const WEB_ROW_KEYS_LOOK = new Set(['language', 'deck.style']);
-const WEB_ROW_KEYS_MOBILE = new Set(['mobile.app']);
 
 function Settings() {
   const { t } = useTranslation();
   const isWeb = Platform.OS === 'web';
+  const isTgMiniApp = isWeb && isTelegramMiniApp();
   const { sceneContentWidth } = useTabRailLayout();
-  const [storeModalOpen, setStoreModalOpen] = useState(false);
   const [languageModalOpen, setLanguageModalOpen] = useState(false);
 
   const { handleChangeBase } = useSettings({
@@ -61,9 +58,9 @@ function Settings() {
   const settingsRoutes = useMemo(
     () =>
       getSettingsRoutes({
-        onMobileAppPress: () => setStoreModalOpen(true),
+        isTelegramMiniApp: isTgMiniApp,
       }),
-    []
+    [isTgMiniApp]
   );
 
   const handlePress = async (
@@ -93,18 +90,6 @@ function Settings() {
     });
   };
 
-  const openStore = useCallback(async (url: string) => {
-    await handleVibrationClick?.();
-    try {
-      await Linking.openURL(url);
-    } catch {
-      if (typeof window !== 'undefined') {
-        window.open(url, '_blank', 'noopener,noreferrer');
-      }
-    }
-    setStoreModalOpen(false);
-  }, [handleVibrationClick]);
-
   const scenePad = moderateScale(16);
   const contentMax = Math.min(560, Math.max(320, sceneContentWidth - scenePad * 2));
 
@@ -113,7 +98,6 @@ function Settings() {
       WEB_ROW_KEYS_ACCOUNT.has(r.title)
     );
     const lookRoutes = settingsRoutes.filter((r) => WEB_ROW_KEYS_LOOK.has(r.title));
-    const mobileRoutes = settingsRoutes.filter((r) => WEB_ROW_KEYS_MOBILE.has(r.title));
 
     return (
       <ScreenLayout style={styles.container}>
@@ -150,41 +134,45 @@ function Settings() {
               />
             </View>
 
-            <Text category={TEXT_TAGS.label} style={webStyles.sectionLabel}>
-              {t('settings:section.account')}
-            </Text>
-            <View style={webStyles.card}>
-              {accountRoutes.map((route) => (
-                <Pressable
-                  key={route.title}
-                  accessibilityRole="button"
-                  onPress={() =>
-                    handlePress(route.url, route.title, route.onPress)
-                  }
-                  style={(s: PressableWebState) => {
-                    const { hovered, pressed } = s;
-                    return [
-                    webStyles.row,
-                    (hovered || pressed) && webStyles.rowActive,
-                  ];
-                  }}
-                >
-                  <View style={styles.iconWrapper}>
-                    <View style={styles.icon}>{route.icon}</View>
-                    <Text
-                      category={TEXT_TAGS.h4}
-                      style={[styles.text, styles.settingsBody]}
+            {accountRoutes.length > 0 ? (
+              <>
+                <Text category={TEXT_TAGS.label} style={webStyles.sectionLabel}>
+                  {t('settings:section.account')}
+                </Text>
+                <View style={webStyles.card}>
+                  {accountRoutes.map((route) => (
+                    <Pressable
+                      key={route.title}
+                      accessibilityRole="button"
+                      onPress={() =>
+                        handlePress(route.url, route.title, route.onPress)
+                      }
+                      style={(s: PressableWebState) => {
+                        const { hovered, pressed } = s;
+                        return [
+                          webStyles.row,
+                          (hovered || pressed) && webStyles.rowActive,
+                        ];
+                      }}
                     >
-                      {t(`settings:${route.title}`)}
-                    </Text>
-                  </View>
-                  <ChevronRightIcon
-                    width={isTablet ? 26 : 17}
-                    height={isTablet ? 26 : 17}
-                  />
-                </Pressable>
-              ))}
-            </View>
+                      <View style={styles.iconWrapper}>
+                        <View style={styles.icon}>{route.icon}</View>
+                        <Text
+                          category={TEXT_TAGS.h4}
+                          style={[styles.text, styles.settingsBody]}
+                        >
+                          {t(`settings:${route.title}`)}
+                        </Text>
+                      </View>
+                      <ChevronRightIcon
+                        width={isTablet ? 26 : 17}
+                        height={isTablet ? 26 : 17}
+                      />
+                    </Pressable>
+                  ))}
+                </View>
+              </>
+            ) : null}
 
             <Text category={TEXT_TAGS.label} style={webStyles.sectionLabel}>
               {t('settings:section.look')}
@@ -225,47 +213,6 @@ function Settings() {
             </View>
 
             <Text category={TEXT_TAGS.label} style={webStyles.sectionLabel}>
-              {t('settings:section.mobile')}
-            </Text>
-            <View style={webStyles.card}>
-              {mobileRoutes.map((route) => (
-                <Pressable
-                  key={route.title}
-                  accessibilityRole="button"
-                  onPress={() =>
-                    handlePress(route.url, route.title, route.onPress)
-                  }
-                  style={(s: PressableWebState) => {
-                    const { hovered, pressed } = s;
-                    return [
-                    webStyles.row,
-                    (hovered || pressed) && webStyles.rowActive,
-                  ];
-                  }}
-                >
-                  <View style={styles.iconWrapper}>
-                    <View style={styles.icon}>{route.icon}</View>
-                    <View style={webStyles.rowTextCol}>
-                      <Text
-                        category={TEXT_TAGS.h4}
-                        style={[styles.text, styles.settingsBody]}
-                      >
-                        {t(`settings:${route.title}`)}
-                      </Text>
-                      <Text category={TEXT_TAGS.p2} style={webStyles.rowHint}>
-                        {t('settings:mobile.app.hint')}
-                      </Text>
-                    </View>
-                  </View>
-                  <ChevronRightIcon
-                    width={isTablet ? 26 : 17}
-                    height={isTablet ? 26 : 17}
-                  />
-                </Pressable>
-              ))}
-            </View>
-
-            <Text category={TEXT_TAGS.label} style={webStyles.sectionLabel}>
               {t('settings:section.legal')}
             </Text>
             <View style={webStyles.legalRow}>
@@ -282,55 +229,6 @@ function Settings() {
             </View>
           </View>
         </ScrollView>
-
-        <Modal
-          visible={storeModalOpen}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setStoreModalOpen(false)}
-        >
-          <Pressable
-            style={webStyles.modalBackdrop}
-            onPress={() => setStoreModalOpen(false)}
-          >
-            <Pressable
-              style={webStyles.modalCard}
-              onPress={(e) => e.stopPropagation()}
-            >
-              <View style={webStyles.modalHeader}>
-                <Text category={TEXT_TAGS.h3} style={webStyles.modalTitle}>
-                  {t('settings:store.modal.title')}
-                </Text>
-                <TouchableOpacity
-                  accessibilityLabel={t('core:stub.emptyResultsModal.closeBackdrop')}
-                  hitSlop={12}
-                  onPress={() => setStoreModalOpen(false)}
-                >
-                  <CrossIcon width={22} height={22} />
-                </TouchableOpacity>
-              </View>
-              <Text category={TEXT_TAGS.p2} style={webStyles.modalSubtitle}>
-                {t('settings:store.modal.subtitle')}
-              </Text>
-              <View style={webStyles.modalButtons}>
-                <Button
-                  style={webStyles.storeButton}
-                  onPress={() => openStore(appStoreLinks.ios)}
-                >
-                  {t('core:downloadAppStore')}
-                </Button>
-                <Button
-                  style={webStyles.storeButtonSecondary}
-                  onPress={() => openStore(appStoreLinks.android)}
-                >
-                  <Text category={TEXT_TAGS.h3} style={webStyles.storeButtonOutlineText}>
-                    {t('core:downloadGooglePlay')}
-                  </Text>
-                </Button>
-              </View>
-            </Pressable>
-          </Pressable>
-        </Modal>
 
         <LanguagePickerModal
           visible={languageModalOpen}

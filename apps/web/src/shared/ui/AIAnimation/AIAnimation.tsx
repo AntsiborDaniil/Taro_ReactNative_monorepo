@@ -102,7 +102,12 @@ function AIAnimation({ hasVibration }: { hasVibration?: boolean }) {
           hideSettingButton: true,
         }}
       />
-      <View style={styles.overlay}>
+      <View
+        style={styles.overlay}
+        {...(Platform.OS === 'web'
+          ? ({ 'data-tarot-no-swipe-back': true } as object)
+          : {})}
+      >
         <View style={[styles.glow, styles.glowLeft]} />
         <View style={[styles.glow, styles.glowRight]} />
         <View style={styles.card}>

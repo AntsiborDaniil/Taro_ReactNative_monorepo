@@ -56,7 +56,33 @@ export function useAnimationCarousel(): TAnimationCarouselHookResult {
   };
 
   const handleAnimate = (index?: number) => {
-    if (!spread?.cardsPosition[spread?.selectedCards?.length]) {
+    const slotIndex = spread?.selectedCards?.length ?? 0;
+    const targetPosition = spread?.cardsPosition?.[slotIndex];
+
+    if (!targetPosition) {
+      opacity.value = 1;
+      scale.value = withSequence(
+        withTiming(1.08, { duration: 220, easing: Easing.out(Easing.ease) }),
+        withTiming(0.85, { duration: 320, easing: Easing.inOut(Easing.ease) })
+      );
+      translateY.value = withSequence(
+        withTiming(translateY.value - 72, {
+          duration: 280,
+          easing: Easing.out(Easing.ease),
+        }),
+        withTiming(translateY.value, {
+          duration: 300,
+          easing: Easing.inOut(Easing.ease),
+        })
+      );
+
+      setTimeout(async () => {
+        await handleVibrationClick?.();
+        opacity.value = 0;
+        scale.value = 0.85;
+        rotateAnimation.flipImmediately();
+      }, ANIMATED_CARD_TIMEOUT + 10);
+
       return;
     }
 
