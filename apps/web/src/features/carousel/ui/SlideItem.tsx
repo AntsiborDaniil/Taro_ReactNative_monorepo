@@ -135,7 +135,10 @@ function SlideItem({
       if (!rect) {
         return;
       }
-      handleGetCenterCardPosition?.(rect.left, rect.top);
+      handleGetCenterCardPosition?.(
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2
+      );
       return;
     }
 
@@ -152,7 +155,10 @@ function SlideItem({
       ) => void;
     };
     measuredNode.measure?.((x, y, width, height, pageX, pageY) => {
-      handleGetCenterCardPosition?.(pageX, pageY);
+      handleGetCenterCardPosition?.(
+        pageX + width / 2,
+        pageY + height / 2
+      );
     });
   };
 

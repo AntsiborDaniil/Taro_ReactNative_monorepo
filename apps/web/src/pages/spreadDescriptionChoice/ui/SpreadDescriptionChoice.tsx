@@ -5,7 +5,8 @@ import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Toast from 'react-native-toast-message';
+import KeyboardAwareScrollView from 'react-native-keyboard-aware-scroll-view';
 import { Header } from 'features/header';
 import { useSpreadCatalogBack } from 'features/header/useSpreadCatalogBack';
 import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
@@ -80,6 +81,10 @@ function SpreadDescriptionChoice() {
     }
 
     if (checkErrors?.().question) {
+      Toast.show({
+        type: 'error',
+        text1: t('spread:question.error'),
+      });
       return;
     }
 
@@ -94,6 +99,7 @@ function SpreadDescriptionChoice() {
     spread?.name,
     handleVibrationClick,
     spread?.id,
+    t,
   ]);
 
   const isSimpleSpread = spread?.category === SpreadsCategory.Simple;
@@ -118,7 +124,12 @@ function SpreadDescriptionChoice() {
   }
 
   if (isSimpleSpread || isSelectingCards) {
-    return <SpreadCardsChoice isSimpleSpread={isSimpleSpread} />;
+    return (
+      <SpreadCardsChoice
+        isSimpleSpread={isSimpleSpread}
+        scrollToPickerOnMount={isSelectingCards && !isSimpleSpread}
+      />
+    );
   }
 
   return (

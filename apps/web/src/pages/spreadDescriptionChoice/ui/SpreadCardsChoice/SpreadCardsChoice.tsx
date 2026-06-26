@@ -10,10 +10,12 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppMetrica from '@appmetrica/react-native-analytics';
+import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Toast from 'react-native-toast-message';
+import KeyboardAwareScrollView from 'react-native-keyboard-aware-scroll-view';
 import {
   AnimatedCard,
   AnimationCarouselContext,
@@ -39,6 +41,7 @@ import {
   shouldPromptWebSignIn,
   verticalScale,
 } from 'shared/lib';
+import { scrollToSpreadPicker } from 'shared/lib/scrollToSpreadPicker';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -51,11 +54,23 @@ const PHONE_MAX_WIDTH = 640;
 
 type SpreadCardsChoiceProps = {
   isSimpleSpread?: boolean;
+  /** After «Сделать расклад» on the previous step — scroll to the card picker. */
+  scrollToPickerOnMount?: boolean;
 };
 
-function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
+function SpreadCardsChoice({
+  isSimpleSpread,
+  scrollToPickerOnMount = false,
+}: SpreadCardsChoiceProps) {
   const attemptsCount = useRef<number>(0);
   const [hasAskedQuestion, setHasAskedQuestion] = useState(false);
+  const scrollRef = useRef<KeyboardAwareScrollView>(null);
+  const pickerZoneRef = useRef<View>(null);
+  const didInitialScrollRef = useRef(false);
+
+  const { handleVibrationClick } = useData({
+    Context: ApplicationConfigContext,
+  });
 
   const navigation = useNativeNavigation();
   const handleBackToSpreads = useSpreadCatalogBack();
@@ -83,6 +98,43 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
 
   const animationCarouselContextData = useAnimationCarousel();
 
+  const showCardPicker =
+    spread?.id === SpreadName.Simple_DaySuggest ||
+    !isSimpleSpread ||
+    hasAskedQuestion;
+
+  const scrollToPicker = useCallback(() => {
+    scrollToSpreadPicker(pickerZoneRef.current, scrollRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (!showCardPicker) {
+      return;
+    }
+
+    const shouldScroll =
+      scrollToPickerOnMount && !didInitialScrollRef.current
+        ? true
+        : hasAskedQuestion && isSimpleSpread;
+
+    if (!shouldScroll) {
+      return;
+    }
+
+    didInitialScrollRef.current = true;
+    const timer = setTimeout(() => {
+      scrollToPicker();
+    }, 420);
+
+    return () => clearTimeout(timer);
+  }, [
+    showCardPicker,
+    scrollToPickerOnMount,
+    hasAskedQuestion,
+    isSimpleSpread,
+    scrollToPicker,
+  ]);
+
   const handlePressMakeSpread = useCallback(async () => {
     if (
       shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
@@ -109,16 +161,24 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
       isLocked: isPractitioner ? false : isLocked,
     });
 
+    await handleVibrationClick?.();
+
     if (!isPractitioner && isLocked) {
       showModal?.(<SignInForSpreadsModal />);
       return;
     }
 
-    if (checkErrors?.().question) {
+    const validation = checkErrors?.() ?? {};
+    if (validation.question) {
+      Toast.show({
+        type: 'error',
+        text1: t('spread:question.error'),
+      });
       return;
     }
 
     setHasAskedQuestion(true);
+    setTimeout(() => scrollToPicker(), 480);
   }, [
     spread?.id,
     spread?.name,
@@ -128,6 +188,9 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
     authSessionLoading,
     checkErrors,
     showModal,
+    handleVibrationClick,
+    scrollToPicker,
+    t,
   ]);
 
   const handleNavigateToSpreadReading = useCallback(async () => {
@@ -207,10 +270,12 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
         value={animationCarouselContextData}
       >
         <KeyboardAwareScrollView
+          ref={scrollRef}
           style={{ flex: 1, position: 'relative' }}
           contentContainerStyle={styles.scrollContent}
           enableOnAndroid
           extraScrollHeight={100}
+          keyboardShouldPersistTaps="handled"
         >
           <View style={styles.wrapper}>
             {!isSimpleSpread && (
@@ -249,10 +314,12 @@ function SpreadCardsChoice({ isSimpleSpread }: SpreadCardsChoiceProps) {
                       ])}
                     />
                   )}
-                {spread?.id === SpreadName.Simple_DaySuggest ||
-                !isSimpleSpread ||
-                hasAskedQuestion ? (
-                  <View style={spreadInnerStyles.altarZone}>
+                {showCardPicker ? (
+                  <View
+                    ref={pickerZoneRef}
+                    style={spreadInnerStyles.altarZone}
+                    collapsable={false}
+                  >
                     <View style={spreadInnerStyles.altarGlow} pointerEvents="none" />
                     <AnimatedCard />
                     <CoverFlowCardCarousel
