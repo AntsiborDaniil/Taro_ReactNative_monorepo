@@ -1,1 +1,1 @@
-export const ANIMATED_CARD_TIMEOUT = 900;
+export const ANIMATED_CARD_TIMEOUT = 820;

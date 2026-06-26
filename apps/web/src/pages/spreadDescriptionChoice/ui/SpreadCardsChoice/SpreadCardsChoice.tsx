@@ -41,7 +41,8 @@ import {
   shouldPromptWebSignIn,
   verticalScale,
 } from 'shared/lib';
-import { scrollToSpreadPickerWithRetries } from 'shared/lib/scrollToSpreadPicker';
+import { scrollToSpreadPickerWithRetries, SPREAD_PICKER_NATIVE_ID } from 'shared/lib/scrollToSpreadPicker';
+import { isTelegramMiniApp } from 'shared/lib/web/telegramWebApp';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -122,9 +123,10 @@ function SpreadCardsChoice({
     }
 
     didInitialScrollRef.current = true;
+    const mountDelay = isTelegramMiniApp() ? 680 : Platform.OS === 'web' ? 520 : 420;
     const timer = setTimeout(() => {
       scrollToPicker();
-    }, Platform.OS === 'web' ? 520 : 420);
+    }, mountDelay);
 
     return () => clearTimeout(timer);
   }, [
@@ -178,7 +180,12 @@ function SpreadCardsChoice({
     }
 
     setHasAskedQuestion(true);
-    setTimeout(() => scrollToPicker(), Platform.OS === 'web' ? 560 : 480);
+    const afterQuestionDelay = isTelegramMiniApp()
+      ? 720
+      : Platform.OS === 'web'
+        ? 560
+        : 480;
+    setTimeout(() => scrollToPicker(), afterQuestionDelay);
   }, [
     spread?.id,
     spread?.name,
@@ -317,6 +324,7 @@ function SpreadCardsChoice({
                 {showCardPicker ? (
                   <View
                     ref={pickerZoneRef}
+                    nativeID={SPREAD_PICKER_NATIVE_ID}
                     style={spreadInnerStyles.altarZone}
                     collapsable={false}
                   >
@@ -398,7 +406,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
   },
   carousel: {
-    marginTop: 8,
+    marginTop: 4,
     alignSelf: 'center',
   },
   carouselSimpleSpread: {

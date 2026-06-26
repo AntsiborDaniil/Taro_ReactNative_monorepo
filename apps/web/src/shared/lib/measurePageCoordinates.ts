@@ -36,11 +36,9 @@ export function measurePageTopLeft(
       : null;
 
   if (measurableTarget?.measure) {
-    measurableTarget.measure(
-      (_x, _y, _width, _height, pageX, pageY) => {
-        callback(pageX, pageY);
-      }
-    );
+    measurableTarget.measure((_x, _y, _width, _height, pageX, pageY) => {
+      callback(pageX, pageY);
+    });
     return true;
   }
 

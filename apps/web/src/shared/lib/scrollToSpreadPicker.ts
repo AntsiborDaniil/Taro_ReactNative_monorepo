@@ -1,5 +1,10 @@
 import { Platform, type View } from 'react-native';
-import { isTelegramMiniApp } from 'shared/lib/web/telegramWebApp';
+import {
+  isTelegramMiniApp,
+  readTelegramSafeAreaInsets,
+} from 'shared/lib/web/telegramWebApp';
+
+export const SPREAD_PICKER_NATIVE_ID = 'spread-card-picker';
 
 type ScrollRef = {
   getScrollResponder?: () => unknown;
@@ -16,6 +21,10 @@ function resolveHTMLElement(ref: View | null): HTMLElement | null {
     return node;
   }
 
+  if (typeof document !== 'undefined') {
+    return document.getElementById(SPREAD_PICKER_NATIVE_ID);
+  }
+
   return null;
 }
 
@@ -29,8 +38,13 @@ function resolveScrollContainer(scrollRef?: ScrollRef): HTMLElement | null {
     return null;
   }
 
-  if (typeof (responder as { getScrollableNode?: () => HTMLElement }).getScrollableNode === 'function') {
-    return (responder as { getScrollableNode: () => HTMLElement }).getScrollableNode();
+  if (
+    typeof (responder as { getScrollableNode?: () => HTMLElement })
+      .getScrollableNode === 'function'
+  ) {
+    return (
+      responder as { getScrollableNode: () => HTMLElement }
+    ).getScrollableNode();
   }
 
   if (typeof (responder as HTMLElement).scrollTo === 'function') {
@@ -40,25 +54,38 @@ function resolveScrollContainer(scrollRef?: ScrollRef): HTMLElement | null {
   return null;
 }
 
+function canScrollVertically(node: HTMLElement): boolean {
+  const style = window.getComputedStyle(node);
+  const overflowY = style.overflowY;
+  const allowsScroll =
+    overflowY === 'auto' ||
+    overflowY === 'scroll' ||
+    overflowY === 'overlay' ||
+    overflowY === 'visible';
+
+  return allowsScroll && node.scrollHeight > node.clientHeight + 2;
+}
+
 function findScrollableParent(element: HTMLElement): HTMLElement | null {
   let node: HTMLElement | null = element.parentElement;
 
   while (node) {
-    const style = window.getComputedStyle(node);
-    const canScrollY =
-      (style.overflowY === 'auto' ||
-        style.overflowY === 'scroll' ||
-        style.overflowY === 'overlay') &&
-      node.scrollHeight > node.clientHeight + 1;
-
-    if (canScrollY) {
+    if (canScrollVertically(node)) {
       return node;
     }
-
     node = node.parentElement;
   }
 
   return null;
+}
+
+function getScrollTopOffset(): number {
+  if (isTelegramMiniApp()) {
+    const tgInsets = readTelegramSafeAreaInsets();
+    return tgInsets.top + 72;
+  }
+
+  return 64;
 }
 
 function scrollElementToTarget(
@@ -69,9 +96,25 @@ function scrollElementToTarget(
   const containerRect = scrollContainer.getBoundingClientRect();
   const targetRect = target.getBoundingClientRect();
   const nextTop =
-    scrollContainer.scrollTop + (targetRect.top - containerRect.top) - topOffset;
+    scrollContainer.scrollTop +
+    (targetRect.top - containerRect.top) -
+    topOffset;
 
   scrollContainer.scrollTo({
+    top: Math.max(0, nextTop),
+    behavior: 'smooth',
+  });
+}
+
+function scrollWindowToTarget(target: HTMLElement, topOffset: number): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const rect = target.getBoundingClientRect();
+  const nextTop = window.scrollY + rect.top - topOffset;
+
+  window.scrollTo({
     top: Math.max(0, nextTop),
     behavior: 'smooth',
   });
@@ -82,15 +125,15 @@ export function scrollToSpreadPicker(
   targetRef: View | null,
   scrollRef?: ScrollRef
 ): void {
-  if (!targetRef) {
-    return;
-  }
-
-  const topOffset = isTelegramMiniApp() ? 108 : 72;
+  const topOffset = getScrollTopOffset();
 
   const scrollViaMeasure = (): boolean => {
+    if (!targetRef || typeof targetRef.measureLayout !== 'function') {
+      return false;
+    }
+
     const scrollResponder = scrollRef?.getScrollResponder?.();
-    if (!scrollResponder || typeof targetRef.measureLayout !== 'function') {
+    if (!scrollResponder) {
       return false;
     }
 
@@ -118,26 +161,30 @@ export function scrollToSpreadPicker(
       const kasvContainer = resolveScrollContainer(scrollRef);
       if (kasvContainer) {
         scrollElementToTarget(kasvContainer, target, topOffset);
-        return;
       }
 
       const scrollParent = findScrollableParent(target);
-      if (scrollParent) {
+      if (scrollParent && scrollParent !== kasvContainer) {
         scrollElementToTarget(scrollParent, target, topOffset);
-        return;
       }
 
-      if (!scrollViaMeasure()) {
-        target.scrollIntoView?.({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'nearest',
-        });
+      if (isTelegramMiniApp()) {
+        scrollWindowToTarget(target, topOffset);
+      }
+
+      if (!kasvContainer && !scrollParent) {
+        if (!scrollViaMeasure()) {
+          target.scrollIntoView?.({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest',
+          });
+        }
       }
     };
 
     requestAnimationFrame(() => {
-      runWebScroll();
+      requestAnimationFrame(runWebScroll);
     });
     return;
   }
@@ -145,13 +192,20 @@ export function scrollToSpreadPicker(
   scrollViaMeasure();
 }
 
+const DEFAULT_RETRY_DELAYS = [0, 120, 320, 560];
+const TELEGRAM_RETRY_DELAYS = [0, 200, 450, 750, 1100, 1500];
+
 /** Retry scroll while layout settles (Telegram Mini App / web). */
 export function scrollToSpreadPickerWithRetries(
   targetRef: View | null,
   scrollRef?: ScrollRef,
-  delaysMs: number[] = [0, 120, 320, 560]
+  delaysMs?: number[]
 ): void {
-  delaysMs.forEach((delay) => {
+  const delays =
+    delaysMs ??
+    (isTelegramMiniApp() ? TELEGRAM_RETRY_DELAYS : DEFAULT_RETRY_DELAYS);
+
+  delays.forEach((delay) => {
     if (delay === 0) {
       scrollToSpreadPicker(targetRef, scrollRef);
       return;

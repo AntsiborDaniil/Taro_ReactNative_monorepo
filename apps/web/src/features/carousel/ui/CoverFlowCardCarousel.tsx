@@ -12,9 +12,11 @@ import { useTranslation } from 'react-i18next';
 import { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
 import type { ICarouselInstance } from 'react-native-reanimated-carousel';
 import Carousel from 'react-native-reanimated-carousel';
+import { getFlyingCardSize } from 'shared/constants';
 import { useData } from 'shared/DataProvider';
 import { ChevronLeftIcon } from 'shared/icons';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
+import { isTelegramMiniApp } from 'shared/lib/web/telegramWebApp';
 import { COLORS } from 'shared/themes';
 import { Text } from 'shared/ui';
 import SlideItem from './SlideItem';
@@ -57,14 +59,15 @@ function CoverFlowCardCarousel({
   );
 
   const carouselWidth = useMemo(
-    () => Math.max(200, Math.min(360, screenWidth - 56)),
+    () => Math.max(200, Math.min(380, screenWidth - 48)),
     [screenWidth]
   );
-  const cardWidth = useMemo(
-    () => Math.round(Math.max(150, carouselWidth * 0.62)),
-    [carouselWidth]
+  const flyingSize = useMemo(
+    () => getFlyingCardSize(screenWidth),
+    [screenWidth]
   );
-  const cardHeight = useMemo(() => Math.round(cardWidth * 1.8), [cardWidth]);
+  const cardWidth = flyingSize.width;
+  const cardHeight = flyingSize.height;
 
   const handleAdditionalClick = () => {
     onAdditionalClick?.();
@@ -106,7 +109,7 @@ function CoverFlowCardCarousel({
         loop={true}
         width={carouselWidth}
         height={carouselHeight}
-        scrollAnimationDuration={1100}
+        scrollAnimationDuration={isTelegramMiniApp() ? 950 : 1000}
         mode="parallax"
         modeConfig={{
           parallaxScrollingScale: 0.86,

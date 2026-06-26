@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     ...({
-      boxShadow: '0 18px 28px rgba(0,0,0,0.35)',
+      boxShadow: '0 10px 22px rgba(0,0,0,0.24)',
     } as object),
   },
   overlay: {

@@ -6,7 +6,7 @@ import Animated from 'react-native-reanimated';
 import { DeckStyle, TarotCardDirection } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { getImage } from 'shared/lib';
-import { COLORS } from 'shared/themes';
+import { COLORS, getColorOpacity } from 'shared/themes';
 import { AnimationCarouselContext } from '../model';
 
 function AnimatedCard() {
@@ -79,11 +79,11 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-    borderWidth: 2,
-    borderColor: COLORS.Content,
-    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: getColorOpacity(COLORS.Content, 55),
+    borderRadius: 12,
     ...({
-      boxShadow: '0 22px 48px rgba(0,0,0,0.45)',
+      boxShadow: '0 10px 28px rgba(0,0,0,0.28)',
     } as object),
   },
 });
