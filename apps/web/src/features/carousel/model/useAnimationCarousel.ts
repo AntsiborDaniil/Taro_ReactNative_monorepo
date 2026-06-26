@@ -4,6 +4,7 @@ import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import {
   Easing,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -41,6 +42,7 @@ export function useAnimationCarousel(): TAnimationCarouselHookResult {
   const { spread } = useData({ Context: SpreadContext });
 
   const rotateAnimation = useRotateAnimation({ duration: 700 });
+  const { resetToBack } = rotateAnimation;
 
   const landingScale =
     Math.min(
@@ -69,14 +71,25 @@ export function useAnimationCarousel(): TAnimationCarouselHookResult {
     translateY.value = cardTop;
   };
 
-  const resetFlyingCard = async () => {
-    await handleVibrationClick?.();
-    opacity.value = withTiming(0, { duration: 160 });
+  const applyHiddenReset = () => {
     rotate.value = 0;
     scale.value = 1;
     translateX.value = prevPositionRef.current.x;
     translateY.value = prevPositionRef.current.y;
-    rotateAnimation.flipImmediately();
+    resetToBack();
+  };
+
+  const resetFlyingCard = () => {
+    if (opacity.value <= 0.01) {
+      applyHiddenReset();
+      return;
+    }
+
+    opacity.value = withTiming(0, { duration: 200 }, (finished) => {
+      if (finished) {
+        runOnJS(applyHiddenReset)();
+      }
+    });
   };
 
   const handleAnimate = (index?: number) => {
@@ -103,7 +116,7 @@ export function useAnimationCarousel(): TAnimationCarouselHookResult {
       );
 
       setTimeout(() => {
-        void resetFlyingCard();
+        resetFlyingCard();
       }, duration + 40);
 
       return;
@@ -165,7 +178,8 @@ export function useAnimationCarousel(): TAnimationCarouselHookResult {
     );
 
     setTimeout(() => {
-      void resetFlyingCard();
+      void handleVibrationClick?.();
+      resetFlyingCard();
     }, duration + 40);
   };
 

@@ -11,6 +11,7 @@ export type TRotateAnimationHookResult = {
   frontAnimatedStyle: StyleProp<ViewStyle>;
   flip: () => void;
   flipImmediately: () => void;
+  resetToBack: () => void;
 };
 
 type TRotateAnimationHookParams = { duration?: number };
@@ -48,10 +49,15 @@ export function useRotateAnimation(
     rotation.value = rotation.value === 0 ? 180 : 0;
   };
 
+  const resetToBack = () => {
+    rotation.value = 0;
+  };
+
   return {
     backAnimatedStyle,
     frontAnimatedStyle,
     flip,
     flipImmediately,
+    resetToBack,
   };
 }

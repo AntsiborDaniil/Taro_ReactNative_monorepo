@@ -41,7 +41,7 @@ import {
   shouldPromptWebSignIn,
   verticalScale,
 } from 'shared/lib';
-import { scrollToSpreadPicker } from 'shared/lib/scrollToSpreadPicker';
+import { scrollToSpreadPickerWithRetries } from 'shared/lib/scrollToSpreadPicker';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -104,7 +104,7 @@ function SpreadCardsChoice({
     hasAskedQuestion;
 
   const scrollToPicker = useCallback(() => {
-    scrollToSpreadPicker(pickerZoneRef.current, scrollRef.current);
+    scrollToSpreadPickerWithRetries(pickerZoneRef.current, scrollRef.current);
   }, []);
 
   useEffect(() => {
@@ -124,7 +124,7 @@ function SpreadCardsChoice({
     didInitialScrollRef.current = true;
     const timer = setTimeout(() => {
       scrollToPicker();
-    }, 420);
+    }, Platform.OS === 'web' ? 520 : 420);
 
     return () => clearTimeout(timer);
   }, [
@@ -178,7 +178,7 @@ function SpreadCardsChoice({
     }
 
     setHasAskedQuestion(true);
-    setTimeout(() => scrollToPicker(), 480);
+    setTimeout(() => scrollToPicker(), Platform.OS === 'web' ? 560 : 480);
   }, [
     spread?.id,
     spread?.name,
