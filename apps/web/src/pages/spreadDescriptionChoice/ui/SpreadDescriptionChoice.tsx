@@ -6,7 +6,7 @@ import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
-import KeyboardAwareScrollView from 'react-native-keyboard-aware-scroll-view';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Header } from 'features/header';
 import { useSpreadCatalogBack } from 'features/header/useSpreadCatalogBack';
 import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
