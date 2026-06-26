@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import Animated from 'react-native-reanimated';
@@ -65,9 +65,10 @@ function AnimatedCard() {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: Platform.OS === 'web' ? 'fixed' : 'absolute',
     left: 0,
     top: 0,
+    zIndex: Platform.OS === 'web' ? 120 : undefined,
   },
   card: {
     width: '100%',

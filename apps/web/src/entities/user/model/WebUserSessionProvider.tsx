@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SubscriptionType } from 'shared/api';
@@ -19,6 +19,13 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
   const [authUser, setAuthUser] = useState<AuthSessionUser | null>(null);
   const [tarotDaily, setTarotDaily] = useState<TarotDailyQuota | null>(null);
   const [authSessionLoading, setAuthSessionLoading] = useState(true);
+  const authUserRef = useRef<AuthSessionUser | null>(null);
+  const tarotDailyRef = useRef<TarotDailyQuota | null>(null);
+
+  useEffect(() => {
+    authUserRef.current = authUser;
+    tarotDailyRef.current = tarotDaily;
+  }, [authUser, tarotDaily]);
 
   const applySession = useCallback((user: AuthSessionUser | null, daily: TarotDailyQuota | null) => {
     setAuthUser(user);
@@ -36,7 +43,17 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
 
     try {
       await tryAuthenticateTelegramMiniApp();
-      const session = await fetchAuthMeSession();
+      const previousSession =
+        authUserRef.current != null
+          ? {
+              user: authUserRef.current,
+              tarotDaily: tarotDailyRef.current,
+            }
+          : fallbackUser
+            ? { user: fallbackUser, tarotDaily: null }
+            : null;
+
+      const session = await fetchAuthMeSession({ previousSession });
 
       if (session?.user) {
         applySession(session.user, session.tarotDaily ?? null);

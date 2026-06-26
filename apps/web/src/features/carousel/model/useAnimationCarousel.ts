@@ -95,7 +95,11 @@ export function useAnimationCarousel(): TAnimationCarouselHookResult {
   const handleAnimate = (index?: number) => {
     const slotIndex = spread?.selectedCards?.length ?? 0;
     const targetPosition = spread?.cardsPosition?.[slotIndex];
-    const duration = ANIMATED_CARD_TIMEOUT;
+    const isWideLayout = screenWidth >= 768;
+    const duration = isWideLayout
+      ? Math.round(ANIMATED_CARD_TIMEOUT * 0.72)
+      : ANIMATED_CARD_TIMEOUT;
+    const liftDelta = isWideLayout ? 16 : 28;
 
     opacity.value = withTiming(1, { duration: 120 });
     scale.value = withSequence(
@@ -135,7 +139,7 @@ export function useAnimationCarousel(): TAnimationCarouselHookResult {
       SCHEME_CARD_SIZE.height +
       (Platform.OS === 'android' ? flyingCardSize.height * 0.08 : 0);
 
-    const liftY = translateY.value - 28;
+    const liftY = translateY.value - liftDelta;
 
     if (isHorizontalCard) {
       rotate.value = withDelay(

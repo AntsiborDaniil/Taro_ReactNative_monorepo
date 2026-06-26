@@ -101,6 +101,7 @@ export const spreadInnerStyles = StyleSheet.create({
   },
   altarZone: {
     width: '100%',
+    maxWidth: 480,
     minHeight: 380,
     alignItems: 'center',
     justifyContent: 'center',

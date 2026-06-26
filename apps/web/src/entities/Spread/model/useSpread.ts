@@ -30,6 +30,7 @@ import {
   shouldPromptWebSignIn,
 } from 'shared/lib';
 import { AsyncMemoryKey } from 'shared/lib/deviceMemory';
+import { measurePageTopLeft } from 'shared/lib/measurePageCoordinates';
 import { AnalyticAction } from 'shared/types';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { UserContext } from '../../user';
@@ -245,22 +246,10 @@ export function useSpread({
       });
     };
 
-    const measurableTarget =
-      event.target && typeof event.target === 'object'
-        ? (event.target as { measure?: (...args: any[]) => void })
-        : null;
-
-    if (measurableTarget?.measure) {
-      measurableTarget.measure(
-        (_x: number, _y: number, _width: number, _height: number, pageX: number, pageY: number) => {
-          applyCardPosition(pageX, pageY);
-        }
-      );
-
+    if (measurePageTopLeft(event, applyCardPosition)) {
       return;
     }
 
-    // Web fallback: target может быть undefined, используем локальные координаты layout.
     const { x, y } = event.nativeEvent.layout;
     applyCardPosition(x, y);
   };
@@ -454,12 +443,28 @@ export function useSpread({
   const handleGetAIInterpretation = async (): Promise<boolean> => {
     const freeUseOfAI = await AsyncStorage.getItem(AsyncMemoryKey.FreeUseOfAI);
 
+    if (spread?.interpretation) {
+      return true;
+    }
+
+    if (spread?.id === SpreadName.Simple_DaySuggest) {
+      return false;
+    }
+
     if (
-      (!isPractitioner && freeUseOfAI) ||
-      spread?.id === SpreadName.Simple_DaySuggest ||
-      spread?.interpretation
+      !isPractitioner &&
+      freeUseOfAI &&
+      (Platform.OS !== 'web' ||
+        shouldPromptWebSignIn(isAuthenticated, authSessionLoading))
     ) {
-      return Boolean(spread?.interpretation);
+      if (
+        Platform.OS === 'web' &&
+        shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
+        !isGuestFreeSpreadId(spread?.id)
+      ) {
+        showModal?.(createElement(SignInForSpreadsModal));
+      }
+      return false;
     }
 
     if (
@@ -517,6 +522,7 @@ export function useSpread({
             'X-Web-Cookie-Auth': '1',
             ...authRequestHeaders(null),
           },
+          cache: 'no-store',
           body: JSON.stringify(AIRequestBody),
         }
       );

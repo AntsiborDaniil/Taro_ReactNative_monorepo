@@ -21,6 +21,7 @@ import Animated, {
 import { ANIMATED_CARD_TIMEOUT } from 'shared/constants';
 import { useData } from 'shared/DataProvider';
 import { getImage } from 'shared/lib';
+import { measurePageCenter } from 'shared/lib/measurePageCoordinates';
 import { COLORS } from 'shared/themes';
 import { AnimationCarouselContext } from '../model';
 
@@ -125,40 +126,12 @@ function SlideItem({
   };
 
   const handleLayoutCard = (event: LayoutChangeEvent) => {
-    if (index !== 0) {
+    if (!isSelected) {
       return;
     }
 
-    if (Platform.OS === 'web') {
-      const node = event.currentTarget as unknown as HTMLElement | null;
-      const rect = node?.getBoundingClientRect?.();
-      if (!rect) {
-        return;
-      }
-      handleGetCenterCardPosition?.(
-        rect.left + rect.width / 2,
-        rect.top + rect.height / 2
-      );
-      return;
-    }
-
-    const measuredNode = event.target as unknown as {
-      measure?: (
-        cb: (
-          x: number,
-          y: number,
-          width: number,
-          height: number,
-          pageX: number,
-          pageY: number
-        ) => void
-      ) => void;
-    };
-    measuredNode.measure?.((x, y, width, height, pageX, pageY) => {
-      handleGetCenterCardPosition?.(
-        pageX + width / 2,
-        pageY + height / 2
-      );
+    measurePageCenter(event, (pageX, pageY) => {
+      handleGetCenterCardPosition?.(pageX, pageY);
     });
   };
 
