@@ -4,12 +4,42 @@ import {
   readTelegramSafeAreaInsets,
 } from 'shared/lib/web/telegramWebApp';
 
-export const SPREAD_PICKER_NATIVE_ID = 'spread-card-picker';
+export const SPREAD_CAROUSEL_NATIVE_ID = 'spread-card-carousel';
 
 type ScrollRef = {
   getScrollResponder?: () => unknown;
   scrollToPosition?: (x: number, y: number, animated?: boolean) => void;
 } | null;
+
+const SLOW_SCROLL_MS = 1500;
+const VIEWPORT_ALIGN = 0.56;
+
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+}
+
+function animateScrollTop(
+  readTop: () => number,
+  writeTop: (value: number) => void,
+  targetTop: number,
+  durationMs: number
+): void {
+  const start = readTop();
+  const delta = targetTop - start;
+  if (Math.abs(delta) < 3) {
+    return;
+  }
+
+  const startTime = performance.now();
+  const tick = (now: number) => {
+    const progress = Math.min(1, (now - startTime) / durationMs);
+    writeTop(start + delta * easeInOutCubic(progress));
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    }
+  };
+  requestAnimationFrame(tick);
+}
 
 function resolveHTMLElement(ref: View | null): HTMLElement | null {
   if (!ref) {
@@ -22,7 +52,7 @@ function resolveHTMLElement(ref: View | null): HTMLElement | null {
   }
 
   if (typeof document !== 'undefined') {
-    return document.getElementById(SPREAD_PICKER_NATIVE_ID);
+    return document.getElementById(SPREAD_CAROUSEL_NATIVE_ID);
   }
 
   return null;
@@ -79,53 +109,73 @@ function findScrollableParent(element: HTMLElement): HTMLElement | null {
   return null;
 }
 
-function getScrollTopOffset(): number {
-  if (isTelegramMiniApp()) {
-    const tgInsets = readTelegramSafeAreaInsets();
-    return tgInsets.top + 72;
+function getViewportAlignOffset(): number {
+  if (typeof window === 'undefined') {
+    return 0;
   }
 
-  return 64;
+  if (isTelegramMiniApp()) {
+    const tgInsets = readTelegramSafeAreaInsets();
+    return tgInsets.top + 56;
+  }
+
+  return 48;
 }
 
-function scrollElementToTarget(
+function computeAlignedScrollTop(
   scrollContainer: HTMLElement,
-  target: HTMLElement,
-  topOffset: number
-): void {
-  const containerRect = scrollContainer.getBoundingClientRect();
+  target: HTMLElement
+): number {
   const targetRect = target.getBoundingClientRect();
-  const nextTop =
-    scrollContainer.scrollTop +
-    (targetRect.top - containerRect.top) -
-    topOffset;
-
-  scrollContainer.scrollTo({
-    top: Math.max(0, nextTop),
-    behavior: 'smooth',
-  });
+  const targetCenterY = targetRect.top + targetRect.height / 2;
+  const desiredCenterY = window.innerHeight * VIEWPORT_ALIGN;
+  return scrollContainer.scrollTop + (targetCenterY - desiredCenterY);
 }
 
-function scrollWindowToTarget(target: HTMLElement, topOffset: number): void {
+function computeWindowScrollTop(target: HTMLElement): number {
+  const rect = target.getBoundingClientRect();
+  const centerY = rect.top + rect.height / 2;
+  const desiredY = window.innerHeight * VIEWPORT_ALIGN;
+  return window.scrollY + (centerY - desiredY);
+}
+
+function scrollElementToTargetSlow(
+  scrollContainer: HTMLElement,
+  target: HTMLElement
+): void {
+  const nextTop = Math.max(0, computeAlignedScrollTop(scrollContainer, target));
+  animateScrollTop(
+    () => scrollContainer.scrollTop,
+    (value) => {
+      scrollContainer.scrollTop = value;
+    },
+    nextTop,
+    SLOW_SCROLL_MS
+  );
+}
+
+function scrollWindowToTargetSlow(target: HTMLElement): void {
   if (typeof window === 'undefined') {
     return;
   }
 
-  const rect = target.getBoundingClientRect();
-  const nextTop = window.scrollY + rect.top - topOffset;
-
-  window.scrollTo({
-    top: Math.max(0, nextTop),
-    behavior: 'smooth',
-  });
+  const nextTop = Math.max(0, computeWindowScrollTop(target));
+  animateScrollTop(
+    () => window.scrollY,
+    (value) => {
+      window.scrollTo(0, value);
+    },
+    nextTop,
+    SLOW_SCROLL_MS
+  );
 }
 
-/** Smoothly bring the card picker (altar / carousel) into view. */
+/** Smoothly bring the card carousel into view (web / Telegram Mini App). */
 export function scrollToSpreadPicker(
   targetRef: View | null,
   scrollRef?: ScrollRef
 ): void {
-  const topOffset = getScrollTopOffset();
+  const topOffset = getViewportAlignOffset();
 
   const scrollViaMeasure = (): boolean => {
     if (!targetRef || typeof targetRef.measureLayout !== 'function') {
@@ -160,17 +210,15 @@ export function scrollToSpreadPicker(
 
       const kasvContainer = resolveScrollContainer(scrollRef);
       if (kasvContainer) {
-        scrollElementToTarget(kasvContainer, target, topOffset);
+        scrollElementToTargetSlow(kasvContainer, target);
       }
 
       const scrollParent = findScrollableParent(target);
       if (scrollParent && scrollParent !== kasvContainer) {
-        scrollElementToTarget(scrollParent, target, topOffset);
+        scrollElementToTargetSlow(scrollParent, target);
       }
 
-      if (isTelegramMiniApp()) {
-        scrollWindowToTarget(target, topOffset);
-      }
+      scrollWindowToTargetSlow(target);
 
       if (!kasvContainer && !scrollParent) {
         if (!scrollViaMeasure()) {
@@ -192,10 +240,10 @@ export function scrollToSpreadPicker(
   scrollViaMeasure();
 }
 
-const DEFAULT_RETRY_DELAYS = [0, 120, 320, 560];
-const TELEGRAM_RETRY_DELAYS = [0, 200, 450, 750, 1100, 1500];
+const DEFAULT_RETRY_DELAYS = [0, 200, 450, 750, 1100, 1500];
+const TELEGRAM_RETRY_DELAYS = [0, 250, 500, 800, 1200, 1600, 2000];
 
-/** Retry scroll while layout settles (Telegram Mini App / web). */
+/** Retry slow scroll while layout settles (Telegram Mini App / web). */
 export function scrollToSpreadPickerWithRetries(
   targetRef: View | null,
   scrollRef?: ScrollRef,
@@ -216,3 +264,6 @@ export function scrollToSpreadPickerWithRetries(
     }, delay);
   });
 }
+
+/** Alias — scroll target should be the carousel wrapper ref. */
+export const scrollToSpreadCarouselWithRetries = scrollToSpreadPickerWithRetries;

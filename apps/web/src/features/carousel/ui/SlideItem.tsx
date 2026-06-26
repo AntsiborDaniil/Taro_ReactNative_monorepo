@@ -6,6 +6,7 @@ import {
   type StyleProp,
   StyleSheet,
   Platform,
+  type View,
   type ViewProps,
   type ViewStyle,
 } from 'react-native';
@@ -52,6 +53,7 @@ function SlideItem({
   });
 
   const isAnimating = useRef(false);
+  const pressableRef = useRef<View>(null);
   const pressScale = useSharedValue(1);
   const selectGlow = useSharedValue(0);
 
@@ -67,35 +69,17 @@ function SlideItem({
     }
   }, [isSelected, selectGlow]);
 
-  const handlePress = () => {
-    if (!isSelected || isAnimating.current) {
-      if (__DEV__) {
-        console.log(`${DAY_CARD_DEBUG} slidePress:ignored`, {
-          isSelected,
-          isAnimating: isAnimating.current,
-        });
-      }
-      return;
-    }
-
-    isAnimating.current = true;
-    pressScale.value = withSequence(
-      withSpring(0.9, { damping: 14, stiffness: 320 }),
-      withSpring(1.04, { damping: 12, stiffness: 260 }),
-      withSpring(1, { damping: 16, stiffness: 280 })
-    );
-
-    const preSelectedTarotCard = handlePreSelectTarotCard?.();
-    if (__DEV__) {
-      console.log(`${DAY_CARD_DEBUG} slidePress:start`, {
-        preSelectedCardId: preSelectedTarotCard?.id,
-        spreadId: spread?.id,
-        selectedCardsLength: spread?.selectedCards?.length ?? 0,
-      });
-    }
-
+  const startCardAnimation = (
+    centerX: number,
+    centerY: number,
+    sliderWidth: number,
+    sliderHeight: number,
+    preSelectedTarotCard: ReturnType<
+      NonNullable<typeof handlePreSelectTarotCard>
+    >
+  ) => {
+    handleGetCenterCardPosition?.(centerX, centerY, sliderWidth, sliderHeight);
     handleAnimate?.(spread?.selectedCards.length);
-
     flip?.();
 
     setTimeout(
@@ -125,13 +109,71 @@ function SlideItem({
     );
   };
 
+  const handlePress = () => {
+    if (!isSelected || isAnimating.current) {
+      if (__DEV__) {
+        console.log(`${DAY_CARD_DEBUG} slidePress:ignored`, {
+          isSelected,
+          isAnimating: isAnimating.current,
+        });
+      }
+      return;
+    }
+
+    isAnimating.current = true;
+    pressScale.value = withSequence(
+      withSpring(0.9, { damping: 14, stiffness: 320 }),
+      withSpring(1.04, { damping: 12, stiffness: 260 }),
+      withSpring(1, { damping: 16, stiffness: 280 })
+    );
+
+    const preSelectedTarotCard = handlePreSelectTarotCard?.();
+    if (__DEV__) {
+      console.log(`${DAY_CARD_DEBUG} slidePress:start`, {
+        preSelectedCardId: preSelectedTarotCard?.id,
+        spreadId: spread?.id,
+        selectedCardsLength: spread?.selectedCards?.length ?? 0,
+      });
+    }
+
+    const node = pressableRef.current;
+    if (Platform.OS === 'web') {
+      const rect = (node as unknown as HTMLElement | null)?.getBoundingClientRect?.();
+      if (rect) {
+        startCardAnimation(
+          rect.left + rect.width / 2,
+          rect.top + rect.height / 2,
+          rect.width,
+          rect.height,
+          preSelectedTarotCard
+        );
+        return;
+      }
+    }
+
+    if (node && typeof node.measureInWindow === 'function') {
+      node.measureInWindow((x, y, width, height) => {
+        startCardAnimation(
+          x + width / 2,
+          y + height / 2,
+          width,
+          height,
+          preSelectedTarotCard
+        );
+      });
+      return;
+    }
+
+    startCardAnimation(0, 0, 0, 0, preSelectedTarotCard);
+  };
+
   const handleLayoutCard = (event: LayoutChangeEvent) => {
     if (!isSelected) {
       return;
     }
 
-    measurePageCenter(event, (pageX, pageY) => {
-      handleGetCenterCardPosition?.(pageX, pageY);
+    measurePageCenter(event, (pageX, pageY, width, height) => {
+      handleGetCenterCardPosition?.(pageX, pageY, width, height);
     });
   };
 
@@ -148,6 +190,7 @@ function SlideItem({
 
   return (
     <Pressable
+      ref={pressableRef}
       onLayout={handleLayoutCard}
       onPress={handlePress}
       accessibilityRole="button"
@@ -180,7 +223,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     ...({
-      boxShadow: '0 10px 22px rgba(0,0,0,0.24)',
+      boxShadow: '0 18px 28px rgba(0,0,0,0.35)',
     } as object),
   },
   overlay: {

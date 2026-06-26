@@ -6,7 +6,7 @@ import Animated from 'react-native-reanimated';
 import { DeckStyle, TarotCardDirection } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { getImage } from 'shared/lib';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { COLORS } from 'shared/themes';
 import { AnimationCarouselContext } from '../model';
 
 function AnimatedCard() {
@@ -19,7 +19,9 @@ function AnimatedCard() {
 
   const { preSelectedTarotCard } = useData({ Context: SpreadContext });
 
-  const cardSize = flyingCardSize ?? { width: 160, height: 288 };
+  const cardSize = flyingCardSize ?? { width: 64, height: 114 };
+  const borderRadius = Math.max(8, Math.round(cardSize.width * 0.14));
+  const isSmall = cardSize.width < 72;
 
   return (
     <Animated.View
@@ -35,7 +37,13 @@ function AnimatedCard() {
     >
       <Animated.View style={[styles.card, backAnimatedStyle]}>
         <Animated.Image
-          style={styles.image}
+          style={[
+            styles.image,
+            {
+              borderRadius,
+              borderWidth: isSmall ? 1.5 : 2,
+            },
+          ]}
           source={getImage(['core', 'cardBack'])}
           resizeMode="cover"
         />
@@ -45,6 +53,8 @@ function AnimatedCard() {
           style={[
             styles.image,
             {
+              borderRadius,
+              borderWidth: isSmall ? 1.5 : 2,
               transform:
                 preSelectedTarotCard?.direction === TarotCardDirection.Reversed
                   ? [{ rotate: '180deg' }]
@@ -79,11 +89,9 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-    borderWidth: 1,
-    borderColor: getColorOpacity(COLORS.Content, 55),
-    borderRadius: 12,
+    borderColor: COLORS.Content,
     ...({
-      boxShadow: '0 10px 28px rgba(0,0,0,0.28)',
+      boxShadow: '0 10px 22px rgba(0,0,0,0.38)',
     } as object),
   },
 });

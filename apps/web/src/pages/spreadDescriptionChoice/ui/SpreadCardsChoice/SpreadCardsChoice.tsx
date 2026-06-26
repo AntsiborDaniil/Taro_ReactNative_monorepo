@@ -41,8 +41,10 @@ import {
   shouldPromptWebSignIn,
   verticalScale,
 } from 'shared/lib';
-import { scrollToSpreadPickerWithRetries, SPREAD_PICKER_NATIVE_ID } from 'shared/lib/scrollToSpreadPicker';
-import { isTelegramMiniApp } from 'shared/lib/web/telegramWebApp';
+import {
+  scrollToSpreadCarouselWithRetries,
+  SPREAD_CAROUSEL_NATIVE_ID,
+} from 'shared/lib/scrollToSpreadPicker';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -67,6 +69,7 @@ function SpreadCardsChoice({
   const [hasAskedQuestion, setHasAskedQuestion] = useState(false);
   const scrollRef = useRef<KeyboardAwareScrollView>(null);
   const pickerZoneRef = useRef<View>(null);
+  const carouselRef = useRef<View>(null);
   const didInitialScrollRef = useRef(false);
 
   const { handleVibrationClick } = useData({
@@ -105,7 +108,10 @@ function SpreadCardsChoice({
     hasAskedQuestion;
 
   const scrollToPicker = useCallback(() => {
-    scrollToSpreadPickerWithRetries(pickerZoneRef.current, scrollRef.current);
+    scrollToSpreadCarouselWithRetries(
+      carouselRef.current ?? pickerZoneRef.current,
+      scrollRef.current
+    );
   }, []);
 
   useEffect(() => {
@@ -123,10 +129,9 @@ function SpreadCardsChoice({
     }
 
     didInitialScrollRef.current = true;
-    const mountDelay = isTelegramMiniApp() ? 680 : Platform.OS === 'web' ? 520 : 420;
     const timer = setTimeout(() => {
       scrollToPicker();
-    }, mountDelay);
+    }, Platform.OS === 'web' ? 640 : 480);
 
     return () => clearTimeout(timer);
   }, [
@@ -180,12 +185,7 @@ function SpreadCardsChoice({
     }
 
     setHasAskedQuestion(true);
-    const afterQuestionDelay = isTelegramMiniApp()
-      ? 720
-      : Platform.OS === 'web'
-        ? 560
-        : 480;
-    setTimeout(() => scrollToPicker(), afterQuestionDelay);
+    setTimeout(() => scrollToPicker(), Platform.OS === 'web' ? 700 : 520);
   }, [
     spread?.id,
     spread?.name,
@@ -324,19 +324,23 @@ function SpreadCardsChoice({
                 {showCardPicker ? (
                   <View
                     ref={pickerZoneRef}
-                    nativeID={SPREAD_PICKER_NATIVE_ID}
                     style={spreadInnerStyles.altarZone}
                     collapsable={false}
                   >
                     <View style={spreadInnerStyles.altarGlow} pointerEvents="none" />
                     <AnimatedCard />
-                    <CoverFlowCardCarousel
+                    <View
+                      ref={carouselRef}
+                      nativeID={SPREAD_CAROUSEL_NATIVE_ID}
+                      collapsable={false}
                       style={
                         isSimpleSpread
                           ? styles.carouselSimpleSpread
                           : styles.carousel
                       }
-                    />
+                    >
+                      <CoverFlowCardCarousel />
+                    </View>
                     {!isSimpleSpread && (
                       <Text category={TEXT_TAGS.p2} style={spreadInnerStyles.altarHint}>
                         {t('spread:flow.pickHint')}
@@ -406,7 +410,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
   },
   carousel: {
-    marginTop: 4,
+    marginTop: 8,
     alignSelf: 'center',
   },
   carouselSimpleSpread: {

@@ -48,7 +48,7 @@ export function measurePageTopLeft(
 /** Center coordinates for animation start (carousel selected card). */
 export function measurePageCenter(
   event: LayoutChangeEvent,
-  callback: (pageX: number, pageY: number) => void
+  callback: (pageX: number, pageY: number, width: number, height: number) => void
 ): boolean {
   if (Platform.OS === 'web') {
     const node = event.currentTarget as unknown as HTMLElement | null;
@@ -57,7 +57,12 @@ export function measurePageCenter(
       return false;
     }
 
-    callback(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    callback(
+      rect.left + rect.width / 2,
+      rect.top + rect.height / 2,
+      rect.width,
+      rect.height
+    );
     return true;
   }
 
@@ -78,8 +83,8 @@ export function measurePageCenter(
       : null;
 
   if (measurableTarget?.measure) {
-    measurableTarget.measure((_x, _y, width, height, pageX, pageY) => {
-      callback(pageX + width / 2, pageY + height / 2);
+    measurableTarget.measure((x, y, width, height, pageX, pageY) => {
+      callback(pageX + width / 2, pageY + height / 2, width, height);
     });
     return true;
   }
