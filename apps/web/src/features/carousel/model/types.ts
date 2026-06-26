@@ -8,8 +8,8 @@ export type TAnimationCarouselHookResult = TRotateAnimationHookResult & {
   flyingCardSize: TSchemeCardSize;
   handleAnimate: (index?: number) => void;
   handleGetCenterCardPosition: (
-    x: number,
-    y: number,
+    centerX: number,
+    centerY: number,
     sliderWidth?: number,
     sliderHeight?: number
   ) => void;

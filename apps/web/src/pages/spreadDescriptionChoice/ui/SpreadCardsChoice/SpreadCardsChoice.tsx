@@ -41,10 +41,7 @@ import {
   shouldPromptWebSignIn,
   verticalScale,
 } from 'shared/lib';
-import {
-  scrollToSpreadCarouselWithRetries,
-  SPREAD_CAROUSEL_NATIVE_ID,
-} from 'shared/lib/scrollToSpreadPicker';
+import { scrollToSpreadPickerWithRetries, SPREAD_PICKER_SLIDER_ID } from 'shared/lib/scrollToSpreadPicker';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -69,7 +66,7 @@ function SpreadCardsChoice({
   const [hasAskedQuestion, setHasAskedQuestion] = useState(false);
   const scrollRef = useRef<KeyboardAwareScrollView>(null);
   const pickerZoneRef = useRef<View>(null);
-  const carouselRef = useRef<View>(null);
+  const sliderScrollRef = useRef<View>(null);
   const didInitialScrollRef = useRef(false);
 
   const { handleVibrationClick } = useData({
@@ -108,9 +105,11 @@ function SpreadCardsChoice({
     hasAskedQuestion;
 
   const scrollToPicker = useCallback(() => {
-    scrollToSpreadCarouselWithRetries(
-      carouselRef.current ?? pickerZoneRef.current,
-      scrollRef.current
+    scrollToSpreadPickerWithRetries(
+      sliderScrollRef.current ?? pickerZoneRef.current,
+      scrollRef.current,
+      [0, 180, 420, 720, 1100, 1450],
+      SPREAD_PICKER_SLIDER_ID
     );
   }, []);
 
@@ -131,7 +130,7 @@ function SpreadCardsChoice({
     didInitialScrollRef.current = true;
     const timer = setTimeout(() => {
       scrollToPicker();
-    }, Platform.OS === 'web' ? 640 : 480);
+    }, Platform.OS === 'web' ? 640 : 420);
 
     return () => clearTimeout(timer);
   }, [
@@ -185,7 +184,7 @@ function SpreadCardsChoice({
     }
 
     setHasAskedQuestion(true);
-    setTimeout(() => scrollToPicker(), Platform.OS === 'web' ? 700 : 520);
+    setTimeout(() => scrollToPicker(), Platform.OS === 'web' ? 680 : 480);
   }, [
     spread?.id,
     spread?.name,
@@ -330,16 +329,18 @@ function SpreadCardsChoice({
                     <View style={spreadInnerStyles.altarGlow} pointerEvents="none" />
                     <AnimatedCard />
                     <View
-                      ref={carouselRef}
-                      nativeID={SPREAD_CAROUSEL_NATIVE_ID}
+                      ref={sliderScrollRef}
+                      nativeID={SPREAD_PICKER_SLIDER_ID}
                       collapsable={false}
-                      style={
-                        isSimpleSpread
-                          ? styles.carouselSimpleSpread
-                          : styles.carousel
-                      }
+                      style={styles.sliderAnchor}
                     >
-                      <CoverFlowCardCarousel />
+                      <CoverFlowCardCarousel
+                        style={
+                          isSimpleSpread
+                            ? styles.carouselSimpleSpread
+                            : styles.carousel
+                        }
+                      />
                     </View>
                     {!isSimpleSpread && (
                       <Text category={TEXT_TAGS.p2} style={spreadInnerStyles.altarHint}>
@@ -412,6 +413,10 @@ const styles = StyleSheet.create({
   carousel: {
     marginTop: 8,
     alignSelf: 'center',
+  },
+  sliderAnchor: {
+    width: '100%',
+    alignItems: 'center',
   },
   carouselSimpleSpread: {
     marginTop: 0,

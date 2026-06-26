@@ -19,9 +19,7 @@ function AnimatedCard() {
 
   const { preSelectedTarotCard } = useData({ Context: SpreadContext });
 
-  const cardSize = flyingCardSize ?? { width: 64, height: 114 };
-  const borderRadius = Math.max(8, Math.round(cardSize.width * 0.14));
-  const isSmall = cardSize.width < 72;
+  const cardSize = flyingCardSize ?? { width: 160, height: 288 };
 
   return (
     <Animated.View
@@ -37,13 +35,7 @@ function AnimatedCard() {
     >
       <Animated.View style={[styles.card, backAnimatedStyle]}>
         <Animated.Image
-          style={[
-            styles.image,
-            {
-              borderRadius,
-              borderWidth: isSmall ? 1.5 : 2,
-            },
-          ]}
+          style={styles.image}
           source={getImage(['core', 'cardBack'])}
           resizeMode="cover"
         />
@@ -53,8 +45,6 @@ function AnimatedCard() {
           style={[
             styles.image,
             {
-              borderRadius,
-              borderWidth: isSmall ? 1.5 : 2,
               transform:
                 preSelectedTarotCard?.direction === TarotCardDirection.Reversed
                   ? [{ rotate: '180deg' }]
@@ -89,9 +79,11 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
+    borderWidth: 2,
     borderColor: COLORS.Content,
+    borderRadius: 14,
     ...({
-      boxShadow: '0 10px 22px rgba(0,0,0,0.38)',
+      boxShadow: '0 22px 48px rgba(0,0,0,0.45)',
     } as object),
   },
 });

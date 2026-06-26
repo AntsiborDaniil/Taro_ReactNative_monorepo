@@ -6,7 +6,6 @@ import {
   type StyleProp,
   StyleSheet,
   Platform,
-  type View,
   type ViewProps,
   type ViewStyle,
 } from 'react-native';
@@ -53,7 +52,7 @@ function SlideItem({
   });
 
   const isAnimating = useRef(false);
-  const pressableRef = useRef<View>(null);
+  const pressableRef = useRef<React.ComponentRef<typeof Pressable>>(null);
   const pressScale = useSharedValue(1);
   const selectGlow = useSharedValue(0);
 
@@ -69,44 +68,28 @@ function SlideItem({
     }
   }, [isSelected, selectGlow]);
 
-  const startCardAnimation = (
-    centerX: number,
-    centerY: number,
-    sliderWidth: number,
-    sliderHeight: number,
-    preSelectedTarotCard: ReturnType<
-      NonNullable<typeof handlePreSelectTarotCard>
-    >
-  ) => {
-    handleGetCenterCardPosition?.(centerX, centerY, sliderWidth, sliderHeight);
-    handleAnimate?.(spread?.selectedCards.length);
-    flip?.();
+  const syncCardPosition = (event?: LayoutChangeEvent) => {
+    if (event) {
+      measurePageCenter(event, (pageX, pageY, width, height) => {
+        handleGetCenterCardPosition?.(pageX, pageY, width, height);
+      });
+      return;
+    }
 
-    setTimeout(
-      async () => {
-        const cardWasSelected = await handleSelectTarotCard?.(preSelectedTarotCard);
-        if (__DEV__) {
-          console.log(`${DAY_CARD_DEBUG} slidePress:afterSelect`, {
-            cardWasSelected: !!cardWasSelected,
-          });
-        }
-        if (cardWasSelected) {
-          selectGlow.value = withSequence(
-            withTiming(1, { duration: 160 }),
-            withTiming(0.35, { duration: 420 })
-          );
-          onAdditionalClick?.();
-          if (__DEV__) {
-            console.log(`${DAY_CARD_DEBUG} slidePress:navigate`);
-          }
-        } else if (__DEV__) {
-          console.warn(`${DAY_CARD_DEBUG} slidePress:skipNavigate`);
-        }
+    if (Platform.OS === 'web') {
+      const node = pressableRef.current as unknown as HTMLElement | null;
+      const rect = node?.getBoundingClientRect?.();
+      if (!rect) {
+        return;
+      }
 
-        isAnimating.current = false;
-      },
-      hasImmediateAnimation ? 0 : ANIMATED_CARD_TIMEOUT + 5
-    );
+      handleGetCenterCardPosition?.(
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2,
+        rect.width,
+        rect.height
+      );
+    }
   };
 
   const handlePress = () => {
@@ -136,35 +119,37 @@ function SlideItem({
       });
     }
 
-    const node = pressableRef.current;
-    if (Platform.OS === 'web') {
-      const rect = (node as unknown as HTMLElement | null)?.getBoundingClientRect?.();
-      if (rect) {
-        startCardAnimation(
-          rect.left + rect.width / 2,
-          rect.top + rect.height / 2,
-          rect.width,
-          rect.height,
-          preSelectedTarotCard
-        );
-        return;
-      }
-    }
+    syncCardPosition();
 
-    if (node && typeof node.measureInWindow === 'function') {
-      node.measureInWindow((x, y, width, height) => {
-        startCardAnimation(
-          x + width / 2,
-          y + height / 2,
-          width,
-          height,
-          preSelectedTarotCard
-        );
-      });
-      return;
-    }
+    handleAnimate?.(spread?.selectedCards.length);
 
-    startCardAnimation(0, 0, 0, 0, preSelectedTarotCard);
+    flip?.();
+
+    setTimeout(
+      async () => {
+        const cardWasSelected = await handleSelectTarotCard?.(preSelectedTarotCard);
+        if (__DEV__) {
+          console.log(`${DAY_CARD_DEBUG} slidePress:afterSelect`, {
+            cardWasSelected: !!cardWasSelected,
+          });
+        }
+        if (cardWasSelected) {
+          selectGlow.value = withSequence(
+            withTiming(1, { duration: 160 }),
+            withTiming(0.35, { duration: 420 })
+          );
+          onAdditionalClick?.();
+          if (__DEV__) {
+            console.log(`${DAY_CARD_DEBUG} slidePress:navigate`);
+          }
+        } else if (__DEV__) {
+          console.warn(`${DAY_CARD_DEBUG} slidePress:skipNavigate`);
+        }
+
+        isAnimating.current = false;
+      },
+      hasImmediateAnimation ? 0 : ANIMATED_CARD_TIMEOUT + 5
+    );
   };
 
   const handleLayoutCard = (event: LayoutChangeEvent) => {
@@ -172,9 +157,7 @@ function SlideItem({
       return;
     }
 
-    measurePageCenter(event, (pageX, pageY, width, height) => {
-      handleGetCenterCardPosition?.(pageX, pageY, width, height);
-    });
+    syncCardPosition(event);
   };
 
   const onKeyDown =
