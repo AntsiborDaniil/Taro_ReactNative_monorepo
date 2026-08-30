@@ -44,6 +44,8 @@ export type TileCardProps = {
   accessibilityLabel?: string;
   /** Только иллюстрация без заголовка (нижний tab bar). */
   imageOnly?: boolean;
+  /** Чип в правом верхнем углу превью (например «Без авторизации»). */
+  topRightBadge?: string;
 };
 
 export enum ImagePosition {

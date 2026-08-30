@@ -3,6 +3,7 @@ import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
+import { useTranslation } from 'react-i18next';
 import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { DeckStyle, TSpread } from 'shared/api';
 import { useData } from 'shared/DataProvider';
@@ -30,6 +31,7 @@ type SmallSpreadCardProps = {
 
 function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
   const { id, name } = spread ?? {};
+  const { t: tSpread } = useTranslation('spread');
 
   const navigation = useNativeNavigation();
 
@@ -44,6 +46,8 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
   const { showModal } = useData({ Context: ModalsContext });
 
   const guestFree = isGuestFreeSpreadId(spread?.id);
+  const showGuestBadge =
+    isWebGuestSession(isAuthenticated, authSessionLoading) && guestFree;
 
   const isLocked =
     isWebGuestSession(isAuthenticated, authSessionLoading) && !guestFree;
@@ -63,6 +67,9 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
       width={horizontalScale(165)}
       height={horizontalScale(155)}
       isLocked={isLocked}
+      topRightBadge={
+        showGuestBadge ? tSpread('guestSpread.badge') : undefined
+      }
       onPress={async () => {
         if (analyticAction) {
           AppMetrica.reportEvent(analyticAction, {

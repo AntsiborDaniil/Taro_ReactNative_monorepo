@@ -48,6 +48,7 @@ function TileCard({
   subtitleStyle,
   accessibilityLabel,
   imageOnly = false,
+  topRightBadge,
 }: TileCardProps) {
   const { t } = useTranslation();
   const { width: winW } = useWindowDimensions();
@@ -113,6 +114,21 @@ function TileCard({
                 ) : (
                   children
                 ))}
+              {!!topRightBadge && (
+                <LinearGradient
+                  colors={[
+                    getColorOpacity(COLORS.Primary, 22),
+                    getColorOpacity(COLORS.Secondary, 28),
+                  ]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.topRightBadge}
+                >
+                  <Text category={TEXT_TAGS.label} style={styles.topRightBadgeText}>
+                    {topRightBadge}
+                  </Text>
+                </LinearGradient>
+              )}
             </ImageBackground>
           ) : (
             <View
@@ -328,6 +344,25 @@ const styles = StyleService.create({
     justifyContent: 'flex-end',
     alignItems: 'flex-start',
     backgroundColor: COLORS.SpbSky4,
+  },
+  topRightBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: getColorOpacity(COLORS.Secondary, 35),
+    maxWidth: '78%',
+  },
+  topRightBadgeText: {
+    color: COLORS.Content,
+    letterSpacing: 0.2,
+    fontWeight: '600',
+    fontSize: 10,
+    lineHeight: 13,
   },
   cornerImage: {
     position: 'absolute',
