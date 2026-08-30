@@ -34,4 +34,4 @@ services:
       - key: ALLOW_VERCEL_PREVIEW
         value: '1'
       - key: TAROT_DAILY_INTERPRET_LIMIT
-        value: '10'
+        value: '3'
