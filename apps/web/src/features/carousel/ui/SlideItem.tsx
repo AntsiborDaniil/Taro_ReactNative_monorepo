@@ -105,9 +105,14 @@ function SlideItem({
 
     isAnimating.current = true;
     pressScale.value = withSequence(
-      withSpring(0.9, { damping: 14, stiffness: 320 }),
-      withSpring(1.04, { damping: 12, stiffness: 260 }),
-      withSpring(1, { damping: 16, stiffness: 280 })
+      withSpring(0.88, { damping: 12, stiffness: 340 }),
+      withSpring(1.08, { damping: 11, stiffness: 240 }),
+      withSpring(1, { damping: 14, stiffness: 260 })
+    );
+    // Immediate visible feedback on desktop (no haptics)
+    selectGlow.value = withSequence(
+      withTiming(1, { duration: 120 }),
+      withTiming(0.55, { duration: 280 })
     );
 
     const preSelectedTarotCard = handlePreSelectTarotCard?.();
@@ -135,8 +140,9 @@ function SlideItem({
         }
         if (cardWasSelected) {
           selectGlow.value = withSequence(
-            withTiming(1, { duration: 160 }),
-            withTiming(0.35, { duration: 420 })
+            withTiming(1, { duration: 140 }),
+            withTiming(0.45, { duration: 520 }),
+            withTiming(0.15, { duration: 400 })
           );
           onAdditionalClick?.();
           if (__DEV__) {

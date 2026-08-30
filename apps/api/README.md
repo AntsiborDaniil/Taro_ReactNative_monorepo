@@ -20,23 +20,35 @@ Copy `.env.example` → `.env` and fill:
 | `CORS_ORIGIN` | Comma-separated web origins |
 | `PORT` | Default `3002` |
 
-## Local dev (memory backend)
+## Local dev (memory + mocks)
 
-Без реальных `SUPABASE_*` включается RAM-режим. В терминале API:
+С placeholder `SUPABASE_*` (как в `.env.example`) включается **RAM-бэкенд** + **mock OpenAI** — полный UI без Docker/Supabase/реального GPT.
+
+| Что | Как |
+|-----|-----|
+| Auth / spreads / favorites | memory backend |
+| `/api/interpret`, mood, habits | mock текст + ~1.8s delay (loader UI) |
+| Быстрый вход | `POST /api/auth/dev/quick-login` → `demo@tarot.local` / `demo` |
+| Web авто-логин | `EXPO_PUBLIC_DEV_QUICK_LOGIN=1` в `apps/web/.env` |
+| Live OpenAI при memory | `USE_MOCK_OPENAI=0` + реальный `OPENAI_API_KEY` |
+| Telegram в memory | работает; без токена — `TELEGRAM_DEV_BYPASS=1` |
+
+В терминале API:
 
 | Лог | Значение |
 |-----|----------|
-| `[auth email] SIMULATED …` | Письмо с кодом *бы* ушло (в dev не отправляется) |
-| `[auth] Registration complete` | Регистрация завершена, сессия выдана |
-| `[auth google] DEV mock sign-in` | Вход через Google без OAuth |
-| `[auth http] POST /api/auth/...` | Запрос auth (в dev по умолчанию) |
+| `[api] DEV memory backend` | данные в RAM |
+| `[api] DEV mock OpenAI` | interpret без ключа |
+| `[api] Dev quick login` | endpoint доступен |
+| `[auth email] SIMULATED …` | письмо с кодом *бы* ушло |
+| `[auth google] DEV mock sign-in` | Google без OAuth |
 
 - Регистрация по умолчанию **сразу логинит** (без экрана кода).
 - `DEV_AUTH_REQUIRE_EMAIL_VERIFY=1` — двухшаговый OTP (код в логе и в `devVerificationCode`).
-- Google: `GET /api/auth/oauth/google` → mock callback → cookie.
 
-`GET /health` → `{ memoryBackend, devAuthRequireEmailVerify }`.
+`GET /health` → `{ memoryBackend, mockOpenAi, devAuthRequireEmailVerify }`.
 
+Walkthrough: `pnpm dev:api` + `pnpm dev:web` → открыть app → уже demo-сессия → любой расклад → AI → история.
 ## Scripts
 
 ```bash

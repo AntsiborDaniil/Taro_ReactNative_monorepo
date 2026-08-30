@@ -1,10 +1,11 @@
 import OpenAI from 'openai';
 import {
-  TarotPosition,
   TarotInterpretationOutput,
   TarotSpreadInput,
 } from '../types';
 import * as dotenv from 'dotenv';
+import { useMockOpenAi } from '../lib/devMode';
+import { mockGenerateInterpretation } from '../dev/mockOpenAi';
 dotenv.config();
 
 const openai = new OpenAI({
@@ -38,6 +39,15 @@ export async function generateInterpretation({
   language,
   question,
 }: TarotSpreadInput): Promise<TarotInterpretationOutput> {
+  if (useMockOpenAi()) {
+    return mockGenerateInterpretation({
+      spread_type,
+      positions,
+      language,
+      question,
+    });
+  }
+
   const content = `
 ВОПРОС КЛИЕНТА: "${question}"
 

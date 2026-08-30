@@ -2,6 +2,7 @@ import { memo, useEffect } from 'react';
 import {
   ImageBackground,
   LayoutChangeEvent,
+  Platform,
   StyleSheet,
   View,
   ViewStyle,
@@ -26,7 +27,7 @@ type TarotSchemeCardProps = {
   hasRotation?: boolean;
   isHorizontal?: boolean;
   cardSize?: TSchemeCardSize;
-  style?: ViewStyle;
+  style?: ViewStyle | ViewStyle[] | null;
   onLayout?: (event: LayoutChangeEvent) => void;
 };
 
@@ -155,6 +156,10 @@ const styles = StyleSheet.create({
   },
   horizontal: {
     transform: [{ rotate: '90deg' }],
+    // Web defaults transform-origin to top-left → Celtic Cross overlay shifts left
+    ...(Platform.OS === 'web'
+      ? ({ transformOrigin: 'center center' } as object)
+      : {}),
   },
   horizontalText: {
     transform: [{ rotate: '-90deg' }],

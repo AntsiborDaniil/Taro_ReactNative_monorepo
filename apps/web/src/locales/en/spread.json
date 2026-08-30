@@ -30,7 +30,7 @@
   "limit.body": "Become a Tarot Practitioner or wait for a new day.",
 
   "dailyLimit.title": "Daily spread limit reached",
-  "dailyLimit.body": "You can complete up to 10 spreads per day while signed in. Try again tomorrow.",
+  "dailyLimit.body": "You can complete up to 3 AI spreads per day while signed in. Try again tomorrow.",
 
   "signInRequired.title": "Sign in required",
   "signInRequired.body": "Spreads are available after you sign in or register.",

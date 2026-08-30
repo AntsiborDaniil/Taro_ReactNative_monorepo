@@ -1,0 +1,114 @@
+{
+  "button.makeSpread": "Сделать расклад",
+
+  "card": "Карта",
+  "card.upright": "Обычное",
+  "card.reversed": "Перевернутое",
+  "card.added1": "Карта Таро добавлена в избранное.",
+  "card.added2": "Нажми, чтобы посмотреть",
+  "card.favoriteError.title": "Не удалось добавить в избранное",
+  "card.favoriteError.body": "Проверьте подключение к интернету и попробуйте снова.",
+
+  "ai.error1": "Туман судьбы скрыл карты Таро.",
+  "ai.error2": "Дайте звездам время и попробуйте вновь.",
+
+  "ai.copy.success": "Скопировано в буфер обмена",
+
+  "button.prev": "Предыдущая",
+  "button.next": "Следующая",
+  "button.resetDayCard": "Сбросить карту дня",
+
+  "choice.tapToChoice": "Нажми, чтобы выбрать карту",
+  "choice.scrollCards": "Листай",
+  "choice.completed": "Читать объяснение",
+
+  "dailyCard.title": "Карта дня",
+  "dailyCard.empty.title": "Сначала выберите карту дня",
+  "dailyCard.empty.button": "Выбрать карту дня",
+
+  "today": "Сегодня",
+  "yesterday": "Вчера",
+
+  "page.dictionary": "Значение \nкарт",
+  "page.history": "История \nраскладов",
+  "page.favorite": "Избранные \nкарты",
+  "page.spreadsGroups": "Расклады Таро",
+  "spreads.catalog.hint": "Нажми, чтобы открыть расклад →",
+  "spreads.catalog.hintLocked": "С замком — в подписке. Нажми, чтобы узнать больше",
+  "page.spreadsHistory": "История раскладов",
+  "page.favouriteCards": "Избранные карты",
+
+  "library": "Библиотека",
+  "library.intro.lead": "Справочник, история и избранное.",
+  "library.section.title": "Разделы",
+  "library.section.subtitle": "",
+  "library.tile.dictionary.title": "Значения карт",
+  "library.tile.dictionary.subtitle": "Арканы и толкования",
+  "library.tile.history.title": "История\nраскладов",
+  "library.tile.history.subtitle": "Прошлые сессии",
+  "library.tile.favorite.title": "Избранное",
+  "library.tile.favorite.subtitle": "Сохранённые карты",
+
+  "save": "Сохранить",
+
+  "errorBoundary.title": "Упс!",
+  "errorBoundary.alternativeTitle": "Приложение устарело",
+  "errorBoundary.description": "Попробуйте обновить приложение",
+  "errorBoundary.button": "Обновить",
+
+  "history.noSpreads": "Вы еще не делали расклады",
+  "favoriteCards.noCards": "Вы еще не добавили карты в избранное",
+
+  "action.makeSpread": "Сделать расклад",
+
+  "question": "Вопрос",
+
+  "finish": "Завершить",
+  "yourState": "Ваше состояние",
+  "continue": "Продолжить",
+
+  "pressToOpen": "Вы достигли лимита\nразборов. Нажми,\nчтобы разблокировать",
+
+  "downloadAppStore": "Скачать в App Store",
+  "downloadGooglePlay": "Скачать в Google Play",
+  "generateMeaning": "Получить объяснение\nрасклада",
+
+  "loading.default": "Подождите чуть-чуть",
+  "loading.1": "Вселенная отвечает",
+  "loading.2": "Энергия собирается",
+  "loading.3": "Путь расклада формируется",
+  "loading.4": "Туман рассеивается",
+  "loading.5": "Магия в движении",
+
+  "slowConnection.hint": "Медленное соединение — загружаем данные…",
+  "slowConnection.dismiss": "Скрыть уведомление",
+
+  "share.message.ios": "Загляни в будущее с нашим приложением Таро! Расклады, которые раскроют твои скрытые пути.",
+  "share.message.android": "Загляни в будущее с нашим приложением Таро! Расклады, которые раскроют твои скрытые пути. Скачай сейчас",
+  "share.title": "Открой тайны судьбы с Таро!",
+  "share.web.copied": "Текст со ссылками скопирован",
+  "share.web.fail": "Не удалось поделиться — попробуйте ещё раз",
+
+  "nav.tab.main": "Главная",
+  "nav.tab.spreads": "Расклады",
+  "nav.tab.library": "Библиотека",
+  "nav.fab.open": "Открыть меню навигации",
+  "nav.fab.close": "Закрыть меню навигации",
+
+  "nav.rail.collapse": "Свернуть боковую панель",
+  "nav.rail.expand": "Развернуть боковую панель",
+
+  "a11y.back": "Назад",
+  "a11y.settings": "Открыть настройки",
+  "a11y.headerActions": "Дополнительные действия",
+  "a11y.horizontalList": "Горизонтальный список",
+  "a11y.suitsRow": "Масти и арканы",
+  "a11y.horizontalScrollHint": "Прокрутка ряда: два пальца по тачпаду, Shift и колёсико мыши или перетаскивание.",
+
+  "stub.missingData.title": "Данные не найдены или устарели",
+  "stub.missingData.button": "К раскладам",
+  "stub.emptyResults": "Ничего не найдено",
+  "stub.emptyResultsModal.subtitle": "Измените условия или попробуйте позже.",
+  "stub.emptyResultsModal.button": "Понятно",
+  "stub.emptyResultsModal.closeBackdrop": "Закрыть"
+}

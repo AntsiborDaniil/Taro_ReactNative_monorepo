@@ -25,4 +25,5 @@ export type TUserHookResult = {
   tarotDaily?: TarotDailyQuota | null;
   authSessionLoading?: boolean;
   refreshAuthSession?: () => Promise<void>;
+  setTarotDaily?: (daily: TarotDailyQuota | null) => void;
 };

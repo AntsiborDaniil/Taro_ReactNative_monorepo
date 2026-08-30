@@ -1,6 +1,8 @@
 import OpenAI from 'openai';
-import { TarotPosition, TMoodAndEnergyOutput, THabitsInput } from '../types';
+import { TMoodAndEnergyOutput, THabitsInput } from '../types';
 import * as dotenv from 'dotenv';
+import { useMockOpenAi } from '../lib/devMode';
+import { mockGenerateHabits } from '../dev/mockOpenAi';
 dotenv.config();
 
 const openai = new OpenAI({
@@ -28,6 +30,10 @@ export async function generateHabitsInterpretation({
   card,
   language,
 }: THabitsInput): Promise<TMoodAndEnergyOutput> {
+  if (useMockOpenAi()) {
+    return mockGenerateHabits({ params, card, language });
+  }
+
   const { goodHabits, badHabits } = params ?? {};
 
   const content = `

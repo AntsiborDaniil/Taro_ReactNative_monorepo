@@ -11,6 +11,7 @@ import {
   logBackendMode,
   shouldLogAuthHttp,
   useMemoryBackend,
+  useMockOpenAi,
 } from './lib/devMode';
 import { isCorsOriginAllowed } from './lib/cors';
 import { interpretRoute } from './routes/interpret';
@@ -29,6 +30,9 @@ async function bootstrap(): Promise<void> {
     logBackendMode();
   } else {
     assertSupabaseEnv();
+    if (useMockOpenAi()) {
+      console.warn('[api] DEV mock OpenAI enabled without memory backend');
+    }
   }
 
   const fastify = Fastify({
@@ -78,6 +82,7 @@ async function bootstrap(): Promise<void> {
     ok: true,
     supabase: !useMemoryBackend(),
     memoryBackend: useMemoryBackend(),
+    mockOpenAi: useMockOpenAi(),
     devAuthRequireEmailVerify: useMemoryBackend()
       ? devAuthRequireEmailVerify()
       : undefined,

@@ -21,6 +21,7 @@ import {
   resendEmailVerificationCode,
   signIn,
   signUp,
+  signInDevQuickLogin,
   signInWithTelegram,
   updateProfile,
   verifyEmailOtp,
@@ -437,6 +438,29 @@ export const authRoute = async (
       }
     }
   );
+
+  /** Local UI walkthrough: memory backend only. */
+  fastify.post('/auth/dev/quick-login', async (request, reply) => {
+    if (!useMemoryBackend()) {
+      return reply.status(404).send({ message: 'Not found' });
+    }
+
+    try {
+      const session = await signInDevQuickLogin();
+      setSessionCookie(request, reply, session.token);
+      // Always include token for local web (cookie may fail across localhost↔127.0.0.1)
+      return reply.send({
+        user: session.user,
+        token: session.token,
+        refreshToken: session.refreshToken,
+      });
+    } catch (error) {
+      request.log.error(error);
+      return reply.status(500).send({
+        message: 'Could not complete dev quick login',
+      });
+    }
+  });
 
   fastify.post('/auth/signout', async (request, reply) => {
     clearSessionCookie(request, reply);

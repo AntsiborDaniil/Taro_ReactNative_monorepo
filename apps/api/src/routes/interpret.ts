@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { resolveAuthedUser } from '../lib/authRequest';
 import { generateInterpretation } from '../services/spreadInterpretationService';
+import { tryConsumeTarotDailySlot } from '../services/tarotDailyUsageService';
 import { TarotSpreadInput } from '../types';
 
 export const interpretRoute = async (
@@ -38,6 +39,14 @@ export const interpretRoute = async (
             type: 'object',
             properties: {
               interpretation: { type: 'string' },
+              tarotDaily: {
+                type: 'object',
+                properties: {
+                  used: { type: 'number' },
+                  limit: { type: 'number' },
+                  day: { type: 'string' },
+                },
+              },
             },
           },
         },
@@ -54,13 +63,32 @@ export const interpretRoute = async (
       const { spread_type, positions, language, question } = request.body;
 
       try {
+        const slot = await tryConsumeTarotDailySlot(user.id);
+        if (!slot.ok) {
+          return reply.status(429).send({
+            message: 'Daily tarot spread limit reached',
+            tarotDaily: {
+              used: slot.used,
+              limit: slot.limit,
+              day: slot.day,
+            },
+          });
+        }
+
         const interpretation = await generateInterpretation({
           spread_type,
           positions,
           language,
           question,
         });
-        return reply.send(interpretation);
+        return reply.send({
+          ...interpretation,
+          tarotDaily: {
+            used: slot.used,
+            limit: slot.limit,
+            day: slot.day,
+          },
+        });
       } catch (error) {
         request.log.error(error);
         return reply.status(500).send({

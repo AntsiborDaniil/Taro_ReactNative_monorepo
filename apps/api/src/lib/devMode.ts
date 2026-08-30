@@ -62,6 +62,35 @@ export function shouldLogAuthHttp(): boolean {
   return env('LOG_AUTH_HTTP')?.toLowerCase() !== '0';
 }
 
+/**
+ * Заглушка OpenAI для локального UI (interpret / mood / habits).
+ * Вкл: USE_MOCK_OPENAI=1 | true, или автоматически с memory backend.
+ * Выкл: USE_MOCK_OPENAI=0 (даже при memory — пойдёт в реальный OpenAI).
+ */
+export function useMockOpenAi(): boolean {
+  if (process.env.NODE_ENV === 'production') {
+    return false;
+  }
+
+  const raw = env('USE_MOCK_OPENAI')?.toLowerCase();
+  if (raw === '0' || raw === 'false' || raw === 'no') {
+    return false;
+  }
+  if (raw === '1' || raw === 'true' || raw === 'yes') {
+    return true;
+  }
+
+  return useMemoryBackend();
+}
+
+export function isTelegramDevBypass(): boolean {
+  if (process.env.NODE_ENV === 'production') {
+    return false;
+  }
+  const raw = env('TELEGRAM_DEV_BYPASS')?.toLowerCase();
+  return raw === '1' || raw === 'true' || raw === 'yes';
+}
+
 export function logBackendMode(): void {
   if (useMemoryBackend()) {
     console.warn(
@@ -77,5 +106,14 @@ export function logBackendMode(): void {
         '[api] Регистрация в dev: сразу вход (письмо только в логе [auth email]). Google — mock без OAuth.'
       );
     }
+    console.warn(
+      '[api] Dev quick login: POST /api/auth/dev/quick-login → demo@tarot.local / demo'
+    );
+  }
+
+  if (useMockOpenAi()) {
+    console.warn(
+      '[api] DEV mock OpenAI — /interpret и motivation без реального ключа (USE_MOCK_OPENAI=0 + OPENAI_API_KEY для live)'
+    );
   }
 }

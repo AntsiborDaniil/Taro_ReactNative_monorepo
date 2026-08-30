@@ -1,10 +1,11 @@
 import OpenAI from 'openai';
 import {
-  TarotPosition,
   TMoodAndEnergyOutput,
   TMoodAndEnergyInput,
 } from '../types';
 import * as dotenv from 'dotenv';
+import { useMockOpenAi } from '../lib/devMode';
+import { mockGenerateMoodAndEnergy } from '../dev/mockOpenAi';
 dotenv.config();
 
 const openai = new OpenAI({
@@ -38,6 +39,10 @@ export async function generateMoodAndEnergyInterpretation({
   card,
   language,
 }: TMoodAndEnergyInput): Promise<TMoodAndEnergyOutput> {
+  if (useMockOpenAi()) {
+    return mockGenerateMoodAndEnergy({ params, card, language });
+  }
+
   const { mood, energy, stress } = params;
 
   const content = `

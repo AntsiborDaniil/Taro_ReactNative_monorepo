@@ -1,0 +1,36 @@
+{
+  "name": "react-native-siren",
+  "version": "0.0.7",
+  "description": "React Native module for checking App version and prompting user.",
+  "main": "index.js",
+  "scripts": {
+    "test": "ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GantMan/react-native-siren.git"
+  },
+  "keywords": [
+    "React",
+    "Native",
+    "Siren",
+    "Harpy",
+    "React Native Siren",
+    "Verion",
+    "Check",
+    "App Store"
+  ],
+  "author": "Gant Laborde",
+  "license": "MIT",
+  "files": [
+    "index.js"
+  ],
+  "bugs": {
+    "url": "https://github.com/GantMan/react-native-siren/issues"
+  },
+  "homepage": "https://github.com/GantMan/react-native-siren#readme",
+  "dependencies": {
+    "apisauce": "^3.1.0",
+    "react-native-device-info": "^8.7.0"
+  }
+}

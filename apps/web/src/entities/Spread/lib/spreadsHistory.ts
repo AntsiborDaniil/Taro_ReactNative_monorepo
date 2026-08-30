@@ -17,14 +17,8 @@ import {
   getValueForAsyncDeviceMemoryKey,
   saveAsyncDeviceMemoryKey,
 } from 'shared/lib';
-import { isGuestFreeSpreadId } from 'shared/lib/tarotGuestSpreads';
 
 const CLOUD_PAGE_SIZE = 20;
-
-async function consumeTarotDailySlotOnServer(): Promise<boolean> {
-  // Authenticated web users have no daily spread cap.
-  return true;
-}
 
 export type SpreadsHistoryPage = {
   spreads: TSpread[];
@@ -167,16 +161,6 @@ export async function saveSpread(
   spread: TSpread
 ): Promise<TSpread | undefined> {
   try {
-    const isNewSpread = !isCloudSpread(spread);
-    const skipServerQuota = isGuestFreeSpreadId(spread.id);
-
-    if (Platform.OS === 'web' && !skipServerQuota && isNewSpread) {
-      const consumed = await consumeTarotDailySlotOnServer();
-      if (!consumed) {
-        return undefined;
-      }
-    }
-
     if (Platform.OS === 'web') {
       const cloudSpread = await saveSpreadToCloud(spread);
       if (cloudSpread) {

@@ -8,6 +8,7 @@ import { DataProvider } from 'shared/DataProvider';
 import { handleWebOAuthReturn } from 'shared/lib/handleWebOAuthReturn';
 import { fetchAuthMeSession } from 'shared/lib/web/fetchAuthMeSession';
 import { tryAuthenticateTelegramMiniApp } from 'shared/lib/web/telegramWebApp';
+import { tryDevQuickLogin } from 'shared/lib/web/tryDevQuickLogin';
 import {
   TAROT_AUTH_CHANGED_EVENT,
   type TarotAuthChangedDetail,
@@ -21,6 +22,7 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
   const [authSessionLoading, setAuthSessionLoading] = useState(true);
   const authUserRef = useRef<AuthSessionUser | null>(null);
   const tarotDailyRef = useRef<TarotDailyQuota | null>(null);
+  const devQuickLoginAttemptedRef = useRef(false);
 
   useEffect(() => {
     authUserRef.current = authUser;
@@ -43,6 +45,7 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
 
     try {
       await tryAuthenticateTelegramMiniApp();
+
       const previousSession =
         authUserRef.current != null
           ? {
@@ -53,7 +56,27 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
             ? { user: fallbackUser, tarotDaily: null }
             : null;
 
-      const session = await fetchAuthMeSession({ previousSession });
+      let session = await fetchAuthMeSession({ previousSession });
+
+      if (!session?.user && !devQuickLoginAttemptedRef.current) {
+        devQuickLoginAttemptedRef.current = true;
+        const quick = await tryDevQuickLogin();
+        if (quick.ok) {
+          if (quick.user) {
+            applySession(quick.user, null);
+            // Refresh quota in background; UI already unlocked
+            void fetchAuthMeSession({ retryUnauthorized: false }).then(
+              (refreshed) => {
+                if (refreshed?.user) {
+                  applySession(refreshed.user, refreshed.tarotDaily ?? null);
+                }
+              }
+            );
+            return;
+          }
+          session = await fetchAuthMeSession({ retryUnauthorized: false });
+        }
+      }
 
       if (session?.user) {
         applySession(session.user, session.tarotDaily ?? null);
@@ -149,6 +172,7 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
       tarotDaily,
       authSessionLoading,
       refreshAuthSession,
+      setTarotDaily,
     }),
     [authUser, tarotDaily, authSessionLoading, refreshAuthSession]
   );

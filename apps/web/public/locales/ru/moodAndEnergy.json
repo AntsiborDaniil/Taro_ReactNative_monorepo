@@ -1,0 +1,15 @@
+{
+  "datesPeriod.week": "7 дней",
+  "datesPeriod.month": "30 дней",
+  "datesPeriod.year": "1 год",
+  "name.stress": "Стресс",
+  "name.mood": "Настроение",
+  "name.energy": "Энергия",
+  "progress.howAreYou": "Узнайте, что с вами сегодня",
+  "progress.assess": "Оцените свое состояние",
+  "progress.createCard": "Создать карту",
+  "progress": "Выполнено",
+  "signInRequired.title": "Нужен вход в аккаунт",
+  "signInRequired.body": "Запись настроения доступна после входа.",
+  "signInRequired.cta": "Войти"
+}

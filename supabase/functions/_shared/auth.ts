@@ -71,7 +71,7 @@ export async function consumeTarotDailySlot(userId: string): Promise<{
   day: string;
 }> {
   const admin = getAdminClient();
-  const limit = Number(Deno.env.get('TAROT_DAILY_INTERPRET_LIMIT') ?? '10');
+  const limit = Number(Deno.env.get('TAROT_DAILY_INTERPRET_LIMIT') ?? '3');
 
   const { data, error } = await admin.rpc('consume_tarot_daily_slot_for_user', {
     p_user_id: userId,

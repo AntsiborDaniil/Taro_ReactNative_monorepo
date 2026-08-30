@@ -1,0 +1,97 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _reactNativeSiren = _interopRequireDefault(require("react-native-siren"));
+var _utils = require("./utils");
+var _InAppUpdatesBase = _interopRequireDefault(require("./InAppUpdatesBase"));
+var _reactNativeDeviceInfo = require("react-native-device-info");
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); } // @ts-expect-error
+const noop = () => {};
+class InAppUpdates extends _InAppUpdatesBase.default {
+  constructor(...args) {
+    super(...args);
+    _defineProperty(this, "installUpdate", noop);
+    _defineProperty(this, "addStatusUpdateListener", noop);
+    _defineProperty(this, "removeStatusUpdateListener", noop);
+    _defineProperty(this, "addIntentSelectionListener", noop);
+    _defineProperty(this, "removeIntentSelectionListener", noop);
+  }
+  checkNeedsUpdate(checkOptions) {
+    const {
+      bundleId,
+      curVersion,
+      toSemverConverter,
+      customVersionComparator,
+      country
+    } = checkOptions || {};
+    let appVersion;
+    if (curVersion) {
+      appVersion = curVersion;
+    } else {
+      appVersion = (0, _reactNativeDeviceInfo.getVersion)();
+    }
+    this.debugLog('Checking store version (iOS)');
+    return _reactNativeSiren.default.performCheck({
+      bundleId,
+      country
+    }).then(checkResponse => {
+      this.debugLog(`Received response from app store: ${JSON.stringify(checkResponse)}`);
+      const {
+        version
+      } = checkResponse || {};
+      if (version != null) {
+        let newAppV = `${version}`;
+        if (toSemverConverter) {
+          newAppV = toSemverConverter(version);
+          this.debugLog(`Used custom semver, and converted result from store (${version}) to ${newAppV}`);
+          if (!newAppV) {
+            this.throwError(`Couldnt convert ${version} using your custom semver converter`, 'checkNeedsUpdate');
+          }
+        }
+        const vCompRes = customVersionComparator ? customVersionComparator(newAppV, appVersion) : (0, _utils.compareVersions)(newAppV, appVersion);
+        if (vCompRes > 0) {
+          this.debugLog(`Compared cur version (${appVersion}) with store version (${newAppV}). The store version is higher!`);
+          // app store version is higher than the current version
+          return {
+            shouldUpdate: true,
+            storeVersion: newAppV,
+            other: {
+              ...checkResponse
+            }
+          };
+        }
+        this.debugLog(`Compared cur version (${appVersion}) with store version (${newAppV}). The current version is higher!`);
+        return {
+          shouldUpdate: false,
+          storeVersion: newAppV,
+          reason: `current version (${appVersion}) is already later than the latest store version (${newAppV}${toSemverConverter ? ` - originated from ${version}` : ''})`,
+          other: {
+            ...checkResponse
+          }
+        };
+      }
+      this.debugLog('Failed to fetch a store version');
+      return {
+        shouldUpdate: false,
+        reason: "Couldn't fetch the latest version",
+        other: {
+          ...checkResponse
+        }
+      };
+    }).catch(err => {
+      this.debugLog(err);
+      this.throwError(err, 'checkNeedsUpdate');
+    });
+  }
+  startUpdate(updateOptions) {
+    return Promise.resolve(_reactNativeSiren.default.promptUser(updateOptions, updateOptions === null || updateOptions === void 0 ? void 0 : updateOptions.versionSpecificOptions, updateOptions === null || updateOptions === void 0 ? void 0 : updateOptions.bundleId, updateOptions === null || updateOptions === void 0 ? void 0 : updateOptions.country));
+  }
+}
+exports.default = InAppUpdates;
+//# sourceMappingURL=InAppUpdates.ios.js.map

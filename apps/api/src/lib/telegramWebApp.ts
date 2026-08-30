@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { getTelegramBotToken } from './env';
+import { isTelegramDevBypass } from './devMode';
 
 export type TelegramWebAppUser = {
   id: number;
@@ -24,43 +25,11 @@ function buildDataCheckString(params: URLSearchParams): string {
     .join('\n');
 }
 
-export function validateTelegramWebAppInitData(
-  initData: string
+function parseUserFromParams(
+  params: URLSearchParams
 ): ValidatedTelegramWebAppData | null {
-  const trimmed = initData.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  const params = new URLSearchParams(trimmed);
-  const hash = params.get('hash');
-  if (!hash) {
-    return null;
-  }
-
-  params.delete('hash');
-
-  const botToken = getTelegramBotToken();
-  const secretKey = crypto
-    .createHmac('sha256', 'WebAppData')
-    .update(botToken)
-    .digest();
-  const calculatedHash = crypto
-    .createHmac('sha256', secretKey)
-    .update(buildDataCheckString(params))
-    .digest('hex');
-
-  if (calculatedHash !== hash) {
-    return null;
-  }
-
-  const authDate = Number(params.get('auth_date'));
+  const authDate = Number(params.get('auth_date') || Date.now() / 1000);
   if (!Number.isFinite(authDate)) {
-    return null;
-  }
-
-  const ageSec = Math.floor(Date.now() / 1000) - authDate;
-  if (ageSec < 0 || ageSec > MAX_AUTH_AGE_SEC) {
     return null;
   }
 
@@ -81,6 +50,94 @@ export function validateTelegramWebAppInitData(
   }
 
   return { user, authDate };
+}
+
+/**
+ * Dev-only: принять initData без HMAC (TELEGRAM_DEV_BYPASS=1),
+ * либо минимальный fake user из пустой строки / query.
+ */
+function parseTelegramInitDataDev(
+  initData: string
+): ValidatedTelegramWebAppData | null {
+  const trimmed = initData.trim();
+  if (!trimmed || trimmed === 'dev') {
+    return {
+      user: { id: 100001, first_name: 'Dev', username: 'tarot_dev' },
+      authDate: Math.floor(Date.now() / 1000),
+    };
+  }
+
+  const params = new URLSearchParams(trimmed);
+  params.delete('hash');
+  const parsed = parseUserFromParams(params);
+  if (parsed) {
+    return parsed;
+  }
+
+  return {
+    user: { id: 100001, first_name: 'Dev', username: 'tarot_dev' },
+    authDate: Math.floor(Date.now() / 1000),
+  };
+}
+
+export function validateTelegramWebAppInitData(
+  initData: string
+): ValidatedTelegramWebAppData | null {
+  const trimmed = initData.trim();
+  if (!trimmed) {
+    return isTelegramDevBypass() ? parseTelegramInitDataDev(trimmed) : null;
+  }
+
+  if (isTelegramDevBypass()) {
+    const params = new URLSearchParams(trimmed);
+    const hash = params.get('hash');
+    if (!hash) {
+      return parseTelegramInitDataDev(trimmed);
+    }
+  }
+
+  const params = new URLSearchParams(trimmed);
+  const hash = params.get('hash');
+  if (!hash) {
+    return null;
+  }
+
+  params.delete('hash');
+
+  let botToken: string;
+  try {
+    botToken = getTelegramBotToken();
+  } catch {
+    if (isTelegramDevBypass()) {
+      return parseTelegramInitDataDev(trimmed);
+    }
+    return null;
+  }
+
+  const secretKey = crypto
+    .createHmac('sha256', 'WebAppData')
+    .update(botToken)
+    .digest();
+  const calculatedHash = crypto
+    .createHmac('sha256', secretKey)
+    .update(buildDataCheckString(params))
+    .digest('hex');
+
+  if (calculatedHash !== hash) {
+    return isTelegramDevBypass() ? parseTelegramInitDataDev(trimmed) : null;
+  }
+
+  const authDate = Number(params.get('auth_date'));
+  if (!Number.isFinite(authDate)) {
+    return null;
+  }
+
+  const ageSec = Math.floor(Date.now() / 1000) - authDate;
+  if (ageSec < 0 || ageSec > MAX_AUTH_AGE_SEC) {
+    return null;
+  }
+
+  return parseUserFromParams(params);
 }
 
 export function telegramSyntheticEmail(telegramId: number): string {

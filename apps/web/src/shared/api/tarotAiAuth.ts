@@ -1,5 +1,6 @@
 import { Linking, Platform } from 'react-native';
 import { getTarotAiApiBaseUrl } from './tarotAiBaseUrl';
+import { getDevAccessToken } from 'shared/lib/web/devAccessToken';
 
 /** Web: JWT lives in HttpOnly cookie; native: Bearer token from API JSON. */
 export function authUsesCookie(): boolean {
@@ -10,11 +11,17 @@ export function authCredentials(): RequestCredentials {
   return authUsesCookie() ? 'include' : 'omit';
 }
 
-/** Headers for authenticated requests (cookie on web, Bearer on native). */
+/** Headers for authenticated requests (cookie on web, Bearer on native / local DEV). */
 export function authRequestHeaders(token: string | null): Record<string, string> {
   const headers: Record<string, string> = {};
   if (!authUsesCookie() && token) {
     headers.Authorization = `Bearer ${token}`;
+    return headers;
+  }
+  // Local DEV: Bearer backup when HttpOnly cookie can't cross localhost↔127.0.0.1
+  const devToken = Platform.OS === 'web' ? getDevAccessToken() : null;
+  if (devToken) {
+    headers.Authorization = `Bearer ${devToken}`;
   }
   return headers;
 }

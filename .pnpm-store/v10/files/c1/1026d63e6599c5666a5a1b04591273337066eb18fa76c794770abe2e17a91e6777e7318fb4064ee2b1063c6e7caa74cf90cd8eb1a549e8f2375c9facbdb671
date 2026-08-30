@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/ErrorBoundary/FallbackComponent/index.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,OAAO,CAAA;AAKzB,MAAM,MAAM,KAAK,GAAG;IAAE,KAAK,EAAE,KAAK,CAAC;IAAC,UAAU,EAAE,MAAM,IAAI,CAAA;CAAE,CAAA;AAE5D,QAAA,MAAM,iBAAiB,GAAI,OAAO,KAAK,sBAWtC,CAAA;AAED,eAAe,iBAAiB,CAAA"}

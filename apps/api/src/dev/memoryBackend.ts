@@ -217,6 +217,46 @@ export function memorySignInWithGoogle(): AuthSession {
   return issueSession(user);
 }
 
+export const DEV_DEMO_EMAIL = 'demo@tarot.local';
+export const DEV_DEMO_PASSWORD = 'demo';
+
+/** Гарантирует demo-пользователя для локального UI walkthrough. */
+export function memoryEnsureDemoUser(): DevUser {
+  const email = DEV_DEMO_EMAIL;
+  let user = usersByEmail.get(email);
+  if (!user) {
+    user = createVerifiedUser({
+      name: 'Demo Tarot',
+      email,
+      passwordHash: hashPassword(DEV_DEMO_PASSWORD),
+    });
+    logAuthSignupComplete(email, user.id);
+  }
+  return user;
+}
+
+export function memoryQuickLogin(): AuthSession {
+  const user = memoryEnsureDemoUser();
+  return issueSession(user);
+}
+
+export function memorySignInWithTelegram(input: {
+  telegramId: number;
+  displayName: string;
+}): AuthSession {
+  const email = `tg${input.telegramId}@telegram.local.dev`;
+  let user = usersByEmail.get(email);
+  if (!user) {
+    user = createVerifiedUser({
+      name: input.displayName,
+      email,
+      passwordHash: hashPassword(`tg-dev:${input.telegramId}`),
+    });
+    logAuthSignupComplete(email, user.id);
+  }
+  return issueSession(user);
+}
+
 export function memorySignIn(input: {
   email: string;
   password: string;

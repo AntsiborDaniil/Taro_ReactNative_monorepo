@@ -517,7 +517,10 @@ export async function signInWithTelegram(initData: string): Promise<AuthSession>
   }
 
   if (useMemoryBackend()) {
-    throw new Error('TELEGRAM_AUTH_REQUIRES_SUPABASE');
+    return memory.memorySignInWithTelegram({
+      telegramId: validated.user.id,
+      displayName: telegramDisplayName(validated.user),
+    });
   }
 
   const telegramId = validated.user.id;
@@ -612,4 +615,12 @@ export async function signInWithTelegram(initData: string): Promise<AuthSession>
     signInData.session.refresh_token,
     publicUser
   );
+}
+
+/** Memory-only: мгновенный вход demo@tarot.local для локального UI. */
+export async function signInDevQuickLogin(): Promise<AuthSession> {
+  if (!useMemoryBackend()) {
+    throw new Error('DEV_QUICK_LOGIN_REQUIRES_MEMORY');
+  }
+  return memory.memoryQuickLogin();
 }

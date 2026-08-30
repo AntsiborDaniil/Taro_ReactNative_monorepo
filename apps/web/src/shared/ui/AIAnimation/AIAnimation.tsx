@@ -62,6 +62,16 @@ function AIAnimation({ hasVibration }: { hasVibration?: boolean }) {
     []
   );
 
+  const videoProp = useMemo(() => {
+    if (Platform.OS === 'web') {
+      // Served from apps/web/public/videos (avoids Metro asset id / Image internals on web)
+      return {
+        uri: videoSource === 'loaderCar' ? '/videos/loaderCar.mp4' : '/videos/loader.mp4',
+      };
+    }
+    return getImage(['videos', videoSource]);
+  }, [videoSource]);
+
   useEffect(() => {
     if (!hasVibration || !isFullScreenLoading) {
       return;
@@ -80,12 +90,12 @@ function AIAnimation({ hasVibration }: { hasVibration?: boolean }) {
     <>
       <Video
         style={styles.video}
-        muted={true} // Отключить звук, если видео используется как фон
-        repeat={true} // Зациклить воспроизведение
-        resizeMode="cover" // Аналогично ImageBackground, растягивает видео
-        rate={1.0} // Скорость воспроизведения
+        muted={true}
+        repeat={true}
+        resizeMode="cover"
+        rate={1.0}
         ignoreSilentSwitch="obey"
-        source={getImage(['videos', videoSource])}
+        source={videoProp}
         controls={false}
         controlsStyles={{
           hidePosition: true,
@@ -138,8 +148,14 @@ function AIAnimation({ hasVibration }: { hasVibration?: boolean }) {
 
 const styles = StyleSheet.create({
   video: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     width: '100%',
     height: '100%',
+    zIndex: 0,
   },
   overlay: {
     position: 'absolute',
@@ -147,6 +163,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    zIndex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 16,

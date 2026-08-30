@@ -24,8 +24,8 @@ export function getOpenAiApiKey(): string | undefined {
 
 export function getTarotDailyLimit(): number {
   const raw = process.env.TAROT_DAILY_INTERPRET_LIMIT?.trim();
-  const parsed = raw ? Number(raw) : 10;
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 10;
+  const parsed = raw ? Number(raw) : 3;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 3;
 }
 
 export function assertSupabaseEnv(): void {

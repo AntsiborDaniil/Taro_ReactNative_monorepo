@@ -1,0 +1,15 @@
+{
+  "datesPeriod.week": "7 days",
+  "datesPeriod.month": "30 days",
+  "datesPeriod.year": "1 year",
+  "name.stress": "Stress",
+  "name.mood": "Mood",
+  "name.energy": "Energy",
+  "progress.howAreYou": "Find out how you feel today",
+  "progress.assess": "Assess your condition",
+  "progress.createCard": "Create card",
+  "progress": "Progress",
+  "signInRequired.title": "Sign in required",
+  "signInRequired.body": "Mood tracking is available after you sign in.",
+  "signInRequired.cta": "Sign in"
+}

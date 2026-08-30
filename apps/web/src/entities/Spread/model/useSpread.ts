@@ -7,7 +7,7 @@ import type { LayoutChangeEvent } from 'react-native';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
+import { SignInForSpreadsModal, DailyTarotLimitModal } from 'features/tarotAccess/ui';
 import {
   SpreadName,
   SpreadsCategory,
@@ -108,9 +108,10 @@ export function useSpread({
 
   const { setIsFullScreenLoading } = useData({ Context: LoadingsContext });
 
-  const { isPractitioner, isAuthenticated, authSessionLoading } = useData({
-    Context: UserContext,
-  });
+  const { isPractitioner, isAuthenticated, authSessionLoading, tarotDaily, setTarotDaily } =
+    useData({
+      Context: UserContext,
+    });
 
   const { showModal } = useData({ Context: ModalsContext });
 
@@ -498,6 +499,15 @@ export function useSpread({
       return false;
     }
 
+    if (
+      Platform.OS === 'web' &&
+      tarotDaily != null &&
+      tarotDaily.used >= tarotDaily.limit
+    ) {
+      showModal?.(createElement(DailyTarotLimitModal));
+      return false;
+    }
+
     const AIRequestBody = getAIRequestBody({
       t,
       spread,
@@ -530,6 +540,22 @@ export function useSpread({
       if (!aiInterpretationResponse.ok) {
         if (aiInterpretationResponse.status === 401) {
           showModal?.(createElement(SignInForSpreadsModal));
+        } else if (aiInterpretationResponse.status === 429) {
+          try {
+            const body = (await aiInterpretationResponse.json()) as {
+              tarotDaily?: {
+                used: number;
+                limit: number;
+                day: string;
+              };
+            };
+            if (body.tarotDaily) {
+              setTarotDaily?.(body.tarotDaily);
+            }
+          } catch {
+            // ignore malformed 429 body
+          }
+          showModal?.(createElement(DailyTarotLimitModal));
         } else {
           Toast.show({
             type: 'error',
@@ -540,8 +566,18 @@ export function useSpread({
         return false;
       }
 
-      const interpretation: string = (await aiInterpretationResponse.json())
-        .interpretation;
+      const payload = (await aiInterpretationResponse.json()) as {
+        interpretation: string;
+        tarotDaily?: {
+          used: number;
+          limit: number;
+          day: string;
+        };
+      };
+      const interpretation = payload.interpretation;
+      if (payload.tarotDaily) {
+        setTarotDaily?.(payload.tarotDaily);
+      }
 
       setSpread((prevState) =>
         prevState ? { ...prevState, interpretation } : prevState

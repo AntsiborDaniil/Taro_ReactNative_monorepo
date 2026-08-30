@@ -49,12 +49,35 @@ export async function tryConsumeTarotDailySlot(
   | { ok: true; used: number; limit: number; day: string }
   | { ok: false; used: number; limit: number; day: string }
 > {
-  const usage = await loadTarotDailyUsage(userId);
+  if (useMemoryBackend()) {
+    return memory.memoryTryConsumeTarotDailySlot(userId);
+  }
+
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin.rpc('consume_tarot_daily_slot_for_user', {
+    p_user_id: userId,
+    p_limit: getTarotDailyLimit(),
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  const row = data as RpcUsageRow;
+  if (row.ok === false) {
+    return {
+      ok: false,
+      used: row.used,
+      limit: row.limit,
+      day: String(row.day),
+    };
+  }
+
   return {
     ok: true,
-    used: usage.used,
-    limit: usage.limit,
-    day: usage.day,
+    used: row.used,
+    limit: row.limit,
+    day: String(row.day),
   };
 }
 

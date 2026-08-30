@@ -68,7 +68,7 @@ function SpreadCardsChoice({
   const navigation = useNativeNavigation();
   const handleBackToSpreads = useSpreadCatalogBack();
   const { t } = useTranslation();
-  const { width } = useWindowDimensions();
+  const { width, height: windowHeight } = useWindowDimensions();
   const { bottom } = useSafeAreaInsets();
   const isPhone = width < PHONE_MAX_WIDTH;
 
@@ -204,6 +204,9 @@ function SpreadCardsChoice({
                   { paddingBottom: bottom + (isPhone ? 12 : 48) },
                 ]}
                 pointerEvents="box-none"
+                {...(Platform.OS === 'web'
+                  ? ({ 'data-tarot-fly-stage': true } as object)
+                  : {})}
               >
                 <AnimatedCard />
                 <CoverFlowCardCarousel overlayControls={isPhone} />
@@ -235,12 +238,15 @@ function SpreadCardsChoice({
           extraScrollHeight={100}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.wrapper}>
-            {!isSimpleSpread && (
-              <View style={[spreadInnerStyles.glassPanel, styles.scheme]}>
-                <SpreadScheme hasRotation={false} isChoicePage />
-              </View>
-            )}
+          <View
+            style={[
+              styles.wrapper,
+              !isSimpleSpread && !isSpreadCompleted && styles.spreadPickWrapper,
+              !isSimpleSpread &&
+                !isSpreadCompleted &&
+                !isPhone && { minHeight: Math.max(420, windowHeight - 220) },
+            ]}
+          >
             {isSpreadCompleted && !isSimpleSpread ? (
               <View style={spreadInnerStyles.completionPanel}>
                 <ChoiceTriangle width={56} height={56} />
@@ -273,21 +279,34 @@ function SpreadCardsChoice({
                     />
                   )}
                 {showCardPicker ? (
-                  <View style={spreadInnerStyles.altarZone}>
-                    <View style={spreadInnerStyles.altarGlow} pointerEvents="none" />
-                    <AnimatedCard />
-                    <CoverFlowCardCarousel
-                      style={
-                        isSimpleSpread
-                          ? styles.carouselSimpleSpread
-                          : styles.carousel
-                      }
-                    />
+                  <View
+                    style={styles.spreadPickCluster}
+                    {...(Platform.OS === 'web'
+                      ? ({ 'data-tarot-fly-stage': true } as object)
+                      : {})}
+                  >
+                    {/* Scheme sits with carousel (not under stepper) so fly targets are nearby */}
                     {!isSimpleSpread && (
-                      <Text category={TEXT_TAGS.p2} style={spreadInnerStyles.altarHint}>
-                        {t('spread:flow.pickHint')}
-                      </Text>
+                      <View style={[spreadInnerStyles.glassPanel, styles.schemeInline]}>
+                        <SpreadScheme hasRotation={false} isChoicePage />
+                      </View>
                     )}
+                    <AnimatedCard />
+                    <View style={spreadInnerStyles.altarZone}>
+                      <View style={spreadInnerStyles.altarGlow} pointerEvents="none" />
+                      <CoverFlowCardCarousel
+                        style={
+                          isSimpleSpread
+                            ? styles.carouselSimpleSpread
+                            : styles.carousel
+                        }
+                      />
+                      {!isSimpleSpread && (
+                        <Text category={TEXT_TAGS.p2} style={spreadInnerStyles.altarHint}>
+                          {t('spread:flow.pickHint')}
+                        </Text>
+                      )}
+                    </View>
                   </View>
                 ) : (
                   <View style={[spreadInnerStyles.glassPanel, styles.questionWrapper]}>
@@ -334,6 +353,17 @@ const styles = StyleSheet.create({
     marginBottom: 48,
     gap: 16,
   },
+  spreadPickWrapper: {
+    justifyContent: 'center',
+    gap: 12,
+  },
+  spreadPickCluster: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 10,
+    position: 'relative',
+    overflow: 'visible',
+  },
   description: {
     marginTop: 8,
     marginHorizontal: 16,
@@ -348,11 +378,16 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(173, 173, 177, 0.2)',
   },
   button: { width: '100%' },
-  scheme: {
-    marginHorizontal: 0,
+  schemeInline: {
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
+    marginHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
   },
   carousel: {
-    marginTop: 8,
+    marginTop: 4,
     alignSelf: 'center',
   },
   carouselSimpleSpread: {
@@ -404,6 +439,8 @@ const styles = StyleSheet.create({
     gap: 14,
     paddingHorizontal: 16,
     zIndex: 1,
+    position: 'relative',
+    overflow: 'visible',
   },
 });
 

@@ -1,0 +1,526 @@
+import { NativeModules as x, Platform as P, NativeEventEmitter as ae } from "react-native";
+const N = "OneSignal-notificationWillDisplayInForeground", M = "OneSignal-notificationClicked", j = "OneSignal-inAppMessageClicked", q = "OneSignal-inAppMessageWillDisplay", R = "OneSignal-inAppMessageDidDisplay", G = "OneSignal-inAppMessageWillDismiss", W = "OneSignal-inAppMessageDidDismiss", k = "OneSignal-permissionChanged", z = "OneSignal-subscriptionChanged", F = "OneSignal-userStateChanged", ue = x.OneSignal;
+class de {
+  constructor(r) {
+    this.body = r.body, this.sound = r.sound, this.title = r.title, this.launchURL = r.launchURL, this.rawPayload = r.rawPayload, this.actionButtons = r.actionButtons, this.additionalData = r.additionalData, this.notificationId = r.notificationId, le() ? (this.groupKey = r.groupKey, this.ledColor = r.ledColor, this.priority = r.priority, this.smallIcon = r.smallIcon, this.largeIcon = r.largeIcon, this.bigPicture = r.bigPicture, this.collapseId = r.collapseId, this.groupMessage = r.groupMessage, this.fromProjectNumber = r.fromProjectNumber, this.smallIconAccentColor = r.smallIconAccentColor, this.lockScreenVisibility = r.lockScreenVisibility, this.androidNotificationId = r.androidNotificationId) : ce() && (this.badge = r.badge, this.category = r.category, this.threadId = r.threadId, this.subtitle = r.subtitle, this.templateId = r.templateId, this.attachments = r.attachments, this.templateName = r.templateName, this.mutableContent = r.mutableContent, this.badgeIncrement = r.badgeIncrement, this.contentAvailable = r.contentAvailable, this.relevanceScore = r.relevanceScore, this.interruptionLevel = r.interruptionLevel);
+  }
+  display() {
+    ue.displayNotification(this.notificationId);
+  }
+}
+const le = (t) => P.OS === "android", ce = (t) => P.OS === "ios", fe = x.OneSignal;
+class ge {
+  constructor(r) {
+    this.notification = new de(r);
+  }
+  preventDefault() {
+    fe.preventDefault(this.notification.notificationId);
+  }
+  getNotification() {
+    return this.notification;
+  }
+}
+const B = [
+  k,
+  z,
+  F,
+  N,
+  M,
+  j,
+  q,
+  G,
+  W,
+  R
+];
+class me {
+  constructor(r) {
+    this.RNOneSignal = r, this.oneSignalEventEmitter = new ae(r), this.eventListenerArrayMap = /* @__PURE__ */ new Map(), this.listeners = {}, this.setupListeners();
+  }
+  setupListeners() {
+    if (this.RNOneSignal != null)
+      for (let r = 0; r < B.length; r++) {
+        let h = B[r];
+        this.listeners[h] = this.generateEventListener(h);
+      }
+  }
+  /**
+   * Adds the event handler to the corresponding handler array on the JS side of the bridge
+   * @param  {string} eventName
+   * @param  {function} handler
+   * @returns void
+   */
+  addEventListener(r, h) {
+    let m = this.eventListenerArrayMap.get(r);
+    m && m.length > 0 ? m.push(h) : this.eventListenerArrayMap.set(r, [h]);
+  }
+  /**
+   * clears the event handler(s) for the event name
+   * @param  {string} eventName
+   * @param  {function} handler
+   * @returns void
+   */
+  removeEventListener(r, h) {
+    const m = this.eventListenerArrayMap.get(r);
+    if (!m)
+      return;
+    const y = m.indexOf(h);
+    y !== -1 && m.splice(y, 1), m.length === 0 && this.eventListenerArrayMap.delete(r);
+  }
+  // returns an event listener with the js to native mapping
+  generateEventListener(r) {
+    const h = (m) => {
+      let y = this.eventListenerArrayMap.get(r);
+      if (y)
+        if (r === N)
+          y.forEach((E) => {
+            E(
+              new ge(m)
+            );
+          });
+        else if (r === k) {
+          const E = m;
+          y.forEach((n) => {
+            n(E.permission);
+          });
+        } else
+          y.forEach((E) => {
+            E(m);
+          });
+    };
+    return this.oneSignalEventEmitter.addListener(
+      r,
+      h
+    );
+  }
+}
+function he(t) {
+  return t && t.__esModule && Object.prototype.hasOwnProperty.call(t, "default") ? t.default : t;
+}
+var C, K;
+function pe() {
+  if (K) return C;
+  K = 1;
+  var t = function(r, h, m, y, E, n, p, v) {
+    if (process.env.NODE_ENV !== "production" && h === void 0)
+      throw new Error("invariant requires an error message argument");
+    if (!r) {
+      var u;
+      if (h === void 0)
+        u = new Error(
+          "Minified exception occurred; use the non-minified dev environment for the full error message and additional helpful warnings."
+        );
+      else {
+        var f = [m, y, E, n, p, v], A = 0;
+        u = new Error(
+          h.replace(/%s/g, function() {
+            return f[A++];
+          })
+        ), u.name = "Invariant Violation";
+      }
+      throw u.framesToPop = 1, u;
+    }
+  };
+  return C = t, C;
+}
+var ve = pe();
+const Se = /* @__PURE__ */ he(ve);
+function b(t) {
+  Se(typeof t == "function", "Must provide a valid callback");
+}
+function i(t) {
+  return t == null ? (console.error(
+    "Could not load RNOneSignal native module. Make sure native dependencies are properly linked."
+  ), !1) : !0;
+}
+function ye(t) {
+  if (!(typeof t == "object" && t !== null && !Array.isArray(t)))
+    return !1;
+  try {
+    return JSON.stringify(t), !0;
+  } catch {
+    return !1;
+  }
+}
+var Ae = /* @__PURE__ */ ((t) => (t[t.NotDetermined = 0] = "NotDetermined", t[t.Denied = 1] = "Denied", t[t.Authorized = 2] = "Authorized", t[t.Provisional = 3] = "Provisional", t[t.Ephemeral = 4] = "Ephemeral", t))(Ae || {});
+const e = x.OneSignal, c = new me(e);
+var Ie = /* @__PURE__ */ ((t) => (t[t.None = 0] = "None", t[t.Fatal = 1] = "Fatal", t[t.Error = 2] = "Error", t[t.Warn = 3] = "Warn", t[t.Info = 4] = "Info", t[t.Debug = 5] = "Debug", t[t.Verbose = 6] = "Verbose", t))(Ie || {});
+let V = !1, L = {
+  id: "",
+  token: "",
+  optedIn: !1
+};
+async function Pe() {
+  _.Notifications.addEventListener(
+    "permissionChange",
+    (t) => {
+      V = t;
+    }
+  ), V = await e.hasNotificationPermission();
+}
+async function Ee() {
+  _.User.pushSubscription.addEventListener(
+    "change",
+    (t) => {
+      L = t.current;
+    }
+  ), L.id = await e.getPushSubscriptionId(), L.token = await e.getPushSubscriptionToken(), L.optedIn = await e.getOptedIn();
+}
+var _;
+((t) => {
+  function r(n) {
+    i(e) && (e.initialize(n), Pe(), Ee());
+  }
+  t.initialize = r;
+  function h(n) {
+    i(e) && e.login(n);
+  }
+  t.login = h;
+  function m() {
+    i(e) && e.logout();
+  }
+  t.logout = m;
+  function y(n) {
+    i(e) && e.setPrivacyConsentRequired(n);
+  }
+  t.setConsentRequired = y;
+  function E(n) {
+    i(e) && e.setPrivacyConsentGiven(n);
+  }
+  t.setConsentGiven = E, ((n) => {
+    function p(u) {
+      i(e) && e.setLogLevel(u);
+    }
+    n.setLogLevel = p;
+    function v(u) {
+      i(e) && e.setAlertLevel(u);
+    }
+    n.setAlertLevel = v;
+  })(t.Debug || (t.Debug = {})), ((n) => {
+    function p(g, S, O = () => {
+    }) {
+      i(e) && P.OS === "ios" && e.enterLiveActivity(g, S, O);
+    }
+    n.enter = p;
+    function v(g, S = () => {
+    }) {
+      i(e) && P.OS === "ios" && e.exitLiveActivity(g, S);
+    }
+    n.exit = v;
+    function u(g, S) {
+      i(e) && P.OS === "ios" && e.setPushToStartToken(g, S);
+    }
+    n.setPushToStartToken = u;
+    function f(g) {
+      i(e) && P.OS === "ios" && e.removePushToStartToken(g);
+    }
+    n.removePushToStartToken = f;
+    function A(g) {
+      i(e) && P.OS === "ios" && e.setupDefaultLiveActivity(g);
+    }
+    n.setupDefault = A;
+    function T(g, S, O) {
+      i(e) && P.OS === "ios" && e.startDefaultLiveActivity(g, S, O);
+    }
+    n.startDefault = T;
+  })(t.LiveActivities || (t.LiveActivities = {})), ((n) => {
+    ((o) => {
+      function a(se, w) {
+        i(e) && (b(w), e.addPushSubscriptionObserver(), c.addEventListener(z, w));
+      }
+      o.addEventListener = a;
+      function D(se, w) {
+        i(e) && c.removeEventListener(z, w);
+      }
+      o.removeEventListener = D;
+      function Z() {
+        return i(e) ? (console.warn(
+          "OneSignal: This method has been deprecated. Use getIdAsync instead for getting push subscription id."
+        ), L.id ? L.id : "") : "";
+      }
+      o.getPushSubscriptionId = Z;
+      async function U() {
+        return i(e) ? await e.getPushSubscriptionId() : Promise.reject(
+          new Error("OneSignal native module not loaded")
+        );
+      }
+      o.getIdAsync = U;
+      function ee() {
+        return i(e) ? (console.warn(
+          "OneSignal: This method has been deprecated. Use getTokenAsync instead for getting push subscription token."
+        ), L.token ? L.token : "") : "";
+      }
+      o.getPushSubscriptionToken = ee;
+      async function te() {
+        return i(e) ? await e.getPushSubscriptionToken() : Promise.reject(
+          new Error("OneSignal native module not loaded")
+        );
+      }
+      o.getTokenAsync = te;
+      function ne() {
+        return i(e) ? (console.warn(
+          "OneSignal: This method has been deprecated. Use getOptedInAsync instead for getting push subscription opted in status."
+        ), L.optedIn ?? !1) : !1;
+      }
+      o.getOptedIn = ne;
+      async function ie() {
+        return i(e) ? await e.getOptedIn() : Promise.reject(
+          new Error("OneSignal native module not loaded")
+        );
+      }
+      o.getOptedInAsync = ie;
+      function re() {
+        i(e) && e.optOut();
+      }
+      o.optOut = re;
+      function oe() {
+        i(e) && e.optIn();
+      }
+      o.optIn = oe;
+    })(n.pushSubscription || (n.pushSubscription = {}));
+    function p(o, a) {
+      i(e) && (b(a), e.addUserStateObserver(), c.addEventListener(F, a));
+    }
+    n.addEventListener = p;
+    function v(o, a) {
+      i(e) && c.removeEventListener(F, a);
+    }
+    n.removeEventListener = v;
+    async function u() {
+      return i(e) ? e.getOnesignalId() : Promise.reject(new Error("OneSignal native module not loaded"));
+    }
+    n.getOnesignalId = u;
+    async function f() {
+      return i(e) ? e.getExternalId() : Promise.reject(new Error("OneSignal native module not loaded"));
+    }
+    n.getExternalId = f;
+    function A(o) {
+      i(e) && e.setLanguage(o);
+    }
+    n.setLanguage = A;
+    function T(o, a) {
+      i(e) && e.addAlias(o, a);
+    }
+    n.addAlias = T;
+    function g(o) {
+      i(e) && e.addAliases(o);
+    }
+    n.addAliases = g;
+    function S(o) {
+      i(e) && e.removeAlias(o);
+    }
+    n.removeAlias = S;
+    function O(o) {
+      i(e) && e.removeAliases(o);
+    }
+    n.removeAliases = O;
+    function s(o) {
+      i(e) && e.addEmail(o);
+    }
+    n.addEmail = s;
+    function d(o) {
+      i(e) && e.removeEmail(o);
+    }
+    n.removeEmail = d;
+    function l(o) {
+      i(e) && e.addSms(o);
+    }
+    n.addSms = l;
+    function I(o) {
+      i(e) && e.removeSms(o);
+    }
+    n.removeSms = I;
+    function H(o, a) {
+      if (i(e)) {
+        if (!o || a === void 0 || a === null) {
+          console.error("OneSignal: addTag: must include a key and a value");
+          return;
+        }
+        typeof a != "string" && (console.warn(
+          "OneSignal: addTag: tag value must be of type string; attempting to convert"
+        ), a = String(a)), e.addTag(o, a);
+      }
+    }
+    n.addTag = H;
+    function Y(o) {
+      if (!i(e)) return;
+      if (!o || Object.keys(o).length === 0) {
+        console.error(
+          'OneSignal: addTags: argument must be of type object of the form { key : "value" }'
+        );
+        return;
+      }
+      const a = o;
+      Object.keys(o).forEach(function(D) {
+        typeof a[D] != "string" && (console.warn(
+          "OneSignal: addTags: tag value for key " + D + " must be of type string; attempting to convert"
+        ), a[D] = String(a[D]));
+      }), e.addTags(o);
+    }
+    n.addTags = Y;
+    function J(o) {
+      if (i(e)) {
+        if (typeof o != "string") {
+          console.error(
+            "OneSignal: removeTag: key argument must be of type string"
+          );
+          return;
+        }
+        e.removeTags([o]);
+      }
+    }
+    n.removeTag = J;
+    function $(o) {
+      if (i(e)) {
+        if (!Array.isArray(o)) {
+          console.error("OneSignal: removeTags: argument must be of array type");
+          return;
+        }
+        e.removeTags(o);
+      }
+    }
+    n.removeTags = $;
+    function Q() {
+      return i(e) ? e.getTags() : Promise.reject(new Error("OneSignal native module not loaded"));
+    }
+    n.getTags = Q;
+    function X(o, a = {}) {
+      if (i(e)) {
+        if (!ye(a)) {
+          console.error("Properties must be a JSON-serializable object");
+          return;
+        }
+        e.trackEvent(o, a);
+      }
+    }
+    n.trackEvent = X;
+  })(t.User || (t.User = {})), ((n) => {
+    function p() {
+      return console.warn(
+        "OneSignal: This method has been deprecated. Use getPermissionAsync instead for getting notification permission status."
+      ), V;
+    }
+    n.hasPermission = p;
+    async function v() {
+      return e.hasNotificationPermission();
+    }
+    n.getPermissionAsync = v;
+    function u(l) {
+      return i(e) ? e.requestNotificationPermission(l) : Promise.reject(new Error("OneSignal native module not loaded"));
+    }
+    n.requestPermission = u;
+    function f() {
+      return i(e) ? e.canRequestNotificationPermission() : Promise.reject(new Error("OneSignal native module not loaded"));
+    }
+    n.canRequestPermission = f;
+    function A(l) {
+      i(e) && (P.OS === "ios" ? (b(l), e.registerForProvisionalAuthorization(l)) : console.warn(
+        "registerForProvisionalAuthorization: this function is not supported on Android"
+      ));
+    }
+    n.registerForProvisionalAuthorization = A;
+    function T() {
+      return i(e) ? e.permissionNative() : Promise.reject(new Error("OneSignal native module not loaded"));
+    }
+    n.permissionNative = T;
+    function g(...[l, I]) {
+      i(e) && (b(I), l === "click" ? (e.addNotificationClickListener(), c.addEventListener(M, I)) : l === "foregroundWillDisplay" ? (e.addNotificationForegroundLifecycleListener(), c.addEventListener(N, I)) : l === "permissionChange" && (b(I), e.addPermissionObserver(), c.addEventListener(k, I)));
+    }
+    n.addEventListener = g;
+    function S(...[l, I]) {
+      l === "click" ? c.removeEventListener(M, I) : l === "foregroundWillDisplay" ? c.removeEventListener(N, I) : l === "permissionChange" && c.removeEventListener(k, I);
+    }
+    n.removeEventListener = S;
+    function O() {
+      i(e) && e.clearAllNotifications();
+    }
+    n.clearAll = O;
+    function s(l) {
+      i(e) && (P.OS === "android" ? e.removeNotification(l) : console.warn(
+        "removeNotification: this function is not supported on iOS"
+      ));
+    }
+    n.removeNotification = s;
+    function d(l) {
+      i(e) && (P.OS === "android" ? e.removeGroupedNotifications(l) : console.warn(
+        "removeGroupedNotifications: this function is not supported on iOS"
+      ));
+    }
+    n.removeGroupedNotifications = d;
+  })(t.Notifications || (t.Notifications = {})), ((n) => {
+    function p(...[s, d]) {
+      i(e) && (b(d), s === "click" ? (e.addInAppMessageClickListener(), c.addEventListener(j, d)) : s === "willDisplay" ? (e.addInAppMessagesLifecycleListener(), c.addEventListener(q, d)) : s === "didDisplay" ? (e.addInAppMessagesLifecycleListener(), c.addEventListener(R, d)) : s === "willDismiss" ? (e.addInAppMessagesLifecycleListener(), c.addEventListener(G, d)) : s === "didDismiss" && (e.addInAppMessagesLifecycleListener(), c.addEventListener(W, d)));
+    }
+    n.addEventListener = p;
+    function v(...[s, d]) {
+      i(e) && (b(d), s === "click" ? c.removeEventListener(j, d) : s === "willDisplay" ? c.removeEventListener(q, d) : s === "didDisplay" ? c.removeEventListener(R, d) : s === "willDismiss" ? c.removeEventListener(G, d) : s === "didDismiss" && c.removeEventListener(W, d));
+    }
+    n.removeEventListener = v;
+    function u(s, d) {
+      if (!i(e)) return;
+      (!s || d == null) && console.error("OneSignal: addTrigger: must include a key and a value");
+      let l = {};
+      l[s] = d, e.addTriggers(l);
+    }
+    n.addTrigger = u;
+    function f(s) {
+      if (!i(e)) return;
+      Object.keys(s).length === 0 && console.error(
+        "OneSignal: addTriggers: argument must be an object of the form { key : 'value' }"
+      ), e.addTriggers(s);
+    }
+    n.addTriggers = f;
+    function A(s) {
+      i(e) && e.removeTrigger(s);
+    }
+    n.removeTrigger = A;
+    function T(s) {
+      i(e) && e.removeTriggers(s);
+    }
+    n.removeTriggers = T;
+    function g() {
+      i(e) && e.clearTriggers();
+    }
+    n.clearTriggers = g;
+    function S(s) {
+      i(e) && e.paused(s);
+    }
+    n.setPaused = S;
+    function O() {
+      return i(e) ? e.getPaused() : Promise.reject(new Error("OneSignal native module not loaded"));
+    }
+    n.getPaused = O;
+  })(t.InAppMessages || (t.InAppMessages = {})), ((n) => {
+    function p() {
+      i(e) && e.requestLocationPermission();
+    }
+    n.requestPermission = p;
+    function v(f) {
+      i(e) && e.setLocationShared(f);
+    }
+    n.setShared = v;
+    function u() {
+      return i(e) ? e.isLocationShared() : Promise.reject(new Error("OneSignal native module not loaded"));
+    }
+    n.isShared = u;
+  })(t.Location || (t.Location = {})), ((n) => {
+    function p(f) {
+      i(e) && e.addOutcome(f);
+    }
+    n.addOutcome = p;
+    function v(f) {
+      i(e) && e.addUniqueOutcome(f);
+    }
+    n.addUniqueOutcome = v;
+    function u(f, A) {
+      i(e) && e.addOutcomeWithValue(f, Number(A));
+    }
+    n.addOutcomeWithValue = u;
+  })(t.Session || (t.Session = {}));
+})(_ || (_ = {}));
+export {
+  Ie as LogLevel,
+  ge as NotificationWillDisplayEvent,
+  de as OSNotification,
+  Ae as OSNotificationPermission,
+  _ as OneSignal
+};
