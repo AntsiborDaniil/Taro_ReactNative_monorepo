@@ -119,8 +119,6 @@ export default function Spreads() {
                 >
                   {data.data.map((item) => {
                     const guestFree = isGuestFreeSpreadId(item.id);
-                    const guestBadge =
-                      isWebGuestSession(isAuthenticated, authSessionLoading) && guestFree;
 
                     return (
                       <SpreadCatalogCard
@@ -133,7 +131,7 @@ export default function Spreads() {
                           item.id,
                         ])}
                         isLocked={false}
-                        guestNoAuthBadge={guestBadge}
+                        guestNoAuthBadge={guestFree}
                         width={layout.cardWidth}
                         imageAreaHeight={layout.previewHeight}
                         onPress={async () => {

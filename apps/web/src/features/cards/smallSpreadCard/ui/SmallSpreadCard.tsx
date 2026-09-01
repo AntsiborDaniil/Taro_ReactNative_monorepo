@@ -46,9 +46,6 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
   const { showModal } = useData({ Context: ModalsContext });
 
   const guestFree = isGuestFreeSpreadId(spread?.id);
-  const showGuestBadge =
-    isWebGuestSession(isAuthenticated, authSessionLoading) && guestFree;
-
   const isLocked =
     isWebGuestSession(isAuthenticated, authSessionLoading) && !guestFree;
 
@@ -67,9 +64,7 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
       width={horizontalScale(165)}
       height={horizontalScale(155)}
       isLocked={isLocked}
-      topRightBadge={
-        showGuestBadge ? tSpread('guestSpread.badge') : undefined
-      }
+      topRightBadge={guestFree ? tSpread('guestSpread.badge') : undefined}
       onPress={async () => {
         if (analyticAction) {
           AppMetrica.reportEvent(analyticAction, {
