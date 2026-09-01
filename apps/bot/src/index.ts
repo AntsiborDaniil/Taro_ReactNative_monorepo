@@ -1,5 +1,6 @@
 import { Bot } from 'grammy';
 import { config } from './config';
+import { startHealthServer } from './health';
 import {
   openMiniAppInlineKeyboard,
   openMiniAppReplyKeyboard,
@@ -49,7 +50,14 @@ async function configureMenuButton(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  await configureMenuButton();
+  console.log('[bot] starting…');
+  startHealthServer(config.port);
+
+  try {
+    await configureMenuButton();
+  } catch (error) {
+    console.warn('[bot] setChatMenuButton failed, continuing:', error);
+  }
 
   bot.catch((err) => {
     console.error('[bot] unhandled error:', err);
