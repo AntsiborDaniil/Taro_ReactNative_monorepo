@@ -27,6 +27,8 @@ import {
   getTarotCardReadings,
   isGuestFreeSpreadId,
   isTablet,
+  MetrikaGoal,
+  reachMetrikaGoal,
   shouldPromptWebSignIn,
 } from 'shared/lib';
 import { AsyncMemoryKey } from 'shared/lib/deviceMemory';
@@ -303,6 +305,14 @@ export function useSpread({
         });
       }
       return false;
+    }
+
+    if (
+      Platform.OS === 'web' &&
+      spread.selectedCards.length === 0 &&
+      spread.id === SpreadName.Simple_DaySuggest
+    ) {
+      reachMetrikaGoal(MetrikaGoal.spreadStarted, { spreadId: spread.id });
     }
 
     const freeUseOfAI = await AsyncStorage.getItem(AsyncMemoryKey.FreeUseOfAI);
@@ -596,6 +606,9 @@ export function useSpread({
 
       AppMetrica.reportEvent(AnalyticAction.GetAIGeneration, {
         free: !!freeUseOfAI,
+      });
+      reachMetrikaGoal(MetrikaGoal.aiGeneration, {
+        spreadId: spread?.id,
       });
 
       if (!isPractitioner && !freeUseOfAI) {

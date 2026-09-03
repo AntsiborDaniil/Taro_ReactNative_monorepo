@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   Platform,
   Pressable,
@@ -11,6 +11,7 @@ import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CardsVoid } from 'shared/icons';
+import { MetrikaGoal, reachMetrikaGoal } from 'shared/lib';
 import { useData } from 'shared/DataProvider';
 import { COLORS, getColorOpacity } from 'shared/themes';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
@@ -27,6 +28,10 @@ function DailyTarotLimitModal() {
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
   });
+
+  useEffect(() => {
+    reachMetrikaGoal(MetrikaGoal.dailyLimitHit);
+  }, []);
 
   const handleClose = useCallback(async () => {
     await handleVibrationClick?.();

@@ -1,4 +1,5 @@
 export * from './blurActiveElement';
+export * from './yandexMetrika';
 export * from './fetchAuthMeSession';
 export * from './hoverTransition';
 export * from './webAuthGate';

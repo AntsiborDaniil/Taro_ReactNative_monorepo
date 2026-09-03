@@ -20,6 +20,8 @@ import {
   getValueForAsyncDeviceMemoryKey,
   isGuestFreeSpreadId,
   moderateScale,
+  reachMetrikaGoal,
+  MetrikaGoal,
   shouldPromptWebSignIn,
 } from 'shared/lib';
 import { AnalyticAction } from 'shared/types';
@@ -87,6 +89,10 @@ function SpreadDescriptionChoice() {
       });
       return;
     }
+
+    reachMetrikaGoal(MetrikaGoal.spreadStarted, {
+      spreadId: spread?.id,
+    });
 
     setIsSelectingCards(true);
   }, [

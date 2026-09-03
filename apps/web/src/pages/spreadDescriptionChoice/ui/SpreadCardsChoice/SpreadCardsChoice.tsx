@@ -38,6 +38,8 @@ import {
   getValueForAsyncDeviceMemoryKey,
   isGuestFreeSpreadId,
   isTablet,
+  MetrikaGoal,
+  reachMetrikaGoal,
   shouldPromptWebSignIn,
   verticalScale,
 } from 'shared/lib';
@@ -138,6 +140,10 @@ function SpreadCardsChoice({
       return;
     }
 
+    reachMetrikaGoal(MetrikaGoal.spreadStarted, {
+      spreadId: spread?.id,
+    });
+
     setHasAskedQuestion(true);
   }, [
     spread?.id,
@@ -157,6 +163,17 @@ function SpreadCardsChoice({
       AppMetrica.reportEvent(AnalyticAction.ClickCompleteSpread, {
         spread: spread?.name,
       });
+      reachMetrikaGoal(MetrikaGoal.spreadCompleted, {
+        spreadId: spread.id,
+      });
+      if (
+        isGuestFreeSpreadId(spread.id) &&
+        shouldPromptWebSignIn(isAuthenticated, authSessionLoading)
+      ) {
+        reachMetrikaGoal(MetrikaGoal.guestFreeSpread, {
+          spreadId: spread.id,
+        });
+      }
     }
 
     const ok = (await handleGetAIInterpretation?.()) ?? false;
@@ -166,7 +183,13 @@ function SpreadCardsChoice({
 
     // @ts-expect-error wrong route
     navigation.navigate(NavigationRoute.SpreadReadings);
-  }, [handleGetAIInterpretation, navigation, spread]);
+  }, [
+    handleGetAIInterpretation,
+    navigation,
+    spread,
+    isAuthenticated,
+    authSessionLoading,
+  ]);
 
   useEffect(() => {
     if (isSpreadCompleted && isSimpleSpread && attemptsCount.current < 1) {
