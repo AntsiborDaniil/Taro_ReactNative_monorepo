@@ -32,6 +32,7 @@
   "guestCatalog.banner": "“Yes or No” and “Daily advice” are available without signing in — look for the badge on the cards.",
 
   "yesNo.guestInterpretation": "Your yes or no follows from the card meaning above. Sign in for a personalized AI reading tied to your question.",
+  "daySuggest.guestInterpretation": "Your daily advice is in the card meaning above. Sign in to save spreads and unlock more AI readings.",
 
   "thematic_relationship.name": "Relationships",
   "thematic_relationship.description": "The \"Relationships\" spread will help deeply analyze romantic connection from six key perspectives. It reveals mutual feelings of partners, their potential in relationships and provides wise advice for harmonious union development.",

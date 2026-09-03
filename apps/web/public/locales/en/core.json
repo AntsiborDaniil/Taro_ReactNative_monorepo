@@ -11,6 +11,8 @@
 
   "ai.error1": "The mists of fate have veiled the Tarot cards.",
   "ai.error2": "Let the stars align and try again.",
+  "ai.errorProvider": "Interpretation service is temporarily unavailable.",
+  "ai.retry": "Try again",
 
   "ai.copy.success": "Copied to clipboard",
 

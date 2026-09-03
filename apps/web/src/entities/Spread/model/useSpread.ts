@@ -27,6 +27,7 @@ import {
   getTarotCardReadings,
   isGuestFreeSpreadId,
   isTablet,
+  isWebAuthPending,
   MetrikaGoal,
   reachMetrikaGoal,
   shouldPromptWebSignIn,
@@ -451,6 +452,47 @@ export function useSpread({
     });
   };
 
+  const applyOfflineGuestInterpretation = async (
+    currentSpread: TSpread
+  ): Promise<boolean> => {
+    const localText =
+      currentSpread.id === SpreadName.Simple_DaySuggest
+        ? t('spread:daySuggest.guestInterpretation')
+        : t('spread:yesNo.guestInterpretation');
+
+    setSpread((prevState) =>
+      prevState ? { ...prevState, interpretation: localText } : prevState
+    );
+    const savedSpread = await saveSpread({
+      ...currentSpread,
+      interpretation: localText,
+    });
+    if (savedSpread) {
+      setSpread({
+        ...savedSpread,
+        question: savedSpread.question ?? currentSpread.question ?? '',
+      });
+    }
+    return true;
+  };
+
+  const showInterpretError = (code?: string) => {
+    if (code === 'ai_provider_unavailable') {
+      Toast.show({
+        type: 'error',
+        text1: t('core:ai.errorProvider'),
+        text2: t('core:ai.error2'),
+      });
+      return;
+    }
+
+    Toast.show({
+      type: 'error',
+      text1: t('core:ai.error1'),
+      text2: t('core:ai.error2'),
+    });
+  };
+
   const handleGetAIInterpretation = async (): Promise<boolean> => {
     const freeUseOfAI = await AsyncStorage.getItem(AsyncMemoryKey.FreeUseOfAI);
 
@@ -458,53 +500,30 @@ export function useSpread({
       return true;
     }
 
-    if (spread?.id === SpreadName.Simple_DaySuggest) {
+    if (isWebAuthPending(authSessionLoading)) {
       return false;
+    }
+
+    const guestFree = isGuestFreeSpreadId(spread?.id);
+    const webGuest = shouldPromptWebSignIn(isAuthenticated, authSessionLoading);
+
+    if (webGuest && guestFree && spread) {
+      return applyOfflineGuestInterpretation(spread);
     }
 
     if (
       !isPractitioner &&
       freeUseOfAI &&
-      (Platform.OS !== 'web' ||
-        shouldPromptWebSignIn(isAuthenticated, authSessionLoading))
+      (Platform.OS !== 'web' || webGuest) &&
+      !guestFree
     ) {
-      if (
-        Platform.OS === 'web' &&
-        shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
-        !isGuestFreeSpreadId(spread?.id)
-      ) {
+      if (webGuest) {
         showModal?.(createElement(SignInForSpreadsModal));
       }
       return false;
     }
 
-    if (
-      Platform.OS === 'web' &&
-      shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
-      spread?.id === SpreadName.Simple_YesNo &&
-      spread
-    ) {
-      const localText = t('spread:yesNo.guestInterpretation');
-      setSpread((prevState) =>
-        prevState ? { ...prevState, interpretation: localText } : prevState
-      );
-      const savedSpread = await saveSpread({
-        ...spread,
-        interpretation: localText,
-      });
-      if (savedSpread) {
-        setSpread({
-          ...savedSpread,
-          question: savedSpread.question ?? spread.question ?? '',
-        });
-      }
-      return true;
-    }
-
-    if (
-      shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
-      !isGuestFreeSpreadId(spread?.id)
-    ) {
+    if (webGuest && !guestFree) {
       showModal?.(createElement(SignInForSpreadsModal));
       return false;
     }
@@ -548,31 +567,40 @@ export function useSpread({
       );
 
       if (!aiInterpretationResponse.ok) {
+        let body: {
+          code?: string;
+          tarotDaily?: {
+            used: number;
+            limit: number;
+            day: string;
+          };
+        } = {};
+        try {
+          body = (await aiInterpretationResponse.json()) as typeof body;
+        } catch {
+          // ignore non-JSON error body
+        }
+
         if (aiInterpretationResponse.status === 401) {
+          if (guestFree && spread) {
+            return applyOfflineGuestInterpretation(spread);
+          }
           showModal?.(createElement(SignInForSpreadsModal));
-        } else if (aiInterpretationResponse.status === 429) {
-          try {
-            const body = (await aiInterpretationResponse.json()) as {
-              tarotDaily?: {
-                used: number;
-                limit: number;
-                day: string;
-              };
-            };
-            if (body.tarotDaily) {
-              setTarotDaily?.(body.tarotDaily);
-            }
-          } catch {
-            // ignore malformed 429 body
+          return false;
+        }
+
+        if (
+          aiInterpretationResponse.status === 429 &&
+          (body.code === 'daily_limit_reached' || body.tarotDaily)
+        ) {
+          if (body.tarotDaily) {
+            setTarotDaily?.(body.tarotDaily);
           }
           showModal?.(createElement(DailyTarotLimitModal));
-        } else {
-          Toast.show({
-            type: 'error',
-            text1: t('core:ai.error1'),
-            text2: t('core:ai.error2'),
-          });
+          return false;
         }
+
+        showInterpretError(body.code);
         return false;
       }
 
@@ -617,12 +645,7 @@ export function useSpread({
 
       return true;
     } catch (e: any) {
-      Toast.show({
-        type: 'error',
-        text1: t('core:ai.error1'),
-        text2: t('core:ai.error2'),
-      });
-
+      showInterpretError();
       AppMetrica.reportError('AI interpretation Error', e.message);
       return false;
     } finally {

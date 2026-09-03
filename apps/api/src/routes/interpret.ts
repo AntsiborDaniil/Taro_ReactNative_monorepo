@@ -1,7 +1,11 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { resolveAuthedUser } from '../lib/authRequest';
+import { OpenAiProviderError } from '../lib/openaiErrors';
 import { generateInterpretation } from '../services/spreadInterpretationService';
-import { tryConsumeTarotDailySlot } from '../services/tarotDailyUsageService';
+import {
+  refundTarotDailySlot,
+  tryConsumeTarotDailySlot,
+} from '../services/tarotDailyUsageService';
 import { TarotSpreadInput } from '../types';
 
 export const interpretRoute = async (
@@ -56,25 +60,27 @@ export const interpretRoute = async (
       const user = await resolveAuthedUser(request);
       if (!user) {
         return reply.status(401).send({
+          code: 'unauthorized',
           message: 'Sign in is required to generate a spread interpretation',
         });
       }
 
       const { spread_type, positions, language, question } = request.body;
 
-      try {
-        const slot = await tryConsumeTarotDailySlot(user.id);
-        if (!slot.ok) {
-          return reply.status(429).send({
-            message: 'Daily tarot spread limit reached',
-            tarotDaily: {
-              used: slot.used,
-              limit: slot.limit,
-              day: slot.day,
-            },
-          });
-        }
+      const slot = await tryConsumeTarotDailySlot(user.id);
+      if (!slot.ok) {
+        return reply.status(429).send({
+          code: 'daily_limit_reached',
+          message: 'Daily tarot spread limit reached',
+          tarotDaily: {
+            used: slot.used,
+            limit: slot.limit,
+            day: slot.day,
+          },
+        });
+      }
 
+      try {
         const interpretation = await generateInterpretation({
           spread_type,
           positions,
@@ -91,7 +97,21 @@ export const interpretRoute = async (
         });
       } catch (error) {
         request.log.error(error);
+        try {
+          await refundTarotDailySlot(user.id);
+        } catch (refundError) {
+          request.log.error(refundError);
+        }
+
+        if (error instanceof OpenAiProviderError) {
+          return reply.status(error.httpStatus).send({
+            message: error.message,
+            code: error.code,
+          });
+        }
+
         return reply.status(500).send({
+          code: 'interpret_failed',
           message: 'Could not generate interpretation',
         });
       }

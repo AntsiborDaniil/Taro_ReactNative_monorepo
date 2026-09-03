@@ -6,6 +6,7 @@ import {
 import * as dotenv from 'dotenv';
 import { useMockOpenAi } from '../lib/devMode';
 import { mockGenerateInterpretation } from '../dev/mockOpenAi';
+import { toOpenAiProviderError } from '../lib/openaiErrors';
 dotenv.config();
 
 const openai = new OpenAI({
@@ -61,16 +62,20 @@ ${positions.map((p) => `${p.label}: ${p.card} Перевернута ли кар
 Помни: твоя задача — ответить на вопрос через призму всего расклада, а не описывать карты по отдельности. Карты должны рассказать единую историю в контексте заданного вопроса.
 `;
 
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content },
-    ],
-    temperature: 0.8,
-  });
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content },
+      ],
+      temperature: 0.8,
+    });
 
-  return {
-    interpretation: completion.choices[0]?.message?.content ?? '',
-  };
+    return {
+      interpretation: completion.choices[0]?.message?.content ?? '',
+    };
+  } catch (error) {
+    throw toOpenAiProviderError(error) ?? error;
+  }
 }

@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 
-export const YANDEX_METRIKA_COUNTER_ID = 112262669;
+export const YANDEX_METRIKA_COUNTER_ID = 112263887;
 
 export const MetrikaGoal = {
   spreadStarted: 'spread_started',
@@ -24,7 +24,7 @@ declare global {
   }
 }
 
-const TAG_SRC = 'https://mc.yandex.ru/metrika/tag.js';
+const TAG_SRC = `https://mc.yandex.ru/metrika/tag.js?id=${YANDEX_METRIKA_COUNTER_ID}`;
 
 function canTrack(): boolean {
   return Platform.OS === 'web' && typeof window !== 'undefined';
@@ -56,10 +56,14 @@ export function injectYandexMetrika(): void {
   }
 
   window.ym(YANDEX_METRIKA_COUNTER_ID, 'init', {
-    clickmap: true,
-    trackLinks: true,
-    accurateTrackBounce: true,
+    ssr: true,
     webvisor: true,
+    clickmap: true,
+    ecommerce: 'dataLayer',
+    referrer: document.referrer,
+    url: location.href,
+    accurateTrackBounce: true,
+    trackLinks: true,
   });
 }
 

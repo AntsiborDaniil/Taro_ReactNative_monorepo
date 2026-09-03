@@ -327,6 +327,13 @@ export function memoryTryConsumeTarotDailySlot(
   return { ok: true, used: next, limit, day };
 }
 
+export function memoryRefundTarotDailySlot(userId: string): void {
+  const day = utcDay();
+  const key = dailyKey(userId, day);
+  const used = dailyUsageByUserDay.get(key) ?? 0;
+  dailyUsageByUserDay.set(key, Math.max(used - 1, 0));
+}
+
 export function memoryListSpreads(
   userId: string,
   options: { limit?: number; offset?: number } = {}

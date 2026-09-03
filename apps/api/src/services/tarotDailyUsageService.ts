@@ -81,6 +81,42 @@ export async function tryConsumeTarotDailySlot(
   };
 }
 
+/** Undo a consumed slot when OpenAI (or another provider) fails after consume. */
+export async function refundTarotDailySlot(userId: string): Promise<void> {
+  if (useMemoryBackend()) {
+    memory.memoryRefundTarotDailySlot(userId);
+    return;
+  }
+
+  const admin = getSupabaseAdmin();
+  const day = new Date().toISOString().slice(0, 10);
+  const { data, error } = await admin
+    .from('tarot_daily_usage')
+    .select('count')
+    .eq('user_id', userId)
+    .eq('day', day)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  const used = typeof data?.count === 'number' ? data.count : 0;
+  if (used <= 0) {
+    return;
+  }
+
+  const { error: updateError } = await admin
+    .from('tarot_daily_usage')
+    .update({ count: used - 1 })
+    .eq('user_id', userId)
+    .eq('day', day);
+
+  if (updateError) {
+    throw updateError;
+  }
+}
+
 export async function isTarotDailyLimitReached(
   userId: string
 ): Promise<boolean> {

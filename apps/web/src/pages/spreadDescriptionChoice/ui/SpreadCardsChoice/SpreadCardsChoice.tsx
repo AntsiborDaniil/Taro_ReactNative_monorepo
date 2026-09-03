@@ -38,6 +38,7 @@ import {
   getValueForAsyncDeviceMemoryKey,
   isGuestFreeSpreadId,
   isTablet,
+  isWebAuthPending,
   MetrikaGoal,
   reachMetrikaGoal,
   shouldPromptWebSignIn,
@@ -60,8 +61,9 @@ type SpreadCardsChoiceProps = {
 function SpreadCardsChoice({
   isSimpleSpread,
 }: SpreadCardsChoiceProps) {
-  const attemptsCount = useRef<number>(0);
+  const autoInterpretAttempted = useRef(false);
   const [hasAskedQuestion, setHasAskedQuestion] = useState(false);
+  const [simpleInterpretFailed, setSimpleInterpretFailed] = useState(false);
 
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
@@ -178,9 +180,13 @@ function SpreadCardsChoice({
 
     const ok = (await handleGetAIInterpretation?.()) ?? false;
     if (!ok) {
+      if (isSimpleSpread && !isWebAuthPending(authSessionLoading)) {
+        setSimpleInterpretFailed(true);
+      }
       return;
     }
 
+    setSimpleInterpretFailed(false);
     // @ts-expect-error wrong route
     navigation.navigate(NavigationRoute.SpreadReadings);
   }, [
@@ -189,14 +195,37 @@ function SpreadCardsChoice({
     spread,
     isAuthenticated,
     authSessionLoading,
+    isSimpleSpread,
   ]);
 
   useEffect(() => {
-    if (isSpreadCompleted && isSimpleSpread && attemptsCount.current < 1) {
-      attemptsCount.current++;
-      handleNavigateToSpreadReading();
+    autoInterpretAttempted.current = false;
+    setSimpleInterpretFailed(false);
+  }, [spread?.id]);
+
+  useEffect(() => {
+    if (!isSpreadCompleted || !isSimpleSpread) {
+      return;
     }
-  }, [isSpreadCompleted, isSimpleSpread, handleNavigateToSpreadReading]);
+    if (isWebAuthPending(authSessionLoading)) {
+      return;
+    }
+    if (autoInterpretAttempted.current) {
+      return;
+    }
+    autoInterpretAttempted.current = true;
+    void handleNavigateToSpreadReading();
+  }, [
+    isSpreadCompleted,
+    isSimpleSpread,
+    authSessionLoading,
+    handleNavigateToSpreadReading,
+  ]);
+
+  const handleRetrySimpleInterpret = useCallback(() => {
+    setSimpleInterpretFailed(false);
+    void handleNavigateToSpreadReading();
+  }, [handleNavigateToSpreadReading]);
 
   const isDaySuggest = spread?.id === SpreadName.Simple_DaySuggest;
 
@@ -233,6 +262,20 @@ function SpreadCardsChoice({
               >
                 <AnimatedCard />
                 <CoverFlowCardCarousel overlayControls={isPhone} />
+                {(simpleInterpretFailed || interpretationLoading) && (
+                  <View style={styles.simpleRetryPanel}>
+                    {interpretationLoading ? (
+                      <ActivityIndicator color={COLORS.Primary} />
+                    ) : (
+                      <Button
+                        style={spreadInnerStyles.stickyCta}
+                        onPress={handleRetrySimpleInterpret}
+                      >
+                        {t('core:ai.retry')}
+                      </Button>
+                    )}
+                  </View>
+                )}
               </View>
             </DataProvider>
           </ImageBackground>
@@ -329,6 +372,22 @@ function SpreadCardsChoice({
                           {t('spread:flow.pickHint')}
                         </Text>
                       )}
+                      {isSimpleSpread &&
+                        isSpreadCompleted &&
+                        (simpleInterpretFailed || interpretationLoading) && (
+                          <View style={styles.simpleRetryPanel}>
+                            {interpretationLoading ? (
+                              <ActivityIndicator color={COLORS.Primary} />
+                            ) : (
+                              <Button
+                                style={spreadInnerStyles.stickyCta}
+                                onPress={handleRetrySimpleInterpret}
+                              >
+                                {t('core:ai.retry')}
+                              </Button>
+                            )}
+                          </View>
+                        )}
                     </View>
                   </View>
                 ) : (
@@ -464,6 +523,15 @@ const styles = StyleSheet.create({
     zIndex: 1,
     position: 'relative',
     overflow: 'visible',
+  },
+  simpleRetryPanel: {
+    width: '100%',
+    maxWidth: 320,
+    alignSelf: 'center',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 8,
+    zIndex: 20,
   },
 });
 

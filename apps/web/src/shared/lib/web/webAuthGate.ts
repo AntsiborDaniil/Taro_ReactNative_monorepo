@@ -12,6 +12,11 @@ export function isWebGuestSession(
   );
 }
 
+/** /me (and Telegram silent login) has not finished. */
+export function isWebAuthPending(authSessionLoading?: boolean): boolean {
+  return Platform.OS === 'web' && authSessionLoading === true;
+}
+
 /** Show sign-in modal only after /me finished loading. */
 export function shouldPromptWebSignIn(
   isAuthenticated?: boolean,
