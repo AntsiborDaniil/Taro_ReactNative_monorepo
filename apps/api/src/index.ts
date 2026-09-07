@@ -22,6 +22,7 @@ import { tarotDailyRoute } from './routes/tarotDaily';
 import { spreadsRoute } from './routes/spreads';
 import { favoritesRoute } from './routes/favorites';
 import { settingsRoute } from './routes/settings';
+import { lavaPaymentsRoute } from './routes/lavaPayments';
 
 dotenv.config();
 
@@ -116,6 +117,7 @@ async function bootstrap(): Promise<void> {
   await fastify.register(tarotDailyRoute, { prefix: '/api' });
   await fastify.register(moodAndEnergyRoute, { prefix: '/api' });
   await fastify.register(habitsRoute, { prefix: '/api' });
+  await fastify.register(lavaPaymentsRoute, { prefix: '/api' });
 
   const address = await fastify.listen({
     port: process.env.PORT ? Number(process.env.PORT) : 3002,

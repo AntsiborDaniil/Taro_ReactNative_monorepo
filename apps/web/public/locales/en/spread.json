@@ -14,6 +14,14 @@
   "selfDevelopment.name.multiple": "Self-Discovery",
   "choice.name.multiple": "Decision Making",
 
+  "flow.step.prepare": "Prepare",
+  "flow.step.choose": "Pick cards",
+  "flow.step.read": "Reading",
+  "flow.positionsTitle": "Spread positions",
+  "flow.pickHint": "Swipe the deck and pick a card",
+  "flow.questionSection": "Your question",
+  "flow.completedTitle": "All cards are in place",
+
   "question.tooltip": "To get an accurate response from Tarot cards, ask questions clearly and specifically. Formulate your query to be open-ended (e.g., 'What do I need to know about...?' or 'How should I proceed with...?'), and avoid simple 'yes/no' questions. Focus on your situation, be sincere and open. The cards reflect your energy, so ask with clear intent and without rushing",
   "question.placeholder": "Ask the cards a question",
   "question.error": "A question needs to be asked",
@@ -22,7 +30,16 @@
   "limit.body": "Become a Tarot Practitioner or wait for a new day.",
 
   "dailyLimit.title": "Daily spread limit reached",
-  "dailyLimit.body": "You can complete up to 3 AI spreads per day while signed in. Try again tomorrow.",
+  "dailyLimit.body": "You get up to 3 free AI spreads per day. Buy a +3 pack or come back tomorrow.",
+  "dailyLimit.emailLabel": "Email for payment",
+  "dailyLimit.emailPlaceholder": "you@email.com",
+  "dailyLimit.emailInvalid": "Enter a valid email",
+  "dailyLimit.buyCta": "Buy +3 spreads",
+  "dailyLimit.buyLoading": "Opening checkout…",
+  "dailyLimit.buyFailed": "Could not start checkout. Try again.",
+  "dailyLimit.buyUnavailable": "Payments are not configured on the server yet.",
+  "dailyLimit.buyUnauthorized": "Sign in to buy more spreads.",
+  "dailyLimit.later": "Later",
 
   "signInRequired.title": "Sign in required",
   "signInRequired.body": "Spreads are available after you sign in or register.",

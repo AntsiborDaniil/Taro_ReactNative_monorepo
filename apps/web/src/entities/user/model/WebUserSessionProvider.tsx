@@ -19,23 +19,38 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation('settings');
   const [authUser, setAuthUser] = useState<AuthSessionUser | null>(null);
   const [tarotDaily, setTarotDaily] = useState<TarotDailyQuota | null>(null);
+  const [spreadCredits, setSpreadCredits] = useState(0);
   const [authSessionLoading, setAuthSessionLoading] = useState(true);
   const authUserRef = useRef<AuthSessionUser | null>(null);
   const tarotDailyRef = useRef<TarotDailyQuota | null>(null);
+  const spreadCreditsRef = useRef(0);
   const devQuickLoginAttemptedRef = useRef(false);
 
   useEffect(() => {
     authUserRef.current = authUser;
     tarotDailyRef.current = tarotDaily;
-  }, [authUser, tarotDaily]);
+    spreadCreditsRef.current = spreadCredits;
+  }, [authUser, tarotDaily, spreadCredits]);
 
-  const applySession = useCallback((user: AuthSessionUser | null, daily: TarotDailyQuota | null) => {
-    setAuthUser(user);
-    setTarotDaily(daily);
-    if (user?.id) {
-      void migrateLocalDataToCloud(user.id);
-    }
-  }, []);
+  const applySession = useCallback(
+    (
+      user: AuthSessionUser | null,
+      daily: TarotDailyQuota | null,
+      credits?: number | null
+    ) => {
+      setAuthUser(user);
+      setTarotDaily(daily);
+      if (typeof credits === 'number' && Number.isFinite(credits)) {
+        setSpreadCredits(Math.max(0, Math.floor(credits)));
+      } else if (!user) {
+        setSpreadCredits(0);
+      }
+      if (user?.id) {
+        void migrateLocalDataToCloud(user.id);
+      }
+    },
+    []
+  );
 
   const loadMe = useCallback(async (fallbackUser?: AuthSessionUser) => {
     if (Platform.OS !== 'web') {
@@ -51,9 +66,10 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
           ? {
               user: authUserRef.current,
               tarotDaily: tarotDailyRef.current,
+              spreadCredits: spreadCreditsRef.current,
             }
           : fallbackUser
-            ? { user: fallbackUser, tarotDaily: null }
+            ? { user: fallbackUser, tarotDaily: null, spreadCredits: 0 }
             : null;
 
       let session = await fetchAuthMeSession({ previousSession });
@@ -63,12 +79,15 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
         const quick = await tryDevQuickLogin();
         if (quick.ok) {
           if (quick.user) {
-            applySession(quick.user, null);
-            // Refresh quota in background; UI already unlocked
+            applySession(quick.user, null, 0);
             void fetchAuthMeSession({ retryUnauthorized: false }).then(
               (refreshed) => {
                 if (refreshed?.user) {
-                  applySession(refreshed.user, refreshed.tarotDaily ?? null);
+                  applySession(
+                    refreshed.user,
+                    refreshed.tarotDaily ?? null,
+                    refreshed.spreadCredits ?? 0
+                  );
                 }
               }
             );
@@ -79,21 +98,25 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
       }
 
       if (session?.user) {
-        applySession(session.user, session.tarotDaily ?? null);
+        applySession(
+          session.user,
+          session.tarotDaily ?? null,
+          session.spreadCredits ?? 0
+        );
         return;
       }
 
       if (fallbackUser) {
-        applySession(fallbackUser, null);
+        applySession(fallbackUser, null, 0);
         return;
       }
 
-      applySession(null, null);
+      applySession(null, null, 0);
     } catch {
       if (fallbackUser) {
-        applySession(fallbackUser, null);
+        applySession(fallbackUser, null, 0);
       } else {
-        applySession(null, null);
+        applySession(null, null, 0);
       }
     } finally {
       setAuthSessionLoading(false);
@@ -170,11 +193,19 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
       isAuthenticated: Platform.OS === 'web' ? !!authUser : false,
       authUser,
       tarotDaily,
+      spreadCredits,
       authSessionLoading,
       refreshAuthSession,
       setTarotDaily,
+      setSpreadCredits,
     }),
-    [authUser, tarotDaily, authSessionLoading, refreshAuthSession]
+    [
+      authUser,
+      tarotDaily,
+      spreadCredits,
+      authSessionLoading,
+      refreshAuthSession,
+    ]
   );
 
   return (

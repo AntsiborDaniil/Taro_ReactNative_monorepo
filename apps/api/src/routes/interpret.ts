@@ -3,8 +3,8 @@ import { resolveAuthedUser } from '../lib/authRequest';
 import { OpenAiProviderError } from '../lib/openaiErrors';
 import { generateInterpretation } from '../services/spreadInterpretationService';
 import {
-  refundTarotDailySlot,
-  tryConsumeTarotDailySlot,
+  refundSpreadSlot,
+  tryConsumeSpreadSlot,
 } from '../services/tarotDailyUsageService';
 import { TarotSpreadInput } from '../types';
 
@@ -51,6 +51,7 @@ export const interpretRoute = async (
                   day: { type: 'string' },
                 },
               },
+              spreadCredits: { type: 'number' },
             },
           },
         },
@@ -67,7 +68,7 @@ export const interpretRoute = async (
 
       const { spread_type, positions, language, question } = request.body;
 
-      const slot = await tryConsumeTarotDailySlot(user.id);
+      const slot = await tryConsumeSpreadSlot(user.id);
       if (!slot.ok) {
         return reply.status(429).send({
           code: 'daily_limit_reached',
@@ -77,6 +78,7 @@ export const interpretRoute = async (
             limit: slot.limit,
             day: slot.day,
           },
+          spreadCredits: slot.spreadCredits,
         });
       }
 
@@ -94,11 +96,12 @@ export const interpretRoute = async (
             limit: slot.limit,
             day: slot.day,
           },
+          spreadCredits: slot.spreadCredits,
         });
       } catch (error) {
         request.log.error(error);
         try {
-          await refundTarotDailySlot(user.id);
+          await refundSpreadSlot(user.id, slot.source);
         } catch (refundError) {
           request.log.error(refundError);
         }

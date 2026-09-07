@@ -30,7 +30,16 @@
   "limit.body": "Станьте Практиком Таро или дождитесь нового дня.",
 
   "dailyLimit.title": "Дневной лимит раскладов исчерпан",
-  "dailyLimit.body": "Войдя в аккаунт, можно сделать до 3 AI-раскладов в сутки. Попробуйте снова завтра.",
+  "dailyLimit.body": "Бесплатно — до 3 AI-раскладов в сутки. Можно докупить пакет +3 расклада или вернуться завтра.",
+  "dailyLimit.emailLabel": "Email для оплаты",
+  "dailyLimit.emailPlaceholder": "you@email.com",
+  "dailyLimit.emailInvalid": "Укажите корректный email",
+  "dailyLimit.buyCta": "Купить +3 расклада",
+  "dailyLimit.buyLoading": "Открываем оплату…",
+  "dailyLimit.buyFailed": "Не удалось создать оплату. Попробуйте ещё раз.",
+  "dailyLimit.buyUnavailable": "Оплата пока не настроена на сервере.",
+  "dailyLimit.buyUnauthorized": "Войдите в аккаунт, чтобы купить расклады.",
+  "dailyLimit.later": "Позже",
 
   "signInRequired.title": "Нужен вход в аккаунт",
   "signInRequired.body": "Расклады доступны после входа или регистрации.",

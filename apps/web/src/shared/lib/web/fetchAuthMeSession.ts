@@ -11,6 +11,7 @@ import {
 export type AuthMeSession = {
   user: AuthSessionUser;
   tarotDaily?: TarotDailyQuota | null;
+  spreadCredits?: number;
 };
 
 const ME_RETRY_DELAYS_MS = [0, 100, 250, 500, 1000, 2000];

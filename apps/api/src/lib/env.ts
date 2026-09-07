@@ -37,3 +37,36 @@ export function assertSupabaseEnv(): void {
 export function getTelegramBotToken(): string {
   return requireEnv('TELEGRAM_BOT_TOKEN');
 }
+
+export function getWebAppUrl(): string | undefined {
+  const value = process.env.WEB_APP_URL?.trim();
+  return value || undefined;
+}
+
+export function getLavaApiKey(): string | undefined {
+  return process.env.LAVA_API_KEY?.trim() || undefined;
+}
+
+export function getLavaOfferId(): string | undefined {
+  return process.env.LAVA_OFFER_ID?.trim() || undefined;
+}
+
+export function getLavaWebhookSecret(): string | undefined {
+  return process.env.LAVA_WEBHOOK_SECRET?.trim() || undefined;
+}
+
+export function getLavaApiBaseUrl(): string {
+  return (
+    process.env.LAVA_API_BASE_URL?.trim() || 'https://gate.lava.top'
+  ).replace(/\/$/, '');
+}
+
+export function getLavaCreditsPerPurchase(): number {
+  const raw = process.env.LAVA_CREDITS_PER_PURCHASE?.trim();
+  const parsed = raw ? Number(raw) : 3;
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 3;
+}
+
+export function isLavaPaymentsConfigured(): boolean {
+  return Boolean(getLavaApiKey() && getLavaOfferId() && getLavaWebhookSecret());
+}

@@ -30,7 +30,10 @@ import {
   type PasswordValidationCode,
   weakPasswordResponse,
 } from '../lib/passwordPolicy';
-import { getTarotDailyUsage } from '../services/tarotDailyUsageService';
+import {
+  getSpreadCredits,
+  getTarotDailyUsage,
+} from '../services/tarotDailyUsageService';
 
 function isWeakPasswordError(
   error: unknown
@@ -484,11 +487,15 @@ export const authRoute = async (
       });
     }
 
-    const tarotDaily = await getTarotDailyUsage(user.id);
+    const [tarotDaily, spreadCredits] = await Promise.all([
+      getTarotDailyUsage(user.id),
+      getSpreadCredits(user.id),
+    ]);
 
     return reply.send({
       user,
       tarotDaily,
+      spreadCredits,
     });
   });
 

@@ -23,7 +23,9 @@ export type TUserHookResult = {
   isAuthenticated?: boolean;
   authUser?: AuthSessionUser | null;
   tarotDaily?: TarotDailyQuota | null;
+  spreadCredits?: number;
   authSessionLoading?: boolean;
   refreshAuthSession?: () => Promise<void>;
   setTarotDaily?: (daily: TarotDailyQuota | null) => void;
+  setSpreadCredits?: (credits: number) => void;
 };

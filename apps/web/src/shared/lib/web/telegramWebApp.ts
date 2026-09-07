@@ -38,6 +38,21 @@ export function readTelegramSafeAreaInsets(): {
   };
 }
 
+/** Open Lava checkout (or any https URL) from Mini App / browser. */
+export function openExternalPaymentUrl(url: string): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  const webApp = window.Telegram?.WebApp as
+    | { openLink?: (href: string, options?: { try_instant_view?: boolean }) => void }
+    | undefined;
+  if (typeof webApp?.openLink === 'function') {
+    webApp.openLink(url, { try_instant_view: false });
+    return;
+  }
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
 export async function ensureTelegramWebAppScript(): Promise<void> {
   if (Platform.OS !== 'web' || typeof document === 'undefined') {
     return;

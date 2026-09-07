@@ -128,6 +128,7 @@
   "auth.validation.nameMin": "Name should be at least 2 characters",
   "auth.validation.emailRequired": "Enter your email",
   "auth.validation.emailInvalid": "Invalid email format",
+  "auth.validation.emailNoGmail": "Use any email except Gmail (e.g. Outlook, Yandex, Mail.ru)",
   "auth.validation.passwordRequired": "Enter your password",
   "auth.validation.passwordMin": "Password must be at least 8 characters",
   "auth.validation.passwordTooShort": "At least 8 characters required",

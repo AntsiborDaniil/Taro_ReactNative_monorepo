@@ -111,7 +111,7 @@ export function useSpread({
 
   const { setIsFullScreenLoading } = useData({ Context: LoadingsContext });
 
-  const { isPractitioner, isAuthenticated, authSessionLoading, tarotDaily, setTarotDaily } =
+  const { isPractitioner, isAuthenticated, authSessionLoading, tarotDaily, setTarotDaily, spreadCredits, setSpreadCredits } =
     useData({
       Context: UserContext,
     });
@@ -531,7 +531,8 @@ export function useSpread({
     if (
       Platform.OS === 'web' &&
       tarotDaily != null &&
-      tarotDaily.used >= tarotDaily.limit
+      tarotDaily.used >= tarotDaily.limit &&
+      (spreadCredits ?? 0) <= 0
     ) {
       showModal?.(createElement(DailyTarotLimitModal));
       return false;
@@ -574,6 +575,7 @@ export function useSpread({
             limit: number;
             day: string;
           };
+          spreadCredits?: number;
         } = {};
         try {
           body = (await aiInterpretationResponse.json()) as typeof body;
@@ -596,6 +598,9 @@ export function useSpread({
           if (body.tarotDaily) {
             setTarotDaily?.(body.tarotDaily);
           }
+          if (typeof body.spreadCredits === 'number') {
+            setSpreadCredits?.(body.spreadCredits);
+          }
           showModal?.(createElement(DailyTarotLimitModal));
           return false;
         }
@@ -611,10 +616,14 @@ export function useSpread({
           limit: number;
           day: string;
         };
+        spreadCredits?: number;
       };
       const interpretation = payload.interpretation;
       if (payload.tarotDaily) {
         setTarotDaily?.(payload.tarotDaily);
+      }
+      if (typeof payload.spreadCredits === 'number') {
+        setSpreadCredits?.(payload.spreadCredits);
       }
 
       setSpread((prevState) =>

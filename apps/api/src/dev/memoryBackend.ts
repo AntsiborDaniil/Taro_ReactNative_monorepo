@@ -48,6 +48,16 @@ const spreadsByUser = new Map<string, SpreadRecord[]>();
 const favoritesByUser = new Map<string, Set<string>>();
 const settingsByUser = new Map<string, UserSettingsRecord>();
 const dailyUsageByUserDay = new Map<string, number>();
+const spreadCreditsByUser = new Map<string, number>();
+const lavaCheckoutsByInvoice = new Map<
+  string,
+  {
+    userId: string;
+    credits: number;
+    email: string;
+    status: 'pending' | 'paid' | 'failed';
+  }
+>();
 
 function hashPassword(password: string): string {
   return createHash('sha256').update(`taro-dev:${password}`).digest('hex');
@@ -332,6 +342,84 @@ export function memoryRefundTarotDailySlot(userId: string): void {
   const key = dailyKey(userId, day);
   const used = dailyUsageByUserDay.get(key) ?? 0;
   dailyUsageByUserDay.set(key, Math.max(used - 1, 0));
+}
+
+export function memoryGetSpreadCredits(userId: string): number {
+  return spreadCreditsByUser.get(userId) ?? 0;
+}
+
+export function memoryConsumeSpreadCredit(
+  userId: string
+): { ok: true; spreadCredits: number } | { ok: false; spreadCredits: number } {
+  const current = spreadCreditsByUser.get(userId) ?? 0;
+  if (current <= 0) {
+    return { ok: false, spreadCredits: 0 };
+  }
+  const next = current - 1;
+  spreadCreditsByUser.set(userId, next);
+  return { ok: true, spreadCredits: next };
+}
+
+export function memoryRefundSpreadCredit(userId: string): number {
+  const next = (spreadCreditsByUser.get(userId) ?? 0) + 1;
+  spreadCreditsByUser.set(userId, next);
+  return next;
+}
+
+export function memoryCreateLavaCheckout(input: {
+  invoiceId: string;
+  userId: string;
+  credits: number;
+  email: string;
+}): void {
+  lavaCheckoutsByInvoice.set(input.invoiceId, {
+    userId: input.userId,
+    credits: input.credits,
+    email: input.email,
+    status: 'pending',
+  });
+}
+
+export function memoryFulfillLavaCheckout(input: {
+  invoiceId: string;
+  userId?: string | null;
+  credits: number;
+  email?: string;
+}): { ok: true; spreadCredits: number; alreadyApplied: boolean } {
+  const existing = lavaCheckoutsByInvoice.get(input.invoiceId);
+  if (existing?.status === 'paid') {
+    return {
+      ok: true,
+      spreadCredits: memoryGetSpreadCredits(existing.userId),
+      alreadyApplied: true,
+    };
+  }
+
+  if (existing?.status === 'pending') {
+    existing.status = 'paid';
+    if (input.email) {
+      existing.email = input.email;
+    }
+    const next =
+      (spreadCreditsByUser.get(existing.userId) ?? 0) + existing.credits;
+    spreadCreditsByUser.set(existing.userId, next);
+    return { ok: true, spreadCredits: next, alreadyApplied: false };
+  }
+
+  const userId = input.userId?.trim();
+  if (!userId) {
+    throw new Error('USER_ID_REQUIRED');
+  }
+
+  lavaCheckoutsByInvoice.set(input.invoiceId, {
+    userId,
+    credits: input.credits,
+    email: input.email ?? '',
+    status: 'paid',
+  });
+  const next = (spreadCreditsByUser.get(userId) ?? 0) + input.credits;
+  spreadCreditsByUser.set(userId, next);
+  return { ok: true, spreadCredits: next, alreadyApplied: false };
 }
 
 export function memoryListSpreads(
