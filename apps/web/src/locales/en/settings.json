@@ -23,6 +23,16 @@
 
   "hasReversed": "Reversed cards",
 
+  "credits.buy.row": "Buy +3 spreads",
+  "credits.buy.rowHint": "Charges after the daily limit. Now: {{count}}",
+  "credits.buy.title": "+3 spreads pack",
+  "credits.buy.body": "After payment, 3 charges are added to your balance. They are used when the daily free limit is already spent.",
+  "credits.buy.balance": "Your charges now: {{count}}",
+  "credits.badge.a11yDaily": "Free spreads left today: {{count}}",
+  "credits.badge.a11yCredits": "Spread charges: {{count}}",
+  "credits.badge.a11yUnlimited": "Unlimited spreads",
+  "credits.badge.a11y": "Spread charges: {{count}}",
+
   "payments": "Subscription and purchases",
   "payments.restore": "Restore purchases",
 

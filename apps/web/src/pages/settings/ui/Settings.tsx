@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment, createElement, useCallback, useMemo, useState } from 'react';
 import {
   Platform,
   Pressable,
@@ -11,12 +11,17 @@ import AppMetrica from '@appmetrica/react-native-analytics';
 import { StyleService, useStyleSheet } from '@ui-kitten/components';
 import { useTabRailLayout } from 'app/navigation/tabs/TabRailLayoutContext';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
+import { UserContext } from 'entities/user';
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
+import {
+  BuySpreadCreditsModal,
+  SpreadCreditsBadge,
+} from 'features/tarotAccess/ui';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { ChevronRightIcon, ReverseIcon } from 'shared/icons';
+import { ChevronRightIcon, LightningBolt, ReverseIcon } from 'shared/icons';
 import {
   AsyncMemorySettingKey,
   isTablet,
@@ -27,6 +32,7 @@ import { isTelegramMiniApp } from 'shared/lib/web/telegramWebApp';
 import { COLORS, SETTINGS_TYPOGRAPHY } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, PressableWebState, TabRoute } from 'shared/types';
 import { ScreenLayout, SwitchElement, Text, TEXT_TAGS } from 'shared/ui';
+import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { APP_AGREEMENTS, getSettingsRoutes } from '../lib';
 import { useSettings } from '../model';
 import LanguagePickerModal from './Language/LanguagePickerModal';
@@ -49,11 +55,58 @@ function Settings() {
   const { spread: spreadSettings, handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
   });
+  const { spreadCredits, tarotDaily, isPractitioner, isAuthenticated } =
+    useData({ Context: UserContext });
+  const { showModal } = useData({ Context: ModalsContext });
 
   const styles = useStyleSheet(styleSheet);
   const webStyles = useMemo(() => (isWeb ? createWebStyles() : null), [isWeb]);
 
   const navigation = useNativeNavigation();
+
+  const credits = spreadCredits ?? 0;
+  const dailyRemaining =
+    tarotDaily != null
+      ? Math.max(0, tarotDaily.limit - tarotDaily.used)
+      : null;
+
+  const quotaBadge = useMemo(() => {
+    if (isPractitioner) {
+      return { mode: 'unlimited' as const };
+    }
+    if (credits > 0) {
+      return { mode: 'credits' as const, remaining: credits };
+    }
+    if (isAuthenticated && dailyRemaining != null) {
+      return { mode: 'daily' as const, remaining: dailyRemaining };
+    }
+    return null;
+  }, [credits, dailyRemaining, isAuthenticated, isPractitioner]);
+
+  const openBuyCredits = useCallback(async () => {
+    AppMetrica.reportEvent(AnalyticAction.ClickSettingsSegment, {
+      segment: 'credits.buy',
+    });
+    await handleVibrationClick?.();
+    showModal?.(createElement(BuySpreadCreditsModal));
+  }, [handleVibrationClick, showModal]);
+
+  const quotaA11y = useMemo(() => {
+    if (!quotaBadge) {
+      return undefined;
+    }
+    if (quotaBadge.mode === 'unlimited') {
+      return t('settings:credits.badge.a11yUnlimited');
+    }
+    if (quotaBadge.mode === 'credits') {
+      return t('settings:credits.badge.a11yCredits', {
+        count: quotaBadge.remaining,
+      });
+    }
+    return t('settings:credits.badge.a11yDaily', {
+      count: quotaBadge.remaining,
+    });
+  }, [quotaBadge, t]);
 
   const settingsRoutes = useMemo(
     () =>
@@ -104,6 +157,24 @@ function Settings() {
         <Header
           title={t('settings:settings')}
           titleStyle={styles.settingsBody}
+          rightAction={
+            quotaBadge && quotaBadge.mode !== 'unlimited'
+              ? openBuyCredits
+              : null
+          }
+          rightContent={
+            quotaBadge ? (
+              <SpreadCreditsBadge
+                mode={quotaBadge.mode}
+                remaining={
+                  quotaBadge.mode === 'unlimited'
+                    ? undefined
+                    : quotaBadge.remaining
+                }
+              />
+            ) : undefined
+          }
+          rightAccessibilityLabel={quotaA11y}
         />
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -132,6 +203,47 @@ function Settings() {
                   handleChangeBase<boolean>(value, 'hasReversed');
                 }}
               />
+              <View style={webStyles.dividerInCard} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('settings:credits.buy.row')}
+                onPress={openBuyCredits}
+                style={(s: PressableWebState) => {
+                  const { hovered, pressed } = s;
+                  return [
+                    webStyles.row,
+                    (hovered || pressed) && webStyles.rowActive,
+                  ];
+                }}
+              >
+                <View style={styles.iconWrapper}>
+                  <View style={styles.icon}>
+                    <LightningBolt
+                      width={isTablet ? 28 : 22}
+                      height={isTablet ? 28 : 22}
+                      fill={COLORS.Primary500}
+                    />
+                  </View>
+                  <View style={webStyles.rowTextCol}>
+                    <Text
+                      category={TEXT_TAGS.h4}
+                      style={[styles.text, styles.settingsBody]}
+                    >
+                      {t('settings:credits.buy.row')}
+                    </Text>
+                    <Text
+                      category={TEXT_TAGS.p2}
+                      style={[webStyles.rowHint, styles.settingsFootnote]}
+                    >
+                      {t('settings:credits.buy.rowHint', { count: credits })}
+                    </Text>
+                  </View>
+                </View>
+                <ChevronRightIcon
+                  width={isTablet ? 26 : 17}
+                  height={isTablet ? 26 : 17}
+                />
+              </Pressable>
             </View>
 
             {accountRoutes.length > 0 ? (

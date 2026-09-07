@@ -23,6 +23,16 @@
 
   "hasReversed": "Перевернутые карты",
 
+  "credits.buy.row": "Купить +3 расклада",
+  "credits.buy.rowHint": "Заряды после дневного лимита. Сейчас: {{count}}",
+  "credits.buy.title": "Пакет +3 расклада",
+  "credits.buy.body": "После оплаты в баланс добавятся 3 заряда. Они тратятся, когда дневной лимит уже исчерпан.",
+  "credits.buy.balance": "Сейчас у вас зарядов: {{count}}",
+  "credits.badge.a11yDaily": "Осталось бесплатных раскладов сегодня: {{count}}",
+  "credits.badge.a11yCredits": "Заряды раскладов: {{count}}",
+  "credits.badge.a11yUnlimited": "Безлимитные расклады",
+  "credits.badge.a11y": "Заряды раскладов: {{count}}",
+
   "payments": "Подписка и покупки",
   "payments.restore": "Восстановить покупки",
 

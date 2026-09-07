@@ -82,13 +82,14 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       </View>
 
       <View style={[styles.sideSlot, styles.rightSlot]}>
-        {rightAction ? (
+        {rightContent || rightAction ? (
           <TouchableOpacity
             style={styles.rightButton}
-            onPress={rightAction}
-            activeOpacity={0.7}
+            onPress={rightAction ?? undefined}
+            disabled={!rightAction}
+            activeOpacity={rightAction ? 0.7 : 1}
             hitSlop={{ top: 16, left: 16, bottom: 16, right: 16 }}
-            accessibilityRole="button"
+            accessibilityRole={rightAction ? 'button' : 'none'}
             accessibilityLabel={
               rightAccessibilityLabel ??
               (rightContent

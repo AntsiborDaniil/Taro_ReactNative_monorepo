@@ -26,6 +26,7 @@ export { default as HeartIcon } from './HeartIcon.svg';
 export { default as Infinity } from './Infinity.svg';
 export { default as Lang } from './Lang.svg';
 export { default as LeafIcon } from './LeafIcon.svg';
+export { default as LightningBolt } from './LightningBolt.svg';
 export { default as LockIcon } from './LockIcon.svg';
 export { default as Paint } from './Paint.svg';
 export { default as Payments } from './Payments.svg';
