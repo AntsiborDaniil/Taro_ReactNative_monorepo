@@ -26,10 +26,12 @@ const Carousel = forwardRef(
       decelerationRate,
       itemWidth,
       spaceBetween,
+      edgePadding = 16,
       outerCarouselRef,
       carouselWidth,
       renderItemStyle,
       style: listStyle,
+      contentContainerStyle,
       accessibilityLabel: a11yLabel,
       accessibilityHint: a11yHint,
       ...restProps
@@ -43,9 +45,6 @@ const Carousel = forwardRef(
         style={[
           styles.renderItem,
           {
-            paddingLeft: info.index === 0 ? 16 : 0,
-            paddingRight:
-              data?.length && info.index === data.length - 1 ? 16 : 0,
             maxWidth: itemWidth ?? '100%',
           },
           renderItemStyle,
@@ -72,14 +71,23 @@ const Carousel = forwardRef(
 
     return (
       <GestureHandlerRootView style={styles.container}>
-        <Animated.View style={[styles.container, { maxWidth: carouselWidth }]}>
+        <Animated.View
+          style={[
+            styles.track,
+            carouselWidth != null ? { maxWidth: carouselWidth } : null,
+          ]}
+        >
           <FlatList
             ref={ref}
             data={data}
             renderItem={renderDefaultRenderItem}
-            contentContainerStyle={{
-              gap: spaceBetween,
-            }}
+            contentContainerStyle={[
+              {
+                gap: spaceBetween,
+                paddingHorizontal: edgePadding,
+              },
+              contentContainerStyle,
+            ]}
             horizontal
             bounces={false}
             simultaneousHandlers={
@@ -93,7 +101,7 @@ const Carousel = forwardRef(
             accessibilityRole="list"
             accessibilityLabel={a11yLabel ?? t('core:a11y.horizontalList')}
             accessibilityHint={a11yHint ?? t('core:a11y.horizontalScrollHint')}
-            style={[webScrollStyle, listStyle]}
+            style={[styles.list, webScrollStyle, listStyle]}
             {...restProps}
           />
         </Animated.View>
@@ -106,11 +114,20 @@ Carousel.displayName = 'Carousel';
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: '100%',
+    maxWidth: '100%',
+    alignSelf: 'stretch',
+  },
+  track: {
+    width: '100%',
+    maxWidth: '100%',
+  },
+  list: {
+    width: '100%',
   },
   renderItem: {
     width: 'auto',
+    flexShrink: 0,
   },
 });
 

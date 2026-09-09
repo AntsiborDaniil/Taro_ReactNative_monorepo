@@ -1,4 +1,5 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import { useWindowDimensions } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
@@ -14,7 +15,7 @@ import {
   isWebGuestSession,
   shouldPromptWebSignIn,
 } from 'shared/lib';
-import { horizontalScale } from 'shared/lib/responsive/responsive';
+import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import {
   AnalyticAction,
   ImagePosition,
@@ -29,9 +30,26 @@ type SmallSpreadCardProps = {
   analyticAction?: AnalyticAction;
 };
 
+/** Карточка карусели: ширина от вьюпорта, с потолком чтобы не вылезала за колонку. */
+function useSmallSpreadCardSize() {
+  const { width: winW } = useWindowDimensions();
+
+  return useMemo(() => {
+    const contentW = Math.min(winW, 1280);
+    const padBudget = contentW < 430 ? 36 : 48;
+    const avail = Math.max(240, contentW - padBudget);
+    const width = Math.round(
+      Math.min(168, Math.max(120, Math.min(avail * 0.42, avail - 40)))
+    );
+    const height = Math.round(width * (155 / 165));
+    return { width, height };
+  }, [winW]);
+}
+
 function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
   const { id, name } = spread ?? {};
   const { t: tSpread } = useTranslation('spread');
+  const { width: cardW, height: cardH } = useSmallSpreadCardSize();
 
   const navigation = useNativeNavigation();
 
@@ -44,6 +62,7 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
   });
 
   const { showModal } = useData({ Context: ModalsContext });
+  const { setSelectedTab } = useData({ Context: TabsAndRoutesContext });
 
   const guestFree = isGuestFreeSpreadId(spread?.id);
   const isLocked =
@@ -61,10 +80,11 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
         DeckStyle.FlatIllustration,
         `${id}`,
       ])}
-      width={horizontalScale(165)}
-      height={horizontalScale(155)}
+      width={cardW}
+      height={cardH}
       isLocked={isLocked}
       topRightBadge={guestFree ? tSpread('guestSpread.badge') : undefined}
+      imageResizeMode="cover"
       onPress={async () => {
         if (analyticAction) {
           AppMetrica.reportEvent(analyticAction, {
@@ -86,15 +106,17 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
         const { shouldRedirectToSpreadReading } =
           (await selectSpread?.(spread)) || {};
 
+        setSelectedTab?.(TabRoute.SpreadsTab);
+
         if (shouldRedirectToSpreadReading) {
-          navigation.navigate(TabRoute.MainTab, {
+          navigation.navigate(TabRoute.SpreadsTab, {
             screen: NavigationRoute.SpreadReadings,
           });
 
           return;
         }
 
-        navigation.navigate(TabRoute.MainTab, {
+        navigation.navigate(TabRoute.SpreadsTab, {
           screen: NavigationRoute.SpreadDescriptionChoice,
         });
       }}

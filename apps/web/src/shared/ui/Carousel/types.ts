@@ -23,6 +23,8 @@ export type CarouselProps<T> = {
   itemWidth?: number;
   /* Отступ между слайдами */
   spaceBetween?: number;
+  /** Горизонтальный inset у списка (вместо padding на первом/последнем слайде) */
+  edgePadding?: number;
   renderItem: ListRenderItem<T>;
   renderItemStyle?: StyleProp<ViewStyle>;
 } & FlatListProps<T>;

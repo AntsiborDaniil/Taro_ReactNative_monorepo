@@ -12,7 +12,6 @@ import { DeckStyle } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { blurActiveElement, getImage, isGuestFreeSpreadId, isWebGuestSession, shouldPromptWebSignIn } from 'shared/lib';
-import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { COLORS, getColorOpacity } from 'shared/themes';
 import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -37,10 +36,7 @@ export default function Spreads() {
   const { t: tSpread } = useTranslation('spread');
 
   const navigation = useNativeNavigation();
-  const { selectedTab } = useData({ Context: TabsAndRoutesContext });
-
-  const spreadsNavigatorTab =
-    selectedTab === TabRoute.SpreadsTab ? TabRoute.SpreadsTab : TabRoute.MainTab;
+  const spreadsNavigatorTab = TabRoute.SpreadsTab;
 
   const showWebGuestBanner = isWebGuestSession(isAuthenticated, authSessionLoading);
   const onFabScroll = useMobileFabScrollOnScroll();
@@ -50,7 +46,6 @@ export default function Spreads() {
       <Header
         showBackButton={false}
         title={t('core:page.spreadsGroups')}
-        titleStyle={layout.columns === 1 ? spreadsHeaderTitle.mobile : undefined}
       />
       <ScrollView
         onScroll={onFabScroll}
@@ -179,11 +174,6 @@ export default function Spreads() {
     </ScreenLayout>
   );
 }
-
-const spreadsHeaderTitle = {
-  /** чуть меньше дефолтного h3 (~21), только одна колонка */
-  mobile: { fontSize: 22 },
-};
 
 const styles = StyleSheet.create({
   scrollInner: {

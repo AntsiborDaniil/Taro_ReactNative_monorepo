@@ -11,7 +11,7 @@ import { Layout, StyleService, useStyleSheet } from '@ui-kitten/components';
 import type { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
 import { ChevronLeftIcon, SettingsIcon } from 'shared/icons';
 import { isTablet, WEB_HOVER_TRANSITION } from 'shared/lib';
-import { Text } from 'shared/ui/Text';
+import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui/Text';
 import { useHeaderNavigation } from './useHeaderNavigation';
 
 interface CustomHeaderProps {
@@ -73,7 +73,8 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
 
       <View style={styles.titleSlot}>
         <Text
-          category="h3"
+          category={TEXT_TAGS.h2}
+          weight={TEXT_WEIGHT.medium}
           numberOfLines={1}
           style={StyleSheet.flatten([styles.title, titleStyle])}
         >

@@ -156,7 +156,6 @@ function Settings() {
       <ScreenLayout style={styles.container}>
         <Header
           title={t('settings:settings')}
-          titleStyle={styles.settingsBody}
           rightAction={
             quotaBadge && quotaBadge.mode !== 'unlimited'
               ? openBuyCredits
@@ -354,7 +353,6 @@ function Settings() {
     <ScreenLayout style={styles.container}>
       <Header
         title={t('settings:settings')}
-        titleStyle={styles.settingsBody}
       />
       <ScrollView contentContainerStyle={styles.wrapper}>
         <SwitchElement

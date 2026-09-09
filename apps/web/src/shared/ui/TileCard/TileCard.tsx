@@ -90,7 +90,8 @@ function TileCard({
             <ImageBackground
               source={imageSource}
               style={styles.backgroundImage}
-              resizeMode={imageResizeMode ?? 'stretch'}
+              imageStyle={styles.backgroundImageMedia}
+              resizeMode={imageResizeMode ?? 'cover'}
             >
               {/* Контент поверх фона */}
 
@@ -340,10 +341,23 @@ const styles = StyleService.create({
     textAlign: 'center',
   },
   backgroundImage: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
     justifyContent: 'flex-end',
     alignItems: 'flex-start',
     backgroundColor: COLORS.SpbSky4,
+    overflow: 'hidden',
+  },
+  backgroundImageMedia: {
+    width: '100%',
+    height: '100%',
+    ...(Platform.OS === 'web'
+      ? ({
+          objectFit: 'cover',
+          objectPosition: 'center',
+        } as object)
+      : {}),
   },
   topRightBadge: {
     position: 'absolute',

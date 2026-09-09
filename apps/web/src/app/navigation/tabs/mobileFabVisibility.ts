@@ -6,6 +6,10 @@ export const FAB_HOST_ROUTES: ReadonlySet<string> = new Set([
   NavigationRoute.Main,
   NavigationRoute.Library,
   NavigationRoute.Spreads,
+  /** Library section opened from Main / Library tiles — keep FAB with Library tab focused */
+  NavigationRoute.FavoriteCards,
+  NavigationRoute.CardsDictionary,
+  NavigationRoute.SpreadsHistory,
 ]);
 
 type TabStackState = {

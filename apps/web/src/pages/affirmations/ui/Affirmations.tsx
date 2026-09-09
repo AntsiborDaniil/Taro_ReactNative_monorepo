@@ -8,22 +8,13 @@ import MeditativeVisualizer from './MeditativeVisualizer';
 import SelectCategory from './SelectCategory';
 import { useAffirmationsLayout } from './useAffirmationsLayout';
 
-const affirmationsHeaderTitle = {
-  mobile: { fontSize: 22 },
-};
-
 function Affirmations(): ReactElement {
   const { t } = useTranslation();
   const layout = useAffirmationsLayout();
 
   return (
     <ScreenLayout>
-      <Header
-        title={t('affirmations:affirmations')}
-        titleStyle={
-          layout.isNarrow ? affirmationsHeaderTitle.mobile : undefined
-        }
-      />
+      <Header title={t('affirmations:affirmations')} />
 
       <View style={styles.root}>
         <View
