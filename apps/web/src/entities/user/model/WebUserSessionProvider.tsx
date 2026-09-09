@@ -9,6 +9,7 @@ import { handleWebOAuthReturn } from 'shared/lib/handleWebOAuthReturn';
 import { fetchAuthMeSession } from 'shared/lib/web/fetchAuthMeSession';
 import { tryAuthenticateTelegramMiniApp } from 'shared/lib/web/telegramWebApp';
 import { tryDevQuickLogin } from 'shared/lib/web/tryDevQuickLogin';
+import { getDevMockSession } from 'shared/lib/web/devMockSession';
 import {
   TAROT_AUTH_CHANGED_EVENT,
   type TarotAuthChangedDetail,
@@ -45,7 +46,7 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
       } else if (!user) {
         setSpreadCredits(0);
       }
-      if (user?.id) {
+      if (user?.id && user.email !== 'demo@mindful.local') {
         void migrateLocalDataToCloud(user.id);
       }
     },
@@ -108,6 +109,18 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
 
       if (fallbackUser) {
         applySession(fallbackUser, null, 0);
+        return;
+      }
+
+      // Local walkthrough: pretend signed-in when API is down / not memory-backed
+      const mock = getDevMockSession();
+      if (mock) {
+        if (__DEV__) {
+          console.info(
+            '[dev] using client mock auth session (API quick-login unavailable)'
+          );
+        }
+        applySession(mock.user, mock.tarotDaily, mock.spreadCredits);
         return;
       }
 

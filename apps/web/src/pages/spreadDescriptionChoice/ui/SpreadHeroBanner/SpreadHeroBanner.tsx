@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
   heroTitle: {
     textAlign: 'center',
     color: COLORS.Content,
+    letterSpacing: 0.4,
     textShadowColor: 'rgba(0,0,0,0.55)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 6,

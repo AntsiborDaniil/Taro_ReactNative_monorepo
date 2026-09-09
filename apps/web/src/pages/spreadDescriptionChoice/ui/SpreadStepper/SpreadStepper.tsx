@@ -60,9 +60,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 14,
     gap: 4,
+    marginHorizontal: 8,
+    marginBottom: 4,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: getColorOpacity(COLORS.Primary500, 12),
+    backgroundColor: 'rgba(22, 28, 38, 0.45)',
   },
   step: {
     flex: 1,
@@ -71,32 +77,40 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: getColorOpacity(COLORS.SpbSky1, 35),
-    marginBottom: 6,
+    width: 11,
+    height: 11,
+    borderRadius: 6,
+    backgroundColor: getColorOpacity(COLORS.SpbSky1, 30),
+    marginBottom: 7,
+    borderWidth: 1,
+    borderColor: getColorOpacity(COLORS.Content, 12),
   },
   dotActive: {
-    backgroundColor: COLORS.Primary,
-    transform: [{ scale: 1.15 }],
+    backgroundColor: COLORS.Primary500,
+    borderColor: COLORS.Primary200,
+    transform: [{ scale: 1.2 }],
+    ...({
+      boxShadow: '0 0 12px rgba(246, 192, 27, 0.45)',
+    } as object),
   },
   dotDone: {
-    backgroundColor: getColorOpacity(COLORS.Primary, 70),
+    backgroundColor: getColorOpacity(COLORS.Primary500, 75),
+    borderColor: getColorOpacity(COLORS.Primary300, 50),
   },
   label: {
     fontSize: 10,
     lineHeight: 13,
     textAlign: 'center',
     color: getColorOpacity(COLORS.Content, 45),
-    letterSpacing: 0.2,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
   },
   labelActive: {
-    color: COLORS.Primary,
+    color: COLORS.Primary300,
     fontWeight: '600',
   },
   labelDone: {
-    color: getColorOpacity(COLORS.Content, 65),
+    color: getColorOpacity(COLORS.Content, 68),
   },
   connector: {
     position: 'absolute',
@@ -108,7 +122,7 @@ const styles = StyleSheet.create({
     zIndex: -1,
   },
   connectorActive: {
-    backgroundColor: getColorOpacity(COLORS.Primary, 45),
+    backgroundColor: getColorOpacity(COLORS.Primary500, 55),
   },
 });
 

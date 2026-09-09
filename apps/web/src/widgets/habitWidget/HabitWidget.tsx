@@ -145,12 +145,17 @@ const styles = StyleSheet.create({
   },
   container: {
     borderWidth: 1,
-    borderRadius: 16,
-    borderColor: 'rgba(255,255,255,0.14)',
-    backgroundColor: 'rgba(255,255,255,0.02)',
+    borderRadius: 18,
+    borderColor: 'rgba(246, 192, 27, 0.18)',
+    backgroundColor: 'rgba(22, 28, 38, 0.55)',
     paddingHorizontal: 16,
     paddingVertical: 14,
     gap: 12,
+    ...(globalThis?.window
+      ? ({
+          boxShadow: 'inset 0 1px 0 rgba(246, 192, 27, 0.06)',
+        } as object)
+      : {}),
   },
   row: {
     flexDirection: 'row',
@@ -173,19 +178,27 @@ const styles = StyleSheet.create({
   plus: {
     fontWeight: 700,
     textAlign: 'center',
-    color: COLORS.Content,
+    color: COLORS.Primary100,
   },
   image: {
-    backgroundColor: COLORS.Background2,
+    backgroundColor: 'rgba(246, 192, 27, 0.12)',
     borderWidth: 1,
-    borderColor: COLORS.Primary,
+    borderColor: COLORS.Primary500,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+    ...(globalThis?.window
+      ? ({
+          boxShadow: '0 0 18px rgba(246, 192, 27, 0.18)',
+        } as object)
+      : {}),
   },
   dateText: {
     fontSize: 14,
     lineHeight: 18,
+    color: COLORS.Primary300,
+    letterSpacing: 0.4,
+    textTransform: 'capitalize',
   },
   goalsText: {
     width: '100%',
@@ -197,10 +210,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   percent: {
-    backgroundColor: COLORS.Success700,
+    backgroundColor: 'rgba(41, 167, 92, 0.85)',
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(83, 232, 115, 0.35)',
+    overflow: 'hidden',
   },
   main: {
     justifyContent: 'center',

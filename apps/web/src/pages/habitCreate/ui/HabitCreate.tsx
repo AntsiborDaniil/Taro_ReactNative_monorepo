@@ -84,8 +84,29 @@ function HabitCreate() {
         style={styles.wrapper}
         contentContainerStyle={styles.container}
       >
-        <View style={styles.introCard}>
-          <View style={styles.sectionGlow} />
+        <View
+          style={[
+            styles.introCard,
+            isBuildHabit ? styles.introCardBuild : styles.introCardQuit,
+          ]}
+        >
+          <View
+            style={[
+              styles.sectionGlow,
+              isBuildHabit ? styles.sectionGlowBuild : styles.sectionGlowQuit,
+            ]}
+          />
+          <Text
+            category={TEXT_TAGS.label}
+            style={[
+              styles.introEyebrow,
+              !isBuildHabit && styles.introEyebrowQuit,
+            ]}
+          >
+            {isBuildHabit
+              ? t('habits:choose.badge.build')
+              : t('habits:choose.badge.quit')}
+          </Text>
           <Text
             category={TEXT_TAGS.h4}
             weight={TEXT_WEIGHT.medium}
@@ -394,33 +415,49 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   introCard: {
-    backgroundColor: 'rgba(17, 26, 42, 0.94)',
-    borderRadius: 16,
+    backgroundColor: 'rgba(22, 28, 38, 0.94)',
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(164, 188, 228, 0.2)',
+    borderColor: 'rgba(246, 192, 27, 0.18)',
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 16,
     gap: 6,
     overflow: 'hidden',
     ...(globalThis?.window
       ? ({
-          boxShadow: '0 8px 20px rgba(0, 0, 0, 0.14)',
+          boxShadow: '0 12px 28px rgba(8, 12, 20, 0.32)',
         } as object)
       : {}),
   },
+  introCardBuild: {
+    borderColor: 'rgba(246, 192, 27, 0.28)',
+  },
+  introCardQuit: {
+    borderColor: 'rgba(255, 99, 127, 0.28)',
+  },
+  introEyebrow: {
+    color: COLORS.Primary400,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  introEyebrowQuit: {
+    color: COLORS.Danger400,
+  },
   introTitle: {
     color: COLORS.Content,
+    letterSpacing: 0.2,
     marginBottom: 2,
   },
   introDescription: {
-    color: 'rgba(218, 230, 255, 0.7)',
+    color: 'rgba(244, 244, 245, 0.68)',
     lineHeight: 22,
   },
   sectionTitle: {
     color: COLORS.Content,
   },
   sectionDescription: {
-    color: 'rgba(218, 230, 255, 0.7)',
+    color: 'rgba(244, 244, 245, 0.68)',
     lineHeight: 22,
     marginTop: 2,
   },
@@ -428,14 +465,14 @@ const styles = StyleSheet.create({
     fontSize: 64,
   },
   innerInput: {
-    backgroundColor: 'rgba(255,255,255,0.035)',
-    borderColor: 'rgba(176, 197, 236, 0.2)',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderColor: 'rgba(246, 192, 27, 0.16)',
     paddingLeft: 12,
-    borderRadius: 10,
+    borderRadius: 12,
   },
   radioUnpressed: {
     backgroundColor: 'rgba(255,255,255,0.03)',
-    borderColor: 'rgba(180, 198, 229, 0.2)',
+    borderColor: 'rgba(246, 192, 27, 0.14)',
   },
   radioText: {
     color: COLORS.Content,
@@ -448,28 +485,34 @@ const styles = StyleSheet.create({
     right: 0,
     left: 0,
     marginHorizontal: 16,
-    marginTop: 32,
+    marginTop: 24,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(224, 195, 124, 0.42)',
-    backgroundColor: 'rgba(137, 106, 44, 0.28)',
+    borderColor: 'rgba(246, 192, 27, 0.5)',
+    backgroundColor: 'rgba(246, 192, 27, 0.18)',
+    minHeight: 56,
     ...(globalThis?.window
       ? ({
-          boxShadow: '0 8px 18px rgba(85, 62, 21, 0.22)',
+          boxShadow:
+            '0 10px 28px rgba(85, 62, 21, 0.28), 0 0 20px rgba(246, 192, 27, 0.12)',
         } as object)
       : {}),
   },
   buttonText: {
     color: '#F9ECD2',
+    letterSpacing: 0.3,
   },
   emojiButton: {
     aspectRatio: '1/1',
     height: 100,
-    borderRadius: 10,
+    borderRadius: 14,
     backgroundColor: 'transparent',
   },
   emojiBackground: {
-    borderRadius: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(246, 192, 27, 0.22)',
+    overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',
@@ -480,7 +523,7 @@ const styles = StyleSheet.create({
   controlButton: {
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(176, 197, 236, 0.2)',
+    borderColor: 'rgba(246, 192, 27, 0.18)',
     backgroundColor: 'rgba(255,255,255,0.03)',
     minHeight: 52,
     ...WEB_HOVER_TRANSITION,
@@ -490,38 +533,43 @@ const styles = StyleSheet.create({
   },
   column: {
     flexDirection: 'column',
-    gap: 4,
+    gap: 8,
   },
   shape: {
     padding: 16,
     borderWidth: 1,
-    borderRadius: 16,
-    borderColor: 'rgba(164, 188, 228, 0.2)',
-    backgroundColor: 'rgba(17, 26, 42, 0.9)',
+    borderRadius: 18,
+    borderColor: 'rgba(246, 192, 27, 0.14)',
+    backgroundColor: 'rgba(22, 28, 38, 0.9)',
     gap: 12,
     overflow: 'hidden',
     ...({
-      boxShadow: '0 8px 20px rgba(0,0,0,0.14)',
+      boxShadow: '0 10px 24px rgba(8, 12, 20, 0.28)',
     } as object),
   },
   sectionGlow: {
     position: 'absolute',
-    width: 70,
-    height: 2,
+    width: 72,
+    height: 3,
     top: 0,
     left: 16,
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
-    backgroundColor: 'rgba(182, 166, 245, 0.85)',
+    backgroundColor: COLORS.Primary500,
+  },
+  sectionGlowBuild: {
+    backgroundColor: COLORS.Primary500,
+  },
+  sectionGlowQuit: {
+    backgroundColor: COLORS.Danger500,
   },
   input: {
     borderWidth: 1,
-    borderColor: 'rgba(176, 197, 236, 0.2)',
+    borderColor: 'rgba(246, 192, 27, 0.16)',
     paddingLeft: 12,
-    backgroundColor: 'rgba(255,255,255,0.025)',
-    borderRadius: 10,
-    fontFamily:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    backgroundColor: 'rgba(255,255,255,0.035)',
+    borderRadius: 12,
+    fontFamily: 'Montserrat-Regular',
     fontSize: 14,
     fontWeight: 400,
     color: '#FFFFFF',

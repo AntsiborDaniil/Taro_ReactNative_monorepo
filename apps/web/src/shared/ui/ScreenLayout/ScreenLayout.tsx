@@ -33,6 +33,11 @@ function ScreenLayout({ children, style }: ScreenLayoutProps): ReactNode {
       : insets;
   const { width } = useWindowDimensions();
   const isCompact = width < 760;
+  /** Web: no forced gap above Header — only real safe-area / Telegram inset. */
+  const paddingTop =
+    Platform.OS === 'web'
+      ? layoutInsets.top
+      : Math.max(layoutInsets.top, isCompact ? 6 : 8);
 
   return (
     <>
@@ -50,7 +55,7 @@ function ScreenLayout({ children, style }: ScreenLayoutProps): ReactNode {
             {
               paddingLeft: layoutInsets.left,
               paddingRight: layoutInsets.right,
-              paddingTop: Math.max(layoutInsets.top, isCompact ? 6 : 8),
+              paddingTop,
               paddingBottom: layoutInsets.bottom,
               gap: isCompact ? 12 : 16,
             },
@@ -81,7 +86,6 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     alignItems: 'stretch',
     height: '100%',
-    paddingTop: 8,
     gap: 16,
     backgroundColor: 'transparent',
   },
