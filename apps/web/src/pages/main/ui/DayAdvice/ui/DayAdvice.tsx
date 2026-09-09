@@ -216,8 +216,9 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     textAlign: 'center',
-    color: 'rgba(216, 228, 247, 0.75)',
+    color: 'rgba(246, 192, 27, 0.62)',
     lineHeight: 20,
+    letterSpacing: 0.2,
   },
   heroStage: {
     marginTop: 12,
@@ -255,10 +256,13 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.16)',
+    borderColor: 'rgba(246, 192, 27, 0.42)',
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
     ...(Platform.OS === 'web'
-      ? ({ boxShadow: '0 16px 32px rgba(0, 0, 0, 0.28)' } as object)
+      ? ({
+          boxShadow:
+            '0 18px 36px rgba(0, 0, 0, 0.35), 0 0 28px rgba(246, 192, 27, 0.12)',
+        } as object)
       : {}),
     zIndex: 2,
   },
@@ -298,20 +302,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 1,
     maxWidth: '100%',
-    backgroundColor: 'rgba(8, 12, 22, 0.78)',
+    backgroundColor: 'rgba(8, 12, 22, 0.82)',
     borderWidth: 1,
-    borderColor: 'rgba(232, 238, 255, 0.36)',
+    borderColor: 'rgba(246, 192, 27, 0.35)',
     ...(Platform.OS === 'web'
       ? ({
-          boxShadow: '0 6px 16px rgba(0, 0, 0, 0.22)',
+          boxShadow: '0 6px 16px rgba(0, 0, 0, 0.28)',
         } as object)
       : {}),
   },
   dateLine: {
-    color: '#F2F6FF',
+    color: COLORS.Primary200,
     textAlign: 'center',
     width: '100%',
     textTransform: 'capitalize',
+    letterSpacing: 0.4,
     ...Platform.select({
       web: { whiteSpace: 'nowrap' } as object,
       default: {},
@@ -324,7 +329,7 @@ const styles = StyleSheet.create({
     width: '100%',
     fontSize: 17,
     lineHeight: 21,
-    letterSpacing: 0.1,
+    letterSpacing: 0.4,
   },
   titleInImageCompact: {
     fontSize: 15,
@@ -340,14 +345,14 @@ const styles = StyleSheet.create({
     height: 150,
     top: -76,
     right: -52,
-    backgroundColor: 'rgba(119, 95, 230, 0.22)',
+    backgroundColor: 'rgba(246, 192, 27, 0.16)',
   },
   decorOrbBottom: {
     width: 120,
     height: 120,
     bottom: 8,
     left: -46,
-    backgroundColor: 'rgba(61, 118, 214, 0.2)',
+    backgroundColor: 'rgba(47, 186, 216, 0.14)',
   },
 });
 

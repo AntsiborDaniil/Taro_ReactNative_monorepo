@@ -433,7 +433,7 @@ function createWebStyles() {
       marginTop: 14,
       marginBottom: 4,
       color: COLORS.Primary,
-      letterSpacing: 0.6,
+      letterSpacing: 1.2,
       textTransform: 'uppercase',
     },
     reversedSwitchWrap: {
@@ -445,13 +445,14 @@ function createWebStyles() {
       width: '100%',
       borderRadius: 16,
       borderWidth: 1,
-      borderColor: 'rgba(175, 161, 232, 0.18)',
+      borderColor: 'rgba(246, 192, 27, 0.16)',
       backgroundColor: COLORS.Background2,
       paddingVertical: 8,
       paddingHorizontal: 8,
       ...(Platform.OS === 'web'
         ? ({
-            boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+            boxShadow:
+              '0 10px 32px rgba(8, 12, 20, 0.35), inset 0 1px 0 rgba(246, 192, 27, 0.05)',
           } as object)
         : {}),
     },
@@ -506,7 +507,7 @@ function createWebStyles() {
       padding: 28,
       backgroundColor: COLORS.Background2,
       borderWidth: 1,
-      borderColor: 'rgba(175, 161, 232, 0.25)',
+      borderColor: 'rgba(246, 192, 27, 0.22)',
       gap: 14,
     },
     modalHeader: {

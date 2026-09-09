@@ -11,6 +11,7 @@ import { Layout } from '@ui-kitten/components';
 import type { CSSProperties, ReactNode } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useWebViewportInsets } from 'shared/lib/web/useWebViewportInsets';
+import { FantasyAtmosphere } from '../FantasyAtmosphere';
 import { COLORS } from '../../themes';
 
 type ScreenLayoutProps = {
@@ -32,12 +33,6 @@ function ScreenLayout({ children, style }: ScreenLayoutProps): ReactNode {
       : insets;
   const { width } = useWindowDimensions();
   const isCompact = width < 760;
-  const isWide = width > 1280;
-
-  const topOrbSize = isCompact ? 190 : isWide ? 300 : 260;
-  const bottomOrbSize = isCompact ? 150 : isWide ? 250 : 220;
-  const decorGridSize = isCompact ? 84 : isWide ? 140 : 120;
-  const hideDecorGrid = width < 620;
 
   return (
     <>
@@ -48,45 +43,7 @@ function ScreenLayout({ children, style }: ScreenLayoutProps): ReactNode {
         />
       </View>
       <View style={styles.wrapper}>
-        <View pointerEvents="none" style={styles.decorLayer}>
-          <View
-            style={[
-              styles.decorOrb,
-              styles.decorOrbTop,
-              {
-                width: topOrbSize,
-                height: topOrbSize,
-                top: -Math.round(topOrbSize * 0.54),
-                right: -Math.round(topOrbSize * 0.28),
-              },
-            ]}
-          />
-          <View
-            style={[
-              styles.decorOrb,
-              styles.decorOrbBottom,
-              {
-                width: bottomOrbSize,
-                height: bottomOrbSize,
-                left: -Math.round(bottomOrbSize * 0.42),
-                bottom: -Math.round(bottomOrbSize * 0.5),
-              },
-            ]}
-          />
-          {!hideDecorGrid && (
-            <View
-              style={[
-                styles.decorGrid,
-                {
-                  width: decorGridSize,
-                  height: decorGridSize,
-                  right: isCompact ? 16 : 30,
-                  bottom: isCompact ? 16 : 36,
-                },
-              ]}
-            />
-          )}
-        </View>
+        <FantasyAtmosphere compact={isCompact} wide={width > 1280} />
         <Layout
           style={StyleSheet.flatten([
             styles.layout,
@@ -126,32 +83,7 @@ const styles = StyleSheet.create({
     height: '100%',
     paddingTop: 8,
     gap: 16,
-    backgroundColor: COLORS.Background,
-  },
-  decorLayer: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  decorOrb: {
-    position: 'absolute',
-    borderRadius: 999,
-  },
-  decorOrbTop: {
-    backgroundColor: 'rgba(117, 96, 224, 0.16)',
-  },
-  decorOrbBottom: {
-    backgroundColor: 'rgba(75, 139, 228, 0.13)',
-  },
-  decorGrid: {
-    position: 'absolute',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(175, 161, 232, 0.12)',
-    backgroundColor: 'rgba(170, 148, 250, 0.025)',
-    ...(Platform.OS === 'web'
-      ? ({
-          backdropFilter: 'blur(1px)',
-        } as object)
-      : {}),
+    backgroundColor: 'transparent',
   },
 });
 

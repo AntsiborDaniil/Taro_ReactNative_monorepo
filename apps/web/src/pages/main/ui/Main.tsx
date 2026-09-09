@@ -112,13 +112,14 @@ const styles = StyleSheet.create({
   },
   sectionShell: {
     borderWidth: 1,
-    borderColor: 'rgba(141, 178, 235, 0.16)',
+    borderColor: 'rgba(246, 192, 27, 0.14)',
     borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.015)',
+    backgroundColor: 'rgba(30, 35, 43, 0.55)',
     overflow: 'hidden',
     ...(globalThis?.window
       ? ({
-          boxShadow: '0 10px 22px rgba(10, 15, 26, 0.2)',
+          boxShadow:
+            '0 12px 28px rgba(8, 12, 20, 0.35), inset 0 1px 0 rgba(246, 192, 27, 0.06)',
         } as object)
       : {}),
   },
@@ -128,9 +129,9 @@ const styles = StyleSheet.create({
     bottom: 40,
     width: 88,
     height: 88,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(181, 166, 235, 0.18)',
-    backgroundColor: 'rgba(170, 148, 250, 0.04)',
+    borderColor: 'rgba(246, 192, 27, 0.16)',
+    backgroundColor: 'rgba(246, 192, 27, 0.03)',
   },
 });

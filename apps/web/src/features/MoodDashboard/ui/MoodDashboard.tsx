@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     right: -40,
     top: -35,
-    backgroundColor: 'rgba(109, 82, 224, 0.22)',
+    backgroundColor: 'rgba(246, 192, 27, 0.12)',
     ...(Platform.OS === 'web'
       ? ({
           filter: 'blur(20px)',
@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   chipsHeaderText: {
-    color: 'rgba(195, 211, 248, 0.85)',
+    color: 'rgba(246, 192, 27, 0.72)',
     fontSize: 12,
     fontWeight: '600',
     letterSpacing: 0.35,
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
     height: 170,
     top: -95,
     right: -46,
-    backgroundColor: 'rgba(106, 83, 214, 0.24)',
+    backgroundColor: 'rgba(246, 192, 27, 0.16)',
     ...(Platform.OS === 'web'
       ? ({
           filter: 'blur(16px)',
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
     height: 150,
     bottom: -92,
     left: -54,
-    backgroundColor: 'rgba(62, 117, 205, 0.2)',
+    backgroundColor: 'rgba(47, 186, 216, 0.14)',
     ...(Platform.OS === 'web'
       ? ({
           filter: 'blur(14px)',
@@ -616,8 +616,8 @@ const styles = StyleSheet.create({
     height: 84,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(181, 166, 235, 0.18)',
-    backgroundColor: 'rgba(170, 148, 250, 0.04)',
+    borderColor: 'rgba(246, 192, 27, 0.16)',
+    backgroundColor: 'rgba(246, 192, 27, 0.03)',
     ...(Platform.OS === 'web'
       ? ({
           boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.02)',

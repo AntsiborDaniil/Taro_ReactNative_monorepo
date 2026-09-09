@@ -180,10 +180,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.Background2,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: getColorOpacity(COLORS.SpbSky1, 35),
+    borderColor: getColorOpacity(COLORS.Primary500, 16),
     ...Platform.select({
       web: {
-        boxShadow: '0 10px 28px rgba(0, 0, 0, 0.22)',
+        boxShadow: '0 12px 28px rgba(8, 12, 20, 0.35)',
         cursor: 'pointer',
         ...WEB_HOVER_TRANSITION,
       },
@@ -198,10 +198,13 @@ const styles = StyleSheet.create({
   },
   cardActive: Platform.select({
     web: {
-      boxShadow: '0 16px 36px rgba(0, 0, 0, 0.28)',
+      borderColor: getColorOpacity(COLORS.Primary500, 45),
+      boxShadow:
+        '0 18px 40px rgba(8, 12, 20, 0.42), 0 0 24px rgba(246, 192, 27, 0.14)',
+      transform: [{ translateY: -2 }],
     },
     default: {
-      shadowColor: '#000',
+      shadowColor: COLORS.Primary500,
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.22,
       shadowRadius: 16,
@@ -277,17 +280,17 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   title: {
-    letterSpacing: 0.12,
+    letterSpacing: 0.35,
     color: COLORS.Content,
   },
   hint: {
     marginBottom: 8,
-    color: getColorOpacity(COLORS.Content, 72),
-    letterSpacing: 0.15,
+    color: getColorOpacity(COLORS.Content, 68),
+    letterSpacing: 0.2,
     lineHeight: 22,
   },
   hintActive: {
-    color: COLORS.Primary,
+    color: COLORS.Primary500,
   },
   hintLocked: {
     color: getColorOpacity(COLORS.Content, 52),
