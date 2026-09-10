@@ -18,7 +18,7 @@ export const helpText = `**Команды бота**
 export const openAppHintText =
   'Нажми кнопку, чтобы открыть Mini App на Vercel:';
 
-export const lavaPaymentSuccessText = `Оплата прошла. Кредиты зачисляются автоматически — открой приложение и обнови баланс, если ещё не видно +3.`;
+export const lavaPaymentSuccessText = `Оплата прошла. Заряды (+3) зачисляются автоматически — обычно это занимает около 5 минут. Открой приложение и обнови баланс, если ещё не видно.`;
 
 export const lavaPaymentFailedText = `Оплата не завершилась. Можно попробовать снова из приложения.`;
 

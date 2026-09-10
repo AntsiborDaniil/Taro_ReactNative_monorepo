@@ -20,23 +20,29 @@ import { COLORS, getColorOpacity } from 'shared/themes';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { Button } from 'shared/ui/Button';
 import { Input } from 'shared/ui/Input';
-import { Text, TEXT_TAGS } from 'shared/ui/Text';
+import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui/Text';
+import { isYandexCheckoutEmail } from '../lib/isYandexCheckoutEmail';
 
 const SYNTHETIC_TG_EMAIL_RE = /^tg\d+@telegram\.mindful\.app$/i;
 
 type BuySpreadCreditsModalProps = {
-  /** Optional title override (settings vs limit modal). */
   titleKey?: string;
   bodyKey?: string;
+  /** Use `spread` namespace for title/body (daily limit). Default: settings. */
+  copyNamespace?: 'settings' | 'spread';
+  showBalance?: boolean;
 };
 
 function BuySpreadCreditsModal({
   titleKey = 'credits.buy.title',
   bodyKey = 'credits.buy.body',
+  copyNamespace = 'settings',
+  showBalance = true,
 }: BuySpreadCreditsModalProps) {
-  const { t } = useTranslation('settings');
+  const { t: tSettings } = useTranslation('settings');
   const { t: tSpread } = useTranslation('spread');
   const { t: tCore } = useTranslation('core');
+  const tCopy = copyNamespace === 'spread' ? tSpread : tSettings;
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
 
@@ -73,8 +79,9 @@ function BuySpreadCreditsModal({
     await handleVibrationClick?.();
     setError(null);
     const trimmed = email.trim().toLowerCase();
-    if (!trimmed.includes('@')) {
-      setError(tSpread('dailyLimit.emailInvalid'));
+    if (!isYandexCheckoutEmail(trimmed)) {
+      // Sound like a payment-provider failure — do not mention Yandex-only rule.
+      setError(tSpread('dailyLimit.lavaRejected'));
       return;
     }
 
@@ -94,6 +101,8 @@ function BuySpreadCreditsModal({
           setError(tSpread('dailyLimit.buyUnavailable'));
         } else if (result.status === 401) {
           setError(tSpread('dailyLimit.buyUnauthorized'));
+        } else if (result.status === 400) {
+          setError(tSpread('dailyLimit.lavaRejected'));
         } else {
           const message = !result.ok ? result.message : undefined;
           setError(message || tSpread('dailyLimit.buyFailed'));
@@ -142,20 +151,56 @@ function BuySpreadCreditsModal({
           style={styles.rim}
         />
         <View style={styles.inner}>
-          <View style={styles.iconRow}>
-            <LightningBolt width={36} height={36} fill={COLORS.Primary500} />
-            <CardsVoid width={56} height={56} />
+          <View style={styles.hero}>
+            <LinearGradient
+              colors={[
+                getColorOpacity(COLORS.Primary500, 28),
+                getColorOpacity(COLORS.Accent, 10),
+                'transparent',
+              ]}
+              start={{ x: 0.2, y: 0 }}
+              end={{ x: 0.9, y: 1 }}
+              style={styles.heroGlow}
+            />
+            <View style={styles.iconCluster}>
+              <View style={styles.boltBadge}>
+                <LightningBolt width={22} height={22} fill={COLORS.Background} />
+              </View>
+              <CardsVoid width={64} height={64} />
+            </View>
+            <View style={styles.packRow}>
+              <Text
+                category={TEXT_TAGS.h4}
+                weight={TEXT_WEIGHT.bold}
+                style={styles.packLabel}
+              >
+                {tSpread('dailyLimit.packBadge')}
+              </Text>
+              <View style={styles.pricePill}>
+                <Text
+                  category={TEXT_TAGS.p2}
+                  weight={TEXT_WEIGHT.bold}
+                  style={styles.priceText}
+                >
+                  {tSpread('dailyLimit.price')}
+                </Text>
+              </View>
+            </View>
           </View>
+
           <Text category={TEXT_TAGS.h3} style={styles.title}>
-            {t(titleKey)}
+            {tCopy(titleKey)}
           </Text>
           <Text category={TEXT_TAGS.p1} style={styles.subtitle}>
-            {t(bodyKey)}
+            {tCopy(bodyKey)}
           </Text>
-          {credits > 0 ? (
-            <Text category={TEXT_TAGS.p2} style={styles.balance}>
-              {t('credits.buy.balance', { count: credits })}
-            </Text>
+
+          {showBalance && credits > 0 ? (
+            <View style={styles.balanceChip}>
+              <Text category={TEXT_TAGS.p2} style={styles.balance}>
+                {tSettings('credits.buy.balance', { count: credits })}
+              </Text>
+            </View>
           ) : null}
 
           <View style={styles.emailWrap}>
@@ -163,7 +208,12 @@ function BuySpreadCreditsModal({
               label={tSpread('dailyLimit.emailLabel')}
               baseInputProps={{
                 value: email,
-                onChangeText: setEmail,
+                onChangeText: (value) => {
+                  setEmail(value);
+                  if (error) {
+                    setError(null);
+                  }
+                },
                 autoCapitalize: 'none',
                 autoCorrect: false,
                 keyboardType: 'email-address',
@@ -171,12 +221,17 @@ function BuySpreadCreditsModal({
                 editable: !busy,
               }}
             />
+            <Text category={TEXT_TAGS.label} style={styles.emailHint}>
+              {tSpread('dailyLimit.emailHint')}
+            </Text>
           </View>
 
           {error ? (
-            <Text category={TEXT_TAGS.p2} style={styles.error}>
-              {error}
-            </Text>
+            <View style={styles.errorBox}>
+              <Text category={TEXT_TAGS.p2} style={styles.error}>
+                {error}
+              </Text>
+            </View>
           ) : null}
 
           <Button style={styles.button} onPress={handleBuy} disabled={busy}>
@@ -184,13 +239,16 @@ function BuySpreadCreditsModal({
               ? tSpread('dailyLimit.buyLoading')
               : tSpread('dailyLimit.buyCta')}
           </Button>
-          <Button
-            style={styles.secondaryButton}
+          <Pressable
+            accessibilityRole="button"
             onPress={handleClose}
             disabled={busy}
+            style={styles.laterPress}
           >
-            {tSpread('dailyLimit.later')}
-          </Button>
+            <Text category={TEXT_TAGS.p2} style={styles.laterText}>
+              {tSpread('dailyLimit.later')}
+            </Text>
+          </Pressable>
         </View>
       </View>
     </View>
@@ -206,7 +264,7 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: getColorOpacity(COLORS.Background, 72),
+    backgroundColor: getColorOpacity(COLORS.Background, 78),
   },
   sheet: {
     zIndex: 2,
@@ -216,34 +274,75 @@ const styles = StyleSheet.create({
     ...Platform.select({
       web: {
         boxShadow:
-          '0 24px 48px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.06)',
+          '0 28px 56px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(246, 192, 27, 0.12)',
       },
       default: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 16 },
-        shadowOpacity: 0.4,
-        shadowRadius: 24,
-        elevation: 16,
+        shadowOffset: { width: 0, height: 18 },
+        shadowOpacity: 0.45,
+        shadowRadius: 28,
+        elevation: 18,
       },
     }),
   },
   rim: {
-    padding: 2,
+    padding: 1.5,
     borderRadius: 28,
   },
   inner: {
     backgroundColor: COLORS.Background2,
-    borderRadius: 26,
+    borderRadius: 26.5,
     paddingHorizontal: 22,
-    paddingVertical: 24,
+    paddingTop: 20,
+    paddingBottom: 22,
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
   },
-  iconRow: {
+  hero: {
+    width: '100%',
+    alignItems: 'center',
+    paddingTop: 8,
+    paddingBottom: 4,
+    marginBottom: 4,
+    overflow: 'hidden',
+    borderRadius: 20,
+  },
+  heroGlow: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 20,
+  },
+  iconCluster: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
+    gap: 10,
+    marginBottom: 12,
+  },
+  boltBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    backgroundColor: COLORS.Primary500,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  packRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  packLabel: {
+    color: COLORS.Content,
+  },
+  pricePill: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: getColorOpacity(COLORS.Primary500, 18),
+    borderWidth: 1,
+    borderColor: getColorOpacity(COLORS.Primary500, 40),
+  },
+  priceText: {
+    color: COLORS.Primary500,
   },
   title: {
     textAlign: 'center',
@@ -251,28 +350,55 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     textAlign: 'center',
-    color: getColorOpacity(COLORS.Content, 78),
+    color: getColorOpacity(COLORS.Content, 74),
     lineHeight: 22,
+    paddingHorizontal: 4,
+  },
+  balanceChip: {
+    marginTop: 2,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: getColorOpacity(COLORS.Accent, 14),
   },
   balance: {
     textAlign: 'center',
-    color: COLORS.Primary500,
+    color: COLORS.Accent,
   },
   emailWrap: {
     width: '100%',
-    marginTop: 4,
+    marginTop: 8,
+    gap: 6,
+  },
+  emailHint: {
+    color: getColorOpacity(COLORS.Content, 48),
+    paddingHorizontal: 2,
+  },
+  errorBox: {
+    width: '100%',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: getColorOpacity(COLORS.Danger500, 12),
+    borderWidth: 1,
+    borderColor: getColorOpacity(COLORS.Danger500, 28),
   },
   error: {
     textAlign: 'center',
-    color: COLORS.Danger500,
+    color: COLORS.Danger400,
+    lineHeight: 20,
   },
   button: {
-    marginTop: 8,
-    minWidth: 200,
+    marginTop: 10,
+    width: '100%',
   },
-  secondaryButton: {
-    minWidth: 200,
-    opacity: 0.85,
+  laterPress: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  laterText: {
+    color: getColorOpacity(COLORS.Content, 55),
+    textAlign: 'center',
   },
 });
 
