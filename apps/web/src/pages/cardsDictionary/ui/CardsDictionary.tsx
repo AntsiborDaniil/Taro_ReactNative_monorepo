@@ -63,12 +63,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: CARDS_GRID_SIDE_PADDING_COMPACT,
   },
   content: {
-    paddingBottom: 28,
+    paddingBottom: 36,
+    paddingTop: 4,
   },
   text: {
     textAlign: 'center',
-    marginTop: 16,
-    marginBottom: 10,
+    marginTop: 18,
+    marginBottom: 12,
   },
 });
 

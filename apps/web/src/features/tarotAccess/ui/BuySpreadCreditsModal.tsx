@@ -101,10 +101,16 @@ function BuySpreadCreditsModal({
           setError(tSpread('dailyLimit.buyUnavailable'));
         } else if (result.status === 401) {
           setError(tSpread('dailyLimit.buyUnauthorized'));
-        } else if (result.status === 400) {
+        } else if (
+          result.status === 400 ||
+          result.code === 'invalid_email'
+        ) {
           setError(tSpread('dailyLimit.lavaRejected'));
+        } else if (result.status === 502 || result.code === 'lava_checkout_failed') {
+          const message = result.message?.trim();
+          setError(message || tSpread('dailyLimit.lavaRejected'));
         } else {
-          const message = !result.ok ? result.message : undefined;
+          const message = result.message?.trim();
           setError(message || tSpread('dailyLimit.buyFailed'));
         }
         return;
@@ -168,24 +174,13 @@ function BuySpreadCreditsModal({
               </View>
               <CardsVoid width={64} height={64} />
             </View>
-            <View style={styles.packRow}>
-              <Text
-                category={TEXT_TAGS.h4}
-                weight={TEXT_WEIGHT.bold}
-                style={styles.packLabel}
-              >
-                {tSpread('dailyLimit.packBadge')}
-              </Text>
-              <View style={styles.pricePill}>
-                <Text
-                  category={TEXT_TAGS.p2}
-                  weight={TEXT_WEIGHT.bold}
-                  style={styles.priceText}
-                >
-                  {tSpread('dailyLimit.price')}
-                </Text>
-              </View>
-            </View>
+            <Text
+              category={TEXT_TAGS.h4}
+              weight={TEXT_WEIGHT.bold}
+              style={styles.packLabel}
+            >
+              {tSpread('dailyLimit.packBadge')}
+            </Text>
           </View>
 
           <Text category={TEXT_TAGS.h3} style={styles.title}>
@@ -206,6 +201,7 @@ function BuySpreadCreditsModal({
           <View style={styles.emailWrap}>
             <Input
               label={tSpread('dailyLimit.emailLabel')}
+              errorContent={error ?? undefined}
               baseInputProps={{
                 value: email,
                 onChangeText: (value) => {
@@ -225,14 +221,6 @@ function BuySpreadCreditsModal({
               {tSpread('dailyLimit.emailHint')}
             </Text>
           </View>
-
-          {error ? (
-            <View style={styles.errorBox}>
-              <Text category={TEXT_TAGS.p2} style={styles.error}>
-                {error}
-              </Text>
-            </View>
-          ) : null}
 
           <Button style={styles.button} onPress={handleBuy} disabled={busy}>
             {busy
@@ -325,24 +313,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  packRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
   packLabel: {
     color: COLORS.Content,
-  },
-  pricePill: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 999,
-    backgroundColor: getColorOpacity(COLORS.Primary500, 18),
-    borderWidth: 1,
-    borderColor: getColorOpacity(COLORS.Primary500, 40),
-  },
-  priceText: {
-    color: COLORS.Primary500,
+    textAlign: 'center',
   },
   title: {
     textAlign: 'center',
@@ -373,20 +346,6 @@ const styles = StyleSheet.create({
   emailHint: {
     color: getColorOpacity(COLORS.Content, 48),
     paddingHorizontal: 2,
-  },
-  errorBox: {
-    width: '100%',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 12,
-    backgroundColor: getColorOpacity(COLORS.Danger500, 12),
-    borderWidth: 1,
-    borderColor: getColorOpacity(COLORS.Danger500, 28),
-  },
-  error: {
-    textAlign: 'center',
-    color: COLORS.Danger400,
-    lineHeight: 20,
   },
   button: {
     marginTop: 10,

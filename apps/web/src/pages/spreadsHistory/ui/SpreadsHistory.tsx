@@ -43,11 +43,13 @@ export default function SpreadsGroups() {
           keyExtractor={(item) => item.uid ?? ''}
           style={styles.spreads}
           renderSectionHeader={({ section: { title } }) => (
-            <Text category={TEXT_TAGS.h3}>{title}</Text>
+            <Text category={TEXT_TAGS.h3} style={styles.sectionTitle}>
+              {title}
+            </Text>
           )}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
-          contentContainerStyle={{ gap: 16 }}
+          contentContainerStyle={{ gap: 14, paddingBottom: 8 }}
           renderItem={({ item }: { item: TSpread }) => {
             const date = new Date(item.date ?? '');
 
@@ -127,16 +129,23 @@ const styles = StyleSheet.create({
   },
   spreads: {
     gap: 16,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 8,
     paddingBottom: 48,
+  },
+  sectionTitle: {
+    marginTop: 8,
+    marginBottom: 4,
   },
   historyItem: {
     backgroundColor: getColorOpacity(COLORS.Secondary, 48),
     borderRadius: 16,
-    padding: 12,
+    padding: 14,
+    marginBottom: 4,
   },
   historyItem_top: { justifyContent: 'space-between', flexDirection: 'row' },
   question: {
     color: COLORS.SpbSky1,
+    marginTop: 6,
   },
 });

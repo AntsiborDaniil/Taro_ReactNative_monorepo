@@ -38,8 +38,8 @@ function FavoriteCards() {
 
 const styles = StyleSheet.create({
   wrapper: {
-    padding: 16,
-    paddingTop: 0,
+    paddingHorizontal: 16,
+    paddingTop: 8,
     paddingBottom: 48,
   },
 });

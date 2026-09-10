@@ -6,7 +6,7 @@ import {
 
 export type CloudFetchResult<T> =
   | { ok: true; data: T; status: number }
-  | { ok: false; status: number; message?: string };
+  | { ok: false; status: number; message?: string; code?: string };
 
 export async function cloudFetch<T>(
   path: string,
@@ -27,13 +27,18 @@ export async function cloudFetch<T>(
 
     if (!response.ok) {
       let message: string | undefined;
+      let code: string | undefined;
       try {
-        const body = (await response.json()) as { message?: string };
+        const body = (await response.json()) as {
+          message?: string;
+          code?: string;
+        };
         message = body.message;
+        code = body.code;
       } catch {
         // ignore
       }
-      return { ok: false, status: response.status, message };
+      return { ok: false, status: response.status, message, code };
     }
 
     if (response.status === 204) {

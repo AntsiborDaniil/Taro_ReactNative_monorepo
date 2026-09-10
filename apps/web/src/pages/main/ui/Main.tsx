@@ -63,7 +63,7 @@ function Main() {
                 <View
                   style={[
                     styles.tarotCluster,
-                    { gap: isCompact ? 6 : 8 },
+                    { gap: isCompact ? 10 : 12 },
                   ]}
                 >
                   <DeferredMount delayMs={100} fallback={null}>
@@ -100,7 +100,7 @@ function Main() {
                 <View
                   style={[
                     styles.tarotCluster,
-                    { gap: isCompact ? 6 : 8 },
+                    { gap: isCompact ? 10 : 12 },
                   ]}
                 >
                   <MainQuickLinks />
@@ -163,7 +163,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   carouselPad: {
-    paddingVertical: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 4,
     width: '100%',
     maxWidth: '100%',
     overflow: 'hidden',

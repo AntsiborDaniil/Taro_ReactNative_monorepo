@@ -140,10 +140,10 @@ export function useLibraryLayout(): LibraryLayout {
 
     const contentWidth = getMaxContentWidth(layoutW);
     const padding = Math.round(
-      Math.min(16, Math.max(8, ms(layoutW, 11) + layoutW * 0.01))
+      Math.min(20, Math.max(14, ms(layoutW, 14) + layoutW * 0.008))
     );
     const gap = Math.round(
-      Math.min(14, Math.max(8, ms(layoutW, 11) + layoutW * 0.01))
+      Math.min(16, Math.max(10, ms(layoutW, 12) + layoutW * 0.01))
     );
 
     const inner = Math.max(0, contentWidth - 2 * padding);

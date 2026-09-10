@@ -56,7 +56,8 @@ export const lavaPaymentsRoute = async (
       if (!isValidCheckoutEmail(email)) {
         return reply.status(400).send({
           code: 'invalid_email',
-          message: 'A valid email is required for checkout',
+          message:
+            'Lava error: could not create payment. Check the email and try again.',
         });
       }
 
@@ -76,7 +77,8 @@ export const lavaPaymentsRoute = async (
         if (message === 'INVALID_EMAIL') {
           return reply.status(400).send({
             code: 'invalid_email',
-            message: 'A valid email is required for checkout',
+            message:
+              'Lava error: could not create payment. Check the email and try again.',
           });
         }
         if (message === 'LAVA_NOT_CONFIGURED') {
@@ -85,9 +87,22 @@ export const lavaPaymentsRoute = async (
             message: 'Lava payments are not configured on this server',
           });
         }
+        if (message === 'LAVA_INVOICE_INCOMPLETE') {
+          return reply.status(502).send({
+            code: 'lava_checkout_failed',
+            message: 'Lava error: incomplete payment response. Try again.',
+          });
+        }
+        // Surface provider text (email rejected, offer issues, etc.)
+        const lavaMessage =
+          message && !message.startsWith('Lava invoice failed')
+            ? message
+            : 'Lava error: could not create payment. Try again.';
         return reply.status(502).send({
           code: 'lava_checkout_failed',
-          message: 'Could not create Lava payment',
+          message: lavaMessage.startsWith('Lava')
+            ? lavaMessage
+            : `Lava error: ${lavaMessage}`,
         });
       }
     }

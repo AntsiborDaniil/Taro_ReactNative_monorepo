@@ -149,8 +149,8 @@ const styles = StyleSheet.create({
   webBody: {
     flex: 1,
     minHeight: 0,
-    paddingTop: 8,
-    paddingBottom: 20,
+    paddingTop: 12,
+    paddingBottom: 24,
     paddingHorizontal: 16,
     alignItems: 'center',
   },
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     width: '100%',
     flex: 1,
     minHeight: 0,
-    gap: 12,
+    gap: 14,
   },
   iframeChrome: {
     flex: 1,
@@ -211,8 +211,8 @@ const styles = StyleSheet.create({
   nativeFrame: {
     flex: 1,
     minHeight: 0,
-    marginHorizontal: 12,
-    marginBottom: 12,
+    marginHorizontal: 16,
+    marginBottom: 16,
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,

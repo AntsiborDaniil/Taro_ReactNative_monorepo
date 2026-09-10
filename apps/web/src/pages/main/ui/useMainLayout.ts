@@ -33,10 +33,10 @@ export function useMainLayout(): MainLayout {
     const isCompact = W < 430;
     const contentWidth = Math.min(W, MAX_CONTENT_WIDTH);
     const padding = Math.round(
-      Math.min(24, Math.max(isCompact ? 10 : 12, ms(W, isCompact ? 12 : 16)))
+      Math.min(24, Math.max(isCompact ? 14 : 16, ms(W, isCompact ? 14 : 16)))
     );
     const sectionGap = Math.round(
-      Math.min(36, Math.max(isCompact ? 12 : 18, ms(W, isCompact ? 14 : 24)))
+      Math.min(32, Math.max(isCompact ? 14 : 18, ms(W, isCompact ? 16 : 22)))
     );
     const bottomMargin = Math.round(
       Math.min(56, Math.max(isCompact ? 16 : 24, (H / 812) * 36))

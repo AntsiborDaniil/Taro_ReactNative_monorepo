@@ -112,8 +112,10 @@ const styleSheet = StyleService.create({
   },
   wrapperScreen: {
     flex: 1,
-    gap: 18,
-    padding: 14,
+    gap: 16,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 24,
   },
   wrapperModal: {
     gap: 12,

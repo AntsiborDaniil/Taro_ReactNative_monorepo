@@ -1,9 +1,8 @@
 import React from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import { TextInputProps } from 'react-native/Libraries/Components/TextInput/TextInput';
-import { COLORS } from '../../themes';
-import { Text } from '../Text';
+import { COLORS, getColorOpacity } from '../../themes';
+import { Text, TEXT_TAGS } from '../Text';
 
 type InputProps = {
   errorContent?: string;
@@ -11,25 +10,41 @@ type InputProps = {
   baseInputProps: TextInputProps;
 };
 
-const Input = ({ label, baseInputProps = {} }: InputProps) => {
-  const { t } = useTranslation();
+const Input = ({ label, errorContent, baseInputProps = {} }: InputProps) => {
+  const hasError = Boolean(errorContent?.trim());
 
   return (
     <View style={styles.wrapper}>
-      {!!label && <Text>{t(label)}</Text>}
+      {!!label && (
+        <Text category={TEXT_TAGS.p2} style={styles.label}>
+          {label}
+        </Text>
+      )}
       <TextInput
         {...baseInputProps}
-        style={[styles.input, baseInputProps?.style]}
+        style={[
+          styles.input,
+          hasError && styles.inputError,
+          baseInputProps?.style,
+        ]}
         placeholderTextColor={
           baseInputProps.placeholderTextColor ?? 'rgba(255,255,255,0.46)'
         }
       />
+      {hasError ? (
+        <Text category={TEXT_TAGS.label} style={styles.errorText}>
+          {errorContent}
+        </Text>
+      ) : null}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   wrapper: { flex: 1, position: 'relative', gap: 8 },
+  label: {
+    color: COLORS.Content,
+  },
   input: {
     borderWidth: 1,
     borderStyle: 'solid',
@@ -43,6 +58,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     minHeight: 52,
     backgroundColor: COLORS.Background2,
+  },
+  inputError: {
+    borderColor: COLORS.Danger400,
+    backgroundColor: getColorOpacity(COLORS.Danger500, 8),
+  },
+  errorText: {
+    color: COLORS.Danger400,
+    lineHeight: 18,
   },
 });
 

@@ -425,11 +425,11 @@ function createWebStyles() {
     pageColumn: {
       width: '100%',
       alignSelf: 'center',
-      gap: 10,
+      gap: 14,
     },
     sectionLabel: {
-      marginTop: 14,
-      marginBottom: 4,
+      marginTop: 16,
+      marginBottom: 6,
       color: COLORS.Primary,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
@@ -556,8 +556,10 @@ const styleSheet = StyleService.create({
   wrapper: {
     flex: 1,
     justifyContent: 'center',
-    gap: moderateScale(14),
-    padding: moderateScale(14),
+    gap: moderateScale(16),
+    paddingHorizontal: moderateScale(16),
+    paddingTop: moderateScale(8),
+    paddingBottom: moderateScale(24),
   },
   icon: {
     width: 30,
@@ -585,10 +587,13 @@ const styleSheet = StyleService.create({
   },
   agreements: {
     flexDirection: 'row',
-    gap: moderateScale(8),
+    flexWrap: 'wrap',
+    gap: moderateScale(12),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: moderateScale(44),
+    marginTop: moderateScale(8),
+    marginBottom: moderateScale(48),
+    paddingHorizontal: moderateScale(8),
   },
   agreement: {
     textDecorationLine: 'underline',

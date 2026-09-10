@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   column: {
-    paddingTop: 4,
+    paddingTop: 8,
     width: '100%',
   },
   introLead: {
