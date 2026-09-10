@@ -1,20 +1,15 @@
 import { useEffect } from 'react';
 import { useNavigationState } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { AffirmationsContext, useAffirmations } from 'entities/affirmations';
 import { MoodAndEnergyContext, useMoodAndEnergy } from 'entities/moodAndEnergy';
 import { Main } from 'pages/main';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { DataProvider, MultiProvider, useData } from 'shared/DataProvider';
-import { ensureI18nNamespaces } from 'shared/lib/i18n/loadNamespaces';
 import { NavigationRoute, TabRoute } from 'shared/types';
 import { darkStackScreenOptions } from '../stackScreenOptions';
 import {
-  LazyAffirmations,
-  LazyCardsDictionary,
   LazyDayAdvice,
   LazyDetailCard,
-  LazyFavoriteCards,
   LazyGoalCelebration,
   LazyHabitChoose,
   LazyHabitCreate,
@@ -23,15 +18,11 @@ import {
   LazyMotivationScreen,
   LazySpreadDescriptionChoice,
   LazySpreadReadings,
-  LazySpreads,
-  LazySpreadsHistory,
 } from '../lazyScreens';
 
 const MainStack = createNativeStackNavigator();
 
 function MainScreen() {
-  const affrmationsContextData = useAffirmations();
-
   const moodAndEnergyContextData = useMoodAndEnergy();
 
   const state = useNavigationState((navState) => navState);
@@ -45,18 +36,9 @@ function MainScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
-  useEffect(() => {
-    void ensureI18nNamespaces('affirmations');
-  }, []);
-
   return (
     <MultiProvider
       providers={[
-        <DataProvider
-          Context={AffirmationsContext}
-          value={affrmationsContextData}
-          key="AffirmationsContext"
-        />,
         <DataProvider
           Context={MoodAndEnergyContext}
           value={moodAndEnergyContextData}
@@ -74,7 +56,6 @@ function MainScreen() {
           name={NavigationRoute.DayAdvice}
           component={LazyDayAdvice}
         />
-        <MainStack.Screen name={NavigationRoute.Spreads} component={LazySpreads} />
         <MainStack.Screen
           name={NavigationRoute.MotivationCard}
           component={LazyMotivationScreen}
@@ -95,22 +76,7 @@ function MainScreen() {
           name={NavigationRoute.GoalCelebration}
           component={LazyGoalCelebration}
         />
-        <MainStack.Screen
-          name={NavigationRoute.SpreadsHistory}
-          component={LazySpreadsHistory}
-        />
-        <MainStack.Screen
-          name={NavigationRoute.Affirmations}
-          component={LazyAffirmations}
-        />
-        <MainStack.Screen
-          name={NavigationRoute.CardsDictionary}
-          component={LazyCardsDictionary}
-        />
-        <MainStack.Screen
-          name={NavigationRoute.FavoriteCards}
-          component={LazyFavoriteCards}
-        />
+        {/* Day-card / in-main spread session only — catalog & library live on their tabs */}
         <MainStack.Screen
           name={NavigationRoute.SpreadReadings}
           component={LazySpreadReadings}

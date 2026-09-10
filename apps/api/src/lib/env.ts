@@ -43,6 +43,15 @@ export function getWebAppUrl(): string | undefined {
   return value || undefined;
 }
 
+/** Bot @username without @ — used for Lava return URLs (t.me/<bot>?start=…). */
+export function getTelegramBotUsername(): string {
+  const raw =
+    process.env.TELEGRAM_BOT_USERNAME?.trim() ||
+    process.env.TELEGRAM_BOT_NAME?.trim() ||
+    'MindFullTaro_bot';
+  return raw.replace(/^@/, '');
+}
+
 export function getLavaApiKey(): string | undefined {
   return process.env.LAVA_API_KEY?.trim() || undefined;
 }

@@ -4,3 +4,4 @@ export * from './settingsApi';
 export * from './spreadMapping';
 export * from './spreadsApi';
 export * from './types';
+export * from './wakeCloudApi';

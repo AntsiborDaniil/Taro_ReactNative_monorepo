@@ -1,4 +1,3 @@
-import { Affirmations } from 'pages/affirmations';
 import { CardsDictionary } from 'pages/cardsDictionary';
 import { DayAdvice } from 'pages/dayAdvice';
 import { DetailCard } from 'pages/detailCard';
@@ -26,7 +25,6 @@ import { WebView } from 'shared/ui';
 const pageFallback = <PageSkeleton />;
 
 const CARD_I18N = { i18nNamespaces: ['card'] };
-const AFFIRMATIONS_I18N = { i18nNamespaces: ['affirmations'] };
 
 export const LazyMoodAndEnergyScreen = createLazyScreen(
   () =>
@@ -88,12 +86,6 @@ export const LazySpreadsHistory = createLazyScreen(
     import('pages/spreadsHistory').then((m) => ({ default: m.SpreadsHistory })),
   SpreadsHistory,
   { fallback: <HistoryListSkeleton /> }
-);
-
-export const LazyAffirmations = createLazyScreen(
-  () => import('pages/affirmations').then((m) => ({ default: m.Affirmations })),
-  Affirmations,
-  { fallback: pageFallback, ...AFFIRMATIONS_I18N }
 );
 
 export const LazyCardsDictionary = createLazyScreen(

@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
+import { navigateInTab } from 'app/navigation/navigateInTab';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
 import { TSelectedTarotCard, TTarotCard } from 'shared/api';
@@ -9,7 +10,6 @@ import { HeartIcon } from 'shared/icons';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
-import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { FavoritesContext } from '../../model';
 import { FavoriteLikeErrorModal } from '../FavoriteLikeErrorModal';
 
@@ -25,7 +25,6 @@ function LikeCard({ card, onAdditionalPress }: LikeCardProps) {
 
   const { showModal } = useData({ Context: ModalsContext });
   const navigation = useNativeNavigation();
-  const { selectedTab } = useData({ Context: TabsAndRoutesContext });
   const { t } = useTranslation();
 
   return (
@@ -44,7 +43,8 @@ function LikeCard({ card, onAdditionalPress }: LikeCardProps) {
               text1: t('core:card.added1'),
               text2: t('core:card.added2'),
               onPress: () =>
-                navigation.navigate(selectedTab as TabRoute, {
+                navigateInTab(navigation, {
+                  tab: TabRoute.LibraryTab,
                   screen: NavigationRoute.FavoriteCards,
                 }),
             });

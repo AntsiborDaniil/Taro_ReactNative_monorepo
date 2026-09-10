@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { SpreadContext } from 'entities/Spread';
 import { SpreadName, SpreadsCategory } from 'shared/api';
-import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { NavigationRoute, TabRoute } from 'shared/types';
@@ -21,7 +20,6 @@ const LIBRARY_ORIGIN_ROUTES = new Set<string>([
 
 export function useSpreadCatalogBack() {
   const navigation = useNativeNavigation();
-  const { selectedTab } = useData({ Context: TabsAndRoutesContext });
   const { spread } = useData({ Context: SpreadContext });
 
   return useCallback(() => {
@@ -46,19 +44,17 @@ export function useSpreadCatalogBack() {
       return;
     }
 
-    const spreadsTab =
-      selectedTab === TabRoute.SpreadsTab ? TabRoute.SpreadsTab : TabRoute.MainTab;
-
     if (
       spread?.id === SpreadName.Simple_DaySuggest &&
-      previousRoute === NavigationRoute.Main
+      (previousRoute === NavigationRoute.Main ||
+        previousRoute === NavigationRoute.DayAdvice)
     ) {
       navigation.navigate(TabRoute.MainTab, { screen: NavigationRoute.Main });
       return;
     }
 
     if (spread?.category) {
-      navigation.navigate(spreadsTab, {
+      navigation.navigate(TabRoute.SpreadsTab, {
         screen: NavigationRoute.Spreads,
         params: { id: spread.category as SpreadsCategory },
       });
@@ -70,6 +66,8 @@ export function useSpreadCatalogBack() {
       return;
     }
 
-    navigation.navigate(spreadsTab, { screen: NavigationRoute.Spreads });
-  }, [navigation, selectedTab, spread?.category, spread?.id]);
+    navigation.navigate(TabRoute.SpreadsTab, {
+      screen: NavigationRoute.Spreads,
+    });
+  }, [navigation, spread?.category, spread?.id]);
 }

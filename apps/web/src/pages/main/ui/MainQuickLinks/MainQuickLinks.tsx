@@ -9,6 +9,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { navigateInTab } from 'app/navigation/navigateInTab';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -73,7 +74,8 @@ function MainQuickLinks() {
       });
       await handleVibrationClick?.();
       setSelectedTab?.(link.tabRoute);
-      navigation.navigate(link.tabRoute, {
+      navigateInTab(navigation, {
+        tab: link.tabRoute,
         screen: link.route,
       });
     },

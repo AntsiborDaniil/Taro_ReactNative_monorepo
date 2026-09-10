@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CardsVoid, LightningBolt } from 'shared/icons';
 import { useData } from 'shared/DataProvider';
 import { cloudFetch } from 'shared/api/cloud/cloudFetch';
+import { wakeCloudApi } from 'shared/api/cloud/wakeCloudApi';
 import { openExternalPaymentUrl } from 'shared/lib/web/telegramWebApp';
 import { COLORS, getColorOpacity } from 'shared/themes';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
@@ -79,6 +80,7 @@ function BuySpreadCreditsModal({
 
     setBusy(true);
     try {
+      await wakeCloudApi();
       const result = await cloudFetch<{ paymentUrl: string }>(
         '/api/payments/lava/checkout',
         {

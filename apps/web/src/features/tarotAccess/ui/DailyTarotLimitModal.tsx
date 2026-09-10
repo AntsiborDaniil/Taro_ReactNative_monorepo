@@ -15,6 +15,7 @@ import { CardsVoid } from 'shared/icons';
 import { MetrikaGoal, reachMetrikaGoal } from 'shared/lib';
 import { useData } from 'shared/DataProvider';
 import { cloudFetch } from 'shared/api/cloud/cloudFetch';
+import { wakeCloudApi } from 'shared/api/cloud/wakeCloudApi';
 import { openExternalPaymentUrl } from 'shared/lib/web/telegramWebApp';
 import { COLORS, getColorOpacity } from 'shared/themes';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
@@ -72,6 +73,7 @@ function DailyTarotLimitModal() {
 
     setBusy(true);
     try {
+      await wakeCloudApi();
       const result = await cloudFetch<{ paymentUrl: string }>(
         '/api/payments/lava/checkout',
         {

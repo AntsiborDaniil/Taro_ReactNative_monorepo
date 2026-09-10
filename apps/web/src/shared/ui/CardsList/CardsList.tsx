@@ -290,7 +290,13 @@ function CardsList<T extends BaseTarotCardProps>({
 
       onPressAnalytics?.(item);
 
-      navigation.navigate(selectedTab as TabRoute, {
+      const detailTab =
+        selectedTab === TabRoute.LibraryTab ||
+        selectedTab === TabRoute.SpreadsTab
+          ? selectedTab
+          : TabRoute.MainTab;
+
+      navigation.navigate(detailTab, {
         screen: NavigationRoute.SpreadDetailCard,
         params: {
           id: item.id,

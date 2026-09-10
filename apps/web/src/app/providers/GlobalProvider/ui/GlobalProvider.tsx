@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useMemo } from 'react';
 import { Platform } from 'react-native';
 import { FavoritesContext, useFavorites } from 'entities/favorites';
 import { HabitsContext, useHabits } from 'entities/habits';
@@ -6,6 +6,7 @@ import { MotivationContext, useMotivation } from 'entities/tarotMotivation';
 import { setBackgroundColorAsync } from 'expo-navigation-bar';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { PaymentContext, usePayment } from 'features/payment';
+import type { TPaymentHookResult } from 'features/payment/model/types';
 import {
   TabsAndRoutesContext,
   useTabsAndRoutes,
@@ -25,6 +26,13 @@ type GlobalProviderProps = {
   children: ReactNode;
 };
 
+const WEB_PAYMENT_STUB: TPaymentHookResult = {
+  offerings: null,
+  isLoading: false,
+  handleRestorePurchase: async () => undefined,
+  handlePurchase: async () => undefined,
+};
+
 function GlobalProvider({ children }: GlobalProviderProps) {
   const modalsContextData = useModals();
 
@@ -36,9 +44,15 @@ function GlobalProvider({ children }: GlobalProviderProps) {
 
   const motivationContextData = useMotivation();
 
-  const paymentContextData = usePayment({
+  /** RevenueCat IAP — native only. Web monetization is Lava credits. */
+  const nativePayment = usePayment({
     closeModal: modalsContextData.closeModal,
   });
+
+  const paymentContextData = useMemo(
+    () => (Platform.OS === 'web' ? WEB_PAYMENT_STUB : nativePayment),
+    [nativePayment]
+  );
 
   useEffect(() => {
     setBackgroundColorAsync(COLORS.Background2);

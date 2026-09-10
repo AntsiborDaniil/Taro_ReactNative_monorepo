@@ -41,7 +41,7 @@ export default function SpreadsGroups() {
                   group: item.name,
                 });
 
-                navigation.navigate(TabRoute.MainTab, {
+                navigation.navigate(TabRoute.SpreadsTab, {
                   screen: NavigationRoute.Spreads,
                   params: {
                     id: item.id,

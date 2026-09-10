@@ -2,6 +2,7 @@ import {
   getLavaApiBaseUrl,
   getLavaApiKey,
   getLavaOfferId,
+  getTelegramBotUsername,
   getWebAppUrl,
 } from '../lib/env';
 
@@ -19,11 +20,22 @@ type LavaInvoiceResponse = {
   details?: unknown;
 };
 
+/** Prefer Telegram bot deep-links; fall back to web app query params. */
 function httpsReturnUrls(): {
   successful_return_url?: string;
   failure_return_url?: string;
   cancel_return_url?: string;
 } {
+  const bot = getTelegramBotUsername();
+  if (bot) {
+    const base = `https://t.me/${bot}`;
+    return {
+      successful_return_url: `${base}?start=lava_success`,
+      failure_return_url: `${base}?start=lava_failed`,
+      cancel_return_url: `${base}?start=lava_cancelled`,
+    };
+  }
+
   const web = getWebAppUrl();
   if (!web || !web.startsWith('https://')) {
     return {};

@@ -11,7 +11,6 @@ export function preloadWebRoutes(): void {
     void import('pages/cardsDictionary');
     void import('pages/favoriteCards');
     void import('pages/spreadsHistory');
-    void import('pages/affirmations');
     void import('pages/settings');
   };
 

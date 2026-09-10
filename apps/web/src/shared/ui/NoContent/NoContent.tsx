@@ -41,7 +41,7 @@ function NoContent({ title, onPress, buttonText, centered }: NoContentProps) {
             return;
           }
 
-          navigation.navigate(TabRoute.MainTab, {
+          navigation.navigate(TabRoute.SpreadsTab, {
             screen: NavigationRoute.Spreads,
           });
         }}

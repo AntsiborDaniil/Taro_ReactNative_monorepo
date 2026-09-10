@@ -5,14 +5,44 @@ import {
   openMiniAppInlineKeyboard,
   openMiniAppReplyKeyboard,
 } from './keyboards';
-import { helpText, openAppHintText, welcomeText } from './messages';
+import {
+  helpText,
+  lavaPaymentCancelledText,
+  lavaPaymentFailedText,
+  lavaPaymentSuccessText,
+  openAppHintText,
+  welcomeText,
+} from './messages';
 
 const bot = new Bot(config.botToken);
 
+function startPayload(ctx: { match?: string | RegExpMatchArray }): string {
+  if (typeof ctx.match === 'string') {
+    return ctx.match.trim();
+  }
+  return '';
+}
+
 bot.command('start', async (ctx) => {
+  const payload = startPayload(ctx);
+  const replyMarkup = openMiniAppInlineKeyboard();
+
+  if (payload === 'lava_success') {
+    await ctx.reply(lavaPaymentSuccessText, { reply_markup: replyMarkup });
+    return;
+  }
+  if (payload === 'lava_failed') {
+    await ctx.reply(lavaPaymentFailedText, { reply_markup: replyMarkup });
+    return;
+  }
+  if (payload === 'lava_cancelled') {
+    await ctx.reply(lavaPaymentCancelledText, { reply_markup: replyMarkup });
+    return;
+  }
+
   await ctx.reply(welcomeText, {
     parse_mode: 'Markdown',
-    reply_markup: openMiniAppInlineKeyboard(),
+    reply_markup: replyMarkup,
   });
 });
 

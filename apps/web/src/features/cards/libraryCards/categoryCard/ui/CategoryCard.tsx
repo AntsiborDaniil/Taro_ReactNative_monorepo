@@ -1,5 +1,6 @@
 import { Platform, StyleSheet, View } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
+import { navigateInTab } from 'app/navigation/navigateInTab';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
@@ -7,6 +8,7 @@ import {
   AnalyticAction,
   ImagePosition,
   NavigationRoute,
+  TabRoute,
   TRedirectPlate,
 } from 'shared/types';
 import { COLORS } from 'shared/themes';
@@ -81,7 +83,8 @@ function CategoryCard({
       category: name,
     });
 
-    navigation.navigate(tabRoute, {
+    navigateInTab(navigation, {
+      tab: tabRoute as TabRoute,
       screen: navigationRoute as NavigationRoute,
     });
   };
