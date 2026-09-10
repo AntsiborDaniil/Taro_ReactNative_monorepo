@@ -1,27 +1,5 @@
--- Paid spread credits (Lava.top packs) + checkout ledger
+-- Fix PL/pgSQL ambiguity: RETURNS TABLE(spread_credits …) clashes with profiles.spread_credits
 
-alter table public.profiles
-  add column if not exists spread_credits integer not null default 0
-    check (spread_credits >= 0);
-
-create table if not exists public.lava_checkouts (
-  invoice_id text primary key,
-  user_id uuid not null references auth.users (id) on delete cascade,
-  credits integer not null default 3 check (credits > 0),
-  email text not null default '',
-  status text not null default 'pending'
-    check (status in ('pending', 'paid', 'failed')),
-  raw jsonb not null default '{}'::jsonb,
-  created_at timestamptz not null default now(),
-  paid_at timestamptz
-);
-
-create index if not exists lava_checkouts_user_id_idx
-  on public.lava_checkouts (user_id, created_at desc);
-
-alter table public.lava_checkouts enable row level security;
-
--- Fulfilled payment: pending -> paid (+credits), or insert paid if checkout missing.
 create or replace function public.add_spread_credits_for_invoice(
   p_invoice_id text,
   p_user_id uuid,
@@ -85,7 +63,6 @@ begin
     return;
   end if;
 
-  -- No checkout row yet (webhook before insert race, or manual link): require user id
   if p_user_id is null then
     raise exception 'user_id required when checkout is missing';
   end if;
@@ -163,19 +140,6 @@ begin
 end;
 $$;
 
-create or replace function public.get_spread_credits_for_user(p_user_id uuid)
-returns integer
-language sql
-security definer
-set search_path = public
-stable
-as $$
-  select coalesce(
-    (select p.spread_credits from public.profiles p where p.id = p_user_id),
-    0
-  );
-$$;
-
 revoke all on function public.add_spread_credits_for_invoice(text, uuid, integer, text, jsonb) from public;
 grant execute on function public.add_spread_credits_for_invoice(text, uuid, integer, text, jsonb) to service_role;
 
@@ -184,6 +148,3 @@ grant execute on function public.consume_spread_credit_for_user(uuid) to service
 
 revoke all on function public.refund_spread_credit_for_user(uuid) from public;
 grant execute on function public.refund_spread_credit_for_user(uuid) to service_role;
-
-revoke all on function public.get_spread_credits_for_user(uuid) from public;
-grant execute on function public.get_spread_credits_for_user(uuid) to service_role;
