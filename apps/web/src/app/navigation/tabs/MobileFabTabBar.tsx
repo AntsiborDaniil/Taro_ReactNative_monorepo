@@ -338,10 +338,10 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    height: 0,
     zIndex: 120,
     elevation: 120,
-    ...(Platform.OS === 'web' ? ({ pointerEvents: 'box-none' } as object) : {}),
+    pointerEvents: 'box-none',
+    ...(Platform.OS === 'web' ? ({ height: 0 } as object) : {}),
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
@@ -361,6 +361,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'flex-start',
     zIndex: 130,
+    pointerEvents: 'box-none',
     ...(Platform.OS === 'web'
       ? ({
           position: 'fixed',

@@ -122,6 +122,7 @@ const styles = StyleSheet.create({
   root: {
     ...StyleSheet.absoluteFillObject,
     overflow: 'hidden',
+    zIndex: 0,
   },
   wash: {
     ...StyleSheet.absoluteFillObject,

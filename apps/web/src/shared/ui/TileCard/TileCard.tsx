@@ -420,6 +420,7 @@ const styles = StyleService.create({
   },
   webPressable: {
     cursor: 'pointer',
+    zIndex: 2,
     ...WEB_HOVER_TRANSITION,
   } as object,
 });

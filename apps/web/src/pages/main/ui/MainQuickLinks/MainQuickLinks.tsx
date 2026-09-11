@@ -74,6 +74,7 @@ function MainQuickLinks() {
       });
       await handleVibrationClick?.();
       setSelectedTab?.(link.tabRoute);
+      // From Main → Library nested screen: reset stack so Back returns to Library root.
       navigateInTab(navigation, {
         tab: link.tabRoute,
         screen: link.route,

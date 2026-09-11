@@ -8,6 +8,7 @@ import { Header } from 'features/header';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
+import { COLORS, getColorOpacity } from 'shared/themes';
 import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { LIBRARY_PLATES } from '../lib';
 import { useLibraryLayout } from './useLibraryLayout';
@@ -60,47 +61,24 @@ function Library() {
             },
           ]}
         >
-          {layout.hasTabRail ? (
-            <Text
-              category={TEXT_TAGS.p2}
-              style={[
-                styles.introLead,
-                {
-                  fontSize: layout.libraryIntroFontSize,
-                  lineHeight: Math.round(layout.libraryIntroFontSize + 7),
-                },
-              ]}
-            >
-              {t('core:library.intro.lead')}
-            </Text>
-          ) : null}
-          {layout.hasTabRail &&
-          Boolean(t('core:library.section.subtitle').trim()) ? (
-            <View
-              style={{
-                marginTop: Math.round(layout.gap * 0.65),
-              }}
-            >
-              <Text
-                category={TEXT_TAGS.p2}
-                style={[
-                  styles.sectionSubtitle,
-                  {
-                    fontSize: layout.libraryIntroFontSize,
-                    lineHeight: Math.round(layout.libraryIntroFontSize + 7),
-                  },
-                ]}
-              >
-                {t('core:library.section.subtitle')}
-              </Text>
-            </View>
-          ) : null}
+          <Text
+            category={TEXT_TAGS.p2}
+            style={[
+              styles.introLead,
+              {
+                fontSize: layout.libraryIntroFontSize,
+                lineHeight: Math.round(layout.libraryIntroFontSize + 7),
+                marginBottom: Math.round(layout.gap * 0.85),
+              },
+            ]}
+          >
+            {t('core:library.intro.lead')}
+          </Text>
           <View
             style={[
               styles.gridShell,
               {
-                marginTop: Math.round(layout.gap * 0.45),
-                padding: layout.gridShellPadding,
+                padding: Math.max(12, layout.gridShellPadding + 2),
               },
             ]}
           >
@@ -109,7 +87,7 @@ function Library() {
                 styles.grid,
                 layout.isStackedTiles && styles.gridStacked,
                 {
-                  gap: layout.gap,
+                  gap: Math.max(12, layout.gap + 2),
                 },
               ]}
             >
@@ -119,7 +97,10 @@ function Library() {
                   card={item}
                   fullWidth={layout.isStackedTiles}
                   tileWidth={layout.cardWidths[index] ?? layout.cardWidth}
-                  tileHeight={layout.cardHeight}
+                  tileHeight={Math.max(
+                    layout.cardHeight,
+                    layout.isStackedTiles ? 148 : layout.cardHeight
+                  )}
                   cornerImageWidth={layout.cornerImageWidth}
                   cornerImageHeight={layout.cornerImageHeight}
                   titleFontSize={layout.cardTitleFontSize}
@@ -143,32 +124,26 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   column: {
-    paddingTop: 8,
+    paddingTop: 12,
     width: '100%',
   },
   introLead: {
-    color: 'rgba(216, 228, 247, 0.82)',
+    color: 'rgba(216, 228, 247, 0.86)',
     maxWidth: 560,
     width: '100%',
     alignSelf: 'center',
     textAlign: 'center',
   },
-  sectionSubtitle: {
-    marginTop: 6,
-    color: 'rgba(216, 228, 247, 0.72)',
-    maxWidth: 520,
-    alignSelf: 'center',
-    textAlign: 'center',
-  },
   gridShell: {
-    borderRadius: 18,
+    borderRadius: 22,
     borderWidth: 1,
-    borderColor: 'rgba(141, 178, 235, 0.16)',
-    backgroundColor: 'rgba(255, 255, 255, 0.015)',
-    overflow: 'hidden',
+    borderColor: getColorOpacity(COLORS.Primary500, 22),
+    backgroundColor: 'rgba(30, 35, 43, 0.55)',
+    overflow: 'visible',
     ...(globalThis?.window
       ? ({
-          boxShadow: '0 10px 22px rgba(10, 15, 26, 0.2)',
+          boxShadow:
+            '0 16px 36px rgba(8, 12, 20, 0.38), inset 0 1px 0 rgba(246, 192, 27, 0.08)',
         } as object)
       : {}),
   },

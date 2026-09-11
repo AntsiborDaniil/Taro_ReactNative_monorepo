@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     backgroundColor: COLORS.Background,
     overflow: 'hidden',
+    position: 'relative',
   },
   layout: {
     width: '100%',
@@ -88,6 +89,8 @@ const styles = StyleSheet.create({
     height: '100%',
     gap: 16,
     backgroundColor: 'transparent',
+    position: 'relative',
+    zIndex: 1,
   },
 });
 

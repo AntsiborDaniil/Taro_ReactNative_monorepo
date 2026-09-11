@@ -83,6 +83,13 @@ function CategoryCard({
       category: name,
     });
 
+    // Already on Library stack — push the screen locally.
+    // Full-tab reset via navigateInTab often no-ops / breaks taps in Telegram Mini App.
+    if (tabRoute === TabRoute.LibraryTab) {
+      navigation.navigate(navigationRoute as never);
+      return;
+    }
+
     navigateInTab(navigation, {
       tab: tabRoute as TabRoute,
       screen: navigationRoute as NavigationRoute,
@@ -159,6 +166,7 @@ export default CategoryCard;
 const styles = StyleSheet.create({
   tileWrap: {
     maxWidth: '100%',
+    zIndex: 1,
   },
   tileWrapFull: Platform.select({
     web: {
@@ -166,6 +174,7 @@ const styles = StyleSheet.create({
       alignSelf: 'stretch',
       flexShrink: 0,
       flexGrow: 0,
+      cursor: 'pointer',
     } as object,
     default: {
       width: '100%',
