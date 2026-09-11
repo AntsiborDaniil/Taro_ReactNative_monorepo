@@ -6,7 +6,9 @@
   "choice.name": "Расклад для выбора",
 
   "yesNo.name": "Да или нет",
+  "yesNo.description": "Сформулируй вопрос и выбери карту — получишь прямой ответ «да» или «нет».",
   "daySuggest.name": "Совет дня",
+  "daySuggest.description": "Выбери карту — это совет на сегодняшний день.",
 
   "simple.name.multiple": "Простые",
   "thematic.name.multiple": "Тематические",
@@ -18,7 +20,7 @@
   "flow.step.choose": "Выбор карт",
   "flow.step.read": "Толкование",
   "flow.positionsTitle": "Позиции расклада",
-  "flow.pickHint": "Проведи по колоде и выбери карту",
+  "flow.pickHint": "Выбери карту из колоды",
   "flow.questionSection": "Твой вопрос",
   "flow.completedTitle": "Все карты на месте",
 

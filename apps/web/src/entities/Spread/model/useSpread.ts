@@ -32,7 +32,7 @@ import {
   reachMetrikaGoal,
   shouldPromptWebSignIn,
   buildSharedReadingUrl,
-  copyTextToClipboard,
+  copyTextToClipboardSync,
 } from 'shared/lib';
 import { AsyncMemoryKey } from 'shared/lib/deviceMemory';
 import { measurePageTopLeft } from 'shared/lib/measurePageCoordinates';
@@ -439,30 +439,44 @@ export function useSpread({
     []
   );
 
-  const handleCopySpreadInterpretation = async () => {
-    if (!spread?.interpretation) {
+  const handleCopySpreadInterpretation = () => {
+    const title = t(spread?.name ?? '');
+    const card = spread?.selectedCards?.[0];
+    const cardMeaning = card?.meaning ? t(card.meaning) : '';
+    const readingText =
+      spread?.interpretation?.trim() ||
+      cardMeaning ||
+      (card?.advice ? t(card.advice) : '');
+
+    if (!readingText) {
+      Toast.show({
+        type: 'error',
+        text1: t('core:ai.copy.fail'),
+      });
       return;
     }
 
-    const title = t(spread.name);
-    const shareText =
-      spread.uid && Platform.OS === 'web'
-        ? `${t('core:ai.copy.shareLead', { name: title })}\n${buildSharedReadingUrl(spread.uid)}`
-        : `${t('spread:summaryTitle')} - ${title}\n\n${spread.interpretation}\n\n${t('core:downloadAppStore')}: ${appLink.ios}\n${t('core:downloadGooglePlay')}: ${appLink.android}`;
+    const shareUrl =
+      spread?.uid && Platform.OS === 'web'
+        ? buildSharedReadingUrl(spread.uid)
+        : '';
+    const shareText = [
+      `${t('spread:summaryTitle')} — ${title}`,
+      readingText,
+      shareUrl ||
+        `${t('core:downloadAppStore')}: ${appLink.ios}\n${t('core:downloadGooglePlay')}: ${appLink.android}`,
+    ]
+      .filter(Boolean)
+      .join('\n\n');
 
-    // Copy in the same tap — awaiting save first drops the user gesture in Telegram.
-    const copied = await copyTextToClipboard(shareText);
+    const copied = copyTextToClipboardSync(shareText);
     if (copied) {
       Toast.show({
         type: 'success',
-        text1:
-          spread.uid && Platform.OS === 'web'
-            ? t('core:ai.copy.shareSuccess')
-            : t('core:ai.copy.success'),
-        text2:
-          spread.uid && Platform.OS === 'web'
-            ? t('core:ai.copy.shareHint')
-            : undefined,
+        text1: shareUrl
+          ? t('core:ai.copy.shareSuccess')
+          : t('core:ai.copy.success'),
+        text2: shareUrl ? t('core:ai.copy.shareHint') : undefined,
       });
     } else {
       Toast.show({
@@ -471,7 +485,7 @@ export function useSpread({
       });
     }
 
-    if (Platform.OS === 'web') {
+    if (Platform.OS === 'web' && spread) {
       void saveSpread(spread).then((saved) => {
         if (saved?.uid && saved.uid !== spread.uid) {
           setSpread(saved);

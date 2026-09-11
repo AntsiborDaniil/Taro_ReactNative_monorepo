@@ -6,7 +6,7 @@ import { SpreadName, SpreadsCategory, TSpread, TSpreadCategory } from './types';
 export const simpleSpreads: Record<string, TSpread> = {
   yesNo: {
     name: 'spread:yesNo.name',
-    description: '',
+    description: 'spread:yesNo.description',
     id: SpreadName.Simple_YesNo,
     category: SpreadsCategory.Simple,
     img: '',
@@ -21,7 +21,7 @@ export const simpleSpreads: Record<string, TSpread> = {
   },
   daySuggest: {
     name: 'spread:daySuggest.name',
-    description: '',
+    description: 'spread:daySuggest.description',
     id: SpreadName.Simple_DaySuggest,
     category: SpreadsCategory.Simple,
     img: '',

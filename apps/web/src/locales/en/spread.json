@@ -6,7 +6,9 @@
   "choice.name": "Choice Spread",
 
   "yesNo.name": "Yes or No",
+  "yesNo.description": "Ask your question and pick a card — you will get a direct yes or no.",
   "daySuggest.name": "Daily Advice",
+  "daySuggest.description": "Pick a card — this is your advice for today.",
 
   "simple.name.multiple": "Simple",
   "thematic.name.multiple": "Thematic",
@@ -18,7 +20,7 @@
   "flow.step.choose": "Pick cards",
   "flow.step.read": "Reading",
   "flow.positionsTitle": "Spread positions",
-  "flow.pickHint": "Swipe the deck and pick a card",
+  "flow.pickHint": "Pick a card from the deck",
   "flow.questionSection": "Your question",
   "flow.completedTitle": "All cards are in place",
 

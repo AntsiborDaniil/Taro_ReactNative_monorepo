@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  Platform,
   StyleSheet,
   TextStyle,
   View,
@@ -102,7 +103,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
                 style={styles.quotaButton}
                 onPress={spreadQuota.onPress}
                 activeOpacity={0.7}
-                hitSlop={{ top: 10, left: 8, bottom: 10, right: 8 }}
+                hitSlop={{ top: 10, left: 8, bottom: 10, right: 0 }}
                 accessibilityRole="button"
                 accessibilityLabel={spreadQuota.a11yLabel}
               >
@@ -112,10 +113,11 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
             {showCustomRight ? (
               <TouchableOpacity
                 style={styles.rightButton}
-                onPress={rightAction ?? undefined}
+                onPress={Platform.OS === 'web' ? undefined : rightAction ?? undefined}
                 disabled={!rightAction}
                 activeOpacity={rightAction ? 0.7 : 1}
                 hitSlop={{ top: 12, left: 8, bottom: 12, right: 12 }}
+                delayPressIn={0}
                 accessibilityRole={rightAction ? 'button' : 'none'}
                 accessibilityLabel={
                   rightAccessibilityLabel ??
@@ -123,6 +125,14 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
                     ? t('core:a11y.headerActions')
                     : t('core:a11y.settings'))
                 }
+                {...(Platform.OS === 'web' && rightAction
+                  ? ({
+                      onClick: (event: { stopPropagation?: () => void }) => {
+                        event?.stopPropagation?.();
+                        rightAction();
+                      },
+                    } as object)
+                  : {})}
               >
                 {rightContent ?? (
                   <SettingsIcon
@@ -195,10 +205,12 @@ const themedStyles = StyleService.create({
     paddingLeft: 2,
     paddingRight: 4,
     marginRight: 2,
+    zIndex: 1,
     ...WEB_HOVER_TRANSITION,
   },
   rightButton: {
     padding: 6,
+    zIndex: 3,
     ...WEB_HOVER_TRANSITION,
   },
   rightButtonPlaceholder: {

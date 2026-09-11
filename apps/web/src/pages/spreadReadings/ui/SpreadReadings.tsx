@@ -30,8 +30,8 @@ function SpreadReadings() {
   const handleBackToSpreads = useSpreadCatalogBack();
 
   const handlePressCopy = useCallback(() => {
+    handleCopySpreadInterpretation?.();
     void handleVibrationClick?.();
-    void handleCopySpreadInterpretation?.();
   }, [handleVibrationClick, handleCopySpreadInterpretation]);
 
   return (
@@ -43,8 +43,8 @@ function SpreadReadings() {
           rightContent={
             <CopyIcon width={isTablet ? 32 : 24} height={isTablet ? 32 : 24} />
           }
-          rightAction={spread?.interpretation ? handlePressCopy : undefined}
-          rightAccessibilityLabel={t('core:ai.copy.shareSuccess')}
+          rightAction={handlePressCopy}
+          rightAccessibilityLabel={t('core:ai.copy.success')}
         />
         {spread?.category !== SpreadsCategory.Simple && (
           <SpreadStepper activeStep={3} />

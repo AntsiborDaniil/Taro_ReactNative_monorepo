@@ -217,6 +217,102 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
       : spread.selectedCards
     : [];
 
+  if (!hasSummary && spread.selectedCards?.[0]) {
+    const card = spread.selectedCards[0];
+    const splittedTitle = t(card.name).split(' ');
+    const middleIndex = Math.floor(splittedTitle.length / 2);
+    const resultedTitle =
+      sceneContentWidth < 360
+        ? `${splittedTitle.slice(0, middleIndex).join(' ')}\n${splittedTitle.slice(middleIndex).join(' ')}`
+        : t(card.name);
+    const cardWidth = Math.max(
+      168,
+      Math.min(
+        isPhone ? 240 : 280,
+        Math.round(sceneContentWidth * (isPhone ? 0.58 : 0.34))
+      )
+    );
+    const cardHeight = Math.round((cardWidth / 9) * 16);
+
+    return (
+      <ScrollView
+        style={styles.gestureRoot}
+        contentContainerStyle={styles.simpleReadingScroll}
+        nestedScrollEnabled
+        {...webVerticalScrollProps()}
+      >
+        <View style={[styles.content, styles.simpleReadingContent]}>
+          <View style={styles.contentInner}>
+            <View style={[styles.paddingWrapper, styles.paddingWrapperDaySuggest]}>
+              <View
+                style={[
+                  spreadInnerStyles.readingCardFrame,
+                  styles.cardFrame,
+                  { width: cardWidth + 8, height: cardHeight + 8 },
+                ]}
+              >
+                <TarotCard
+                  cardId={card.id}
+                  direction={card.direction}
+                  width={cardWidth}
+                  height={cardHeight}
+                  styleCard={[
+                    styles.readingCard,
+                    { width: cardWidth, height: cardHeight },
+                  ]}
+                />
+              </View>
+              {spread.id === SpreadName.Simple_YesNo && (
+                <Text category={TEXT_TAGS.h2} style={styles.title}>
+                  {t(card.yesNo)}
+                </Text>
+              )}
+              <View style={[styles.namesContainer, styles.namesContainerDaySuggest]}>
+                <View style={styles.titleContainer}>
+                  <LeafIcon
+                    fill={COLORS.Primary}
+                    width={30}
+                    height={30}
+                    style={styles.leftLeaf}
+                  />
+                  <Text category={TEXT_TAGS.h2} style={styles.title}>
+                    {resultedTitle}
+                  </Text>
+                  <LeafIcon fill={COLORS.Primary} width={30} height={30} />
+                  <LikeCard
+                    card={card}
+                    onAdditionalPress={async () => {
+                      await handleVibrationClick?.();
+                    }}
+                  />
+                </View>
+                {card.direction === TarotCardDirection.Reversed && (
+                  <View style={spreadInnerStyles.reversedChip}>
+                    <ReverseIcon width={18} height={18} />
+                    <Text style={spreadInnerStyles.reversedChipText}>
+                      {t('spread:reverseCard')}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            <TarotCharacteristics card={card} />
+
+            <View style={styles.paddingWrapper}>
+              <TarotMeanings
+                card={card}
+                interpretation={interpretation}
+                hasBlur={!spread.interpretation}
+                onPressInterpretation={handlePressToUnlock}
+              />
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
+
   return (
     <View style={styles.gestureRoot}>
       {spread.category !== SpreadsCategory.Simple && (
@@ -515,11 +611,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                   <View style={styles.paddingWrapper}>
                     <TarotMeanings
                       card={card}
-                      interpretation={
-                        spread?.id === SpreadName.Simple_YesNo
-                          ? interpretation
-                          : null
-                      }
+                      interpretation={interpretation}
                       hasBlur={!spread?.interpretation}
                       onPressInterpretation={handlePressToUnlock}
                     />
@@ -590,12 +682,22 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     marginBottom: 32,
   },
+  simpleReadingScroll: {
+    flexGrow: 1,
+    paddingBottom: 48,
+  },
+  simpleReadingContent: {
+    marginBottom: 0,
+    paddingBottom: 24,
+    width: '100%',
+  },
   daySuggestScrollInner: {
     paddingBottom: 24,
+    flexGrow: 1,
   },
   daySuggestScrollInnerPhone: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
   daySuggestContent: {
     marginBottom: 0,

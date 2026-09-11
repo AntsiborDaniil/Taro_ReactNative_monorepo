@@ -2,14 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
-  ImageBackground,
   Platform,
   ScrollView,
   StyleSheet,
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
@@ -73,7 +71,6 @@ function SpreadCardsChoice({
   const handleBackToSpreads = useSpreadCatalogBack();
   const { t } = useTranslation();
   const { width, height: windowHeight } = useWindowDimensions();
-  const { bottom } = useSafeAreaInsets();
   const isPhone = width < PHONE_MAX_WIDTH;
 
   const {
@@ -227,63 +224,6 @@ function SpreadCardsChoice({
     void handleNavigateToSpreadReading();
   }, [handleNavigateToSpreadReading]);
 
-  const isDaySuggest = spread?.id === SpreadName.Simple_DaySuggest;
-
-  if (isDaySuggest) {
-    return (
-      <ScreenLayout style={styles.daySuggestScreen}>
-        <View style={styles.daySuggestRoot}>
-          <ImageBackground
-            source={getImage(['core', 'girl'])}
-            resizeMode="cover"
-            style={styles.daySuggestBg}
-            imageStyle={styles.daySuggestBgImage}
-          >
-            <View style={styles.daySuggestScrim} pointerEvents="none" />
-            <View style={styles.daySuggestHeader} pointerEvents="box-none">
-              <Header
-                backAction={handleBackToSpreads}
-                title={t(spread?.name ?? '')}
-              />
-            </View>
-            <DataProvider
-              Context={AnimationCarouselContext}
-              value={animationCarouselContextData}
-            >
-              <View
-                style={[
-                  styles.daySuggestCenter,
-                  { paddingBottom: bottom + (isPhone ? 12 : 48) },
-                ]}
-                pointerEvents="box-none"
-                {...(Platform.OS === 'web'
-                  ? ({ 'data-tarot-fly-stage': true } as object)
-                  : {})}
-              >
-                <AnimatedCard />
-                <CoverFlowCardCarousel overlayControls={isPhone} />
-                {(simpleInterpretFailed || interpretationLoading) && (
-                  <View style={styles.simpleRetryPanel}>
-                    {interpretationLoading ? (
-                      <ActivityIndicator color={COLORS.Primary} />
-                    ) : (
-                      <Button
-                        style={spreadInnerStyles.stickyCta}
-                        onPress={handleRetrySimpleInterpret}
-                      >
-                        {t('core:ai.retry')}
-                      </Button>
-                    )}
-                  </View>
-                )}
-              </View>
-            </DataProvider>
-          </ImageBackground>
-        </View>
-      </ScreenLayout>
-    );
-  }
-
   const stepperStep = isSpreadCompleted && !isSimpleSpread ? 3 : 2;
 
   return (
@@ -356,6 +296,23 @@ function SpreadCardsChoice({
                         <SpreadScheme hasRotation={false} isChoicePage />
                       </View>
                     )}
+                    {isSimpleSpread && (
+                      <View style={styles.simpleIntro}>
+                        {!!spread?.description && (
+                          <Text
+                            category={TEXT_TAGS.p2}
+                            style={spreadInnerStyles.descriptionText}
+                          >
+                            {t(spread.description)}
+                          </Text>
+                        )}
+                        {!!question && (
+                          <Text category={TEXT_TAGS.h4} style={styles.questionEcho}>
+                            {question}
+                          </Text>
+                        )}
+                      </View>
+                    )}
                     <AnimatedCard />
                     <View style={spreadInnerStyles.altarZone}>
                       <View style={spreadInnerStyles.altarGlowClip} pointerEvents="none">
@@ -368,11 +325,9 @@ function SpreadCardsChoice({
                             : styles.carousel
                         }
                       />
-                      {!isSimpleSpread && (
-                        <Text category={TEXT_TAGS.p2} style={spreadInnerStyles.altarHint}>
-                          {t('spread:flow.pickHint')}
-                        </Text>
-                      )}
+                      <Text category={TEXT_TAGS.p2} style={spreadInnerStyles.altarHint}>
+                        {t('spread:flow.pickHint')}
+                      </Text>
                       {isSimpleSpread &&
                         isSpreadCompleted &&
                         (simpleInterpretFailed || interpretationLoading) && (
@@ -483,53 +438,16 @@ const styles = StyleSheet.create({
     marginTop: 0,
     alignSelf: 'center',
   },
-  daySuggestScreen: {
-    paddingTop: 0,
-    paddingHorizontal: 0,
-    gap: 0,
-  },
-  daySuggestRoot: {
-    flex: 1,
-    minHeight: 0,
+  simpleIntro: {
     width: '100%',
-    overflow: 'hidden',
-    position: 'relative',
-    backgroundColor: COLORS.Background,
+    maxWidth: 520,
+    alignSelf: 'center',
+    paddingHorizontal: 20,
+    gap: 10,
   },
-  daySuggestBg: {
-    flex: 1,
-    width: '100%',
-    minHeight: 0,
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  daySuggestBgImage: {
-    opacity: 0.85,
-  },
-  daySuggestScrim: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(8, 12, 22, 0.15)',
-    zIndex: 0,
-  },
-  daySuggestHeader: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 50,
-  },
-  daySuggestCenter: {
-    flex: 1,
-    width: '100%',
-    alignSelf: 'stretch',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 14,
-    paddingHorizontal: 16,
-    zIndex: 1,
-    position: 'relative',
-    overflow: 'visible',
+  questionEcho: {
+    textAlign: 'center',
+    color: COLORS.Content,
   },
   simpleRetryPanel: {
     width: '100%',

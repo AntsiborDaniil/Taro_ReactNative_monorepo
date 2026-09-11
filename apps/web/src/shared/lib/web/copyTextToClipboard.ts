@@ -1,33 +1,42 @@
 import { Platform } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 
-/**
- * Telegram iOS WebView rejects Clipboard API and ignores off-screen textareas.
- * execCommand must run synchronously in the same tap, with the node in-viewport.
- */
-function copyWithTextarea(text: string): boolean {
+function copyViaEvent(text: string): boolean {
+  if (typeof document === 'undefined') {
+    return false;
+  }
+
+  let copied = false;
+  const onCopy = (event: ClipboardEvent) => {
+    event.clipboardData?.setData('text/plain', text);
+    event.preventDefault();
+    copied = true;
+  };
+
+  document.addEventListener('copy', onCopy);
+  try {
+    copied = document.execCommand('copy') || copied;
+  } catch {
+    copied = false;
+  }
+  document.removeEventListener('copy', onCopy);
+  return copied;
+}
+
+function copyWithField(text: string): boolean {
   if (typeof document === 'undefined') {
     return false;
   }
 
   const el = document.createElement('textarea');
   el.value = text;
-  el.setAttribute('readonly', '');
   el.setAttribute('aria-hidden', 'true');
   el.style.cssText =
-    'position:fixed;top:0;left:0;width:2px;height:2px;padding:0;margin:0;border:0;outline:none;opacity:0.01;z-index:99999;';
+    'position:fixed;top:12px;left:12px;width:8px;height:8px;padding:0;margin:0;border:0;opacity:0.01;z-index:2147483647;';
   document.body.appendChild(el);
   el.focus();
   el.select();
   el.setSelectionRange(0, text.length);
-
-  const selection = window.getSelection?.();
-  if (selection) {
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    selection.removeAllRanges();
-    selection.addRange(range);
-  }
 
   let ok = false;
   try {
@@ -39,15 +48,22 @@ function copyWithTextarea(text: string): boolean {
   return ok;
 }
 
-/** Copy must run in the same user-gesture tick — do not await network or haptics first. */
-export async function copyTextToClipboard(text: string): Promise<boolean> {
+/** Must run in the same click tick — no await before this. */
+export function copyTextToClipboardSync(text: string): boolean {
   if (Platform.OS !== 'web') {
     Clipboard.setString(text);
     return true;
   }
 
-  // Sync path first: awaits on clipboard.writeText drop the Telegram user gesture.
-  if (copyWithTextarea(text)) {
+  if (copyViaEvent(text)) {
+    return true;
+  }
+
+  return copyWithField(text);
+}
+
+export async function copyTextToClipboard(text: string): Promise<boolean> {
+  if (copyTextToClipboardSync(text)) {
     return true;
   }
 
