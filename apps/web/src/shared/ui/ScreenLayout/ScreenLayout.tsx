@@ -80,6 +80,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.Background,
     overflow: 'hidden',
     position: 'relative',
+    ...(Platform.OS === 'web'
+      ? ({
+          height: 'var(--tarot-app-height, 100%)',
+          maxHeight: 'var(--tarot-app-height, 100%)',
+        } as object)
+      : {}),
   },
   layout: {
     width: '100%',

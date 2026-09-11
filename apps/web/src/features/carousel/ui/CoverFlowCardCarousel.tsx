@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
 import type { ICarouselInstance } from 'react-native-reanimated-carousel';
 import Carousel from 'react-native-reanimated-carousel';
+import { Easing } from 'react-native-reanimated';
 import { useData } from 'shared/DataProvider';
 import { ChevronLeftIcon } from 'shared/icons';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
@@ -101,8 +102,8 @@ function CoverFlowCardCarousel({
     let startX = 0;
     let startY = 0;
     let axis: 'x' | 'y' | null = null;
-    const AXIS_LOCK = 12;
-    const SWIPE = 40;
+    const AXIS_LOCK = 10;
+    const SWIPE = 28;
 
     const onStart = (event: TouchEvent) => {
       if (event.touches.length !== 1) {
@@ -177,12 +178,19 @@ function CoverFlowCardCarousel({
         loop={true}
         width={carouselWidth}
         height={carouselHeight}
-        scrollAnimationDuration={1100}
+        scrollAnimationDuration={480}
+        withAnimation={{
+          type: 'timing',
+          config: {
+            duration: 480,
+            easing: Easing.bezier(0.22, 1, 0.36, 1),
+          },
+        }}
         enabled={Platform.OS !== 'web'}
         mode="parallax"
         modeConfig={{
-          parallaxScrollingScale: 0.86,
-          parallaxScrollingOffset: 54,
+          parallaxScrollingScale: 0.88,
+          parallaxScrollingOffset: 42,
         }}
         style={[styles.carousel, { width: carouselWidth, height: carouselHeight }]}
         pagingEnabled={true}
