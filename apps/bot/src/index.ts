@@ -7,7 +7,6 @@ import {
 } from './acquisition';
 import {
   openMiniAppInlineKeyboard,
-  openMiniAppReplyKeyboard,
   mainReplyKeyboard,
   channelInlineKeyboard,
   faqInlineKeyboard,
@@ -16,6 +15,7 @@ import {
   BTN_FAQ,
   BTN_SUPPORT,
   BTN_HELP,
+  BTN_APP,
   CHANNEL_URL,
 } from './keyboards';
 import {
@@ -131,7 +131,7 @@ bot.command('start', async (ctx) => {
 
 bot.command('app', async (ctx) => {
   await ctx.reply(openAppHintText, {
-    reply_markup: openMiniAppReplyKeyboard(),
+    reply_markup: openMiniAppInlineKeyboard(),
   });
 });
 
@@ -169,6 +169,12 @@ bot.on('message:text', async (ctx) => {
 
   const text = ctx.message.text.trim();
 
+  if (text === BTN_APP) {
+    await ctx.reply(openAppHintText, {
+      reply_markup: openMiniAppInlineKeyboard(),
+    });
+    return;
+  }
   if (text === BTN_CHANNEL) {
     await sendChannel(ctx);
     return;

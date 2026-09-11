@@ -57,7 +57,7 @@ export const lavaPaymentsRoute = async (
         return reply.status(400).send({
           code: 'invalid_email',
           message:
-            'Lava error: could not create payment. Check the email and try again.',
+            'Оплата доступна только с почтой Яндекса (@yandex.ru, @ya.ru и др.).',
         });
       }
 
@@ -78,7 +78,7 @@ export const lavaPaymentsRoute = async (
           return reply.status(400).send({
             code: 'invalid_email',
             message:
-              'Lava error: could not create payment. Check the email and try again.',
+              'Оплата доступна только с почтой Яндекса (@yandex.ru, @ya.ru и др.).',
           });
         }
         if (message === 'LAVA_NOT_CONFIGURED') {

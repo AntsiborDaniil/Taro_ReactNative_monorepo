@@ -1,13 +1,13 @@
 import { Platform } from 'react-native';
 import {
   authCredentials,
-  authSignHeaders,
   getTarotAiApiBaseUrl,
 } from 'shared/api';
-import { fetchAuthMeSession } from './fetchAuthMeSession';
+import { setDevAccessToken } from './devAccessToken';
 
 const TELEGRAM_SCRIPT_SRC = 'https://telegram.org/js/telegram-web-app.js';
 const TELEGRAM_SCRIPT_ID = 'telegram-web-app-js';
+const AUTH_ME_CACHE_KEY = 'tarot_auth_me_session';
 
 export function isTelegramMiniApp(): boolean {
   if (Platform.OS !== 'web' || typeof window === 'undefined') {
@@ -94,6 +94,17 @@ export function initTelegramWebAppChrome(): void {
   tg.setBackgroundColor('#171F2C');
 }
 
+function clearAuthMeCache(): void {
+  if (typeof sessionStorage === 'undefined') {
+    return;
+  }
+  try {
+    sessionStorage.removeItem(AUTH_ME_CACHE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
 /** Silent login in Telegram Mini App via signed initData. */
 export async function tryAuthenticateTelegramMiniApp(): Promise<boolean> {
   if (Platform.OS !== 'web' || typeof window === 'undefined') {
@@ -113,10 +124,9 @@ export async function tryAuthenticateTelegramMiniApp(): Promise<boolean> {
     return false;
   }
 
-  const existing = await fetchAuthMeSession({ retryUnauthorized: false });
-  if (existing?.user) {
-    return true;
-  }
+  // Always exchange initData — skipping when a cookie/cache session existed
+  // left users unregistered after opening the app from the bot keyboard.
+  clearAuthMeCache();
 
   try {
     const response = await fetch(`${getTarotAiApiBaseUrl()}/api/auth/telegram`, {
@@ -124,13 +134,27 @@ export async function tryAuthenticateTelegramMiniApp(): Promise<boolean> {
       credentials: authCredentials(),
       headers: {
         'Content-Type': 'application/json',
-        ...authSignHeaders(),
       },
       body: JSON.stringify({ initData }),
     });
 
-    return response.ok;
-  } catch {
+    if (!response.ok) {
+      console.warn('[telegram auth] failed', response.status);
+      return false;
+    }
+
+    const body = (await response.json().catch(() => null)) as {
+      token?: string;
+    } | null;
+
+    if (typeof body?.token === 'string' && body.token.trim()) {
+      // Bearer backup for Telegram WebViews where HttpOnly cookie can race.
+      setDevAccessToken(body.token.trim());
+    }
+
+    return true;
+  } catch (error) {
+    console.warn('[telegram auth] error', error);
     return false;
   }
 }

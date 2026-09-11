@@ -5,9 +5,12 @@ import { getLavaCreditsPerPurchase } from '../lib/env';
 import { createLavaOneTimeInvoice } from './lavaClient';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const YANDEX_EMAIL_RE =
+  /^[a-z0-9._%+-]+@(yandex\.(ru|com|by|kz|ua)|ya\.ru)$/i;
 
 export function isValidCheckoutEmail(email: string): boolean {
-  return EMAIL_RE.test(email.trim().toLowerCase());
+  const normalized = email.trim().toLowerCase();
+  return EMAIL_RE.test(normalized) && YANDEX_EMAIL_RE.test(normalized);
 }
 
 export async function createLavaCheckoutForUser(input: {

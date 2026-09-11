@@ -90,7 +90,9 @@ async function proxyAuthRoute(req, res, authPath) {
 
   if (isSessionRoute && upstream.ok && json?.token) {
     setSessionCookie(res, json.token);
-    const { token: _t, refreshToken: _r, ...clientBody } = json;
+    // Keep token in JSON for Telegram Mini App WebViews where cookie can race
+    // or fail; client stores it as Bearer backup via sessionStorage.
+    const { refreshToken: _r, ...clientBody } = json;
     res.status(upstream.status).json(clientBody);
     return;
   }

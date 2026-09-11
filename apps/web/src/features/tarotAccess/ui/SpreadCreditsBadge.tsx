@@ -167,11 +167,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   plusBadge: {
-    left: -2,
+    right: -2,
     paddingHorizontal: 0,
   },
   countBadge: {
-    right: -2,
+    left: -2,
   },
   badgeText: {
     fontSize: 10,

@@ -28,7 +28,7 @@ export function openMiniAppReplyKeyboard(): Keyboard {
 /** Persistent reply keyboard: quick access to main actions / commands. */
 export function mainReplyKeyboard(): Keyboard {
   return new Keyboard()
-    .webApp(BTN_APP, config.webAppUrl)
+    .text(BTN_APP)
     .text(BTN_CHANNEL)
     .row()
     .text(BTN_FAQ)
