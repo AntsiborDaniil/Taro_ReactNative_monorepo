@@ -63,3 +63,18 @@ export async function updateCloudSpread(
 
   return cloudRecordToSpread(result.data.spread);
 }
+
+/** Public shared interpretation (no auth). */
+export async function fetchSharedCloudSpread(
+  spreadId: string
+): Promise<TSpread | null> {
+  const result = await cloudFetch<CloudSpreadResponse>(
+    `/api/spreads/shared/${encodeURIComponent(spreadId)}`
+  );
+
+  if (!result.ok) {
+    return null;
+  }
+
+  return cloudRecordToSpread(result.data.spread);
+}

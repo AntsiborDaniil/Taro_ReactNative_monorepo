@@ -28,6 +28,7 @@ import {
 } from './adaptiveTabLayout';
 import { MobileFabScrollProvider } from './MobileFabScrollContext';
 import { TabRailLayoutProvider } from './TabRailLayoutContext';
+import { useSharedReadingDeepLink } from '../useSharedReadingDeepLink';
 
 const TAB_ICON = {
   [TabRoute.MainTab]: PlanetIcon,
@@ -87,6 +88,10 @@ function TarotTabs() {
   });
   const spreadContextData = useSpread({
     hasReversedCards: spread?.hasReversed,
+  });
+
+  useSharedReadingDeepLink({
+    selectFullSpread: spreadContextData.selectFullSpread,
   });
 
   const iconSize = isBottomBar ? 40 : 36;

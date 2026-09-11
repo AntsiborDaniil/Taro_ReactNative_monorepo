@@ -511,6 +511,19 @@ export function memoryGetSpreadById(
   return list.find((s) => s.id === spreadId) ?? null;
 }
 
+/** Public shared reading — any saved spread with an interpretation. */
+export function memoryGetSharedSpreadById(
+  spreadId: string
+): SpreadRecord | null {
+  for (const list of spreadsByUser.values()) {
+    const found = list.find((s) => s.id === spreadId);
+    if (found?.interpretation?.trim()) {
+      return found;
+    }
+  }
+  return null;
+}
+
 export function memoryListFavoriteCardIds(userId: string): string[] {
   const set = favoritesByUser.get(userId);
   return set ? Array.from(set) : [];

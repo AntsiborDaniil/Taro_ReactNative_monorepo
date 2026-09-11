@@ -179,3 +179,37 @@ export async function getSpreadById(
 
   return data ? mapRow(data as SpreadRow) : null;
 }
+
+/**
+ * Public lookup for shared readings (interpretation page only).
+ * Returns null when missing or when interpretation is empty.
+ */
+export async function getSharedSpreadById(
+  spreadId: string
+): Promise<SpreadRecord | null> {
+  if (useMemoryBackend()) {
+    return memory.memoryGetSharedSpreadById(spreadId);
+  }
+
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from('spreads')
+    .select('*')
+    .eq('id', spreadId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const record = mapRow(data as SpreadRow);
+  if (!record.interpretation?.trim()) {
+    return null;
+  }
+
+  return record;
+}

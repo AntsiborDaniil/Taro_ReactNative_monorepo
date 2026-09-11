@@ -15,6 +15,10 @@
   "ai.retry": "Try again",
 
   "ai.copy.success": "Copied to clipboard",
+  "ai.copy.shareSuccess": "Interpretation link copied",
+  "ai.copy.shareHint": "Friends open the Mini App on the reading page",
+  "ai.copy.shareLead": "My «{{name}}» reading in MindFullTaro:",
+  "ai.copy.shareOpenFailed": "Could not open this shared reading",
 
   "button.prev": "Previous",
   "button.next": "Next",

@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { resolveAuthedUser } from '../lib/authRequest';
 import {
   createSpread,
+  getSharedSpreadById,
   getSpreadById,
   listSpreads,
   updateSpread,
@@ -49,6 +50,22 @@ export const spreadsRoute = async (
       } catch (error) {
         request.log.error(error);
         return reply.status(500).send({ message: 'Could not load spreads' });
+      }
+    }
+  );
+
+  fastify.get<{ Params: { id: string } }>(
+    '/spreads/shared/:id',
+    async (request, reply) => {
+      try {
+        const spread = await getSharedSpreadById(request.params.id);
+        if (!spread) {
+          return reply.status(404).send({ message: 'Shared reading not found' });
+        }
+        return reply.send({ spread });
+      } catch (error) {
+        request.log.error(error);
+        return reply.status(500).send({ message: 'Could not load shared reading' });
       }
     }
   );

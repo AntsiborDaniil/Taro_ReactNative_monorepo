@@ -52,8 +52,9 @@ export function SpreadCreditsBadge({
           style={[
             styles.glow,
             {
-              width: size * 1.85,
-              height: size * 1.85,
+              // Keep glow tight around the bolt (−4px vs previous diameter).
+              width: Math.max(size, size * 1.85 - 4),
+              height: Math.max(size, size * 1.85 - 4),
               borderRadius: size,
             },
           ]}
@@ -107,17 +108,17 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: 'absolute',
-    backgroundColor: getColorOpacity(COLORS.Primary700, 42),
+    backgroundColor: getColorOpacity(COLORS.Primary700, 38),
     ...(Platform.OS === 'web'
       ? ({
-          boxShadow: `0 0 12px ${getColorOpacity(COLORS.Primary600, 50)}, 0 0 5px ${getColorOpacity(COLORS.Primary800, 60)}`,
+          boxShadow: `0 0 8px ${getColorOpacity(COLORS.Primary600, 45)}, 0 0 3px ${getColorOpacity(COLORS.Primary800, 55)}`,
         } as object)
       : {
           shadowColor: COLORS.Primary700,
           shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 0.65,
-          shadowRadius: 6,
-          elevation: 5,
+          shadowOpacity: 0.55,
+          shadowRadius: 4,
+          elevation: 4,
         }),
   },
   boltRow: {

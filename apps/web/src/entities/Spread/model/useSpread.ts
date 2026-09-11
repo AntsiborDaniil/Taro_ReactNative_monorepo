@@ -32,6 +32,7 @@ import {
   patchCachedAuthMeQuota,
   reachMetrikaGoal,
   shouldPromptWebSignIn,
+  buildSharedReadingUrl,
 } from 'shared/lib';
 import { AsyncMemoryKey } from 'shared/lib/deviceMemory';
 import { measurePageTopLeft } from 'shared/lib/measurePageCoordinates';
@@ -84,7 +85,7 @@ export type TSpreadHookResult = {
   handleSelectTarotCard: (card?: TTarotCard) => Promise<boolean>;
   handleClearSelectedCards: () => void;
   handleResetDaySuggest: () => Promise<void>;
-  handleCopySpreadInterpretation: () => void;
+  handleCopySpreadInterpretation: () => void | Promise<void>;
 };
 
 const DAY_CARD_DEBUG = '[DayCardFlow]';
@@ -438,8 +439,38 @@ export function useSpread({
     []
   );
 
-  const handleCopySpreadInterpretation = () => {
+  const handleCopySpreadInterpretation = async () => {
     if (!spread?.interpretation) {
+      return;
+    }
+
+    let cloudSpread = spread;
+    if (Platform.OS === 'web' && !spread.uid) {
+      const saved = await saveSpread(spread);
+      if (saved) {
+        cloudSpread = saved;
+        setSpread(saved);
+      }
+    } else if (Platform.OS === 'web' && spread.uid) {
+      // Ensure latest interpretation is persisted before sharing.
+      const saved = await saveSpread(spread);
+      if (saved) {
+        cloudSpread = saved;
+        setSpread(saved);
+      }
+    }
+
+    if (cloudSpread.uid && Platform.OS === 'web') {
+      const url = buildSharedReadingUrl(cloudSpread.uid);
+      const title = t(cloudSpread.name);
+      Clipboard.setString(
+        `${t('core:ai.copy.shareLead', { name: title })}\n${url}`
+      );
+      Toast.show({
+        type: 'success',
+        text1: t('core:ai.copy.shareSuccess'),
+        text2: t('core:ai.copy.shareHint'),
+      });
       return;
     }
 

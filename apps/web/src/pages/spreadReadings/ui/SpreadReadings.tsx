@@ -45,6 +45,7 @@ function SpreadReadings() {
             <CopyIcon width={isTablet ? 32 : 24} height={isTablet ? 32 : 24} />
           }
           rightAction={spread?.interpretation ? handlePressCopy : undefined}
+          rightAccessibilityLabel={t('core:ai.copy.shareSuccess')}
         />
         {spread?.category !== SpreadsCategory.Simple && (
           <SpreadStepper activeStep={3} />

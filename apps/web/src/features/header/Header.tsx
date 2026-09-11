@@ -103,7 +103,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
                 accessibilityRole="button"
                 accessibilityLabel={spreadQuota.a11yLabel}
               >
-                <HeaderSpreadQuotaBadge quota={spreadQuota} size={22} />
+                <HeaderSpreadQuotaBadge quota={spreadQuota} />
               </TouchableOpacity>
             ) : null}
             {showCustomRight ? (
@@ -165,7 +165,8 @@ const themedStyles = StyleService.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    gap: 2,
+    gap: 12,
+    paddingRight: 2,
   },
   titleSlot: {
     flex: 1,
@@ -179,7 +180,10 @@ const themedStyles = StyleService.create({
     ...WEB_HOVER_TRANSITION,
   },
   quotaButton: {
-    padding: 2,
+    paddingVertical: 2,
+    paddingLeft: 2,
+    paddingRight: 4,
+    marginRight: 2,
     ...WEB_HOVER_TRANSITION,
   },
   rightButton: {
