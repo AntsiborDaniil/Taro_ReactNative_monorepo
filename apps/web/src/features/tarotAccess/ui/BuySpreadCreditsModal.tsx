@@ -21,7 +21,7 @@ import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { Button } from 'shared/ui/Button';
 import { Input } from 'shared/ui/Input';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui/Text';
-import { isYandexCheckoutEmail } from '../lib/isYandexCheckoutEmail';
+import { isCheckoutEmail } from '../lib/isYandexCheckoutEmail';
 
 const SYNTHETIC_TG_EMAIL_RE = /^tg\d+@telegram\.mindful\.app$/i;
 
@@ -79,9 +79,8 @@ function BuySpreadCreditsModal({
     await handleVibrationClick?.();
     setError(null);
     const trimmed = email.trim().toLowerCase();
-    if (!isYandexCheckoutEmail(trimmed)) {
-      // Sound like a payment-provider failure — do not mention Yandex-only rule.
-      setError(tSpread('dailyLimit.lavaRejected'));
+    if (!isCheckoutEmail(trimmed)) {
+      setError(tSpread('dailyLimit.emailInvalid'));
       return;
     }
 

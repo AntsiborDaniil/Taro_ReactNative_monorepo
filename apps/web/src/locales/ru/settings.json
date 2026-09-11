@@ -28,10 +28,10 @@
   "credits.buy.title": "Пакет +3 расклада",
   "credits.buy.body": "После оплаты в баланс добавятся 3 заряда (обычно до 5 минут). Они тратятся, когда дневной лимит уже исчерпан.",
   "credits.buy.balance": "Сейчас у вас зарядов: {{count}}",
-  "credits.badge.a11yDaily": "Осталось бесплатных раскладов сегодня: {{count}}",
-  "credits.badge.a11yCredits": "Заряды раскладов: {{count}}",
+  "credits.badge.a11yDaily": "Осталось бесплатных раскладов сегодня: {{count}}. Нажмите, чтобы пополнить заряды",
+  "credits.badge.a11yCredits": "Заряды раскладов: {{count}}. Нажмите, чтобы пополнить",
   "credits.badge.a11yUnlimited": "Безлимитные расклады",
-  "credits.badge.a11y": "Заряды раскладов: {{count}}",
+  "credits.badge.a11y": "Заряды раскладов: {{count}}. Нажмите, чтобы пополнить",
 
   "payments": "Подписка и покупки",
   "payments.restore": "Восстановить покупки",

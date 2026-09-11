@@ -28,10 +28,10 @@
   "credits.buy.title": "+3 spreads pack",
   "credits.buy.body": "After payment, 3 charges are added to your balance (usually within ~5 minutes). They are used when the daily free limit is already spent.",
   "credits.buy.balance": "Your charges now: {{count}}",
-  "credits.badge.a11yDaily": "Free spreads left today: {{count}}",
-  "credits.badge.a11yCredits": "Spread charges: {{count}}",
+  "credits.badge.a11yDaily": "Free spreads left today: {{count}}. Tap to top up charges",
+  "credits.badge.a11yCredits": "Spread charges: {{count}}. Tap to top up",
   "credits.badge.a11yUnlimited": "Unlimited spreads",
-  "credits.badge.a11y": "Spread charges: {{count}}",
+  "credits.badge.a11y": "Spread charges: {{count}}. Tap to top up",
 
   "payments": "Subscription and purchases",
   "payments.restore": "Restore purchases",

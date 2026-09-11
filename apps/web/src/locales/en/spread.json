@@ -34,7 +34,7 @@
   "dailyLimit.title": "Daily spread limit reached",
   "dailyLimit.body": "You get up to 3 free AI spreads per day. Buy a +3 pack or come back tomorrow. After payment, charges usually appear within ~5 minutes.",
   "dailyLimit.emailLabel": "Email for payment",
-  "dailyLimit.emailPlaceholder": "name@yandex.ru",
+  "dailyLimit.emailPlaceholder": "name@example.com",
   "dailyLimit.emailHint": "The receipt and payment confirmation will be sent here.",
   "dailyLimit.emailInvalid": "Enter a valid email",
   "dailyLimit.lavaRejected": "Lava error: could not create payment. Check the email and try again.",
