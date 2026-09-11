@@ -7,7 +7,7 @@ import {
 } from './acquisition';
 import {
   openMiniAppInlineKeyboard,
-  startOpenAppInlineKeyboard,
+  openMiniAppReplyKeyboard,
   mainReplyKeyboard,
   channelInlineKeyboard,
   faqInlineKeyboard,
@@ -76,17 +76,8 @@ async function trackStartIfNeeded(ctx: Context, payload: string): Promise<void> 
 async function sendWelcome(ctx: Context): Promise<void> {
   await ctx.reply(welcomeText, {
     parse_mode: 'Markdown',
-    reply_markup: startOpenAppInlineKeyboard(),
-  });
-  // Install reply keyboard without leaving a visible second bubble.
-  const keyboardMsg = await ctx.reply('\u200B', {
     reply_markup: mainReplyKeyboard(),
   });
-  try {
-    await ctx.api.deleteMessage(ctx.chat!.id, keyboardMsg.message_id);
-  } catch {
-    // Keyboard stays even if delete fails.
-  }
 }
 
 async function sendChannel(ctx: Context): Promise<void> {
@@ -140,7 +131,7 @@ bot.command('start', async (ctx) => {
 
 bot.command('app', async (ctx) => {
   await ctx.reply(openAppHintText, {
-    reply_markup: openMiniAppInlineKeyboard(),
+    reply_markup: openMiniAppReplyKeyboard(),
   });
 });
 

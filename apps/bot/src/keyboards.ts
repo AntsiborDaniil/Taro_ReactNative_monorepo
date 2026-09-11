@@ -2,19 +2,14 @@ import { InlineKeyboard, Keyboard } from 'grammy';
 import { config } from './config';
 import { CHANNEL_HANDLE, CHANNEL_URL, type FaqTopicId } from './messages';
 
-/** Inline / reply WebApp button label on /start and elsewhere. */
-export const OPEN_APP_LABEL = 'Открыть Mindful Taro';
+const OPEN_APP_LABEL = '🔮 Открыть Mindful Tarot';
 export const BTN_CHANNEL = '📣 Канал';
 export const BTN_FAQ = '❓ FAQ';
 export const BTN_SUPPORT = '💬 Поддержка';
 export const BTN_HELP = 'ℹ️ Помощь';
+export const BTN_APP = '🔮 Приложение';
 
 export { CHANNEL_URL, CHANNEL_HANDLE };
-
-/** Primary CTA on /start — opens Mini App. */
-export function startOpenAppInlineKeyboard(): InlineKeyboard {
-  return new InlineKeyboard().webApp(OPEN_APP_LABEL, config.webAppUrl);
-}
 
 export function openMiniAppInlineKeyboard(): InlineKeyboard {
   return new InlineKeyboard()
@@ -30,12 +25,13 @@ export function openMiniAppReplyKeyboard(): Keyboard {
     .oneTime();
 }
 
-/** Persistent reply keyboard: quick actions (без кнопки приложения). */
+/** Persistent reply keyboard: quick access to main actions / commands. */
 export function mainReplyKeyboard(): Keyboard {
   return new Keyboard()
+    .webApp(OPEN_APP_LABEL, config.webAppUrl)
     .text(BTN_CHANNEL)
-    .text(BTN_FAQ)
     .row()
+    .text(BTN_FAQ)
     .text(BTN_SUPPORT)
     .text(BTN_HELP)
     .resized()
