@@ -46,7 +46,15 @@ const authProvider = {
       throw new Error('Not authenticated');
     }
   },
-  checkError: async (error: { status?: number }) => {
+  checkError: async (error: { status?: number; message?: unknown; name?: string }) => {
+    if (
+      error?.name === 'AbortError' ||
+      error?.message === false ||
+      (typeof error?.message === 'string' &&
+        /abort|cancel/i.test(error.message))
+    ) {
+      return;
+    }
     if (error.status === 401) {
       await adminSignOut();
       throw new Error('Unauthorized');

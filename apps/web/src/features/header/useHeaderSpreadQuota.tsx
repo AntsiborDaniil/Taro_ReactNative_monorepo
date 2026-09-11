@@ -1,5 +1,5 @@
 import { createElement, useCallback, useMemo } from 'react';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { useWindowDimensions } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { UserContext } from 'entities/user';
@@ -10,9 +10,7 @@ import {
   type SpreadQuotaBadgeMode,
 } from 'features/tarotAccess/ui';
 import { useData } from 'shared/DataProvider';
-import { COLORS, getColorOpacity } from 'shared/themes';
 import { AnalyticAction } from 'shared/types';
-import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui/Text';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 
 export type HeaderSpreadQuota = {
@@ -93,62 +91,13 @@ export function HeaderSpreadQuotaBadge({
   const { width } = useWindowDimensions();
   const isCompactMobile = width < 430;
   const resolvedSize = size ?? (isCompactMobile ? 17 : 22);
-  const showTopUp = quota.mode !== 'unlimited';
-  const plusSize = isCompactMobile ? 14 : 16;
 
   return (
-    <View style={styles.chip} accessibilityElementsHidden>
-      <SpreadCreditsBadge
-        mode={quota.mode}
-        remaining={quota.remaining}
-        size={resolvedSize}
-      />
-      {showTopUp ? (
-        <View
-          style={[
-            styles.plusMark,
-            {
-              width: plusSize,
-              height: plusSize,
-              borderRadius: plusSize / 2,
-            },
-          ]}
-        >
-          <Text
-            category={TEXT_TAGS.label}
-            weight={TEXT_WEIGHT.bold}
-            style={[
-              styles.plusText,
-              {
-                fontSize: isCompactMobile ? 11 : 12,
-                lineHeight: isCompactMobile ? 12 : 14,
-              },
-            ]}
-          >
-            +
-          </Text>
-        </View>
-      ) : null}
-    </View>
+    <SpreadCreditsBadge
+      mode={quota.mode}
+      remaining={quota.remaining}
+      size={resolvedSize}
+      showTopUpHint={quota.mode !== 'unlimited'}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  plusMark: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: getColorOpacity(COLORS.Primary500, 22),
-    borderWidth: 1,
-    borderColor: getColorOpacity(COLORS.Primary500, 70),
-  },
-  plusText: {
-    color: COLORS.Primary500,
-    textAlign: 'center',
-    includeFontPadding: false,
-  },
-});

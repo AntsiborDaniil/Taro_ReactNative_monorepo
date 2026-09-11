@@ -10,6 +10,8 @@ type SpreadCreditsBadgeProps = {
   /** Remaining free daily spreads or paid credits. Ignored for unlimited. */
   remaining?: number;
   size?: number;
+  /** Показать «+» в бейдже снизу справа (пополнение). */
+  showTopUpHint?: boolean;
 };
 
 /**
@@ -21,6 +23,7 @@ export function SpreadCreditsBadge({
   mode,
   remaining = 0,
   size = 28,
+  showTopUpHint = false,
 }: SpreadCreditsBadgeProps) {
   const isCharged = mode === 'credits' || mode === 'unlimited';
   const boltColor = isCharged ? COLORS.Primary600 : COLORS.SpbSky2;
@@ -30,8 +33,12 @@ export function SpreadCreditsBadge({
   const accentText = isCharged ? COLORS.Primary500 : COLORS.SpbSky1;
 
   const count = Math.max(0, Math.floor(remaining));
-  const label =
+  const countLabel =
     mode === 'unlimited' ? '∞' : count > 99 ? '99+' : String(count);
+  const label =
+    showTopUpHint && mode !== 'unlimited' && count <= 99
+      ? `${countLabel}+`
+      : countLabel;
 
   const rootSize = Math.max(28, Math.round(size * 1.55));
   const badgeMin = size <= 18 ? 14 : 16;

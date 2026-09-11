@@ -351,6 +351,7 @@ function CardsList<T extends BaseTarotCardProps>({
         style={[
           styles.grid,
           { gap: gridGap },
+          preferCompactTiles ? styles.gridCentered : styles.gridStart,
           isMobileStackLayout && styles.gridSingle,
         ]}
         onLayout={(event) => {
@@ -378,6 +379,15 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     flexWrap: 'wrap',
+  },
+  /** Значения карт / словарь — сетка по центру. */
+  gridCentered: {
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
+  },
+  /** Стиль колоды / избранное — слева, без «висящей» карты по центру. */
+  gridStart: {
     justifyContent: 'flex-start',
     alignContent: 'flex-start',
     alignItems: 'flex-start',
@@ -385,6 +395,7 @@ const styles = StyleSheet.create({
   gridSingle: {
     flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   item: {
     gap: 10,

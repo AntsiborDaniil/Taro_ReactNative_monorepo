@@ -94,7 +94,17 @@ function MainQuickLinks() {
           key={link.id}
           accessibilityRole="button"
           accessibilityLabel={t(link.labelKey)}
-          onPress={() => onPress(link)}
+          onPress={() => {
+            void onPress(link);
+          }}
+          {...(Platform.OS === 'web'
+            ? ({
+                onClick: (event: { stopPropagation?: () => void }) => {
+                  event?.stopPropagation?.();
+                  void onPress(link);
+                },
+              } as object)
+            : {})}
           style={(state: PressableStateCallbackType) => [
             styles.chip,
             isCompact && styles.chipCompact,
@@ -179,6 +189,8 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(246, 192, 27, 0.18)',
     backgroundColor: 'rgba(30, 35, 43, 0.62)',
     overflow: 'hidden',
+    position: 'relative',
+    zIndex: 1,
     ...(Platform.OS === 'web'
       ? ({
           cursor: 'pointer',

@@ -54,9 +54,18 @@ function Main() {
               },
             ]}
           >
-            <View style={styles.decorGrid} />
+            <View style={styles.decorGrid} pointerEvents="none" />
             <View style={styles.sectionShell}>
               <DayAdvice />
+            </View>
+            <View style={[styles.sectionShell, styles.quickLinksShell]}>
+              {Platform.OS === 'web' ? (
+                <DeferredMount delayMs={100} fallback={null}>
+                  <MainQuickLinks />
+                </DeferredMount>
+              ) : (
+                <MainQuickLinks />
+              )}
             </View>
             {Platform.OS === 'web' ? (
               <>
@@ -66,9 +75,6 @@ function Main() {
                     { gap: isCompact ? 10 : 12 },
                   ]}
                 >
-                  <DeferredMount delayMs={100} fallback={null}>
-                    <MainQuickLinks />
-                  </DeferredMount>
                   <View style={styles.sectionShell}>
                     <DeferredMount
                       delayMs={160}
@@ -103,7 +109,6 @@ function Main() {
                     { gap: isCompact ? 10 : 12 },
                   ]}
                 >
-                  <MainQuickLinks />
                   <View style={styles.sectionShell}>
                     {popularSpreads}
                   </View>
@@ -159,6 +164,11 @@ const styles = StyleSheet.create({
         } as object)
       : {}),
   },
+  quickLinksShell: {
+    zIndex: 2,
+    overflow: 'visible',
+    padding: 10,
+  },
   tarotCluster: {
     width: '100%',
   },
@@ -179,5 +189,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(246, 192, 27, 0.16)',
     backgroundColor: 'rgba(246, 192, 27, 0.03)',
+    zIndex: 0,
   },
 });

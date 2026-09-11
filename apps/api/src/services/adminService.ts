@@ -107,25 +107,42 @@ export async function getAdminUser(id: string): Promise<Record<string, unknown> 
     return null;
   }
 
-  const [{ count: spreadsCount }, { data: daily }] = await Promise.all([
-    admin
+  let spreadsCount = 0;
+  let dailyUsed = 0;
+  let dailyDay: string | null = null;
+
+  try {
+    const { count } = await admin
       .from('spreads')
       .select('id', { count: 'exact', head: true })
-      .eq('user_id', id),
-    admin
+      .eq('user_id', id);
+    spreadsCount = count ?? 0;
+  } catch {
+    spreadsCount = 0;
+  }
+
+  try {
+    const { data: daily, error: dailyError } = await admin
       .from('tarot_daily_usage')
       .select('count, day')
       .eq('user_id', id)
       .order('day', { ascending: false })
       .limit(1)
-      .maybeSingle(),
-  ]);
+      .maybeSingle();
+    if (!dailyError && daily) {
+      dailyUsed = typeof daily.count === 'number' ? daily.count : 0;
+      dailyDay = daily.day ?? null;
+    }
+  } catch {
+    dailyUsed = 0;
+    dailyDay = null;
+  }
 
   return {
     ...data,
-    spreads_count: spreadsCount ?? 0,
-    daily_used: daily?.count ?? 0,
-    daily_day: daily?.day ?? null,
+    spreads_count: spreadsCount,
+    daily_used: dailyUsed,
+    daily_day: dailyDay,
   };
 }
 
@@ -162,17 +179,15 @@ export async function updateAdminUser(
     return getAdminUser(id);
   }
 
-  const { data, error } = await getSupabaseAdmin()
+  const { error } = await getSupabaseAdmin()
     .from('profiles')
     .update(updates)
-    .eq('id', id)
-    .select('*')
-    .maybeSingle();
+    .eq('id', id);
 
   if (error) {
     throw error;
   }
-  return data as Record<string, unknown> | null;
+  return getAdminUser(id);
 }
 
 export async function listAdminSpreads(input: {

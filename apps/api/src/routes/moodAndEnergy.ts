@@ -1,6 +1,11 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { resolveAuthedUser } from '../lib/authRequest';
+import { OpenAiProviderError } from '../lib/openaiErrors';
 import { generateMoodAndEnergyInterpretation } from '../services/moodAndEnergyMotivationService';
+import {
+  refundSpreadSlot,
+  tryConsumeSpreadSlot,
+} from '../services/tarotDailyUsageService';
 import { TMoodAndEnergyInput } from '../types';
 
 export const moodAndEnergyRoute = async (
@@ -40,6 +45,15 @@ export const moodAndEnergyRoute = async (
             type: 'object',
             properties: {
               interpretation: { type: 'string' },
+              tarotDaily: {
+                type: 'object',
+                properties: {
+                  used: { type: 'number' },
+                  limit: { type: 'number' },
+                  day: { type: 'string' },
+                },
+              },
+              spreadCredits: { type: 'number' },
             },
           },
         },
@@ -48,10 +62,27 @@ export const moodAndEnergyRoute = async (
     async (request, reply) => {
       const user = await resolveAuthedUser(request);
       if (!user) {
-        return reply.status(401).send({ message: 'Unauthorized' });
+        return reply.status(401).send({
+          code: 'unauthorized',
+          message: 'Sign in is required to generate a mood reading',
+        });
       }
 
       const { params, card, language } = request.body;
+
+      const slot = await tryConsumeSpreadSlot(user.id);
+      if (!slot.ok) {
+        return reply.status(429).send({
+          code: 'daily_limit_reached',
+          message: 'Daily tarot spread limit reached',
+          tarotDaily: {
+            used: slot.used,
+            limit: slot.limit,
+            day: slot.day,
+          },
+          spreadCredits: slot.spreadCredits,
+        });
+      }
 
       try {
         const interpretation = await generateMoodAndEnergyInterpretation({
@@ -59,10 +90,32 @@ export const moodAndEnergyRoute = async (
           card,
           language,
         });
-        return reply.send(interpretation);
+        return reply.send({
+          ...interpretation,
+          tarotDaily: {
+            used: slot.used,
+            limit: slot.limit,
+            day: slot.day,
+          },
+          spreadCredits: slot.spreadCredits,
+        });
       } catch (error) {
         request.log.error(error);
+        try {
+          await refundSpreadSlot(user.id, slot.source);
+        } catch (refundError) {
+          request.log.error(refundError);
+        }
+
+        if (error instanceof OpenAiProviderError) {
+          return reply.status(error.httpStatus).send({
+            message: error.message,
+            code: error.code,
+          });
+        }
+
         return reply.status(500).send({
+          code: 'motivation_failed',
           message: 'Could not generate interpretation',
         });
       }

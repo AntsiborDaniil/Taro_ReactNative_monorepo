@@ -76,10 +76,14 @@ function MoodProgress({
     }
 
     if (todayProgress) {
-      await handleSelectMotivationItem?.({
+      const ok = await handleSelectMotivationItem?.({
         key: MotivationKey.MoodAndEnergy,
         parameters: todayProgress.values,
       });
+
+      if (!ok) {
+        return;
+      }
 
       navigation.navigate(TabRoute.MainTab, {
         screen: NavigationRoute.MotivationCard,

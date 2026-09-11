@@ -21,6 +21,9 @@ import { ingestSupportTicket } from './support';
 
 const bot = new Bot(config.botToken);
 
+/** Users who pressed /support and should send the next text as a ticket. */
+const pendingSupportByUser = new Set<number>();
+
 function startPayload(ctx: { match?: string | RegExpMatchArray }): string {
   if (typeof ctx.match === 'string') {
     return ctx.match.trim();
@@ -65,6 +68,9 @@ bot.command('help', async (ctx) => {
 });
 
 bot.command('support', async (ctx) => {
+  if (ctx.from?.id) {
+    pendingSupportByUser.add(ctx.from.id);
+  }
   await ctx.reply(
     'Напиши одним сообщением, что случилось — оплата, заряды, ошибка в раскладе. Текст уйдёт в поддержку, ответ придёт сюда в бот.'
   );
@@ -98,6 +104,17 @@ bot.on('message:text', async (ctx) => {
     return;
   }
 
+  const awaitingSupport = pendingSupportByUser.has(from.id);
+  if (!awaitingSupport) {
+    await ctx.reply(helpText, {
+      parse_mode: 'Markdown',
+      reply_markup: openMiniAppInlineKeyboard(),
+    });
+    return;
+  }
+
+  pendingSupportByUser.delete(from.id);
+
   try {
     await ingestSupportTicket({
       telegramId: from.id,
@@ -111,6 +128,7 @@ bot.on('message:text', async (ctx) => {
     );
   } catch (error) {
     console.error('[bot] support ingest failed:', error);
+    pendingSupportByUser.add(from.id);
     await ctx.reply(
       'Сейчас не получилось отправить сообщение в поддержку. Попробуй ещё раз через минуту или напиши /support.'
     );
