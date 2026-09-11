@@ -69,12 +69,12 @@ const authProvider = {
 };
 
 export function App() {
-  // RA 5 defaults to HashRouter. Wrap with BrowserRouter (no basename here)
-  // so Admin basename="/admin") is applied once — not /admin/admin/*.
+  // RA 5 defaults to HashRouter. Outer BrowserRouter with basename strips
+  // /admin so Resource routes (users/*, tickets/*) match. Do NOT also pass
+  // basename to <Admin> — that doubles links to /admin/admin/* or breaks match.
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={ADMIN_BASENAME}>
       <Admin
-        basename={ADMIN_BASENAME}
         theme={theme}
         darkTheme={theme}
         loginPage={LoginPage}
