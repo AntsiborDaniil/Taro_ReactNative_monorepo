@@ -6,8 +6,8 @@ function isAbortError(error: unknown): boolean {
   if (!error || typeof error !== 'object') {
     return false;
   }
-  const err = error as { name?: string; message?: string; status?: number };
-  if (err.name === 'AbortError') {
+  const err = error as { name?: string; message?: string };
+  if (err.name === 'AbortError' || err.name === 'CanceledError') {
     return true;
   }
   const message = String(err.message || '').toLowerCase();
@@ -18,24 +18,39 @@ function isAbortError(error: unknown): boolean {
   );
 }
 
-const httpClient: typeof fetchUtils.fetchJson = async (url, options: Options = {}) => {
+const httpClient: typeof fetchUtils.fetchJson = async (
+  url,
+  options: Options = {}
+) => {
+  // React Query aborts the previous in-flight request on remount / mailto click.
+  // That surfaces as "cancelled" and blocks opening a user. Do not honor abort.
+  const { signal: _signal, ...rest } = options;
   try {
     return await fetchUtils.fetchJson(url, {
-      ...options,
-      headers: adminHeaders(options.headers),
+      ...rest,
+      headers: adminHeaders(rest.headers),
       credentials: 'include',
     });
   } catch (error) {
-    // React Admin / React Query abort previous in-flight requests; don't toast "cancelled".
     if (isAbortError(error)) {
-      // eslint-disable-next-line @typescript-eslint/no-throw-literal
       throw { message: false, name: 'AbortError' };
     }
     throw error;
   }
 };
 
-export const dataProvider: DataProvider = simpleRestProvider(
-  `${getApiBase()}/api/admin`,
-  httpClient
-);
+const restProvider = simpleRestProvider(`${getApiBase()}/api/admin`, httpClient);
+
+export const dataProvider: DataProvider = {
+  ...restProvider,
+  getOne: async (resource, params) => {
+    try {
+      return await restProvider.getOne(resource, params);
+    } catch (error) {
+      if (isAbortError(error)) {
+        return restProvider.getOne(resource, params);
+      }
+      throw error;
+    }
+  },
+};

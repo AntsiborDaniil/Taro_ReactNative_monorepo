@@ -36,7 +36,7 @@ export function SpreadList() {
         <TextField source="category" label="Категория" />
         <TextField source="name" label="Название" />
         <NumberField source="cards_count" label="Карт" />
-        <ReferenceField source="user_id" reference="users" label="Пользователь" />
+        <ReferenceField source="user_id" reference="users" label="Пользователь" link="edit" />
         <DateField source="created_at" showTime />
       </Datagrid>
     </List>
@@ -48,7 +48,7 @@ export function SpreadShow() {
     <Show>
       <SimpleShowLayout>
         <TextField source="id" />
-        <ReferenceField source="user_id" reference="users" />
+        <ReferenceField source="user_id" reference="users" link="edit" />
         <TextField source="spread_key" />
         <TextField source="category" />
         <TextField source="name" />

@@ -55,7 +55,7 @@ export function TicketShow() {
         <NumberField source="telegram_id" />
         <TextField source="username" />
         <TextField source="display_name" />
-        <ReferenceField source="user_id" reference="users" label="Профиль" />
+        <ReferenceField source="user_id" reference="users" label="Профиль" link="edit" />
         <TextField source="profile_email" label="Email профиля" />
         <TextField source="profile_name" label="Имя профиля" />
         <TextField source="profile_role" label="Роль" />

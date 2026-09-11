@@ -1,7 +1,6 @@
 import {
   Datagrid,
   DateField,
-  EmailField,
   List,
   NumberField,
   ReferenceField,
@@ -32,8 +31,8 @@ export function PaymentList() {
         <TextField source="invoice_id" label="Invoice" />
         <SelectField source="status" choices={statusChoices} />
         <NumberField source="credits" />
-        <EmailField source="email" />
-        <ReferenceField source="user_id" reference="users" />
+        <TextField source="email" />
+        <ReferenceField source="user_id" reference="users" link="edit" />
         <DateField source="created_at" showTime />
         <DateField source="paid_at" showTime />
       </Datagrid>
@@ -48,8 +47,8 @@ export function PaymentShow() {
         <TextField source="invoice_id" />
         <TextField source="status" />
         <NumberField source="credits" />
-        <EmailField source="email" />
-        <ReferenceField source="user_id" reference="users" />
+        <TextField source="email" />
+        <ReferenceField source="user_id" reference="users" link="edit" />
         <DateField source="created_at" showTime />
         <DateField source="paid_at" showTime />
       </SimpleShowLayout>
