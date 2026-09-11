@@ -17,6 +17,7 @@ import {
   openAppHintText,
   welcomeText,
 } from './messages';
+import { ingestSupportTicket } from './support';
 
 const bot = new Bot(config.botToken);
 
@@ -63,6 +64,12 @@ bot.command('help', async (ctx) => {
   });
 });
 
+bot.command('support', async (ctx) => {
+  await ctx.reply(
+    'Напиши одним сообщением, что случилось — оплата, заряды, ошибка в раскладе. Текст уйдёт в поддержку, ответ придёт сюда в бот.'
+  );
+});
+
 bot.command('faq', async (ctx) => {
   await ctx.reply(faqIntroText, {
     reply_markup: faqInlineKeyboard(),
@@ -85,9 +92,29 @@ bot.on('message:text', async (ctx) => {
     return;
   }
 
-  await ctx.reply('Используй /app или кнопку ниже, чтобы открыть приложение.', {
-    reply_markup: openMiniAppInlineKeyboard(),
-  });
+  const from = ctx.from;
+  if (!from) {
+    await ctx.reply('Не удалось определить аккаунт Telegram. Напиши ещё раз.');
+    return;
+  }
+
+  try {
+    await ingestSupportTicket({
+      telegramId: from.id,
+      username: from.username,
+      displayName: [from.first_name, from.last_name].filter(Boolean).join(' '),
+      message: ctx.message.text,
+    });
+    await ctx.reply(
+      'Приняли обращение. Ответим здесь в боте. Пока можно открыть приложение кнопкой ниже.',
+      { reply_markup: openMiniAppInlineKeyboard() }
+    );
+  } catch (error) {
+    console.error('[bot] support ingest failed:', error);
+    await ctx.reply(
+      'Сейчас не получилось отправить сообщение в поддержку. Попробуй ещё раз через минуту или напиши /support.'
+    );
+  }
 });
 
 async function configureMenuButton(): Promise<void> {
@@ -109,6 +136,7 @@ async function main(): Promise<void> {
       { command: 'start', description: 'Приветствие и приложение' },
       { command: 'app', description: 'Открыть Mini App' },
       { command: 'faq', description: 'Оплата, заряды и правила' },
+      { command: 'support', description: 'Написать в поддержку' },
       { command: 'help', description: 'Список команд' },
     ]);
     await configureMenuButton();

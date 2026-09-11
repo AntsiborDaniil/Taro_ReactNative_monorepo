@@ -25,9 +25,21 @@ const rewrites = [
     source: '/health',
     destination: `${apiBase}/health`,
   },
-  // SPA fallback — exclude /locales/* so JSON is served as static files
   {
-    source: '/((?!locales/).*)',
+    source: '/admin',
+    destination: '/admin/index.html',
+  },
+  {
+    source: '/admin/',
+    destination: '/admin/index.html',
+  },
+  {
+    source: '/admin/:path*',
+    destination: '/admin/index.html',
+  },
+  // SPA fallback — exclude /locales/* and /admin*
+  {
+    source: '/((?!locales/|admin).*)',
     destination: '/index.html',
   },
 ];
@@ -59,6 +71,13 @@ const config = {
           key: 'Cache-Control',
           value: 'public, max-age=31536000, immutable',
         },
+      ],
+    },
+    {
+      source: '/admin/:path*',
+      headers: [
+        { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        { key: 'X-Frame-Options', value: 'DENY' },
       ],
     },
     {

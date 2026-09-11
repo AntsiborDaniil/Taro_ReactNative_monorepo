@@ -23,6 +23,8 @@ import { spreadsRoute } from './routes/spreads';
 import { favoritesRoute } from './routes/favorites';
 import { settingsRoute } from './routes/settings';
 import { lavaPaymentsRoute } from './routes/lavaPayments';
+import { adminRoute } from './routes/admin';
+import { internalSupportRoute } from './routes/internalSupport';
 
 dotenv.config();
 
@@ -57,7 +59,10 @@ async function bootstrap(): Promise<void> {
       'Content-Type',
       'Authorization',
       'X-Web-Cookie-Auth',
+      'X-Tarot-Client',
+      'X-Telegram-Init-Data',
     ],
+    exposedHeaders: ['Content-Range', 'X-Total-Count'],
   });
 
   await fastify.register(swagger, {
@@ -118,6 +123,8 @@ async function bootstrap(): Promise<void> {
   await fastify.register(moodAndEnergyRoute, { prefix: '/api' });
   await fastify.register(habitsRoute, { prefix: '/api' });
   await fastify.register(lavaPaymentsRoute, { prefix: '/api' });
+  await fastify.register(adminRoute, { prefix: '/api' });
+  await fastify.register(internalSupportRoute, { prefix: '/api' });
 
   const address = await fastify.listen({
     port: process.env.PORT ? Number(process.env.PORT) : 3002,

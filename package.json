@@ -14,5 +14,8 @@
     "supabase:push": "supabase db push",
     "deploy:check-health": "bash scripts/check-production-health.sh",
     "supabase:functions": "supabase functions serve --env-file apps/api/.env"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
   }
 }

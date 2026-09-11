@@ -23,5 +23,9 @@ export const config = {
     /\/?$/,
     '/'
   ),
+  apiPublicUrl: (
+    process.env.API_PUBLIC_URL?.trim() ||
+    'https://taro-reactnative-monorepo.onrender.com'
+  ).replace(/\/$/, ''),
   port: parsePort(process.env.PORT, 8080),
 } as const;
