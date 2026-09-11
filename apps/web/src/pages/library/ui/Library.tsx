@@ -124,7 +124,11 @@ function Library() {
             ]}
           >
             <View style={styles.settingsIconWrap}>
-              <SettingsIcon width={iconSize} height={iconSize} />
+              <SettingsIcon
+                width={iconSize}
+                height={iconSize}
+                fill={COLORS.Content}
+              />
             </View>
             <View style={styles.settingsTextCol}>
               <Text

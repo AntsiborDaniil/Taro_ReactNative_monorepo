@@ -12,6 +12,7 @@ import { Layout, StyleService, useStyleSheet } from '@ui-kitten/components';
 import type { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
 import { ChevronLeftIcon, SettingsIcon } from 'shared/icons';
 import { isTablet, WEB_HOVER_TRANSITION } from 'shared/lib';
+import { COLORS } from 'shared/themes';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui/Text';
 import { useHeaderNavigation } from './useHeaderNavigation';
 import {
@@ -138,6 +139,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
                   <SettingsIcon
                     width={isTablet ? 32 : 24}
                     height={isTablet ? 32 : 24}
+                    fill={COLORS.Content}
                   />
                 )}
               </TouchableOpacity>
