@@ -35,12 +35,10 @@ export function SpreadCreditsBadge({
   const count = Math.max(0, Math.floor(remaining));
   const countLabel =
     mode === 'unlimited' ? '∞' : count > 99 ? '99+' : String(count);
-  const label =
-    showTopUpHint && mode !== 'unlimited' && count <= 99
-      ? `${countLabel}+`
-      : countLabel;
+  const showPlus = showTopUpHint && mode !== 'unlimited';
+  const label = showPlus ? `${countLabel} +` : countLabel;
 
-  const rootSize = Math.max(28, Math.round(size * 1.55));
+  const rootSize = Math.max(30, Math.round(size * 1.7));
   const badgeMin = size <= 18 ? 14 : 16;
   const badgeFont = size <= 18 ? 9 : 10;
 
@@ -77,10 +75,36 @@ export function SpreadCreditsBadge({
           />
         ) : null}
       </View>
+      {showPlus ? (
+        <View
+          style={[
+            styles.badge,
+            styles.plusBadge,
+            {
+              borderColor: accentBorder,
+              width: badgeMin,
+              height: badgeMin,
+              borderRadius: badgeMin / 2,
+            },
+          ]}
+        >
+          <Text
+            category={TEXT_TAGS.label}
+            weight={TEXT_WEIGHT.bold}
+            style={[
+              styles.badgeText,
+              { color: accentText, fontSize: badgeFont, lineHeight: badgeFont + 2 },
+            ]}
+          >
+            +
+          </Text>
+        </View>
+      ) : null}
       {mode !== 'unlimited' ? (
         <View
           style={[
             styles.badge,
+            styles.countBadge,
             {
               borderColor: accentBorder,
               minWidth: badgeMin,
@@ -97,7 +121,7 @@ export function SpreadCreditsBadge({
               { color: accentText, fontSize: badgeFont, lineHeight: badgeFont + 2 },
             ]}
           >
-            {label}
+            {countLabel}
           </Text>
         </View>
       ) : null}
@@ -135,13 +159,19 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    right: -1,
-    bottom: 0,
+    bottom: -1,
     paddingHorizontal: 3,
     backgroundColor: COLORS.Background2,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  plusBadge: {
+    left: -2,
+    paddingHorizontal: 0,
+  },
+  countBadge: {
+    right: -2,
   },
   badgeText: {
     fontSize: 10,
