@@ -1,13 +1,25 @@
-import { Bot } from 'grammy';
+import { Bot, type Context } from 'grammy';
 import { config } from './config';
 import { startHealthServer } from './health';
 import {
+  ingestAcquisition,
+  isTrackedStartPayload,
+} from './acquisition';
+import {
   openMiniAppInlineKeyboard,
   openMiniAppReplyKeyboard,
+  mainReplyKeyboard,
+  channelInlineKeyboard,
   faqInlineKeyboard,
   isFaqTopicId,
+  BTN_CHANNEL,
+  BTN_FAQ,
+  BTN_SUPPORT,
+  BTN_HELP,
+  CHANNEL_URL,
 } from './keyboards';
 import {
+  channelText,
   faqIntroText,
   faqTopics,
   helpText,
@@ -31,6 +43,74 @@ function startPayload(ctx: { match?: string | RegExpMatchArray }): string {
   return '';
 }
 
+function fromMeta(ctx: Context) {
+  const from = ctx.from;
+  if (!from) {
+    return null;
+  }
+  return {
+    telegramId: from.id,
+    username: from.username,
+    displayName: [from.first_name, from.last_name].filter(Boolean).join(' '),
+  };
+}
+
+async function trackStartIfNeeded(ctx: Context, payload: string): Promise<void> {
+  if (!isTrackedStartPayload(payload)) {
+    return;
+  }
+  const meta = fromMeta(ctx);
+  if (!meta) {
+    return;
+  }
+  try {
+    await ingestAcquisition({
+      ...meta,
+      source: payload.trim().toLowerCase(),
+    });
+  } catch (error) {
+    console.error('[bot] acquisition ingest failed:', error);
+  }
+}
+
+async function sendWelcome(ctx: Context): Promise<void> {
+  await ctx.reply(welcomeText, {
+    parse_mode: 'Markdown',
+    reply_markup: openMiniAppInlineKeyboard(),
+  });
+  await ctx.reply('Меню команд — кнопками внизу:', {
+    reply_markup: mainReplyKeyboard(),
+  });
+}
+
+async function sendChannel(ctx: Context): Promise<void> {
+  await ctx.reply(channelText, {
+    reply_markup: channelInlineKeyboard(),
+  });
+}
+
+async function sendFaq(ctx: Context): Promise<void> {
+  await ctx.reply(faqIntroText, {
+    reply_markup: faqInlineKeyboard(),
+  });
+}
+
+async function sendHelp(ctx: Context): Promise<void> {
+  await ctx.reply(helpText, {
+    parse_mode: 'Markdown',
+    reply_markup: openMiniAppInlineKeyboard(),
+  });
+}
+
+async function beginSupport(ctx: Context): Promise<void> {
+  if (ctx.from?.id) {
+    pendingSupportByUser.add(ctx.from.id);
+  }
+  await ctx.reply(
+    'Напиши одним сообщением, что случилось — оплата, заряды, ошибка в раскладе. Текст уйдёт в поддержку, ответ придёт сюда в бот.'
+  );
+}
+
 bot.command('start', async (ctx) => {
   const payload = startPayload(ctx);
   const replyMarkup = openMiniAppInlineKeyboard();
@@ -48,10 +128,8 @@ bot.command('start', async (ctx) => {
     return;
   }
 
-  await ctx.reply(welcomeText, {
-    parse_mode: 'Markdown',
-    reply_markup: replyMarkup,
-  });
+  await trackStartIfNeeded(ctx, payload);
+  await sendWelcome(ctx);
 });
 
 bot.command('app', async (ctx) => {
@@ -60,26 +138,20 @@ bot.command('app', async (ctx) => {
   });
 });
 
+bot.command('channel', async (ctx) => {
+  await sendChannel(ctx);
+});
+
 bot.command('help', async (ctx) => {
-  await ctx.reply(helpText, {
-    parse_mode: 'Markdown',
-    reply_markup: openMiniAppInlineKeyboard(),
-  });
+  await sendHelp(ctx);
 });
 
 bot.command('support', async (ctx) => {
-  if (ctx.from?.id) {
-    pendingSupportByUser.add(ctx.from.id);
-  }
-  await ctx.reply(
-    'Напиши одним сообщением, что случилось — оплата, заряды, ошибка в раскладе. Текст уйдёт в поддержку, ответ придёт сюда в бот.'
-  );
+  await beginSupport(ctx);
 });
 
 bot.command('faq', async (ctx) => {
-  await ctx.reply(faqIntroText, {
-    reply_markup: faqInlineKeyboard(),
-  });
+  await sendFaq(ctx);
 });
 
 bot.callbackQuery(/^faq:(.+)$/, async (ctx) => {
@@ -95,6 +167,25 @@ bot.callbackQuery(/^faq:(.+)$/, async (ctx) => {
 
 bot.on('message:text', async (ctx) => {
   if (ctx.message.text.startsWith('/')) {
+    return;
+  }
+
+  const text = ctx.message.text.trim();
+
+  if (text === BTN_CHANNEL) {
+    await sendChannel(ctx);
+    return;
+  }
+  if (text === BTN_FAQ) {
+    await sendFaq(ctx);
+    return;
+  }
+  if (text === BTN_HELP) {
+    await sendHelp(ctx);
+    return;
+  }
+  if (text === BTN_SUPPORT) {
+    await beginSupport(ctx);
     return;
   }
 
@@ -153,6 +244,7 @@ async function main(): Promise<void> {
     await bot.api.setMyCommands([
       { command: 'start', description: 'Приветствие и приложение' },
       { command: 'app', description: 'Открыть Mini App' },
+      { command: 'channel', description: 'Наш Telegram-канал' },
       { command: 'faq', description: 'Оплата, заряды и правила' },
       { command: 'support', description: 'Написать в поддержку' },
       { command: 'help', description: 'Список команд' },
@@ -168,6 +260,7 @@ async function main(): Promise<void> {
 
   const me = await bot.api.getMe();
   console.log(`[bot] @${me.username} — Mini App: ${config.webAppUrl}`);
+  console.log(`[bot] channel: ${CHANNEL_URL}`);
   console.log('[bot] polling… (Ctrl+C to stop)');
 
   await bot.start();

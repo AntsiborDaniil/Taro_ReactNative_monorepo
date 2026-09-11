@@ -9,6 +9,8 @@ const USER_SORT = new Set([
   'role',
   'spread_credits',
   'telegram_id',
+  'acquisition_source',
+  'acquisition_at',
 ]);
 const SPREAD_SORT = new Set([
   'created_at',
@@ -53,12 +55,16 @@ export async function listAdminUsers(input: {
   const admin = getSupabaseAdmin();
   const q = sanitizeSearch(filterString(input.filter, 'q'));
   const role = filterString(input.filter, 'role');
+  const acquisitionSource = filterString(input.filter, 'acquisition_source');
   const hasCredits = input.filter.hasCredits;
 
   let query = admin.from('profiles').select('*', { count: 'exact' });
 
   if (role) {
     query = query.eq('role', role);
+  }
+  if (acquisitionSource) {
+    query = query.eq('acquisition_source', acquisitionSource);
   }
   if (hasCredits === true || hasCredits === 'true') {
     query = query.gt('spread_credits', 0);

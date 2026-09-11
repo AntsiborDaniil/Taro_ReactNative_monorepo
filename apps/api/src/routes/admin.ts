@@ -16,6 +16,7 @@ import {
   updateAdminTicketStatus,
   updateAdminUser,
 } from '../services/adminService';
+import { getAcquisitionSummary } from '../services/acquisitionService';
 
 function sendList(
   reply: FastifyReply,
@@ -42,6 +43,16 @@ export const adminRoute = async (
       return;
     }
     return reply.send({ user: actor });
+  });
+
+  fastify.get('/admin/acquisition-stats', async (request, reply) => {
+    const actor = await requireAdmin(request, reply);
+    if (!actor) {
+      return;
+    }
+    const rows = await getAcquisitionSummary();
+    const total = rows.reduce((sum, row) => sum + row.count, 0);
+    return reply.send({ total, rows });
   });
 
   fastify.get('/admin/users', async (request, reply) => {

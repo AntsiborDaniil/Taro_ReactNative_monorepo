@@ -15,6 +15,7 @@ import {
   validateTelegramWebAppInitData,
 } from '../lib/telegramWebApp';
 import * as memory from '../dev/memoryBackend';
+import { applyAcquisitionToProfile } from './acquisitionService';
 
 export type AuthPublicUser = {
   id: string;
@@ -609,6 +610,16 @@ export async function signInWithTelegram(initData: string): Promise<AuthSession>
     .from('profiles')
     .update({ telegram_id: telegramId })
     .eq('id', publicUser.id);
+
+  try {
+    await applyAcquisitionToProfile({
+      userId: publicUser.id,
+      telegramId,
+    });
+  } catch (error) {
+    // Attribution must not block login.
+    console.error('[auth telegram] acquisition sync failed:', error);
+  }
 
   return mapSession(
     signInData.session.access_token,

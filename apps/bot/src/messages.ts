@@ -1,10 +1,16 @@
+export const CHANNEL_URL = 'https://t.me/mindfultaro';
+export const CHANNEL_HANDLE = '@mindfultaro';
+
 export const welcomeText = `Привет! Я бот **Mindful Tarot**.
 
 Нажми кнопку ниже, чтобы открыть приложение с раскладами, картой дня и словарём карт.
 
+Наш канал: [${CHANNEL_HANDLE}](${CHANNEL_URL}) — новости, подсказки и разборы.
+
 Команды:
-/start — приветствие и кнопка Mini App
-/app — открыть приложение
+/start — приветствие и приложение
+/app — открыть Mini App
+/channel — наш Telegram-канал
 /faq — оплата, заряды и правила
 /support — написать в поддержку
 /help — список команд`;
@@ -13,11 +19,20 @@ export const helpText = `**Команды бота**
 
 /start — начать и получить кнопку Mini App
 /app — открыть веб-приложение в Telegram
+/channel — перейти в канал ${CHANNEL_HANDLE}
 /faq — частые вопросы: оплата, заряды, правила
 /support — написать в поддержку
 /help — эта справка
 
+Или используй кнопки меню внизу чата.
+
 Приложение: таро-расклады, карта дня, библиотека карт.`;
+
+export const channelText = `Наш Telegram-канал: ${CHANNEL_HANDLE}
+
+Там анонсы, короткие разборы и новости Mindful Tarot.
+
+Открыть: ${CHANNEL_URL}`;
 
 export const openAppHintText =
   'Нажми кнопку, чтобы открыть Mini App на Vercel:';
