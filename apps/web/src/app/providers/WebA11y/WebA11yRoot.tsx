@@ -12,7 +12,7 @@ import {
   WEB_SCROLL_Y_DRAGGING_CLASS,
 } from 'shared/lib/web/webScrollClasses';
 
-const STYLE_ID = 'tarot-web-a11y-global';
+const STYLE_ID = 'tarot-web-a11y-global-v2';
 
 function isTypingTarget(target: EventTarget | null): boolean {
   if (typeof document === 'undefined') {
@@ -43,10 +43,10 @@ input, textarea, select {
   font-size: 16px !important;
 }
 [data-tarot-carousel] {
-  touch-action: pan-y !important;
+  touch-action: pan-x pan-y;
 }
 [data-tarot-carousel] * {
-  touch-action: pan-y !important;
+  touch-action: pan-x pan-y;
 }
 .tarot-web-scroll-x {
   overflow-x: auto;

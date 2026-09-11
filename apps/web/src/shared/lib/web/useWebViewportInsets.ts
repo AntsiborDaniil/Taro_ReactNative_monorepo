@@ -18,7 +18,9 @@ export type LayoutViewportInsets = {
   right: number;
 };
 
-/** Chrome/Safari mobile UI (адресная строка, нижняя панель вкладок). */
+/** Chrome/Safari toolbar — ignore keyboard-sized visualViewport shrink. */
+const MAX_BROWSER_CHROME_INSET = 80;
+
 function readBrowserChromeBottomInset(): number {
   if (typeof window === 'undefined') {
     return 0;
@@ -30,7 +32,11 @@ function readBrowserChromeBottomInset(): number {
   }
 
   const gap = window.innerHeight - (vv.height + vv.offsetTop);
-  return Math.max(0, Math.round(gap));
+  const chrome = Math.max(0, Math.round(gap));
+  if (chrome > MAX_BROWSER_CHROME_INSET) {
+    return 0;
+  }
+  return chrome;
 }
 
 function readCssSafeAreaInsets(): LayoutViewportInsets {
@@ -84,15 +90,10 @@ export function useWebViewportInsets(): LayoutViewportInsets {
     };
 
     update();
-    const vv = window.visualViewport;
-    vv?.addEventListener('resize', update);
-    vv?.addEventListener('scroll', update);
     window.addEventListener('resize', update);
     window.addEventListener('orientationchange', update);
 
     return () => {
-      vv?.removeEventListener('resize', update);
-      vv?.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
       window.removeEventListener('orientationchange', update);
     };

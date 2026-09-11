@@ -1,5 +1,6 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  findNodeHandle,
   Platform,
   Pressable,
   StyleSheet,
@@ -83,9 +84,84 @@ function CoverFlowCardCarousel({
   };
 
   const carouselHeight = cardHeight;
+  const stageRef = useRef<View>(null);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      return;
+    }
+
+    const node =
+      (stageRef.current as unknown as HTMLElement | null) ??
+      (findNodeHandle(stageRef.current) as unknown as HTMLElement | null);
+    if (!node || typeof node.addEventListener !== 'function') {
+      return;
+    }
+
+    let startX = 0;
+    let startY = 0;
+    let axis: 'x' | 'y' | null = null;
+    const AXIS_LOCK = 12;
+    const SWIPE = 40;
+
+    const onStart = (event: TouchEvent) => {
+      if (event.touches.length !== 1) {
+        return;
+      }
+      startX = event.touches[0].clientX;
+      startY = event.touches[0].clientY;
+      axis = null;
+    };
+
+    const onMove = (event: TouchEvent) => {
+      if (event.touches.length !== 1) {
+        return;
+      }
+      const dx = event.touches[0].clientX - startX;
+      const dy = event.touches[0].clientY - startY;
+      if (!axis) {
+        if (Math.abs(dx) < AXIS_LOCK && Math.abs(dy) < AXIS_LOCK) {
+          return;
+        }
+        axis = Math.abs(dx) > Math.abs(dy) * 1.2 ? 'x' : 'y';
+      }
+      if (axis === 'x') {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    const onEnd = (event: TouchEvent) => {
+      if (axis !== 'x') {
+        axis = null;
+        return;
+      }
+      const dx = event.changedTouches[0].clientX - startX;
+      axis = null;
+      event.stopPropagation();
+      if (dx <= -SWIPE) {
+        ref.current?.next();
+      } else if (dx >= SWIPE) {
+        ref.current?.prev();
+      }
+    };
+
+    node.addEventListener('touchstart', onStart, { passive: true });
+    node.addEventListener('touchmove', onMove, { passive: false });
+    node.addEventListener('touchend', onEnd);
+    node.addEventListener('touchcancel', onEnd);
+
+    return () => {
+      node.removeEventListener('touchstart', onStart);
+      node.removeEventListener('touchmove', onMove);
+      node.removeEventListener('touchend', onEnd);
+      node.removeEventListener('touchcancel', onEnd);
+    };
+  }, [carouselHeight, stageWidth]);
 
   return (
     <View
+      ref={stageRef}
       style={[
         styles.container,
         { width: stageWidth, height: carouselHeight },
