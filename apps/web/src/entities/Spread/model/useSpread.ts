@@ -29,6 +29,7 @@ import {
   isTablet,
   isWebAuthPending,
   MetrikaGoal,
+  patchCachedAuthMeQuota,
   reachMetrikaGoal,
   shouldPromptWebSignIn,
 } from 'shared/lib';
@@ -111,7 +112,7 @@ export function useSpread({
 
   const { setIsFullScreenLoading } = useData({ Context: LoadingsContext });
 
-  const { isPractitioner, isAuthenticated, authSessionLoading, tarotDaily, setTarotDaily, spreadCredits, setSpreadCredits } =
+  const { isPractitioner, isAuthenticated, authSessionLoading, tarotDaily, setTarotDaily, spreadCredits, setSpreadCredits, refreshSpreadQuota } =
     useData({
       Context: UserContext,
     });
@@ -601,6 +602,11 @@ export function useSpread({
           if (typeof body.spreadCredits === 'number') {
             setSpreadCredits?.(body.spreadCredits);
           }
+          patchCachedAuthMeQuota({
+            tarotDaily: body.tarotDaily,
+            spreadCredits: body.spreadCredits,
+          });
+          void refreshSpreadQuota?.();
           showModal?.(createElement(DailyTarotLimitModal));
           return false;
         }
@@ -619,12 +625,35 @@ export function useSpread({
         spreadCredits?: number;
       };
       const interpretation = payload.interpretation;
-      if (payload.tarotDaily) {
-        setTarotDaily?.(payload.tarotDaily);
+
+      const nextDaily =
+        payload.tarotDaily ??
+        (tarotDaily && tarotDaily.used < tarotDaily.limit
+          ? {
+              ...tarotDaily,
+              used: Math.min(tarotDaily.limit, tarotDaily.used + 1),
+            }
+          : tarotDaily);
+      const consumedDailySlot =
+        tarotDaily != null &&
+        nextDaily != null &&
+        nextDaily.used > tarotDaily.used;
+      const nextCredits =
+        typeof payload.spreadCredits === 'number'
+          ? payload.spreadCredits
+          : consumedDailySlot
+            ? (spreadCredits ?? 0)
+            : Math.max(0, (spreadCredits ?? 0) - 1);
+
+      if (nextDaily) {
+        setTarotDaily?.(nextDaily);
       }
-      if (typeof payload.spreadCredits === 'number') {
-        setSpreadCredits?.(payload.spreadCredits);
-      }
+      setSpreadCredits?.(nextCredits);
+      patchCachedAuthMeQuota({
+        tarotDaily: nextDaily,
+        spreadCredits: nextCredits,
+      });
+      void refreshSpreadQuota?.();
 
       setSpread((prevState) =>
         prevState ? { ...prevState, interpretation } : prevState

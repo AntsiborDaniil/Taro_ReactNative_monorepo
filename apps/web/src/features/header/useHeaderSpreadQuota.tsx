@@ -1,4 +1,5 @@
 import { createElement, useCallback, useMemo } from 'react';
+import { useWindowDimensions } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { UserContext } from 'entities/user';
@@ -33,20 +34,22 @@ export function useHeaderSpreadQuota(): HeaderSpreadQuota | null {
   const dailyRemaining =
     tarotDaily != null
       ? Math.max(0, tarotDaily.limit - tarotDaily.used)
-      : null;
+      : 0;
+  // Free daily + paid credits — decreases on every successful interpret.
+  const remainingTotal = dailyRemaining + credits;
 
   const quotaBadge = useMemo(() => {
     if (isPractitioner) {
       return { mode: 'unlimited' as const };
     }
-    if (credits > 0) {
-      return { mode: 'credits' as const, remaining: credits };
+    if (!isAuthenticated) {
+      return null;
     }
-    if (isAuthenticated && dailyRemaining != null) {
-      return { mode: 'daily' as const, remaining: dailyRemaining };
-    }
-    return null;
-  }, [credits, dailyRemaining, isAuthenticated, isPractitioner]);
+    return {
+      mode: (credits > 0 ? 'credits' : 'daily') as SpreadQuotaBadgeMode,
+      remaining: remainingTotal,
+    };
+  }, [credits, isAuthenticated, isPractitioner, remainingTotal]);
 
   const openBuyCredits = useCallback(async () => {
     AppMetrica.reportEvent(AnalyticAction.ClickSettingsSegment, {
@@ -80,16 +83,20 @@ export function useHeaderSpreadQuota(): HeaderSpreadQuota | null {
 
 export function HeaderSpreadQuotaBadge({
   quota,
-  size = 22,
+  size,
 }: {
   quota: HeaderSpreadQuota;
   size?: number;
 }) {
+  const { width } = useWindowDimensions();
+  const isCompactMobile = width < 430;
+  const resolvedSize = size ?? (isCompactMobile ? 17 : 22);
+
   return (
     <SpreadCreditsBadge
       mode={quota.mode}
       remaining={quota.remaining}
-      size={size}
+      size={resolvedSize}
     />
   );
 }

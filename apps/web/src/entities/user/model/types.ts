@@ -26,6 +26,8 @@ export type TUserHookResult = {
   spreadCredits?: number;
   authSessionLoading?: boolean;
   refreshAuthSession?: () => Promise<void>;
+  /** Web: refresh only tarotDaily / spreadCredits without auth loading flash. */
+  refreshSpreadQuota?: () => Promise<void>;
   setTarotDaily?: (daily: TarotDailyQuota | null) => void;
   setSpreadCredits?: (credits: number) => void;
 };

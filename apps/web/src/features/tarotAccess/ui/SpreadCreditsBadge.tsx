@@ -33,9 +33,17 @@ export function SpreadCreditsBadge({
   const label =
     mode === 'unlimited' ? '∞' : count > 99 ? '99+' : String(count);
 
+  const rootSize = Math.max(28, Math.round(size * 1.55));
+  const badgeMin = size <= 18 ? 14 : 16;
+  const badgeFont = size <= 18 ? 9 : 10;
+
   return (
     <View
-      style={[styles.root, mode === 'unlimited' && styles.rootWide]}
+      style={[
+        styles.root,
+        { width: rootSize, height: rootSize },
+        mode === 'unlimited' && styles.rootWide,
+      ]}
       accessibilityRole="text"
       accessibilityLabel={label}
     >
@@ -44,8 +52,8 @@ export function SpreadCreditsBadge({
           style={[
             styles.glow,
             {
-              width: size * 1.9,
-              height: size * 1.9,
+              width: size * 1.85,
+              height: size * 1.85,
               borderRadius: size,
             },
           ]}
@@ -62,11 +70,24 @@ export function SpreadCreditsBadge({
         ) : null}
       </View>
       {mode !== 'unlimited' ? (
-        <View style={[styles.badge, { borderColor: accentBorder }]}>
+        <View
+          style={[
+            styles.badge,
+            {
+              borderColor: accentBorder,
+              minWidth: badgeMin,
+              height: badgeMin,
+              borderRadius: badgeMin / 2,
+            },
+          ]}
+        >
           <Text
             category={TEXT_TAGS.label}
             weight={TEXT_WEIGHT.bold}
-            style={[styles.badgeText, { color: accentText }]}
+            style={[
+              styles.badgeText,
+              { color: accentText, fontSize: badgeFont, lineHeight: badgeFont + 2 },
+            ]}
           >
             {label}
           </Text>
@@ -78,27 +99,25 @@ export function SpreadCreditsBadge({
 
 const styles = StyleSheet.create({
   root: {
-    width: 36,
-    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
   },
   rootWide: {
-    width: 48,
+    minWidth: 40,
   },
   glow: {
     position: 'absolute',
     backgroundColor: getColorOpacity(COLORS.Primary700, 42),
     ...(Platform.OS === 'web'
       ? ({
-          boxShadow: `0 0 14px ${getColorOpacity(COLORS.Primary600, 55)}, 0 0 6px ${getColorOpacity(COLORS.Primary800, 65)}`,
+          boxShadow: `0 0 12px ${getColorOpacity(COLORS.Primary600, 50)}, 0 0 5px ${getColorOpacity(COLORS.Primary800, 60)}`,
         } as object)
       : {
           shadowColor: COLORS.Primary700,
           shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 0.7,
-          shadowRadius: 8,
-          elevation: 6,
+          shadowOpacity: 0.65,
+          shadowRadius: 6,
+          elevation: 5,
         }),
   },
   boltRow: {
@@ -110,10 +129,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -1,
     bottom: 0,
-    minWidth: 16,
-    height: 16,
     paddingHorizontal: 3,
-    borderRadius: 8,
     backgroundColor: COLORS.Background2,
     borderWidth: 1,
     alignItems: 'center',

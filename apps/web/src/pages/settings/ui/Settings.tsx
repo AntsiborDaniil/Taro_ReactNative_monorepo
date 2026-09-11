@@ -68,20 +68,21 @@ function Settings() {
   const dailyRemaining =
     tarotDaily != null
       ? Math.max(0, tarotDaily.limit - tarotDaily.used)
-      : null;
+      : 0;
+  const remainingTotal = dailyRemaining + credits;
 
   const quotaBadge = useMemo(() => {
     if (isPractitioner) {
       return { mode: 'unlimited' as const };
     }
+    if (!isAuthenticated) {
+      return null;
+    }
     if (credits > 0) {
-      return { mode: 'credits' as const, remaining: credits };
+      return { mode: 'credits' as const, remaining: remainingTotal };
     }
-    if (isAuthenticated && dailyRemaining != null) {
-      return { mode: 'daily' as const, remaining: dailyRemaining };
-    }
-    return null;
-  }, [credits, dailyRemaining, isAuthenticated, isPractitioner]);
+    return { mode: 'daily' as const, remaining: remainingTotal };
+  }, [credits, isAuthenticated, isPractitioner, remainingTotal]);
 
   const openBuyCredits = useCallback(async () => {
     AppMetrica.reportEvent(AnalyticAction.ClickSettingsSegment, {
@@ -171,7 +172,7 @@ function Settings() {
                     ? undefined
                     : quotaBadge.remaining
                 }
-                size={22}
+                size={17}
               />
             ) : undefined
           }

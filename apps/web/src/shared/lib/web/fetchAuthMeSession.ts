@@ -51,6 +51,27 @@ function writeCachedAuthMeSession(session: AuthMeSession | null): void {
   }
 }
 
+/** Keep header quota in sync after /interpret without waiting for the next /me. */
+export function patchCachedAuthMeQuota(input: {
+  tarotDaily?: TarotDailyQuota | null;
+  spreadCredits?: number;
+}): void {
+  const current = readCachedAuthMeSession();
+  if (!current?.user) {
+    return;
+  }
+
+  writeCachedAuthMeSession({
+    ...current,
+    tarotDaily:
+      input.tarotDaily !== undefined ? input.tarotDaily : current.tarotDaily,
+    spreadCredits:
+      typeof input.spreadCredits === 'number'
+        ? input.spreadCredits
+        : current.spreadCredits,
+  });
+}
+
 export async function fetchAuthMeSession(options?: {
   retryUnauthorized?: boolean;
   /** Keep session when CDN/proxy returns 304 Not Modified (empty body). */

@@ -197,6 +197,37 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
     await loadMe();
   }, [loadMe]);
 
+  const refreshSpreadQuota = useCallback(async () => {
+    if (Platform.OS !== 'web') {
+      return;
+    }
+
+    const previousSession =
+      authUserRef.current != null
+        ? {
+            user: authUserRef.current,
+            tarotDaily: tarotDailyRef.current,
+            spreadCredits: spreadCreditsRef.current,
+          }
+        : null;
+
+    const session = await fetchAuthMeSession({
+      retryUnauthorized: false,
+      previousSession,
+    });
+
+    if (!session?.user) {
+      return;
+    }
+
+    if (session.tarotDaily) {
+      setTarotDaily(session.tarotDaily);
+    }
+    if (typeof session.spreadCredits === 'number') {
+      setSpreadCredits(Math.max(0, Math.floor(session.spreadCredits)));
+    }
+  }, []);
+
   const value = useMemo(
     () => ({
       customerInfo: null,
@@ -209,6 +240,7 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
       spreadCredits,
       authSessionLoading,
       refreshAuthSession,
+      refreshSpreadQuota,
       setTarotDaily,
       setSpreadCredits,
     }),
@@ -218,6 +250,7 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
       spreadCredits,
       authSessionLoading,
       refreshAuthSession,
+      refreshSpreadQuota,
     ]
   );
 
