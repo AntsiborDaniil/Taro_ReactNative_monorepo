@@ -61,7 +61,19 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
     <Layout
       style={StyleSheet.flatten([styles.header, stylesWrapper as StyleProp<ViewStyle>])}
     >
-      <View style={styles.sideSlot}>
+      {/* True screen-center title — ignores unequal left/right action widths */}
+      <View style={styles.titleOverlay} pointerEvents="none">
+        <Text
+          category={TEXT_TAGS.h2}
+          weight={TEXT_WEIGHT.medium}
+          numberOfLines={1}
+          style={StyleSheet.flatten([styles.title, titleStyle])}
+        >
+          {title}
+        </Text>
+      </View>
+
+      <View style={[styles.sideSlot, styles.leftSlot]}>
         {leftContent}
         <TouchableOpacity
           style={styles.backButton}
@@ -80,16 +92,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
         </TouchableOpacity>
       </View>
 
-      <View style={styles.titleSlot}>
-        <Text
-          category={TEXT_TAGS.h2}
-          weight={TEXT_WEIGHT.medium}
-          numberOfLines={1}
-          style={StyleSheet.flatten([styles.title, titleStyle])}
-        >
-          {title}
-        </Text>
-      </View>
+      <View style={styles.sideSpacer} />
 
       <View style={[styles.sideSlot, styles.rightSlot]}>
         {showQuota || showCustomRight ? (
@@ -151,15 +154,29 @@ const themedStyles = StyleService.create({
     justifyContent: 'space-between',
     minHeight: 48,
   },
+  titleOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 72,
+    zIndex: 0,
+  },
   sideSlot: {
+    zIndex: 1,
     minWidth: 48,
-    maxWidth: '32%',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
   },
+  leftSlot: {
+    alignItems: 'flex-start',
+  },
   rightSlot: {
     alignItems: 'flex-end',
+  },
+  sideSpacer: {
+    flex: 1,
+    minWidth: 0,
   },
   rightCluster: {
     flexDirection: 'row',
@@ -167,12 +184,6 @@ const themedStyles = StyleService.create({
     justifyContent: 'flex-end',
     gap: 12,
     paddingRight: 2,
-  },
-  titleSlot: {
-    flex: 1,
-    minWidth: 0,
-    justifyContent: 'center',
-    paddingHorizontal: 4,
   },
   backButton: {
     padding: 8,
@@ -196,6 +207,7 @@ const themedStyles = StyleService.create({
   title: {
     textAlign: 'center',
     paddingHorizontal: 4,
+    maxWidth: '100%',
   },
 });
 
