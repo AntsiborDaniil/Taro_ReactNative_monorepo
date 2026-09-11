@@ -24,6 +24,9 @@ function Question() {
             numberOfLines: 4,
             maxLength: 100,
             autoComplete: 'off',
+            autoCorrect: false,
+            spellCheck: false,
+            autoFocus: false,
             textAlignVertical: 'top',
             placeholder: t('spread:question.placeholder'),
           }}
@@ -56,7 +59,7 @@ function Question() {
 
 const styles = StyleSheet.create({
   questionWrapper: { gap: 12, position: 'relative' },
-  input: { flex: 1, height: 80, paddingRight: 70 },
+  input: { flex: 1, height: 80, paddingRight: 70, fontSize: 16 },
   maxSize: {
     position: 'absolute',
     bottom: 8,

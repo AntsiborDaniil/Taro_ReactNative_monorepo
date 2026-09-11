@@ -27,6 +27,9 @@ const Input = ({ label, errorContent, baseInputProps = {} }: InputProps) => {
           hasError && styles.inputError,
           baseInputProps?.style,
         ]}
+        autoComplete="off"
+        autoCorrect={false}
+        spellCheck={false}
         placeholderTextColor={
           baseInputProps.placeholderTextColor ?? 'rgba(255,255,255,0.46)'
         }
@@ -53,7 +56,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.SpbSky1,
     borderRadius: 12,
     color: COLORS.Content,
-    fontSize: 14,
+    fontSize: 16,
     paddingHorizontal: 12,
     paddingVertical: 10,
     minHeight: 52,

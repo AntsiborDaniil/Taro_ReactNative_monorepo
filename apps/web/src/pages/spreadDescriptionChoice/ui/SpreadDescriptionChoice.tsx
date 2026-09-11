@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
@@ -133,16 +133,19 @@ function SpreadDescriptionChoice() {
     return <SpreadCardsChoice isSimpleSpread={isSimpleSpread} />;
   }
 
+  const ScrollBody = Platform.OS === 'web' ? ScrollView : KeyboardAwareScrollView;
+
   return (
     <ScreenLayout>
       <Header backAction={handleBackToSpreads} title="" />
       <SpreadStepper activeStep={1} />
-      <KeyboardAwareScrollView
+      <ScrollBody
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
-        enableOnAndroid
-        extraScrollHeight={100}
         keyboardShouldPersistTaps="handled"
+        {...(Platform.OS === 'web'
+          ? {}
+          : { enableOnAndroid: true, extraScrollHeight: 100 })}
       >
         <View style={styles.wrapper}>
           <SpreadHeroBanner
@@ -177,7 +180,7 @@ function SpreadDescriptionChoice() {
 
           <CardDescription />
         </View>
-      </KeyboardAwareScrollView>
+      </ScrollBody>
     </ScreenLayout>
   );
 }

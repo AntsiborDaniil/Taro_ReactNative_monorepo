@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, Pressable } from 'react-native';
 import { useMobileFabScrollOnScroll } from 'app/navigation/tabs/MobileFabScrollContext';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
@@ -7,9 +7,10 @@ import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
+import { SettingsIcon } from 'shared/icons';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { COLORS, getColorOpacity } from 'shared/themes';
-import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
+import { ScreenLayout, Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import { LIBRARY_PLATES } from '../lib';
 import { useLibraryLayout } from './useLibraryLayout';
 
@@ -40,7 +41,6 @@ function Library() {
       <Header
         showBackButton={false}
         title={t('core:library')}
-        rightAction={handlePress}
       />
       <ScrollView
         onScroll={onFabScroll}
@@ -113,6 +113,24 @@ function Library() {
               ))}
             </View>
           </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('settings:settings')}
+            onPress={handlePress}
+            style={({ pressed }) => [
+              styles.settingsBtn,
+              pressed && styles.settingsBtnPressed,
+            ]}
+          >
+            <SettingsIcon width={18} height={18} />
+            <Text
+              category={TEXT_TAGS.p1}
+              weight={TEXT_WEIGHT.medium}
+              style={styles.settingsBtnText}
+            >
+              {t('settings:settings')}
+            </Text>
+          </Pressable>
         </View>
       </ScrollView>
     </ScreenLayout>
@@ -126,6 +144,7 @@ const styles = StyleSheet.create({
   column: {
     paddingTop: 12,
     width: '100%',
+    flexGrow: 1,
   },
   introLead: {
     color: 'rgba(216, 228, 247, 0.86)',
@@ -157,6 +176,29 @@ const styles = StyleSheet.create({
   gridStacked: {
     flexDirection: 'column',
     flexWrap: 'nowrap',
+  },
+  settingsBtn: {
+    marginTop: 'auto',
+    marginBottom: 8,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    minHeight: 48,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: getColorOpacity(COLORS.Primary500, 28),
+    backgroundColor: 'rgba(30, 35, 43, 0.72)',
+    width: '100%',
+    maxWidth: 420,
+  },
+  settingsBtnPressed: {
+    opacity: 0.88,
+  },
+  settingsBtnText: {
+    color: COLORS.Content,
   },
 });
 

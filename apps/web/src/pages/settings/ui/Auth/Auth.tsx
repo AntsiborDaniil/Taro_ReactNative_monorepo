@@ -1801,6 +1801,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(176, 197, 236, 0.2)',
     borderRadius: 12,
     minHeight: 52,
+    fontSize: 16,
     color: COLORS.Content,
     backgroundColor: 'rgba(255,255,255,0.03)',
     paddingHorizontal: 12,

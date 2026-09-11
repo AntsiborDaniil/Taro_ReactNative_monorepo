@@ -4,6 +4,7 @@ import {
   Image,
   ImageBackground,
   Platform,
+  ScrollView,
   StyleSheet,
   useWindowDimensions,
   View,
@@ -285,6 +286,11 @@ function SpreadCardsChoice({
   }
 
   const stepperStep = isSpreadCompleted && !isSimpleSpread ? 3 : 2;
+  const ScrollBody = Platform.OS === 'web' ? ScrollView : KeyboardAwareScrollView;
+  const scrollExtraProps =
+    Platform.OS === 'web'
+      ? {}
+      : { enableOnAndroid: true, extraScrollHeight: 100 };
 
   return (
     <ScreenLayout>
@@ -297,12 +303,13 @@ function SpreadCardsChoice({
         Context={AnimationCarouselContext}
         value={animationCarouselContextData}
       >
-        <KeyboardAwareScrollView
+        <ScrollBody
           style={{ flex: 1, position: 'relative' }}
           contentContainerStyle={styles.scrollContent}
-          enableOnAndroid
-          extraScrollHeight={100}
           keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled={false}
+          directionalLockEnabled
+          {...scrollExtraProps}
         >
           <View
             style={[
@@ -359,8 +366,14 @@ function SpreadCardsChoice({
                     )}
                     <AnimatedCard />
                     <View style={spreadInnerStyles.altarZone}>
-                      <View style={spreadInnerStyles.altarGlow} pointerEvents="none" />
+                      <View
+                        style={spreadInnerStyles.altarGlowClip}
+                        pointerEvents="none"
+                      >
+                        <View style={spreadInnerStyles.altarGlow} />
+                      </View>
                       <CoverFlowCardCarousel
+                        overlayControls
                         style={
                           isSimpleSpread
                             ? styles.carouselSimpleSpread
@@ -412,7 +425,7 @@ function SpreadCardsChoice({
             )}
             <CardDescription style={styles.description} />
           </View>
-        </KeyboardAwareScrollView>
+        </ScrollBody>
       </DataProvider>
     </ScreenLayout>
   );
@@ -421,6 +434,7 @@ function SpreadCardsChoice({
 const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
+    ...(Platform.OS === 'web' ? ({ touchAction: 'pan-y' } as object) : {}),
   },
   questionWrapper: {
     width: '100%',
@@ -442,7 +456,7 @@ const styles = StyleSheet.create({
   spreadPickCluster: {
     width: '100%',
     alignItems: 'center',
-    gap: 10,
+    gap: 16,
     position: 'relative',
     overflow: 'visible',
   },
@@ -467,6 +481,15 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     paddingVertical: 10,
     paddingHorizontal: 12,
+    zIndex: 3,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(12, 16, 24, 0.96)',
+    ...Platform.select({
+      web: {
+        isolation: 'isolate',
+      } as object,
+      default: {},
+    }),
   },
   carousel: {
     marginTop: 4,

@@ -1,7 +1,6 @@
 import { createElement, useEffect, useMemo, useState } from 'react';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Clipboard from '@react-native-clipboard/clipboard';
 import { useTranslation } from 'react-i18next';
 import type { LayoutChangeEvent } from 'react-native';
 import { Platform } from 'react-native';
@@ -33,6 +32,8 @@ import {
   reachMetrikaGoal,
   shouldPromptWebSignIn,
   buildSharedReadingUrl,
+  copyTextToClipboard,
+  copyTextToClipboardSync,
 } from 'shared/lib';
 import { AsyncMemoryKey } from 'shared/lib/deviceMemory';
 import { measurePageTopLeft } from 'shared/lib/measurePageCoordinates';
@@ -440,48 +441,109 @@ export function useSpread({
   );
 
   const handleCopySpreadInterpretation = async () => {
-    if (!spread?.interpretation) {
+    if (!spread) {
       return;
     }
 
-    let cloudSpread = spread;
-    if (Platform.OS === 'web' && !spread.uid) {
-      const saved = await saveSpread(spread);
-      if (saved) {
-        cloudSpread = saved;
-        setSpread(saved);
-      }
-    } else if (Platform.OS === 'web' && spread.uid) {
-      // Ensure latest interpretation is persisted before sharing.
-      const saved = await saveSpread(spread);
-      if (saved) {
-        cloudSpread = saved;
-        setSpread(saved);
-      }
-    }
+    const title = t(spread.name);
+    const fallbackText = `${t('spread:summaryTitle')} - ${title}\n\n${
+      spread.interpretation ?? ''
+    }`;
 
-    if (cloudSpread.uid && Platform.OS === 'web') {
-      const url = buildSharedReadingUrl(cloudSpread.uid);
-      const title = t(cloudSpread.name);
-      Clipboard.setString(
-        `${t('core:ai.copy.shareLead', { name: title })}\n${url}`
-      );
+    const shareFromUid = (uid: string) => {
+      const url = buildSharedReadingUrl(uid);
+      return `${t('core:ai.copy.shareLead', { name: title })}\n${url}`;
+    };
+
+    const copyNow = async (text: string, asShareLink: boolean) => {
+      const ok =
+        copyTextToClipboardSync(text) || (await copyTextToClipboard(text));
+      if (ok) {
+        Toast.show({
+          type: 'success',
+          text1: asShareLink
+            ? t('core:ai.copy.shareSuccess')
+            : t('core:ai.copy.success'),
+          text2: asShareLink ? t('core:ai.copy.shareHint') : undefined,
+        });
+        return true;
+      }
       Toast.show({
-        type: 'success',
-        text1: t('core:ai.copy.shareSuccess'),
-        text2: t('core:ai.copy.shareHint'),
+        type: 'error',
+        text1: t('core:ai.copy.fail'),
+      });
+      return false;
+    };
+
+    // Copy in the same tap (before network) — Mini App drops clipboard otherwise.
+    if (spread.uid && Platform.OS === 'web') {
+      const shareText = shareFromUid(spread.uid);
+      const synced = copyTextToClipboardSync(shareText);
+      if (synced) {
+        Toast.show({
+          type: 'success',
+          text1: t('core:ai.copy.shareSuccess'),
+          text2: t('core:ai.copy.shareHint'),
+        });
+        void saveSpread(spread).then((saved) => {
+          if (saved) {
+            setSpread(saved);
+          }
+        });
+        return;
+      }
+      await copyNow(shareText, true);
+      void saveSpread(spread).then((saved) => {
+        if (saved) {
+          setSpread(saved);
+        }
       });
       return;
     }
 
-    Clipboard.setString(
-      `${t('spread:summaryTitle')} - ${t(spread.name)}\n\n${spread.interpretation}\n\n${t('core:downloadAppStore')}: ${appLink.ios}\n${t('core:downloadGooglePlay')}: ${appLink.android}`
-    );
+    if (spread.uid) {
+      await copyNow(
+        `${fallbackText}\n\n${t('core:downloadAppStore')}: ${appLink.ios}\n${t(
+          'core:downloadGooglePlay'
+        )}: ${appLink.android}`,
+        false
+      );
+      return;
+    }
 
-    Toast.show({
-      type: 'success',
-      text1: t('core:ai.copy.success'),
-    });
+    if (Platform.OS === 'web' && spread.interpretation) {
+      const copied = copyTextToClipboardSync(fallbackText);
+      void saveSpread(spread).then((saved) => {
+        if (saved) {
+          setSpread(saved);
+        }
+      });
+      if (copied) {
+        Toast.show({
+          type: 'success',
+          text1: t('core:ai.copy.success'),
+        });
+        return;
+      }
+    }
+
+    if (Platform.OS === 'web') {
+      const saved = await saveSpread(spread);
+      if (saved?.uid) {
+        setSpread(saved);
+        await copyNow(shareFromUid(saved.uid), true);
+        return;
+      }
+    }
+
+    if (spread.interpretation) {
+      await copyNow(
+        `${fallbackText}\n\n${t('core:downloadAppStore')}: ${appLink.ios}\n${t(
+          'core:downloadGooglePlay'
+        )}: ${appLink.android}`,
+        false
+      );
+    }
   };
 
   const applyOfflineGuestInterpretation = async (

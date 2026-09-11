@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  GestureResponderEvent,
   Platform,
   Pressable,
   StyleSheet,
@@ -15,16 +16,38 @@ import Carousel from 'react-native-reanimated-carousel';
 import { useData } from 'shared/DataProvider';
 import { ChevronLeftIcon } from 'shared/icons';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
-import { COLORS } from 'shared/themes';
 import SlideItem from './SlideItem';
 
 const CAROUSEL_DATA = [...Array(7)];
+const ARROW_SIZE = 42;
+const ARROW_GAP = 10;
+
+function readPointerPoint(event: {
+  nativeEvent?: { pageX?: number; pageY?: number };
+  pageX?: number;
+  pageY?: number;
+  clientX?: number;
+  clientY?: number;
+}): { x: number; y: number } {
+  return {
+    x:
+      event.nativeEvent?.pageX ??
+      event.pageX ??
+      event.clientX ??
+      0,
+    y:
+      event.nativeEvent?.pageY ??
+      event.pageY ??
+      event.clientY ??
+      0,
+  };
+}
 
 type TCoverFlowCardCarouselProps = {
   hasImmediateAnimation?: boolean;
   style?: StyleProp<ViewStyle>;
   onAdditionalClick?: () => void;
-  /** Стрелки и счётчик поверх нижней части карты (мобильный «Совет дня»). */
+  /** Стрелки по центру карточки (по высоте). */
   overlayControls?: boolean;
 };
 
@@ -55,12 +78,13 @@ function CoverFlowCardCarousel({
     [handleVibrationClick]
   );
 
-  const carouselWidth = useMemo(
-    () => Math.max(200, Math.min(360, screenWidth - 56)),
-    [screenWidth]
-  );
+  const sidePad = ARROW_SIZE + ARROW_GAP;
+  const carouselWidth = useMemo(() => {
+    const available = Math.max(200, screenWidth - 32);
+    return Math.max(180, Math.min(320, available - sidePad * 2));
+  }, [screenWidth]);
   const cardWidth = useMemo(
-    () => Math.round(Math.max(150, carouselWidth * 0.62)),
+    () => Math.round(Math.max(140, carouselWidth * 0.62)),
     [carouselWidth]
   );
   const cardHeight = useMemo(() => Math.round(cardWidth * 1.8), [cardWidth]);
@@ -79,24 +103,64 @@ function CoverFlowCardCarousel({
     ref.current?.next();
   };
 
-  const carouselHeight = cardHeight + 12;
-  const ARROW_SIZE = 42;
-  const ARROW_GAP_FROM_CARD = 24;
-  const sideArrowInset = Math.max(
-    -32,
-    Math.round((carouselWidth - cardWidth) / 2 - ARROW_SIZE - ARROW_GAP_FROM_CARD)
-  );
+  const carouselHeight = cardHeight;
+  const showOverlayArrows = overlayControls || Platform.OS === 'web';
+  const shellWidth = carouselWidth + (showOverlayArrows ? sidePad * 2 : 0);
+  const [panEnabled, setPanEnabled] = useState(true);
+  const pointerStartRef = useRef({ x: 0, y: 0, decided: false });
+
+  const handlePointerDown = (event: GestureResponderEvent) => {
+    const point = readPointerPoint(event);
+    pointerStartRef.current = { x: point.x, y: point.y, decided: false };
+    setPanEnabled(true);
+  };
+
+  const handlePointerMove = (event: GestureResponderEvent) => {
+    if (pointerStartRef.current.decided) {
+      return;
+    }
+    const point = readPointerPoint(event);
+    const dx = Math.abs(point.x - pointerStartRef.current.x);
+    const dy = Math.abs(point.y - pointerStartRef.current.y);
+    if (dx < 10 && dy < 10) {
+      return;
+    }
+    pointerStartRef.current.decided = true;
+    if (dy > dx) {
+      setPanEnabled(false);
+    }
+  };
+
+  const handlePointerUp = () => {
+    pointerStartRef.current.decided = false;
+    setPanEnabled(true);
+  };
 
   return (
     <View
       style={[
         styles.container,
-        overlayControls && styles.containerOverlay,
-        overlayControls && { width: carouselWidth, height: carouselHeight },
+        showOverlayArrows && styles.containerOverlay,
+        showOverlayArrows && {
+          width: shellWidth,
+          height: carouselHeight,
+        },
         style,
       ]}
+      onStartShouldSetResponderCapture={() => false}
+      onMoveShouldSetResponderCapture={() => false}
+      onResponderGrant={handlePointerDown}
+      onResponderMove={handlePointerMove}
+      onResponderRelease={handlePointerUp}
+      onResponderTerminate={handlePointerUp}
       {...(Platform.OS === 'web'
-        ? ({ 'data-tarot-no-swipe-back': true } as object)
+        ? ({
+            'data-tarot-no-swipe-back': true,
+            onPointerDown: handlePointerDown,
+            onPointerMove: handlePointerMove,
+            onPointerUp: handlePointerUp,
+            onPointerCancel: handlePointerUp,
+          } as object)
         : {})}
     >
       <Carousel
@@ -105,6 +169,7 @@ function CoverFlowCardCarousel({
         loop={true}
         width={carouselWidth}
         height={carouselHeight}
+        enabled={panEnabled}
         scrollAnimationDuration={1100}
         mode="parallax"
         modeConfig={{
@@ -113,11 +178,15 @@ function CoverFlowCardCarousel({
         }}
         style={[
           styles.carousel,
-          overlayControls && styles.carouselOverlay,
-          { width: carouselWidth },
+          showOverlayArrows && styles.carouselOverlay,
+          { width: carouselWidth, height: carouselHeight },
         ]}
         pagingEnabled={true}
         snapEnabled={true}
+        onConfigurePanGesture={(gesture) => {
+          gesture.activeOffsetX([-28, 28]);
+          gesture.failOffsetY([-8, 8]);
+        }}
         onSnapToItem={handleSnapToItem}
         renderItem={({ index }) => {
           return (
@@ -131,17 +200,13 @@ function CoverFlowCardCarousel({
           );
         }}
       />
-      {overlayControls ? (
+      {showOverlayArrows ? (
         <>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('core:button.prev')}
             onPress={handlePrev}
-            style={[
-              styles.controlButton,
-              styles.controlButtonLeft,
-              { left: sideArrowInset },
-            ]}
+            style={[styles.controlButton, styles.controlButtonLeft]}
           >
             <ChevronLeftIcon width={28} height={28} />
           </Pressable>
@@ -149,11 +214,7 @@ function CoverFlowCardCarousel({
             accessibilityRole="button"
             accessibilityLabel={t('core:button.next')}
             onPress={handleNext}
-            style={[
-              styles.controlButton,
-              styles.controlButtonRight,
-              { right: sideArrowInset },
-            ]}
+            style={[styles.controlButton, styles.controlButtonRight]}
           >
             <ChevronLeftIcon width={28} height={28} style={styles.rightChevron} />
           </Pressable>
@@ -194,12 +255,17 @@ const styles = StyleSheet.create({
   containerOverlay: {
     gap: 0,
     maxWidth: undefined,
+    justifyContent: 'center',
   },
   carousel: {
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 6,
     zIndex: 1,
+    overflow: 'visible',
+    ...(Platform.OS === 'web'
+      ? ({ touchAction: 'pan-x pan-y' } as object)
+      : {}),
   },
   carouselOverlay: {
     marginBottom: 0,
@@ -214,9 +280,9 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   controlButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: ARROW_SIZE,
+    height: ARROW_SIZE,
+    borderRadius: ARROW_SIZE / 2,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.28)',
     backgroundColor: 'rgba(12,19,33,0.62)',
@@ -230,9 +296,10 @@ const styles = StyleSheet.create({
   },
   controlButtonLeft: {
     position: 'absolute',
+    left: 0,
     top: '50%',
-    marginTop: -21,
-    zIndex: 10,
+    marginTop: -(ARROW_SIZE / 2),
+    zIndex: 4,
     ...Platform.select({
       web: { pointerEvents: 'auto' as const },
       default: {},
@@ -240,33 +307,14 @@ const styles = StyleSheet.create({
   },
   controlButtonRight: {
     position: 'absolute',
+    right: 0,
     top: '50%',
-    marginTop: -21,
-    zIndex: 10,
+    marginTop: -(ARROW_SIZE / 2),
+    zIndex: 4,
     ...Platform.select({
       web: { pointerEvents: 'auto' as const },
       default: {},
     }),
-  },
-  counter: {
-    color: 'rgba(255,255,255,0.9)',
-    letterSpacing: 0.4,
-    fontSize: 16,
-    minWidth: 68,
-    textAlign: 'center',
-  },
-  counterOverlay: {
-    position: 'absolute',
-    bottom: 10,
-    alignSelf: 'center',
-    color: 'rgba(255,255,255,0.9)',
-    letterSpacing: 0.4,
-    fontSize: 14,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    backgroundColor: 'rgba(12, 19, 33, 0.55)',
-    zIndex: 10,
   },
   rightChevron: {
     transform: [{ rotate: '180deg' }],
