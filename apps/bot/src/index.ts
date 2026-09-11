@@ -76,9 +76,6 @@ async function trackStartIfNeeded(ctx: Context, payload: string): Promise<void> 
 async function sendWelcome(ctx: Context): Promise<void> {
   await ctx.reply(welcomeText, {
     parse_mode: 'Markdown',
-    reply_markup: openMiniAppInlineKeyboard(),
-  });
-  await ctx.reply('Меню команд — кнопками внизу:', {
     reply_markup: mainReplyKeyboard(),
   });
 }

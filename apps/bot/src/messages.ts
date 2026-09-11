@@ -1,5 +1,5 @@
-export const CHANNEL_URL = 'https://t.me/mindfultaro';
-export const CHANNEL_HANDLE = '@mindfultaro';
+export const CHANNEL_URL = 'https://t.me/mindfultarot';
+export const CHANNEL_HANDLE = '@mindfultarot';
 
 export const welcomeText = `Привет! Я бот **Mindful Tarot**.
 
