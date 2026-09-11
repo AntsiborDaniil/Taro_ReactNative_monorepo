@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { tryNavigateNavReturn } from 'app/navigation/navReturnStore';
 import { SpreadContext } from 'entities/Spread';
 import { SpreadName, SpreadsCategory } from 'shared/api';
 import { useData } from 'shared/DataProvider';
@@ -23,6 +24,10 @@ export function useSpreadCatalogBack() {
   const { spread } = useData({ Context: SpreadContext });
 
   return useCallback(() => {
+    if (tryNavigateNavReturn(navigation)) {
+      return;
+    }
+
     const state = navigation.getState();
     const routes = state?.routes ?? [];
     const index = state?.index ?? 0;

@@ -1,17 +1,16 @@
 import React, { memo, useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
 import AppMetrica from '@appmetrica/react-native-analytics';
+import { setNavReturnToMain } from 'app/navigation/navReturnStore';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
-import { useTranslation } from 'react-i18next';
 import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { DeckStyle, TSpread } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import {
   getImage,
-  isGuestFreeSpreadId,
   isWebGuestSession,
   shouldPromptWebSignIn,
 } from 'shared/lib';
@@ -48,7 +47,6 @@ function useSmallSpreadCardSize() {
 
 function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
   const { id, name } = spread ?? {};
-  const { t: tSpread } = useTranslation('spread');
   const { width: cardW, height: cardH } = useSmallSpreadCardSize();
 
   const navigation = useNativeNavigation();
@@ -64,9 +62,7 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
   const { showModal } = useData({ Context: ModalsContext });
   const { setSelectedTab } = useData({ Context: TabsAndRoutesContext });
 
-  const guestFree = isGuestFreeSpreadId(spread?.id);
-  const isLocked =
-    isWebGuestSession(isAuthenticated, authSessionLoading) && !guestFree;
+  const isLocked = isWebGuestSession(isAuthenticated, authSessionLoading);
 
   const { selectSpread } = useData({
     Context: SpreadContext,
@@ -83,7 +79,6 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
       width={cardW}
       height={cardH}
       isLocked={isLocked}
-      topRightBadge={guestFree ? tSpread('guestSpread.badge') : undefined}
       imageResizeMode="cover"
       onPress={async () => {
         if (analyticAction) {
@@ -95,10 +90,7 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
 
         await handleVibrationClick?.();
 
-        if (
-          shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
-          !guestFree
-        ) {
+        if (shouldPromptWebSignIn(isAuthenticated, authSessionLoading)) {
           showModal?.(<SignInForSpreadsModal />);
           return;
         }
@@ -107,6 +99,7 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
           (await selectSpread?.(spread)) || {};
 
         setSelectedTab?.(TabRoute.SpreadsTab);
+        setNavReturnToMain();
 
         if (shouldRedirectToSpreadReading) {
           navigation.navigate(TabRoute.SpreadsTab, {

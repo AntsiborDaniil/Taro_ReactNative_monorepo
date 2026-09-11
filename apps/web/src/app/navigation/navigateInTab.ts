@@ -5,6 +5,10 @@ import {
   type ParamListBase,
 } from '@react-navigation/native';
 import { NavigationRoute, TabRoute } from 'shared/types';
+import {
+  type NavReturnPoint,
+  setNavReturn,
+} from './navReturnStore';
 
 const TAB_ROOT_SCREEN: Record<TabRoute, NavigationRoute> = {
   [TabRoute.MainTab]: NavigationRoute.Main,
@@ -19,8 +23,11 @@ type NavigateInTabOptions = {
   /**
    * If true (default), nested stack becomes [tabRoot, screen]
    * so Back never returns to a sibling (e.g. Dictionary → Favorites).
+   * When `returnTo` is set, stack is only [screen] so Back uses the origin.
    */
   resetStack?: boolean;
+  /** Cross-tab origin (e.g. Main) — Header / Telegram Back return here. */
+  returnTo?: NavReturnPoint;
 };
 
 type AnyNavigation = NavigationProp<ParamListBase> & {
@@ -46,8 +53,13 @@ export function createNavigateInTabAction({
   screen,
   params,
   resetStack = true,
+  returnTo,
 }: NavigateInTabOptions) {
   return (state: NavigationState) => {
+    if (returnTo) {
+      setNavReturn(returnTo);
+    }
+
     const tabIndex = state.routes.findIndex((route) => route.name === tab);
 
     if (tabIndex < 0 || !resetStack) {
@@ -59,8 +71,8 @@ export function createNavigateInTabAction({
 
     const root = TAB_ROOT_SCREEN[tab];
     const nestedRoutes =
-      screen === root
-        ? [{ name: root }]
+      returnTo || screen === root
+        ? [params ? { name: screen, params } : { name: screen }]
         : [
             { name: root },
             params ? { name: screen, params } : { name: screen },

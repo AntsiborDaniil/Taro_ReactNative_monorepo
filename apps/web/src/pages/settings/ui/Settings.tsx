@@ -156,6 +156,7 @@ function Settings() {
       <ScreenLayout style={styles.container}>
         <Header
           title={t('settings:settings')}
+          hideSpreadQuota
           rightAction={
             quotaBadge && quotaBadge.mode !== 'unlimited'
               ? openBuyCredits
@@ -170,6 +171,7 @@ function Settings() {
                     ? undefined
                     : quotaBadge.remaining
                 }
+                size={22}
               />
             ) : undefined
           }

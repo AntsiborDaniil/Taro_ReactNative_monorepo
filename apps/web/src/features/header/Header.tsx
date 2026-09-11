@@ -13,20 +13,24 @@ import { ChevronLeftIcon, SettingsIcon } from 'shared/icons';
 import { isTablet, WEB_HOVER_TRANSITION } from 'shared/lib';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui/Text';
 import { useHeaderNavigation } from './useHeaderNavigation';
+import {
+  HeaderSpreadQuotaBadge,
+  useHeaderSpreadQuota,
+} from './useHeaderSpreadQuota';
 
 interface CustomHeaderProps {
-  title: string; // Текст заголовка
-  showBackButton?: boolean; // Опциональная кнопка "Назад"
-  backAction?: () => void; // Кастомное действие для кнопки "Назад" (опционально)
-  rightAction?: (() => void) | null; // Опциональное действие справа (например, клик по иконке)
+  title: string;
+  showBackButton?: boolean;
+  backAction?: () => void;
+  rightAction?: (() => void) | null;
   rightContent?: React.ReactNode;
-  /** Подпись для кнопки справа (VoiceOver / TalkBack / веб) */
   rightAccessibilityLabel?: string;
   leftContent?: React.ReactNode;
-  rightIconName?: string; // Имя иконки для правого действия (из пакета eva)
+  rightIconName?: string;
   stylesWrapper?: StyleProp<ViewStyle>;
-  /** Доп. стили заголовка (например меньший кегль на узком экране) */
   titleStyle?: StyleProp<TextStyle>;
+  /** Hide global credits chip (e.g. when screen already renders its own). */
+  hideSpreadQuota?: boolean;
 }
 
 const CustomHeader: React.FC<CustomHeaderProps> = ({
@@ -39,14 +43,19 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   rightAccessibilityLabel,
   stylesWrapper,
   titleStyle,
+  hideSpreadQuota = false,
 }) => {
   const styles = useStyleSheet(themedStyles);
   const { t } = useTranslation();
+  const spreadQuota = useHeaderSpreadQuota();
 
   const { handleBackPress } = useHeaderNavigation({
     backAction,
     showBackButton,
   });
+
+  const showQuota = !hideSpreadQuota && spreadQuota != null;
+  const showCustomRight = Boolean(rightContent) || rightAction != null;
 
   return (
     <Layout
@@ -83,28 +92,44 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       </View>
 
       <View style={[styles.sideSlot, styles.rightSlot]}>
-        {rightContent || rightAction ? (
-          <TouchableOpacity
-            style={styles.rightButton}
-            onPress={rightAction ?? undefined}
-            disabled={!rightAction}
-            activeOpacity={rightAction ? 0.7 : 1}
-            hitSlop={{ top: 16, left: 16, bottom: 16, right: 16 }}
-            accessibilityRole={rightAction ? 'button' : 'none'}
-            accessibilityLabel={
-              rightAccessibilityLabel ??
-              (rightContent
-                ? t('core:a11y.headerActions')
-                : t('core:a11y.settings'))
-            }
-          >
-            {rightContent ?? (
-              <SettingsIcon
-                width={isTablet ? 32 : 24}
-                height={isTablet ? 32 : 24}
-              />
-            )}
-          </TouchableOpacity>
+        {showQuota || showCustomRight ? (
+          <View style={styles.rightCluster}>
+            {showQuota ? (
+              <TouchableOpacity
+                style={styles.quotaButton}
+                onPress={spreadQuota.onPress}
+                activeOpacity={0.7}
+                hitSlop={{ top: 10, left: 8, bottom: 10, right: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel={spreadQuota.a11yLabel}
+              >
+                <HeaderSpreadQuotaBadge quota={spreadQuota} size={22} />
+              </TouchableOpacity>
+            ) : null}
+            {showCustomRight ? (
+              <TouchableOpacity
+                style={styles.rightButton}
+                onPress={rightAction ?? undefined}
+                disabled={!rightAction}
+                activeOpacity={rightAction ? 0.7 : 1}
+                hitSlop={{ top: 12, left: 8, bottom: 12, right: 12 }}
+                accessibilityRole={rightAction ? 'button' : 'none'}
+                accessibilityLabel={
+                  rightAccessibilityLabel ??
+                  (rightContent
+                    ? t('core:a11y.headerActions')
+                    : t('core:a11y.settings'))
+                }
+              >
+                {rightContent ?? (
+                  <SettingsIcon
+                    width={isTablet ? 32 : 24}
+                    height={isTablet ? 32 : 24}
+                  />
+                )}
+              </TouchableOpacity>
+            ) : null}
+          </View>
         ) : (
           <View style={styles.rightButtonPlaceholder}>
             <ChevronLeftIcon opacity={0} width={24} height={24} />
@@ -115,7 +140,6 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   );
 };
 
-// Темированные стили с UI Kitten
 const themedStyles = StyleService.create({
   header: {
     width: '100%',
@@ -128,8 +152,8 @@ const themedStyles = StyleService.create({
     minHeight: 48,
   },
   sideSlot: {
-    minWidth: 56,
-    maxWidth: '25%',
+    minWidth: 48,
+    maxWidth: '32%',
     alignItems: 'flex-start',
     justifyContent: 'center',
     flexDirection: 'row',
@@ -137,19 +161,29 @@ const themedStyles = StyleService.create({
   rightSlot: {
     alignItems: 'flex-end',
   },
+  rightCluster: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 2,
+  },
   titleSlot: {
     flex: 1,
     minWidth: 0,
     justifyContent: 'center',
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
   },
   backButton: {
     padding: 8,
     paddingRight: 8,
     ...WEB_HOVER_TRANSITION,
   },
+  quotaButton: {
+    padding: 2,
+    ...WEB_HOVER_TRANSITION,
+  },
   rightButton: {
-    padding: 8,
+    padding: 6,
     ...WEB_HOVER_TRANSITION,
   },
   rightButtonPlaceholder: {

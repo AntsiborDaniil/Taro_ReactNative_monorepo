@@ -4,6 +4,7 @@ import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { NavigationRoute, TabRoute } from 'shared/types';
+import { tryNavigateNavReturn } from 'app/navigation/navReturnStore';
 import { getNavigationRules } from './getNavigationRules';
 
 type THeaderNavigationParameters = {
@@ -41,6 +42,10 @@ export function useHeaderNavigation({
     if (backAction) {
       backAction();
 
+      return;
+    }
+
+    if (tryNavigateNavReturn(navigation)) {
       return;
     }
 

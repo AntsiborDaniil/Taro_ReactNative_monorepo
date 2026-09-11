@@ -1,5 +1,6 @@
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useMobileFabScrollOnScroll } from 'app/navigation/tabs/MobileFabScrollContext';
+import { tryNavigateNavReturn, useNavReturn } from 'app/navigation/navReturnStore';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
@@ -11,7 +12,7 @@ import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { DeckStyle } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { blurActiveElement, getImage, isGuestFreeSpreadId, isWebGuestSession, shouldPromptWebSignIn } from 'shared/lib';
+import { blurActiveElement, getImage, isWebGuestSession, shouldPromptWebSignIn } from 'shared/lib';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { COLORS, getColorOpacity } from 'shared/themes';
 import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
@@ -37,6 +38,7 @@ export default function Spreads() {
 
   const navigation = useNativeNavigation();
   const spreadsNavigatorTab = TabRoute.SpreadsTab;
+  const navReturn = useNavReturn();
 
   const showWebGuestBanner = isWebGuestSession(isAuthenticated, authSessionLoading);
   const onFabScroll = useMobileFabScrollOnScroll();
@@ -44,7 +46,14 @@ export default function Spreads() {
   return (
     <ScreenLayout>
       <Header
-        showBackButton={false}
+        showBackButton={navReturn != null}
+        backAction={
+          navReturn
+            ? () => {
+                tryNavigateNavReturn(navigation);
+              }
+            : undefined
+        }
         title={t('core:page.spreadsGroups')}
       />
       <ScrollView
@@ -113,8 +122,6 @@ export default function Spreads() {
                   ]}
                 >
                   {data.data.map((item) => {
-                    const guestFree = isGuestFreeSpreadId(item.id);
-
                     return (
                       <SpreadCatalogCard
                         key={item.id}
@@ -126,7 +133,6 @@ export default function Spreads() {
                           item.id,
                         ])}
                         isLocked={false}
-                        guestNoAuthBadge={guestFree}
                         width={layout.cardWidth}
                         imageAreaHeight={layout.previewHeight}
                         onPress={async () => {
@@ -142,8 +148,7 @@ export default function Spreads() {
                           await handleVibrationClick?.();
 
                           if (
-                            shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
-                            !guestFree
+                            shouldPromptWebSignIn(isAuthenticated, authSessionLoading)
                           ) {
                             showModal?.(<SignInForSpreadsModal />);
                             return;

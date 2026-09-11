@@ -16,7 +16,6 @@ import { useData } from 'shared/DataProvider';
 import { ChevronLeftIcon } from 'shared/icons';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
-import { Text } from 'shared/ui';
 import SlideItem from './SlideItem';
 
 const CAROUSEL_DATA = [...Array(7)];
@@ -158,9 +157,6 @@ function CoverFlowCardCarousel({
           >
             <ChevronLeftIcon width={28} height={28} style={styles.rightChevron} />
           </Pressable>
-          <Text style={styles.counterOverlay}>
-            {`${currentIndex + 1} / ${CAROUSEL_DATA.length}`}
-          </Text>
         </>
       ) : (
         <View style={styles.controls} pointerEvents="box-none">
@@ -172,9 +168,6 @@ function CoverFlowCardCarousel({
           >
             <ChevronLeftIcon width={28} height={28} />
           </Pressable>
-          <Text style={styles.counter}>
-            {`${currentIndex + 1} / ${CAROUSEL_DATA.length}`}
-          </Text>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('core:button.next')}

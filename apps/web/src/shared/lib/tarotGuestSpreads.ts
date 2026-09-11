@@ -1,6 +1,11 @@
 import { SpreadName } from 'shared/api';
 
-/** Расклады, доступные без входа (веб). */
-export function isGuestFreeSpreadId(id: SpreadName | string | undefined): boolean {
-  return id === SpreadName.Simple_YesNo || id === SpreadName.Simple_DaySuggest;
+/**
+ * Previously Yes/No + Day card were free without auth.
+ * All spreads now use the same daily / credits quota.
+ */
+export function isGuestFreeSpreadId(
+  _id: SpreadName | string | undefined
+): boolean {
+  return false;
 }

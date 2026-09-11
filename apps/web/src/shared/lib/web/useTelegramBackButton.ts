@@ -1,6 +1,11 @@
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { navigationRef } from 'app/navigation/navigationRef';
+import {
+  getNavReturn,
+  subscribeNavReturn,
+  tryNavigateNavReturn,
+} from 'app/navigation/navReturnStore';
 import { LoadingsContext } from 'shared/contexts/Loadings';
 import { useData } from 'shared/DataProvider';
 import {
@@ -22,7 +27,8 @@ function syncTelegramBackButton(blockBack: boolean): void {
   }
 
   const canGoBack =
-    navigationRef.isReady() && navigationRef.canGoBack();
+    (navigationRef.isReady() && navigationRef.canGoBack()) ||
+    getNavReturn() != null;
 
   if (canGoBack) {
     backButton.show();
@@ -36,6 +42,7 @@ function syncTelegramBackButton(blockBack: boolean): void {
  */
 export function useTelegramBackButton(): void {
   const { isFullScreenLoading } = useData({ Context: LoadingsContext });
+  const blockBack = Boolean(isFullScreenLoading);
 
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') {
@@ -44,6 +51,7 @@ export function useTelegramBackButton(): void {
 
     let disposed = false;
     let clickHandler: (() => void) | null = null;
+    let cleanupWatchers: (() => void) | undefined;
 
     const setup = async (): Promise<void> => {
       try {
@@ -64,7 +72,20 @@ export function useTelegramBackButton(): void {
       }
 
       clickHandler = () => {
-        if (navigationRef.isReady() && navigationRef.canGoBack()) {
+        if (!navigationRef.isReady()) {
+          return;
+        }
+
+        // Prefer stored origin (Main after popular / quick links) over opaque stack pops.
+        if (
+          tryNavigateNavReturn(
+            navigationRef as unknown as Parameters<typeof tryNavigateNavReturn>[0]
+          )
+        ) {
+          return;
+        }
+
+        if (navigationRef.canGoBack()) {
           navigationRef.goBack();
         }
       };
@@ -72,28 +93,29 @@ export function useTelegramBackButton(): void {
       backButton.onClick(clickHandler);
 
       const interval = window.setInterval(() => {
-        syncTelegramBackButton(isFullScreenLoading);
+        syncTelegramBackButton(blockBack);
       }, 400);
-      syncTelegramBackButton(isFullScreenLoading);
+      const unsubscribeReturn = subscribeNavReturn(() => {
+        syncTelegramBackButton(blockBack);
+      });
+      syncTelegramBackButton(blockBack);
 
-      return () => {
+      cleanupWatchers = () => {
         window.clearInterval(interval);
+        unsubscribeReturn();
       };
     };
 
-    let cleanupInterval: (() => void) | undefined;
-    void setup().then((cleanup) => {
-      cleanupInterval = cleanup;
-    });
+    void setup();
 
     return () => {
       disposed = true;
-      cleanupInterval?.();
+      cleanupWatchers?.();
       const backButton = window.Telegram?.WebApp?.BackButton;
       if (backButton && clickHandler) {
         backButton.offClick(clickHandler);
         backButton.hide();
       }
     };
-  }, [isFullScreenLoading]);
+  }, [blockBack]);
 }

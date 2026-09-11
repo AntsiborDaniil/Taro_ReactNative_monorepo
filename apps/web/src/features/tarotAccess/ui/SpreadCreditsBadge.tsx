@@ -78,26 +78,26 @@ export function SpreadCreditsBadge({
 
 const styles = StyleSheet.create({
   root: {
-    width: 44,
-    height: 44,
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
   },
   rootWide: {
-    width: 56,
+    width: 48,
   },
   glow: {
     position: 'absolute',
     backgroundColor: getColorOpacity(COLORS.Primary700, 42),
     ...(Platform.OS === 'web'
       ? ({
-          boxShadow: `0 0 18px ${getColorOpacity(COLORS.Primary600, 55)}, 0 0 8px ${getColorOpacity(COLORS.Primary800, 65)}`,
+          boxShadow: `0 0 14px ${getColorOpacity(COLORS.Primary600, 55)}, 0 0 6px ${getColorOpacity(COLORS.Primary800, 65)}`,
         } as object)
       : {
           shadowColor: COLORS.Primary700,
           shadowOffset: { width: 0, height: 0 },
           shadowOpacity: 0.7,
-          shadowRadius: 10,
+          shadowRadius: 8,
           elevation: 6,
         }),
   },
@@ -108,19 +108,19 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    right: 0,
-    bottom: 2,
-    minWidth: 18,
-    height: 18,
-    paddingHorizontal: 4,
-    borderRadius: 9,
+    right: -1,
+    bottom: 0,
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 3,
+    borderRadius: 8,
     backgroundColor: COLORS.Background2,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   badgeText: {
-    fontSize: 11,
-    lineHeight: 13,
+    fontSize: 10,
+    lineHeight: 12,
   },
 });
