@@ -1,5 +1,6 @@
 import { Admin, Resource } from 'react-admin';
 import { defaultTheme } from 'react-admin';
+import { BrowserRouter } from 'react-router-dom';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import PeopleIcon from '@mui/icons-material/People';
 import StyleIcon from '@mui/icons-material/Style';
@@ -16,6 +17,9 @@ import { UserEdit, UserList, UserShow } from './resources/users';
 import { SpreadEdit, SpreadList, SpreadShow } from './resources/spreads';
 import { TicketEdit, TicketList, TicketShow } from './resources/tickets';
 import { PaymentList, PaymentShow } from './resources/payments';
+
+/** Subpath on the public site; must match Vite `base` without trailing slash. */
+const ADMIN_BASENAME = '/admin';
 
 const theme = {
   ...defaultTheme,
@@ -65,48 +69,52 @@ const authProvider = {
 };
 
 export function App() {
+  // RA 5 defaults to HashRouter; with basename="/admin" hash path "/" does not match.
+  // Outer BrowserRouter disables the hash router and enables clean /admin/* URLs.
   return (
-    <Admin
-      basename="/admin"
-      theme={theme}
-      darkTheme={theme}
-      loginPage={LoginPage}
-      dataProvider={dataProvider}
-      authProvider={authProvider}
-      title="Mindful Tarot Admin"
-      requireAuth
-    >
-      <Resource
-        name="users"
-        options={{ label: 'Пользователи' }}
-        icon={PeopleIcon}
-        list={UserList}
-        show={UserShow}
-        edit={UserEdit}
-      />
-      <Resource
-        name="spreads"
-        options={{ label: 'Расклады' }}
-        icon={StyleIcon}
-        list={SpreadList}
-        show={SpreadShow}
-        edit={SpreadEdit}
-      />
-      <Resource
-        name="tickets"
-        options={{ label: 'Поддержка' }}
-        icon={SupportAgentIcon}
-        list={TicketList}
-        show={TicketShow}
-        edit={TicketEdit}
-      />
-      <Resource
-        name="payments"
-        options={{ label: 'Оплаты' }}
-        icon={PaymentsIcon}
-        list={PaymentList}
-        show={PaymentShow}
-      />
-    </Admin>
+    <BrowserRouter basename={ADMIN_BASENAME}>
+      <Admin
+        basename={ADMIN_BASENAME}
+        theme={theme}
+        darkTheme={theme}
+        loginPage={LoginPage}
+        dataProvider={dataProvider}
+        authProvider={authProvider}
+        title="Mindful Tarot Admin"
+        requireAuth
+      >
+        <Resource
+          name="users"
+          options={{ label: 'Пользователи' }}
+          icon={PeopleIcon}
+          list={UserList}
+          show={UserShow}
+          edit={UserEdit}
+        />
+        <Resource
+          name="spreads"
+          options={{ label: 'Расклады' }}
+          icon={StyleIcon}
+          list={SpreadList}
+          show={SpreadShow}
+          edit={SpreadEdit}
+        />
+        <Resource
+          name="tickets"
+          options={{ label: 'Поддержка' }}
+          icon={SupportAgentIcon}
+          list={TicketList}
+          show={TicketShow}
+          edit={TicketEdit}
+        />
+        <Resource
+          name="payments"
+          options={{ label: 'Оплаты' }}
+          icon={PaymentsIcon}
+          list={PaymentList}
+          show={PaymentShow}
+        />
+      </Admin>
+    </BrowserRouter>
   );
 }
