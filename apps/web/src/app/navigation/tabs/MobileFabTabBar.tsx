@@ -22,6 +22,7 @@ import { blurActiveElement, WEB_HOVER_TRANSITION } from 'shared/lib';
 import { useWebViewportInsets } from 'shared/lib/web/useWebViewportInsets';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, TabRoute } from 'shared/types';
+import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import {
   markFabDiscoveredInSession,
   readFabDiscoveredFromSession,
@@ -33,7 +34,7 @@ import { isFabHostScreenFromTabState } from './mobileFabVisibility';
 
 const FAB_SIZE = 48;
 const ACTION_SIZE = 44;
-const ACTION_GAP = 8;
+const ACTION_GAP = 10;
 const OPEN_SPRING = { damping: 15, stiffness: 240, mass: 0.85 };
 const CLOSE_TIMING = { duration: 220, easing: Easing.in(Easing.cubic) };
 const PEEK_HIDE_TIMING = { duration: 260, easing: Easing.out(Easing.cubic) };
@@ -104,6 +105,7 @@ function FabActionItem({
             (pressState as { hovered?: boolean }).hovered;
           return [
             styles.actionPressable,
+            focused && styles.actionPressableFocused,
             hovered && styles.actionPressableHover,
             pressState.pressed && styles.actionPressablePressed,
           ];
@@ -121,6 +123,14 @@ function FabActionItem({
             fill={focused ? COLORS.Primary : COLORS.Content}
           />
         </View>
+        <Text
+          category={TEXT_TAGS.p2}
+          weight={TEXT_WEIGHT.medium}
+          style={[styles.actionLabel, focused && styles.actionLabelFocused]}
+          numberOfLines={1}
+        >
+          {label}
+        </Text>
       </Pressable>
     </Animated.View>
   );
@@ -375,8 +385,28 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   actionPressable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    minHeight: ACTION_SIZE,
+    paddingRight: 14,
     borderRadius: ACTION_SIZE / 2,
+    backgroundColor: COLORS.Background2,
+    borderWidth: 1,
+    borderColor: 'rgba(244, 244, 245, 0.12)',
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '0 6px 18px rgba(0, 0, 0, 0.32)',
+          cursor: 'pointer',
+        } as object)
+      : {
+          elevation: 6,
+        }),
     ...WEB_HOVER_TRANSITION,
+  },
+  actionPressableFocused: {
+    borderColor: 'rgba(246, 192, 27, 0.5)',
+    backgroundColor: 'rgba(246, 192, 27, 0.14)',
   },
   actionPressableHover: {
     opacity: 0.92,
@@ -391,20 +421,16 @@ const styles = StyleSheet.create({
     borderRadius: ACTION_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.Background2,
-    borderWidth: 1,
-    borderColor: 'rgba(244, 244, 245, 0.12)',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 6px 18px rgba(0, 0, 0, 0.32)',
-        } as object)
-      : {
-          elevation: 6,
-        }),
   },
-  actionIconBtnFocused: {
-    borderColor: 'rgba(246, 192, 27, 0.5)',
-    backgroundColor: 'rgba(246, 192, 27, 0.14)',
+  actionIconBtnFocused: {},
+  actionLabel: {
+    color: COLORS.Content,
+    fontSize: 14,
+    lineHeight: 18,
+    paddingVertical: 2,
+  },
+  actionLabelFocused: {
+    color: COLORS.Primary,
   },
   fab: {
     width: FAB_SIZE,
