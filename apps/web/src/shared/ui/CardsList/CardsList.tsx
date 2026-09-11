@@ -1,5 +1,4 @@
 import {
-  FlatList,
   Platform,
   Pressable,
   SafeAreaView,
@@ -7,7 +6,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTabRailLayout } from 'app/navigation/tabs/TabRailLayoutContext';
 import { TAB_BREAKPOINT_RAIL } from 'app/navigation/tabs/adaptiveTabLayout';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
@@ -24,6 +23,7 @@ import { EmptyResultsModal } from '../EmptyResultsModal';
 import { ModalsContext } from '../ModalsProvider';
 import { Text, TEXT_TAGS } from '../Text';
 import TarotCard from '../TarotCard/TarotCard';
+import { CARDS_GRID_SIDE_PADDING_COMPACT } from './gridPadding';
 
 type BaseTarotCardProps = {
   id: string;
@@ -59,11 +59,9 @@ type CardGridItemProps<T extends BaseTarotCardProps> = {
 };
 
 const LOCKED_DECK_STYLES = ['settings:deck.style.modern'];
-const GRID_GAP = 14;
-const GRID_SIDE_PADDING = 24;
-import { CARDS_GRID_SIDE_PADDING_COMPACT } from './gridPadding';
-
+const GRID_SIDE_PADDING = 16;
 const GRID_SIDE_PADDING_COMPACT = CARDS_GRID_SIDE_PADDING_COMPACT;
+const GRID_GAP = 14;
 const GRID_GAP_DICTIONARY = 16;
 const CARD_ASPECT_RATIO = 9 / 16;
 const DICTIONARY_CARD_WIDTH_MIN_DESKTOP = 152;
@@ -165,6 +163,7 @@ function CardsList<T extends BaseTarotCardProps>({
   const { t } = useTranslation();
   const { width: windowWidth } = useWindowDimensions();
   const { sceneContentWidth } = useTabRailLayout();
+  const [measuredWidth, setMeasuredWidth] = useState(0);
 
   const { appearance, handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
@@ -193,10 +192,11 @@ function CardsList<T extends BaseTarotCardProps>({
   }, [cards.length, showModal]);
 
   const sidePad = preferCompactTiles ? GRID_SIDE_PADDING_COMPACT : GRID_SIDE_PADDING;
-  const containerWidth = Math.max(
+  const fallbackWidth = Math.max(
     200,
-    Math.min(windowWidth, sceneContentWidth) - sidePad
+    Math.min(windowWidth, sceneContentWidth) - sidePad * 2
   );
+  const containerWidth = measuredWidth > 0 ? measuredWidth : fallbackWidth;
   const gridGap = preferCompactTiles ? GRID_GAP_DICTIONARY : GRID_GAP;
 
   const isMobileDictionaryGrid =
@@ -249,7 +249,8 @@ function CardsList<T extends BaseTarotCardProps>({
       );
     }
 
-    return Math.max(130, raw);
+    // Не раздуваем плитки сверх доступной ширины — иначе ряд обрезается.
+    return Math.max(1, raw);
   }, [
     containerWidth,
     numColumns,
@@ -262,12 +263,6 @@ function CardsList<T extends BaseTarotCardProps>({
   const cardHeight = useMemo(
     () => Math.round(cardWidth / CARD_ASPECT_RATIO),
     [cardWidth]
-  );
-
-  const columnWrapperStyle = useMemo(
-    () =>
-      numColumns > 1 ? [styles.row, { gap: gridGap }] : undefined,
-    [numColumns, gridGap]
   );
 
   const openCard = useCallback(
@@ -350,30 +345,23 @@ function CardsList<T extends BaseTarotCardProps>({
     );
   };
 
-  // FlatList внутри ScrollView на web/mobile перехватывает touch — на мобилке plain map.
-  if (isMobileStackLayout) {
-    return (
-      <SafeAreaView style={styles.wrapper}>
-        <View style={styles.listContent}>
-          {cards.length === 0 ? listEmpty : cards.map(renderCard)}
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.wrapper}>
-      <FlatList
-        key={`cards-grid-${numColumns}`}
-        data={cards}
-        numColumns={numColumns}
-        scrollEnabled={false}
-        columnWrapperStyle={columnWrapperStyle}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={listEmpty}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => renderCard(item)}
-      />
+      <View
+        style={[
+          styles.grid,
+          { gap: gridGap },
+          isMobileStackLayout && styles.gridSingle,
+        ]}
+        onLayout={(event) => {
+          const nextWidth = Math.floor(event.nativeEvent.layout.width);
+          if (nextWidth > 0 && nextWidth !== measuredWidth) {
+            setMeasuredWidth(nextWidth);
+          }
+        }}
+      >
+        {cards.length === 0 ? listEmpty : cards.map(renderCard)}
+      </View>
     </SafeAreaView>
   );
 }
@@ -384,9 +372,18 @@ const styles = StyleSheet.create({
   },
   wrapper: {
     marginBottom: 32,
+    width: '100%',
   },
-  listContent: {
-    gap: 16,
+  grid: {
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    alignContent: 'flex-start',
+    alignItems: 'flex-start',
+  },
+  gridSingle: {
+    flexDirection: 'column',
     alignItems: 'center',
   },
   item: {
@@ -406,10 +403,6 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: 'center',
-  },
-  row: {
-    justifyContent: 'space-between',
-    alignSelf: 'stretch',
   },
   emptyResults: {
     width: '100%',

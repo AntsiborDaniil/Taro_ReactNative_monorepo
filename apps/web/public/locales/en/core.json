@@ -105,6 +105,7 @@
   "nav.tab.library": "Library",
   "nav.fab.open": "Open navigation menu",
   "nav.fab.close": "Close navigation menu",
+  "nav.fab.settings": "Settings",
 
   "nav.rail.collapse": "Collapse sidebar",
   "nav.rail.expand": "Expand sidebar",

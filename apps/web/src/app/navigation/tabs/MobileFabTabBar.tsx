@@ -18,11 +18,17 @@ import Animated, {
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
-import { BookIcon, CardsIcon, CrossIcon, PlanetIcon } from 'shared/icons';
+import {
+  BookIcon,
+  CardsIcon,
+  CrossIcon,
+  PlanetIcon,
+  SettingsIcon,
+} from 'shared/icons';
 import { blurActiveElement, WEB_HOVER_TRANSITION } from 'shared/lib';
 import { useWebViewportInsets } from 'shared/lib/web/useWebViewportInsets';
 import { COLORS } from 'shared/themes';
-import { AnalyticAction, TabRoute } from 'shared/types';
+import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import {
   markFabDiscoveredInSession,
@@ -58,9 +64,11 @@ const TAB_ITEMS = [
   },
 ] as const;
 
+type FabIcon = (typeof TAB_ITEMS)[number]['Icon'] | typeof SettingsIcon;
+
 type FabActionItemProps = {
   index: number;
-  Icon: (typeof TAB_ITEMS)[number]['Icon'];
+  Icon: FabIcon;
   label: string;
   focused: boolean;
   openProgress: SharedValue<number>;
@@ -231,6 +239,27 @@ export function MobileFabTabBar({
     [handleVibrationClick, navigation, selectedTab, setOpen, setSelectedTab]
   );
 
+  const openSettings = useCallback(async () => {
+    setOpen(false);
+    blurActiveElement();
+    await handleVibrationClick?.();
+    clearNavReturn();
+    AppMetrica.reportEvent(AnalyticAction.ClickSettings);
+    navigation.navigate(TabRoute.LibraryTab, {
+      screen: NavigationRoute.Settings,
+    });
+    setSelectedTab?.(TabRoute.LibraryTab);
+  }, [handleVibrationClick, navigation, setOpen, setSelectedTab]);
+
+  const focusedLibraryStack =
+    focusedRoute === TabRoute.LibraryTab
+      ? (state.routes[state.index] as { state?: { routes?: { name: string }[]; index?: number } })
+          ?.state
+      : undefined;
+  const focusedLibraryScreen =
+    focusedLibraryStack?.routes?.[focusedLibraryStack.index ?? 0]?.name;
+  const settingsFocused = focusedLibraryScreen === NavigationRoute.Settings;
+
   const backdropStyle = useAnimatedStyle(() => ({
     opacity: interpolate(openProgress.value, [0, 1], [0, 1]),
   }));
@@ -319,6 +348,16 @@ export function MobileFabTabBar({
               onPress={() => navigateTo(route)}
             />
           ))}
+          <FabActionItem
+            index={TAB_ITEMS.length}
+            Icon={SettingsIcon}
+            label={t('nav.fab.settings')}
+            focused={settingsFocused}
+            openProgress={openProgress}
+            onPress={() => {
+              void openSettings();
+            }}
+          />
         </Animated.View>
 
         <Pressable

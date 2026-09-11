@@ -25,9 +25,13 @@ function FavoriteCards() {
   return (
     <ScreenLayout>
       <Header showBackButton title={t('core:page.favouriteCards')} />
-      <ScrollView style={styles.wrapper}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {cards.length ? (
-          <CardsList cards={cards} mobileSingleColumn />
+          <CardsList cards={cards} />
         ) : (
           <NoContent title={t('core:favoriteCards.noCards')} />
         )}
@@ -37,10 +41,13 @@ function FavoriteCards() {
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: 16,
     paddingTop: 8,
-    paddingBottom: 48,
+    paddingBottom: 120,
   },
 });
 

@@ -77,7 +77,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 16,
     paddingTop: 8,
-    paddingBottom: 32,
+    // FAB + safe area: иначе нижний ряд карт обрезается.
+    paddingBottom: 120,
   },
 });
 
