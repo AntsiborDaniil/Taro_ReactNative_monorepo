@@ -204,6 +204,9 @@ function SpreadCardsChoice({
     if (!isSpreadCompleted || !isSimpleSpread) {
       return;
     }
+    if (spread?.interpretation?.trim()) {
+      return;
+    }
     if (isWebAuthPending(authSessionLoading)) {
       return;
     }
@@ -217,6 +220,7 @@ function SpreadCardsChoice({
     isSimpleSpread,
     authSessionLoading,
     handleNavigateToSpreadReading,
+    spread?.interpretation,
   ]);
 
   const handleRetrySimpleInterpret = useCallback(() => {

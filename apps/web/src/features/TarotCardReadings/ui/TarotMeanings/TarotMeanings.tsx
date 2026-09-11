@@ -1,6 +1,5 @@
 import { ReactElement, useMemo } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
-import { PressToUnlock } from 'entities/Spread';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { TSelectedTarotCard } from 'shared/api';
 import { webCardMeaningsProps } from 'shared/lib/web/webScrollClasses';
@@ -11,15 +10,11 @@ import { Text, TEXT_TAGS } from 'shared/ui';
 type TarotTextsProps = {
   card: TSelectedTarotCard;
   interpretation?: string | null;
-  hasBlur?: boolean;
-  onPressInterpretation?: () => void;
 };
 
 function TarotMeanings({
   card,
   interpretation,
-  hasBlur,
-  onPressInterpretation,
 }: TarotTextsProps) {
   const { t } = useTranslation();
 
@@ -28,20 +23,14 @@ function TarotMeanings({
 
     if (interpretation) {
       texts.push(
-        <Pressable
-          key="summary"
-          onPress={onPressInterpretation}
-          style={styles.textContainer}
-          delayPressIn={Platform.OS === 'web' ? 180 : undefined}
-        >
+        <View key="summary" style={styles.textContainer}>
           <Text category={TEXT_TAGS.h3} style={styles.textTitle}>
             {t('spread:summaryTitle')}
           </Text>
           <Text style={styles.commonText}>
             {interpretation}
           </Text>
-          {hasBlur && <PressToUnlock />}
-        </Pressable>
+        </View>
       );
     }
 

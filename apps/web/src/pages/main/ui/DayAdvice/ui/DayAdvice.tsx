@@ -64,16 +64,7 @@ function DayAdvice() {
 
     await handleVibrationClick?.();
 
-    const { shouldRedirectToSpreadReading } =
-      (await selectSpread?.(simpleSpreads.daySuggest)) || {};
-
-    if (shouldRedirectToSpreadReading) {
-      navigate(TabRoute.MainTab, {
-        screen: NavigationRoute.SpreadReadings,
-      });
-
-      return;
-    }
+    await selectSpread?.(simpleSpreads.daySuggest);
 
     navigate(TabRoute.MainTab, {
       screen: NavigationRoute.DayAdvice,

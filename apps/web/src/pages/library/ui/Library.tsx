@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useMobileFabScrollOnScroll } from 'app/navigation/tabs/MobileFabScrollContext';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
@@ -7,9 +7,11 @@ import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { AnalyticAction, NavigationRoute } from 'shared/types';
+import { ChevronRightIcon, SettingsIcon } from 'shared/icons';
+import { isTablet, WEB_HOVER_TRANSITION } from 'shared/lib';
+import { AnalyticAction, NavigationRoute, PressableWebState } from 'shared/types';
 import { COLORS, getColorOpacity } from 'shared/themes';
-import { ScreenLayout, Text, TEXT_TAGS, Button } from 'shared/ui';
+import { ScreenLayout, Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import { LIBRARY_PLATES } from '../lib';
 import { useLibraryLayout } from './useLibraryLayout';
 
@@ -32,6 +34,8 @@ function Library() {
 
     navigation.push(NavigationRoute.Settings as never);
   };
+
+  const iconSize = isTablet ? 26 : 22;
 
   return (
     <ScreenLayout>
@@ -110,13 +114,32 @@ function Library() {
               ))}
             </View>
           </View>
-          <Button
-            style={styles.settingsBtn}
-            onPress={handlePress}
+          <Pressable
+            accessibilityRole="button"
             accessibilityLabel={t('settings:settings')}
+            onPress={handlePress}
+            style={(state: PressableWebState) => [
+              styles.settingsRow,
+              (state.hovered || state.pressed) && styles.settingsRowActive,
+            ]}
           >
-            {t('settings:settings')}
-          </Button>
+            <View style={styles.settingsIconWrap}>
+              <SettingsIcon width={iconSize} height={iconSize} />
+            </View>
+            <View style={styles.settingsTextCol}>
+              <Text
+                category={TEXT_TAGS.h4}
+                weight={TEXT_WEIGHT.medium}
+                style={styles.settingsTitle}
+              >
+                {t('settings:settings')}
+              </Text>
+              <Text category={TEXT_TAGS.p2} style={styles.settingsHint}>
+                {t('core:library.settings.subtitle')}
+              </Text>
+            </View>
+            <ChevronRightIcon width={isTablet ? 26 : 17} height={isTablet ? 26 : 17} />
+          </Pressable>
         </View>
       </ScrollView>
     </ScreenLayout>
@@ -162,14 +185,56 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     flexWrap: 'nowrap',
   },
-  settingsBtn: {
-    marginTop: 28,
+  settingsRow: {
+    marginTop: 20,
     marginBottom: 8,
     width: '100%',
-    minHeight: 52,
+    minHeight: 64,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(246, 192, 27, 0.16)',
+    backgroundColor: COLORS.Background2,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
     zIndex: 2,
     position: 'relative',
+    ...WEB_HOVER_TRANSITION,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+          boxShadow:
+            '0 10px 32px rgba(8, 12, 20, 0.35), inset 0 1px 0 rgba(246, 192, 27, 0.05)',
+        } as object)
+      : {}),
+  },
+  settingsRowActive: {
+    backgroundColor: 'rgba(100, 152, 202, 0.12)',
+    borderColor: 'rgba(246, 192, 27, 0.28)',
+  },
+  settingsIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(246, 192, 27, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(246, 192, 27, 0.22)',
+  },
+  settingsTextCol: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+  settingsTitle: {
+    color: COLORS.Content,
+  },
+  settingsHint: {
+    color: COLORS.SpbSky1,
+    lineHeight: 18,
   },
 });
 

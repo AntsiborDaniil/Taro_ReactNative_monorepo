@@ -205,25 +205,6 @@ export function useSpread({
     setErrors({});
     setQuestion('');
 
-    if (value.id === SpreadName.Simple_DaySuggest) {
-      const prevSelectedDaySuggest = await getTodayDayCard();
-      if (__DEV__) {
-        console.log(`${DAY_CARD_DEBUG} selectSpread:existingDayCard`, {
-          hasCard: !!prevSelectedDaySuggest,
-          selectedCardsLength: prevSelectedDaySuggest?.selectedCards?.length ?? 0,
-        });
-      }
-
-      if (prevSelectedDaySuggest) {
-        setSpread(prevSelectedDaySuggest);
-        setSelectedCardsIds(
-          getSelectedCardsIdsMap(prevSelectedDaySuggest.selectedCards)
-        );
-
-        return { shouldRedirectToSpreadReading: true };
-      }
-    }
-
     return { shouldRedirectToSpreadReading: false };
   };
 

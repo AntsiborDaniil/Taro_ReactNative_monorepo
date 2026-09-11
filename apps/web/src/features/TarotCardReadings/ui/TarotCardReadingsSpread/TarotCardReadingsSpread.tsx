@@ -13,8 +13,7 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { LikeCard } from 'entities/favorites';
-import { PressToUnlock, SpreadContext } from 'entities/Spread';
-import { LoremIpsum } from 'lorem-ipsum';
+import { SpreadContext } from 'entities/Spread';
 import { useTranslation } from 'react-i18next';
 import { useSharedValue } from 'react-native-reanimated';
 import Carousel, {
@@ -94,7 +93,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
     carouselRef.current?.prev();
   };
 
-  const { spread, dayCardHydrated, handleGetAIInterpretation } = useData({
+  const { spread, dayCardHydrated } = useData({
     Context: SpreadContext,
   });
 
@@ -116,11 +115,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
       });
     }
   }, [sceneContentWidth, windowHeight, carouselWidth, carouselHeight, tabBarHeight]);
-
-  const handlePressToUnlock = async () => {
-    await handleVibrationClick?.();
-    handleGetAIInterpretation?.();
-  };
 
   useEffect(() => {
     if (typeof cardIndex === 'undefined') {
@@ -198,18 +192,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
     );
   }
 
-  const interpretation =
-    spread.interpretation ||
-    new LoremIpsum({
-      sentencesPerParagraph: {
-        max: 6,
-        min: 4,
-      },
-      wordsPerSentence: {
-        max: 15,
-        min: 10,
-      },
-    }).generateParagraphs(3);
+  const interpretation = spread.interpretation?.trim() || '';
 
   const carouselData = spread?.selectedCards
     ? hasSummary
@@ -303,8 +286,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
               <TarotMeanings
                 card={card}
                 interpretation={interpretation}
-                hasBlur={!spread.interpretation}
-                onPressInterpretation={handlePressToUnlock}
               />
             </View>
           </View>
@@ -388,16 +369,14 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                       <SpreadScheme hasRotation={false} isChoicePage />
                     </View>
                     <View style={styles.paddingWrapper}>
-                      <Pressable
-                        style={spreadInnerStyles.summaryScroll}
-                        onPress={handlePressToUnlock}
-                      >
-                        <View style={spreadInnerStyles.summaryScrollAccent} />
-                        <Text style={spreadInnerStyles.summaryText} key="meaning">
-                          {interpretation ?? ''}
-                        </Text>
-                        {!spread?.interpretation && <PressToUnlock />}
-                      </Pressable>
+                      {!!interpretation && (
+                        <View style={spreadInnerStyles.summaryScroll}>
+                          <View style={spreadInnerStyles.summaryScrollAccent} />
+                          <Text style={spreadInnerStyles.summaryText} key="meaning">
+                            {interpretation}
+                          </Text>
+                        </View>
+                      )}
 
                       {!!spread?.cardsOrder?.length && (
                         <View style={styles.buttons}>
@@ -612,8 +591,6 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                     <TarotMeanings
                       card={card}
                       interpretation={interpretation}
-                      hasBlur={!spread?.interpretation}
-                      onPressInterpretation={handlePressToUnlock}
                     />
 
                     {!!spread?.cardsOrder?.length && (
