@@ -7,6 +7,7 @@ import {
 } from './acquisition';
 import {
   openMiniAppInlineKeyboard,
+  startOpenAppInlineKeyboard,
   mainReplyKeyboard,
   channelInlineKeyboard,
   faqInlineKeyboard,
@@ -15,7 +16,6 @@ import {
   BTN_FAQ,
   BTN_SUPPORT,
   BTN_HELP,
-  BTN_APP,
   CHANNEL_URL,
 } from './keyboards';
 import {
@@ -76,8 +76,17 @@ async function trackStartIfNeeded(ctx: Context, payload: string): Promise<void> 
 async function sendWelcome(ctx: Context): Promise<void> {
   await ctx.reply(welcomeText, {
     parse_mode: 'Markdown',
+    reply_markup: startOpenAppInlineKeyboard(),
+  });
+  // Install reply keyboard without leaving a visible second bubble.
+  const keyboardMsg = await ctx.reply('\u200B', {
     reply_markup: mainReplyKeyboard(),
   });
+  try {
+    await ctx.api.deleteMessage(ctx.chat!.id, keyboardMsg.message_id);
+  } catch {
+    // Keyboard stays even if delete fails.
+  }
 }
 
 async function sendChannel(ctx: Context): Promise<void> {
@@ -169,12 +178,6 @@ bot.on('message:text', async (ctx) => {
 
   const text = ctx.message.text.trim();
 
-  if (text === BTN_APP) {
-    await ctx.reply(openAppHintText, {
-      reply_markup: openMiniAppInlineKeyboard(),
-    });
-    return;
-  }
   if (text === BTN_CHANNEL) {
     await sendChannel(ctx);
     return;
