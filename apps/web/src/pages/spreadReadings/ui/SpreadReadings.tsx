@@ -30,9 +30,8 @@ function SpreadReadings() {
   const handleBackToSpreads = useSpreadCatalogBack();
 
   const handlePressCopy = useCallback(() => {
-    // Copy first, same tap — vibration/async must not steal user-activation.
-    void handleCopySpreadInterpretation?.();
     void handleVibrationClick?.();
+    void handleCopySpreadInterpretation?.();
   }, [handleVibrationClick, handleCopySpreadInterpretation]);
 
   return (
@@ -44,9 +43,7 @@ function SpreadReadings() {
           rightContent={
             <CopyIcon width={isTablet ? 32 : 24} height={isTablet ? 32 : 24} />
           }
-          rightAction={
-            spread?.interpretation || spread?.uid ? handlePressCopy : undefined
-          }
+          rightAction={spread?.interpretation ? handlePressCopy : undefined}
           rightAccessibilityLabel={t('core:ai.copy.shareSuccess')}
         />
         {spread?.category !== SpreadsCategory.Simple && (

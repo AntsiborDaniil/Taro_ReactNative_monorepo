@@ -24,8 +24,6 @@ function Question() {
             numberOfLines: 4,
             maxLength: 100,
             autoComplete: 'off',
-            autoCorrect: false,
-            spellCheck: false,
             autoFocus: false,
             textAlignVertical: 'top',
             placeholder: t('spread:question.placeholder'),

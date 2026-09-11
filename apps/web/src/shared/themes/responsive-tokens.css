@@ -22,8 +22,6 @@
 html {
   font-size: var(--font-size-base, 12px);
   background-color: #171f2c;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
 }
 
 body {
@@ -40,15 +38,6 @@ body {
 /* RN Web: не показывать белый фон под картинками во время загрузки */
 img {
   background-color: transparent;
-}
-
-/* iOS/Telegram: inputs < 16px trigger page zoom that does not reset. */
-@media (max-width: 767px) {
-  input,
-  textarea,
-  select {
-    font-size: 16px !important;
-  }
 }
 
 /* Плавные hover для нативных HTML-контролов (RN Web задаёт transition в JS отдельно). */

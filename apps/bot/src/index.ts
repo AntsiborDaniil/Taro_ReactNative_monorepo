@@ -4,14 +4,12 @@ import { startHealthServer } from './health';
 import {
   openMiniAppInlineKeyboard,
   openMiniAppReplyKeyboard,
+  faqInlineKeyboard,
+  isFaqTopicId,
 } from './keyboards';
 import {
-  FAQ_INTRO,
-  faqBackKeyboard,
-  faqMenuKeyboard,
-  findFaqEntry,
-} from './faq';
-import {
+  faqIntroText,
+  faqTopics,
   helpText,
   lavaPaymentCancelledText,
   lavaPaymentFailedText,
@@ -66,34 +64,20 @@ bot.command('help', async (ctx) => {
 });
 
 bot.command('faq', async (ctx) => {
-  await ctx.reply(FAQ_INTRO, {
-    reply_markup: faqMenuKeyboard(),
+  await ctx.reply(faqIntroText, {
+    reply_markup: faqInlineKeyboard(),
   });
 });
 
 bot.callbackQuery(/^faq:(.+)$/, async (ctx) => {
-  const id = ctx.match[1];
+  const topic = ctx.match[1];
   await ctx.answerCallbackQuery();
-
-  const send = async (text: string, keyboard: ReturnType<typeof faqMenuKeyboard>) => {
-    try {
-      await ctx.editMessageText(text, { reply_markup: keyboard });
-    } catch {
-      await ctx.reply(text, { reply_markup: keyboard });
-    }
-  };
-
-  if (id === 'menu') {
-    await send(FAQ_INTRO, faqMenuKeyboard());
+  if (!isFaqTopicId(topic)) {
     return;
   }
-
-  const entry = findFaqEntry(id);
-  if (!entry) {
-    return;
-  }
-
-  await send(entry.text, faqBackKeyboard());
+  await ctx.reply(faqTopics[topic], {
+    reply_markup: faqInlineKeyboard(),
+  });
 });
 
 bot.on('message:text', async (ctx) => {
@@ -101,22 +85,12 @@ bot.on('message:text', async (ctx) => {
     return;
   }
 
-  await ctx.reply(
-    'Используй /app, чтобы открыть приложение, или /faq — если вопрос про оплату и заряды.',
-    {
-      reply_markup: openMiniAppInlineKeyboard(),
-    }
-  );
+  await ctx.reply('Используй /app или кнопку ниже, чтобы открыть приложение.', {
+    reply_markup: openMiniAppInlineKeyboard(),
+  });
 });
 
 async function configureMenuButton(): Promise<void> {
-  await bot.api.setMyCommands([
-    { command: 'start', description: 'Приветствие и открыть приложение' },
-    { command: 'app', description: 'Открыть Mini App' },
-    { command: 'faq', description: 'Оплата, заряды, правила' },
-    { command: 'help', description: 'Список команд' },
-  ]);
-
   await bot.api.setChatMenuButton({
     menu_button: {
       type: 'web_app',
@@ -131,6 +105,12 @@ async function main(): Promise<void> {
   startHealthServer(config.port);
 
   try {
+    await bot.api.setMyCommands([
+      { command: 'start', description: 'Приветствие и приложение' },
+      { command: 'app', description: 'Открыть Mini App' },
+      { command: 'faq', description: 'Оплата, заряды и правила' },
+      { command: 'help', description: 'Список команд' },
+    ]);
     await configureMenuButton();
   } catch (error) {
     console.warn('[bot] setChatMenuButton failed, continuing:', error);

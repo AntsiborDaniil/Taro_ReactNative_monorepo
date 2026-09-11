@@ -16,7 +16,6 @@ import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   AnimatedCard,
   AnimationCarouselContext,
@@ -286,11 +285,6 @@ function SpreadCardsChoice({
   }
 
   const stepperStep = isSpreadCompleted && !isSimpleSpread ? 3 : 2;
-  const ScrollBody = Platform.OS === 'web' ? ScrollView : KeyboardAwareScrollView;
-  const scrollExtraProps =
-    Platform.OS === 'web'
-      ? {}
-      : { enableOnAndroid: true, extraScrollHeight: 100 };
 
   return (
     <ScreenLayout>
@@ -303,14 +297,12 @@ function SpreadCardsChoice({
         Context={AnimationCarouselContext}
         value={animationCarouselContextData}
       >
-        <ScrollBody
-          style={{ flex: 1, position: 'relative' }}
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          nestedScrollEnabled={false}
-          directionalLockEnabled
-          {...scrollExtraProps}
-        >
+          <ScrollView
+            style={{ flex: 1, position: 'relative' }}
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+          >
           <View
             style={[
               styles.wrapper,
@@ -366,14 +358,10 @@ function SpreadCardsChoice({
                     )}
                     <AnimatedCard />
                     <View style={spreadInnerStyles.altarZone}>
-                      <View
-                        style={spreadInnerStyles.altarGlowClip}
-                        pointerEvents="none"
-                      >
+                      <View style={spreadInnerStyles.altarGlowClip} pointerEvents="none">
                         <View style={spreadInnerStyles.altarGlow} />
                       </View>
                       <CoverFlowCardCarousel
-                        overlayControls
                         style={
                           isSimpleSpread
                             ? styles.carouselSimpleSpread
@@ -425,7 +413,7 @@ function SpreadCardsChoice({
             )}
             <CardDescription style={styles.description} />
           </View>
-        </ScrollBody>
+          </ScrollView>
       </DataProvider>
     </ScreenLayout>
   );
@@ -434,7 +422,6 @@ function SpreadCardsChoice({
 const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
-    ...(Platform.OS === 'web' ? ({ touchAction: 'pan-y' } as object) : {}),
   },
   questionWrapper: {
     width: '100%',
@@ -456,7 +443,7 @@ const styles = StyleSheet.create({
   spreadPickCluster: {
     width: '100%',
     alignItems: 'center',
-    gap: 16,
+    gap: 10,
     position: 'relative',
     overflow: 'visible',
   },
@@ -481,13 +468,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    zIndex: 3,
     overflow: 'hidden',
-    backgroundColor: 'rgba(12, 16, 24, 0.96)',
+    zIndex: 2,
     ...Platform.select({
-      web: {
-        isolation: 'isolate',
-      } as object,
+      web: { isolation: 'isolate' } as object,
       default: {},
     }),
   },

@@ -184,7 +184,6 @@ const themedStyles = StyleService.create({
     justifyContent: 'flex-end',
     gap: 12,
     paddingRight: 2,
-    zIndex: 2,
   },
   backButton: {
     padding: 8,

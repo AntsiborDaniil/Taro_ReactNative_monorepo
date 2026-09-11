@@ -15,11 +15,11 @@
   "ai.retry": "Try again",
 
   "ai.copy.success": "Copied to clipboard",
-  "ai.copy.fail": "Could not copy. Long-press and copy the text instead.",
   "ai.copy.shareSuccess": "Interpretation link copied",
   "ai.copy.shareHint": "Friends open the Mini App on the reading page",
   "ai.copy.shareLead": "My «{{name}}» reading in MindFullTaro:",
   "ai.copy.shareOpenFailed": "Could not open this shared reading",
+  "ai.copy.fail": "Could not copy. Try again.",
 
   "button.prev": "Previous",
   "button.next": "Next",

@@ -7,5 +7,6 @@ export * from './webScrollClasses';
 export * from './useWebPointerDragScroll';
 export * from './useWebScrollFriendlyPress';
 export * from './sharedReadingLink';
-export * from './copyText';
+export * from './copyTextToClipboard';
+export * from './lockMobileInputZoom';
 

@@ -250,7 +250,7 @@ export function useLibraryLayout(): LibraryLayout {
       libraryTileSubtitleFontSize,
       libraryTileSubtitleLineHeight,
       scrollBottomPad: Math.round(
-        Math.max(28, v(36)) +
+        Math.max(48, v(52)) +
           (Platform.OS === 'web' && W < TAB_BREAKPOINT_RAIL ? bottomTabInset : 0)
       ),
       isNarrow: layoutW < TAB_BREAKPOINT_LABELED,

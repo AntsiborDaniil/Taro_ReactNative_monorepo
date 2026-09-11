@@ -33,7 +33,6 @@ import {
   shouldPromptWebSignIn,
   buildSharedReadingUrl,
   copyTextToClipboard,
-  copyTextToClipboardSync,
 } from 'shared/lib';
 import { AsyncMemoryKey } from 'shared/lib/deviceMemory';
 import { measurePageTopLeft } from 'shared/lib/measurePageCoordinates';
@@ -441,108 +440,43 @@ export function useSpread({
   );
 
   const handleCopySpreadInterpretation = async () => {
-    if (!spread) {
+    if (!spread?.interpretation) {
       return;
     }
 
     const title = t(spread.name);
-    const fallbackText = `${t('spread:summaryTitle')} - ${title}\n\n${
-      spread.interpretation ?? ''
-    }`;
+    const shareText =
+      spread.uid && Platform.OS === 'web'
+        ? `${t('core:ai.copy.shareLead', { name: title })}\n${buildSharedReadingUrl(spread.uid)}`
+        : `${t('spread:summaryTitle')} - ${title}\n\n${spread.interpretation}\n\n${t('core:downloadAppStore')}: ${appLink.ios}\n${t('core:downloadGooglePlay')}: ${appLink.android}`;
 
-    const shareFromUid = (uid: string) => {
-      const url = buildSharedReadingUrl(uid);
-      return `${t('core:ai.copy.shareLead', { name: title })}\n${url}`;
-    };
-
-    const copyNow = async (text: string, asShareLink: boolean) => {
-      const ok =
-        copyTextToClipboardSync(text) || (await copyTextToClipboard(text));
-      if (ok) {
-        Toast.show({
-          type: 'success',
-          text1: asShareLink
+    // Copy in the same tap — awaiting save first drops the user gesture in Telegram.
+    const copied = await copyTextToClipboard(shareText);
+    if (copied) {
+      Toast.show({
+        type: 'success',
+        text1:
+          spread.uid && Platform.OS === 'web'
             ? t('core:ai.copy.shareSuccess')
             : t('core:ai.copy.success'),
-          text2: asShareLink ? t('core:ai.copy.shareHint') : undefined,
-        });
-        return true;
-      }
+        text2:
+          spread.uid && Platform.OS === 'web'
+            ? t('core:ai.copy.shareHint')
+            : undefined,
+      });
+    } else {
       Toast.show({
         type: 'error',
         text1: t('core:ai.copy.fail'),
       });
-      return false;
-    };
-
-    // Copy in the same tap (before network) — Mini App drops clipboard otherwise.
-    if (spread.uid && Platform.OS === 'web') {
-      const shareText = shareFromUid(spread.uid);
-      const synced = copyTextToClipboardSync(shareText);
-      if (synced) {
-        Toast.show({
-          type: 'success',
-          text1: t('core:ai.copy.shareSuccess'),
-          text2: t('core:ai.copy.shareHint'),
-        });
-        void saveSpread(spread).then((saved) => {
-          if (saved) {
-            setSpread(saved);
-          }
-        });
-        return;
-      }
-      await copyNow(shareText, true);
-      void saveSpread(spread).then((saved) => {
-        if (saved) {
-          setSpread(saved);
-        }
-      });
-      return;
-    }
-
-    if (spread.uid) {
-      await copyNow(
-        `${fallbackText}\n\n${t('core:downloadAppStore')}: ${appLink.ios}\n${t(
-          'core:downloadGooglePlay'
-        )}: ${appLink.android}`,
-        false
-      );
-      return;
-    }
-
-    if (Platform.OS === 'web' && spread.interpretation) {
-      const copied = copyTextToClipboardSync(fallbackText);
-      void saveSpread(spread).then((saved) => {
-        if (saved) {
-          setSpread(saved);
-        }
-      });
-      if (copied) {
-        Toast.show({
-          type: 'success',
-          text1: t('core:ai.copy.success'),
-        });
-        return;
-      }
     }
 
     if (Platform.OS === 'web') {
-      const saved = await saveSpread(spread);
-      if (saved?.uid) {
-        setSpread(saved);
-        await copyNow(shareFromUid(saved.uid), true);
-        return;
-      }
-    }
-
-    if (spread.interpretation) {
-      await copyNow(
-        `${fallbackText}\n\n${t('core:downloadAppStore')}: ${appLink.ios}\n${t(
-          'core:downloadGooglePlay'
-        )}: ${appLink.android}`,
-        false
-      );
+      void saveSpread(spread).then((saved) => {
+        if (saved?.uid && saved.uid !== spread.uid) {
+          setSpread(saved);
+        }
+      });
     }
   };
 

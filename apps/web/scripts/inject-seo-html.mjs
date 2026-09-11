@@ -59,7 +59,7 @@ html = html.replace(/<html lang="[^"]*">/, '<html lang="ru">');
 html = html.replace(/<title>[^<]*<\/title>/, `<title>${SEO.title}</title>`);
 
 const viewportMeta =
-  '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />';
+  '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />';
 if (html.includes('name="viewport"')) {
   html = html.replace(
     /<meta[^>]*name="viewport"[^>]*>/i,

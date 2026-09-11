@@ -27,9 +27,6 @@ const Input = ({ label, errorContent, baseInputProps = {} }: InputProps) => {
           hasError && styles.inputError,
           baseInputProps?.style,
         ]}
-        autoComplete="off"
-        autoCorrect={false}
-        spellCheck={false}
         placeholderTextColor={
           baseInputProps.placeholderTextColor ?? 'rgba(255,255,255,0.46)'
         }

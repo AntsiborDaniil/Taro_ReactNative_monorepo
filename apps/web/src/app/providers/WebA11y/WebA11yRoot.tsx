@@ -4,6 +4,7 @@ import { navigationRef } from '../../navigation/navigationRef';
 import { useWebPointerDragScroll } from 'shared/lib/web/useWebPointerDragScroll';
 import { useWebSwipeBack } from 'shared/lib/web/useWebSwipeBack';
 import { useTelegramBackButton } from 'shared/lib/web/useTelegramBackButton';
+import { lockMobileInputZoom } from 'shared/lib/web/lockMobileInputZoom';
 import {
   WEB_CARD_MEANINGS_CLASS,
   WEB_CARD_TILE_CLASS,
@@ -32,10 +33,20 @@ function isTypingTarget(target: EventTarget | null): boolean {
 const GLOBAL_A11Y_CSS = `
 html {
   -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
 }
 body {
   overscroll-behavior-y: contain;
   overscroll-behavior-x: contain;
+}
+input, textarea, select {
+  font-size: 16px !important;
+}
+[data-tarot-carousel] {
+  touch-action: pan-y !important;
+}
+[data-tarot-carousel] * {
+  touch-action: pan-y !important;
 }
 .tarot-web-scroll-x {
   overflow-x: auto;
@@ -83,19 +94,21 @@ body {
 export function WebA11yRoot() {
   useWebPointerDragScroll();
   useWebSwipeBack();
-  useTelegramBackButton();
+    useTelegramBackButton();
 
-  useEffect(() => {
-    if (Platform.OS !== 'web' || typeof document === 'undefined') {
-      return;
-    }
+    useEffect(() => {
+      if (Platform.OS !== 'web' || typeof document === 'undefined') {
+        return;
+      }
 
-    if (!document.getElementById(STYLE_ID)) {
-      const style = document.createElement('style');
-      style.id = STYLE_ID;
-      style.textContent = GLOBAL_A11Y_CSS;
-      document.head.appendChild(style);
-    }
+      const unlockZoom = lockMobileInputZoom();
+
+      if (!document.getElementById(STYLE_ID)) {
+        const style = document.createElement('style');
+        style.id = STYLE_ID;
+        style.textContent = GLOBAL_A11Y_CSS;
+        document.head.appendChild(style);
+      }
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') {
@@ -115,7 +128,10 @@ export function WebA11yRoot() {
     };
 
     document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
+    return () => {
+      unlockZoom();
+      document.removeEventListener('keydown', onKeyDown);
+    };
   }, []);
 
   return null;

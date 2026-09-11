@@ -6,7 +6,6 @@ import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Header } from 'features/header';
 import { useSpreadCatalogBack } from 'features/header/useSpreadCatalogBack';
 import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
@@ -133,19 +132,15 @@ function SpreadDescriptionChoice() {
     return <SpreadCardsChoice isSimpleSpread={isSimpleSpread} />;
   }
 
-  const ScrollBody = Platform.OS === 'web' ? ScrollView : KeyboardAwareScrollView;
-
   return (
     <ScreenLayout>
       <Header backAction={handleBackToSpreads} title="" />
       <SpreadStepper activeStep={1} />
-      <ScrollBody
+      <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
-        {...(Platform.OS === 'web'
-          ? {}
-          : { enableOnAndroid: true, extraScrollHeight: 100 })}
+        keyboardDismissMode="on-drag"
       >
         <View style={styles.wrapper}>
           <SpreadHeroBanner
@@ -180,7 +175,7 @@ function SpreadDescriptionChoice() {
 
           <CardDescription />
         </View>
-      </ScrollBody>
+      </ScrollView>
     </ScreenLayout>
   );
 }

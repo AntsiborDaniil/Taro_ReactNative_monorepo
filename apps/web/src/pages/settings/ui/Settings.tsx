@@ -30,7 +30,7 @@ import {
 } from 'shared/lib';
 import { isTelegramMiniApp } from 'shared/lib/web/telegramWebApp';
 import { COLORS, SETTINGS_TYPOGRAPHY } from 'shared/themes';
-import { AnalyticAction, NavigationRoute, PressableWebState, TabRoute } from 'shared/types';
+import { AnalyticAction, NavigationRoute, PressableWebState } from 'shared/types';
 import { ScreenLayout, SwitchElement, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { APP_AGREEMENTS, getSettingsRoutes } from '../lib';
@@ -139,9 +139,7 @@ function Settings() {
       return;
     }
 
-    navigation.navigate(TabRoute.LibraryTab, {
-      screen,
-    });
+    navigation.navigate(screen as never);
   };
 
   const scenePad = moderateScale(16);
@@ -205,48 +203,48 @@ function Settings() {
                   handleChangeBase<boolean>(value, 'hasReversed');
                 }}
               />
-              <View style={webStyles.dividerInCard} />
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('settings:credits.buy.row')}
-                onPress={openBuyCredits}
-                style={(s: PressableWebState) => {
-                  const { hovered, pressed } = s;
-                  return [
-                    webStyles.row,
-                    (hovered || pressed) && webStyles.rowActive,
-                  ];
-                }}
-              >
-                <View style={styles.iconWrapper}>
-                  <View style={styles.icon}>
-                    <LightningBolt
-                      width={isTablet ? 28 : 22}
-                      height={isTablet ? 28 : 22}
-                      fill={COLORS.Primary500}
-                    />
-                  </View>
-                  <View style={webStyles.rowTextCol}>
-                    <Text
-                      category={TEXT_TAGS.h4}
-                      style={[styles.text, styles.settingsBody]}
-                    >
-                      {t('settings:credits.buy.row')}
-                    </Text>
-                    <Text
-                      category={TEXT_TAGS.p2}
-                      style={[webStyles.rowHint, styles.settingsFootnote]}
-                    >
-                      {t('settings:credits.buy.rowHint', { count: credits })}
-                    </Text>
-                  </View>
-                </View>
-                <ChevronRightIcon
-                  width={isTablet ? 26 : 17}
-                  height={isTablet ? 26 : 17}
-                />
-              </Pressable>
             </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('settings:credits.buy.row')}
+              onPress={openBuyCredits}
+              style={(s: PressableWebState) => {
+                const { hovered, pressed } = s;
+                return [
+                  webStyles.card,
+                  webStyles.buyRow,
+                  (hovered || pressed) && webStyles.rowActive,
+                ];
+              }}
+            >
+              <View style={styles.iconWrapper}>
+                <View style={styles.icon}>
+                  <LightningBolt
+                    width={isTablet ? 28 : 22}
+                    height={isTablet ? 28 : 22}
+                    fill={COLORS.Primary500}
+                  />
+                </View>
+                <View style={webStyles.rowTextCol}>
+                  <Text
+                    category={TEXT_TAGS.h4}
+                    style={[styles.text, styles.settingsBody]}
+                  >
+                    {t('settings:credits.buy.row')}
+                  </Text>
+                  <Text
+                    category={TEXT_TAGS.p2}
+                    style={[webStyles.rowHint, styles.settingsFootnote]}
+                  >
+                    {t('settings:credits.buy.rowHint', { count: credits })}
+                  </Text>
+                </View>
+              </View>
+              <ChevronRightIcon
+                width={isTablet ? 26 : 17}
+                height={isTablet ? 26 : 17}
+              />
+            </Pressable>
 
             {accountRoutes.length > 0 ? (
               <>
@@ -461,6 +459,17 @@ function createWebStyles() {
       height: StyleSheet.hairlineWidth,
       backgroundColor: 'rgba(244,244,245,0.12)',
       marginHorizontal: 8,
+    },
+    buyRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: 4,
+      paddingVertical: 16,
+      paddingHorizontal: 10,
+      ...(Platform.OS === 'web'
+        ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
+        : {}),
     },
     row: {
       flexDirection: 'row',
