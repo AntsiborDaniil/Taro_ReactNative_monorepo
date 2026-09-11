@@ -4,6 +4,10 @@ import {
   getTarotAiApiBaseUrl,
 } from 'shared/api';
 import { setDevAccessToken } from './devAccessToken';
+import {
+  trackMetrikaAuthTelegram,
+  trackMetrikaMiniAppOpen,
+} from './yandexMetrika';
 
 const TELEGRAM_SCRIPT_SRC = 'https://telegram.org/js/telegram-web-app.js';
 const TELEGRAM_SCRIPT_ID = 'telegram-web-app-js';
@@ -38,19 +42,42 @@ export function readTelegramSafeAreaInsets(): {
   };
 }
 
-/** Open Lava checkout (or any https URL) from Mini App / browser. */
-export function openExternalPaymentUrl(url: string): void {
-  if (typeof window === 'undefined') {
-    return;
+/** Open Lava checkout (or any https URL) from Mini App / browser.
+ * Returns false only when nothing could be attempted.
+ */
+export function openExternalPaymentUrl(url: string): boolean {
+  if (typeof window === 'undefined' || !url.trim()) {
+    return false;
   }
+
+  const href = url.trim();
   const webApp = window.Telegram?.WebApp as
-    | { openLink?: (href: string, options?: { try_instant_view?: boolean }) => void }
+    | {
+        openLink?: (
+          link: string,
+          options?: { try_instant_view?: boolean }
+        ) => void;
+      }
     | undefined;
+
+  // Telegram Desktop Mini App: openLink is required; window.open is often blocked.
   if (typeof webApp?.openLink === 'function') {
-    webApp.openLink(url, { try_instant_view: false });
-    return;
+    try {
+      webApp.openLink(href, { try_instant_view: false });
+      return true;
+    } catch (error) {
+      console.warn('[payment] Telegram openLink failed, falling back', error);
+    }
   }
-  window.open(url, '_blank', 'noopener,noreferrer');
+
+  const popup = window.open(href, '_blank', 'noopener,noreferrer');
+  if (popup) {
+    return true;
+  }
+
+  // Popup blocked — navigate same tab as last resort.
+  window.location.assign(href);
+  return true;
 }
 
 export async function ensureTelegramWebAppScript(): Promise<void> {
@@ -124,6 +151,8 @@ export async function tryAuthenticateTelegramMiniApp(): Promise<boolean> {
     return false;
   }
 
+  trackMetrikaMiniAppOpen();
+
   // Always exchange initData — skipping when a cookie/cache session existed
   // left users unregistered after opening the app from the bot keyboard.
   clearAuthMeCache();
@@ -152,6 +181,7 @@ export async function tryAuthenticateTelegramMiniApp(): Promise<boolean> {
       setDevAccessToken(body.token.trim());
     }
 
+    trackMetrikaAuthTelegram();
     return true;
   } catch (error) {
     console.warn('[telegram auth] error', error);

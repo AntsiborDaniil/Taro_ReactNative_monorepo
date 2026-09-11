@@ -5,7 +5,10 @@ declare global {
     Telegram?: {
       WebApp?: {
         initData: string;
-        initDataUnsafe: Record<string, unknown>;
+        initDataUnsafe: {
+          start_param?: string;
+          [key: string]: unknown;
+        };
         ready: () => void;
         expand: () => void;
         close: () => void;
@@ -23,6 +26,10 @@ declare global {
           onClick: (cb: () => void) => void;
           offClick: (cb: () => void) => void;
         };
+        openLink?: (
+          url: string,
+          options?: { try_instant_view?: boolean }
+        ) => void;
       };
     };
   }

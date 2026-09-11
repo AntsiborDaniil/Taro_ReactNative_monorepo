@@ -10,6 +10,7 @@ import { fetchAuthMeSession } from 'shared/lib/web/fetchAuthMeSession';
 import { tryAuthenticateTelegramMiniApp } from 'shared/lib/web/telegramWebApp';
 import { tryDevQuickLogin } from 'shared/lib/web/tryDevQuickLogin';
 import { getDevMockSession } from 'shared/lib/web/devMockSession';
+import { trackMetrikaPaymentSuccessIfNeeded } from 'shared/lib/web/yandexMetrika';
 import {
   TAROT_AUTH_CHANGED_EVENT,
   type TarotAuthChangedDetail,
@@ -41,11 +42,15 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
     ) => {
       setAuthUser(user);
       setTarotDaily(daily);
+      let nextCredits = spreadCreditsRef.current;
       if (typeof credits === 'number' && Number.isFinite(credits)) {
-        setSpreadCredits(Math.max(0, Math.floor(credits)));
+        nextCredits = Math.max(0, Math.floor(credits));
+        setSpreadCredits(nextCredits);
       } else if (!user) {
+        nextCredits = 0;
         setSpreadCredits(0);
       }
+      trackMetrikaPaymentSuccessIfNeeded(nextCredits);
       if (user?.id && user.email !== 'demo@mindful.local') {
         void migrateLocalDataToCloud(user.id);
       }
@@ -224,7 +229,11 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
       setTarotDaily(session.tarotDaily);
     }
     if (typeof session.spreadCredits === 'number') {
-      setSpreadCredits(Math.max(0, Math.floor(session.spreadCredits)));
+      const nextCredits = Math.max(0, Math.floor(session.spreadCredits));
+      setSpreadCredits(nextCredits);
+      trackMetrikaPaymentSuccessIfNeeded(nextCredits);
+    } else {
+      trackMetrikaPaymentSuccessIfNeeded(spreadCreditsRef.current);
     }
   }, []);
 

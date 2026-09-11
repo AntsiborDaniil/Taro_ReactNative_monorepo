@@ -16,6 +16,11 @@ import { useData } from 'shared/DataProvider';
 import { cloudFetch } from 'shared/api/cloud/cloudFetch';
 import { wakeCloudApi } from 'shared/api/cloud/wakeCloudApi';
 import { openExternalPaymentUrl } from 'shared/lib/web/telegramWebApp';
+import {
+  MetrikaGoal,
+  markAwaitingLavaPayment,
+  reachMetrikaGoal,
+} from 'shared/lib/web/yandexMetrika';
 import { COLORS, getColorOpacity } from 'shared/themes';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { Button } from 'shared/ui/Button';
@@ -50,7 +55,7 @@ function BuySpreadCreditsModal({
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
   });
-  const { authUser, spreadCredits, refreshAuthSession } = useData({
+  const { authUser, spreadCredits } = useData({
     Context: UserContext,
   });
 
@@ -66,9 +71,15 @@ function BuySpreadCreditsModal({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const credits = spreadCredits ?? 0;
+
   useEffect(() => {
     setEmail(suggestedEmail);
   }, [suggestedEmail]);
+
+  useEffect(() => {
+    reachMetrikaGoal(MetrikaGoal.buyCreditsOpen);
+  }, []);
 
   const handleClose = useCallback(async () => {
     await handleVibrationClick?.();
@@ -78,6 +89,7 @@ function BuySpreadCreditsModal({
   const handleBuy = useCallback(async () => {
     await handleVibrationClick?.();
     setError(null);
+    reachMetrikaGoal(MetrikaGoal.buyCreditsClick);
     const trimmed = email.trim().toLowerCase();
     if (!isCheckoutEmail(trimmed)) {
       setError(tSpread('dailyLimit.emailInvalid'));
@@ -104,7 +116,9 @@ function BuySpreadCreditsModal({
           result.status === 400 ||
           result.code === 'invalid_email'
         ) {
-          setError(tSpread('dailyLimit.lavaRejected'));
+          setError(
+            result.message?.trim() || tSpread('dailyLimit.emailInvalid')
+          );
         } else if (result.status === 502 || result.code === 'lava_checkout_failed') {
           const message = result.message?.trim();
           setError(message || tSpread('dailyLimit.lavaRejected'));
@@ -115,22 +129,30 @@ function BuySpreadCreditsModal({
         return;
       }
 
-      openExternalPaymentUrl(result.data.paymentUrl);
-      void refreshAuthSession?.();
-      closeModal?.();
+      markAwaitingLavaPayment(credits);
+      const opened = openExternalPaymentUrl(result.data.paymentUrl);
+      if (!opened) {
+        setError(tSpread('dailyLimit.buyFailed'));
+        return;
+      }
+      // Keep modal open — Desktop TG often opens checkout in an external
+      // browser; closing + refreshing here looked like “modal vanished”.
+    } catch (error) {
+      console.warn('[buy credits] checkout failed', error);
+      setError(tSpread('dailyLimit.buyFailed'));
     } finally {
       setBusy(false);
     }
-  }, [
-    closeModal,
-    email,
-    handleVibrationClick,
-    refreshAuthSession,
-    tSpread,
-  ]);
+  }, [credits, email, handleVibrationClick, tSpread]);
+
+  const stopSheetClose = useCallback(
+    (event?: { stopPropagation?: () => void }) => {
+      event?.stopPropagation?.();
+    },
+    []
+  );
 
   const cardMaxW = Math.min(420, width - 32);
-  const credits = spreadCredits ?? 0;
 
   return (
     <View
@@ -148,7 +170,19 @@ function BuySpreadCreditsModal({
         style={styles.backdrop}
         onPress={handleClose}
       />
-      <View style={[styles.sheet, { maxWidth: cardMaxW }]}>
+      <Pressable
+        accessible={false}
+        style={[styles.sheet, { maxWidth: cardMaxW }]}
+        onPress={stopSheetClose}
+        // RN Web: prevent click-through to backdrop (closes modal on Buy / validation).
+        {...(Platform.OS === 'web'
+          ? ({
+              onClick: (event: { stopPropagation?: () => void }) => {
+                event?.stopPropagation?.();
+              },
+            } as object)
+          : null)}
+      >
         <LinearGradient
           colors={[COLORS.Primary500, COLORS.Accent, COLORS.Secondary]}
           start={{ x: 0, y: 0 }}
@@ -237,7 +271,7 @@ function BuySpreadCreditsModal({
             </Text>
           </Pressable>
         </View>
-      </View>
+      </Pressable>
     </View>
   );
 }
