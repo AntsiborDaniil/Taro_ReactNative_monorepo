@@ -32,6 +32,8 @@ module.exports = wrapWithReanimatedMetroConfig(
 
     config.resolver.extraNodeModules = {
       ...config.resolver.extraNodeModules,
+      react: path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
       'expo-secure-store': path.resolve(
         __dirname,
         'src/shared/stubs/expo-secure-store.ts'
@@ -125,8 +127,10 @@ module.exports = wrapWithReanimatedMetroConfig(
         'src/shared/stubs/victory.tsx'
       ),
     };
-    config.resolver.blockList =
-      /(?:^|\/)(?:\.pnpm-store|\.turbo|\.git)(?:\/|$)/;
+    config.resolver.blockList = [
+      /(?:^|\/)(?:\.pnpm-store|\.turbo|\.git)(?:\/|$)/,
+      /[/\\]apps[/\\]admin[/\\]/,
+    ];
 
     const upstreamResolveRequest = config.resolver.resolveRequest;
 
