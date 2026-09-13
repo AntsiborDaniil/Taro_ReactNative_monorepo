@@ -3,13 +3,12 @@ export const CHANNEL_HANDLE = '@mindfultarot';
 
 export const welcomeText = `Привет! Я бот **Mindful Tarot**.
 
-Нажми кнопку ниже, чтобы открыть приложение с раскладами, картой дня и словарём карт.
+Приложение с раскладами, картой дня и словарём карт открывается кнопкой «Открыть Tarot» рядом с полем ввода.
 
 Наш канал: [${CHANNEL_HANDLE}](${CHANNEL_URL}) — новости, подсказки и разборы.
 
 Команды:
 /start — приветствие и приложение
-/app — открыть Mini App
 /channel — наш Telegram-канал
 /faq — оплата, заряды и правила
 /support — написать в поддержку
@@ -17,8 +16,7 @@ export const welcomeText = `Привет! Я бот **Mindful Tarot**.
 
 export const helpText = `**Команды бота**
 
-/start — начать и получить кнопку Mini App
-/app — открыть веб-приложение в Telegram
+/start — приветствие и быстрые кнопки
 /channel — перейти в канал ${CHANNEL_HANDLE}
 /faq — частые вопросы: оплата, заряды, правила
 /support — написать в поддержку
@@ -33,9 +31,6 @@ export const channelText = `Наш Telegram-канал: ${CHANNEL_HANDLE}
 Там анонсы, короткие разборы и новости Mindful Tarot.
 
 Открыть: ${CHANNEL_URL}`;
-
-export const openAppHintText =
-  'Нажми кнопку, чтобы открыть Mini App на Vercel:';
 
 export const lavaPaymentSuccessText = `Оплата прошла. Заряды (+3) зачисляются автоматически — обычно это занимает около 5 минут. Открой приложение и обнови баланс, если ещё не видно.`;
 

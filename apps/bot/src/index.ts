@@ -7,7 +7,6 @@ import {
 } from './acquisition';
 import {
   openMiniAppInlineKeyboard,
-  openMiniAppReplyKeyboard,
   mainReplyKeyboard,
   channelInlineKeyboard,
   faqInlineKeyboard,
@@ -26,7 +25,6 @@ import {
   lavaPaymentCancelledText,
   lavaPaymentFailedText,
   lavaPaymentSuccessText,
-  openAppHintText,
   welcomeText,
 } from './messages';
 import { ingestSupportTicket } from './support';
@@ -127,12 +125,6 @@ bot.command('start', async (ctx) => {
 
   await trackStartIfNeeded(ctx, payload);
   await sendWelcome(ctx);
-});
-
-bot.command('app', async (ctx) => {
-  await ctx.reply(openAppHintText, {
-    reply_markup: openMiniAppReplyKeyboard(),
-  });
 });
 
 bot.command('channel', async (ctx) => {
@@ -240,7 +232,6 @@ async function main(): Promise<void> {
   try {
     await bot.api.setMyCommands([
       { command: 'start', description: 'Приветствие и приложение' },
-      { command: 'app', description: 'Открыть Mini App' },
       { command: 'channel', description: 'Наш Telegram-канал' },
       { command: 'faq', description: 'Оплата, заряды и правила' },
       { command: 'support', description: 'Написать в поддержку' },

@@ -7,7 +7,6 @@ export const BTN_CHANNEL = '📣 Канал';
 export const BTN_FAQ = '❓ FAQ';
 export const BTN_SUPPORT = '💬 Поддержка';
 export const BTN_HELP = 'ℹ️ Помощь';
-export const BTN_APP = '🔮 Приложение';
 
 export { CHANNEL_URL, CHANNEL_HANDLE };
 
@@ -18,20 +17,12 @@ export function openMiniAppInlineKeyboard(): InlineKeyboard {
     .url(`Канал ${CHANNEL_HANDLE}`, CHANNEL_URL);
 }
 
-export function openMiniAppReplyKeyboard(): Keyboard {
-  return new Keyboard()
-    .webApp(OPEN_APP_LABEL, config.webAppUrl)
-    .resized()
-    .oneTime();
-}
-
 /** Persistent reply keyboard: quick access to main actions / commands. */
 export function mainReplyKeyboard(): Keyboard {
   return new Keyboard()
-    .webApp(OPEN_APP_LABEL, config.webAppUrl)
     .text(BTN_CHANNEL)
-    .row()
     .text(BTN_FAQ)
+    .row()
     .text(BTN_SUPPORT)
     .text(BTN_HELP)
     .resized()
