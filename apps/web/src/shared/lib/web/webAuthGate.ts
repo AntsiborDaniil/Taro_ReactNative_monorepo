@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 /** Web guest: session resolved and user is not signed in. */
 export function isWebGuestSession(
@@ -35,4 +36,15 @@ export function isWebAuthConfirmed(
     authSessionLoading !== true &&
     Boolean(isAuthenticated)
   );
+}
+
+/** No guest panels — toast only. Mini App should auto-login via Telegram. */
+export function toastWebAuthRequired(message?: string): void {
+  if (Platform.OS !== 'web') {
+    return;
+  }
+  Toast.show({
+    type: 'info',
+    text1: message || 'Откройте приложение из Telegram-бота для входа',
+  });
 }

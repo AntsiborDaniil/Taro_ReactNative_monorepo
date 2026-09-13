@@ -7,7 +7,12 @@ import { UserContext } from './UserContext';
 import { DataProvider } from 'shared/DataProvider';
 import { handleWebOAuthReturn } from 'shared/lib/handleWebOAuthReturn';
 import { fetchAuthMeSession } from 'shared/lib/web/fetchAuthMeSession';
-import { tryAuthenticateTelegramMiniApp } from 'shared/lib/web/telegramWebApp';
+import {
+  ensureTelegramWebAppScript,
+  initTelegramWebAppChrome,
+  isLikelyTelegramMiniApp,
+  tryAuthenticateTelegramMiniApp,
+} from 'shared/lib/web/telegramWebApp';
 import { tryDevQuickLogin } from 'shared/lib/web/tryDevQuickLogin';
 import { getDevMockSession } from 'shared/lib/web/devMockSession';
 import { trackMetrikaPaymentSuccessIfNeeded } from 'shared/lib/web/yandexMetrika';
@@ -16,6 +21,10 @@ import {
   type TarotAuthChangedDetail,
 } from 'shared/lib/tarotAuthEvents';
 import { migrateLocalDataToCloud } from 'shared/lib/cloudMigration/migrateLocalToCloud';
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export function WebUserSessionProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation('settings');
@@ -65,22 +74,43 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      await tryAuthenticateTelegramMiniApp();
+      const inTelegramShell = isLikelyTelegramMiniApp();
 
-      const previousSession =
-        authUserRef.current != null
-          ? {
-              user: authUserRef.current,
-              tarotDaily: tarotDailyRef.current,
-              spreadCredits: spreadCreditsRef.current,
-            }
-          : fallbackUser
-            ? { user: fallbackUser, tarotDaily: null, spreadCredits: 0 }
-            : null;
+      // 1) Soft check: already authorized?
+      let session = await fetchAuthMeSession({ retryUnauthorized: false });
 
-      let session = await fetchAuthMeSession({ previousSession });
+      // 2) Mini App: if not authorized — register/login via Telegram initData.
+      if (!session?.user && inTelegramShell) {
+        const tgAuth = await tryAuthenticateTelegramMiniApp({ force: true });
+        session = await fetchAuthMeSession({
+          retryUnauthorized: true,
+          previousSession: null,
+        });
 
-      if (!session?.user && !devQuickLoginAttemptedRef.current) {
+        // One more pass if cookie/token raced behind /me.
+        if (!session?.user && tgAuth.inTelegram) {
+          await sleep(300);
+          await tryAuthenticateTelegramMiniApp({ force: true });
+          session = await fetchAuthMeSession({
+            retryUnauthorized: true,
+            previousSession: null,
+          });
+        }
+      } else if (!session?.user) {
+        // Browser without Telegram — keep prior telegram attempt harmless.
+        await tryAuthenticateTelegramMiniApp();
+        session = await fetchAuthMeSession({ previousSession: null });
+      } else if (inTelegramShell) {
+        // Already authorized: only warm Mini App chrome / layout height.
+        try {
+          await ensureTelegramWebAppScript();
+          initTelegramWebAppChrome();
+        } catch {
+          // ignore
+        }
+      }
+
+      if (!session?.user && !inTelegramShell && !devQuickLoginAttemptedRef.current) {
         devQuickLoginAttemptedRef.current = true;
         const quick = await tryDevQuickLogin();
         if (quick.ok) {
@@ -114,6 +144,12 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
 
       if (fallbackUser) {
         applySession(fallbackUser, null, 0);
+        return;
+      }
+
+      // Never fake a guest session inside Telegram Mini App.
+      if (inTelegramShell) {
+        applySession(null, null, 0);
         return;
       }
 
@@ -151,6 +187,7 @@ export function WebUserSessionProvider({ children }: { children: ReactNode }) {
     }
 
     const refreshSession = () => {
+      // Soft refresh on focus — full Telegram re-auth only if still guest.
       void loadMe();
     };
 

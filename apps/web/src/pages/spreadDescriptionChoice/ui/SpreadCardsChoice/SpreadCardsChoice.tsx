@@ -22,7 +22,6 @@ import {
 } from 'features/carousel';
 import { Header } from 'features/header';
 import { useSpreadCatalogBack } from 'features/header/useSpreadCatalogBack';
-import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { Question } from 'features/Question';
 import { SpreadScheme } from 'features/scheme';
 import { SpreadName } from 'shared/api';
@@ -34,18 +33,17 @@ import {
   getImage,
   getTodayISO,
   getValueForAsyncDeviceMemoryKey,
-  isGuestFreeSpreadId,
   isTablet,
   isWebAuthPending,
   MetrikaGoal,
   reachMetrikaGoal,
   shouldPromptWebSignIn,
+  toastWebAuthRequired,
   verticalScale,
 } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { AnalyticAction, NavigationRoute } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
-import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { spreadInnerStyles } from 'shared/lib/spreadInnerUi';
 import { CardDescription } from '../CardDescription';
 import SpreadStepper from '../SpreadStepper/SpreadStepper';
@@ -84,11 +82,10 @@ function SpreadCardsChoice({
     Context: SpreadContext,
   });
 
-  const { isPractitioner, isAuthenticated, authSessionLoading } = useData({
-    Context: UserContext,
-  });
-
-  const { showModal } = useData({ Context: ModalsContext });
+  const { isPractitioner, isAuthenticated, authSessionLoading, refreshAuthSession } =
+    useData({
+      Context: UserContext,
+    });
 
   const animationCarouselContextData = useAnimationCarousel();
 
@@ -98,12 +95,9 @@ function SpreadCardsChoice({
     hasAskedQuestion;
 
   const handlePressMakeSpread = useCallback(async () => {
-    if (
-      shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
-      spread &&
-      !isGuestFreeSpreadId(spread.id)
-    ) {
-      showModal?.(<SignInForSpreadsModal />);
+    if (shouldPromptWebSignIn(isAuthenticated, authSessionLoading)) {
+      void refreshAuthSession?.();
+      toastWebAuthRequired();
       return;
     }
 
@@ -126,7 +120,10 @@ function SpreadCardsChoice({
     await handleVibrationClick?.();
 
     if (!isPractitioner && isLocked) {
-      showModal?.(<SignInForSpreadsModal />);
+      Toast.show({
+        type: 'info',
+        text1: t('spread:question.error'),
+      });
       return;
     }
 
@@ -151,8 +148,8 @@ function SpreadCardsChoice({
     isPractitioner,
     isAuthenticated,
     authSessionLoading,
+    refreshAuthSession,
     checkErrors,
-    showModal,
     handleVibrationClick,
     t,
   ]);
@@ -165,14 +162,6 @@ function SpreadCardsChoice({
       reachMetrikaGoal(MetrikaGoal.spreadCompleted, {
         spreadId: spread.id,
       });
-      if (
-        isGuestFreeSpreadId(spread.id) &&
-        shouldPromptWebSignIn(isAuthenticated, authSessionLoading)
-      ) {
-        reachMetrikaGoal(MetrikaGoal.guestFreeSpread, {
-          spreadId: spread.id,
-        });
-      }
     }
 
     const ok = (await handleGetAIInterpretation?.()) ?? false;
@@ -190,7 +179,6 @@ function SpreadCardsChoice({
     handleGetAIInterpretation,
     navigation,
     spread,
-    isAuthenticated,
     authSessionLoading,
     isSimpleSpread,
   ]);

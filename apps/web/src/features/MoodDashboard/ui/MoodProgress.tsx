@@ -9,16 +9,18 @@ import {
 import { CircularProgressBar } from '@ui-kitten/components';
 import { MoodAndEnergyContext } from 'entities/moodAndEnergy';
 import { UserContext } from 'entities/user';
-import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { type ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { WEB_HOVER_TRANSITION, shouldPromptWebSignIn } from 'shared/lib';
+import {
+  WEB_HOVER_TRANSITION,
+  shouldPromptWebSignIn,
+  toastWebAuthRequired,
+} from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { NavigationRoute, TabRoute, PressableWebState } from 'shared/types';
 import { Text, TEXT_TAGS } from 'shared/ui';
-import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { MotivationContext } from '../../../entities/tarotMotivation';
 import { MotivationKey } from '../../../shared/api';
 
@@ -39,11 +41,9 @@ function MoodProgress({
     Context: MoodAndEnergyContext,
   });
 
-  const { isAuthenticated, authSessionLoading } = useData({
+  const { isAuthenticated, authSessionLoading, refreshAuthSession } = useData({
     Context: UserContext,
   });
-
-  const { showModal } = useData({ Context: ModalsContext });
 
   const navigation = useNativeNavigation();
 
@@ -61,9 +61,8 @@ function MoodProgress({
     const needsWebAuth = shouldPromptWebSignIn(isAuthenticated, authSessionLoading);
 
     if (needsWebAuth) {
-      showModal?.(
-        <SignInForSpreadsModal i18nNamespace="moodAndEnergy" />
-      );
+      void refreshAuthSession?.();
+      toastWebAuthRequired();
       return;
     }
 

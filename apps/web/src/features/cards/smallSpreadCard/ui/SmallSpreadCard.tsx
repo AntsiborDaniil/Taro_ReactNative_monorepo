@@ -5,14 +5,13 @@ import { setNavReturnToMain } from 'app/navigation/navReturnStore';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { SpreadContext } from 'entities/Spread';
 import { UserContext } from 'entities/user';
-import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { DeckStyle, TSpread } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import {
   getImage,
-  isWebGuestSession,
   shouldPromptWebSignIn,
+  toastWebAuthRequired,
 } from 'shared/lib';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import {
@@ -22,7 +21,6 @@ import {
   TabRoute,
 } from 'shared/types';
 import { TileCard } from 'shared/ui';
-import { ModalsContext } from 'shared/ui/ModalsProvider';
 
 type SmallSpreadCardProps = {
   spread: TSpread;
@@ -55,14 +53,13 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
     Context: ApplicationConfigContext,
   });
 
-  const { isAuthenticated, authSessionLoading } = useData({
+  const { isAuthenticated, authSessionLoading, refreshAuthSession } = useData({
     Context: UserContext,
   });
 
-  const { showModal } = useData({ Context: ModalsContext });
   const { setSelectedTab } = useData({ Context: TabsAndRoutesContext });
 
-  const isLocked = isWebGuestSession(isAuthenticated, authSessionLoading);
+  const isLocked = false;
 
   const { selectSpread } = useData({
     Context: SpreadContext,
@@ -91,7 +88,8 @@ function SmallSpreadCard({ spread, analyticAction }: SmallSpreadCardProps) {
         await handleVibrationClick?.();
 
         if (shouldPromptWebSignIn(isAuthenticated, authSessionLoading)) {
-          showModal?.(<SignInForSpreadsModal />);
+          void refreshAuthSession?.();
+          toastWebAuthRequired();
           return;
         }
 

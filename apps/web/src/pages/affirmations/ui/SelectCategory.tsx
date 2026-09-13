@@ -21,13 +21,11 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { useData } from 'shared/DataProvider';
 import { ChevronRightIcon } from 'shared/icons';
-import { WEB_HOVER_TRANSITION } from 'shared/lib';
+import { WEB_HOVER_TRANSITION, toastWebAuthRequired } from 'shared/lib';
 import { COLORS } from 'shared/themes';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
-import { ModalsContext } from 'shared/ui/ModalsProvider';
 
 import AffirmationCategoryChip from './AffirmationCategoryChip';
 import type { AffirmationsLayout } from './useAffirmationsLayout';
@@ -104,11 +102,12 @@ const SelectCategory = ({ layout }: SelectCategoryProps) => {
 
   const { handleSelectedAffirmationCategory, selectedAffirmationCategory } =
     useData({ Context: AffirmationsContext });
-  const { isAuthenticated, authSessionLoading } = useData({ Context: UserContext });
+  const { isAuthenticated, authSessionLoading, refreshAuthSession } = useData({
+    Context: UserContext,
+  });
   const canAccessLockedCategories =
     Boolean(isAuthenticated) ||
     (Platform.OS === 'web' && authSessionLoading === true);
-  const { showModal } = useData({ Context: ModalsContext });
 
   const { t } = useTranslation();
 
@@ -183,7 +182,8 @@ const SelectCategory = ({ layout }: SelectCategoryProps) => {
 
   const handleCategoryPress = (item: (typeof CATEGORIES)[number]) => {
     if (!canAccessLockedCategories && item.hasLock) {
-      showModal?.(<SignInForSpreadsModal i18nNamespace="affirmations" />);
+      void refreshAuthSession?.();
+      toastWebAuthRequired();
       return;
     }
     handleSelectedAffirmationCategory?.(item.category);

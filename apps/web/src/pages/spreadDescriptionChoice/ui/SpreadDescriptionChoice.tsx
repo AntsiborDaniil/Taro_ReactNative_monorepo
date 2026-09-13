@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
 import { Header } from 'features/header';
 import { useSpreadCatalogBack } from 'features/header/useSpreadCatalogBack';
-import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import Question from 'features/Question/ui/Question';
 import { SpreadScheme } from 'features/scheme';
 import { SpreadsCategory, spreadsDataNames } from 'shared/api';
@@ -17,15 +16,14 @@ import {
   AsyncMemoryKey,
   getTodayISO,
   getValueForAsyncDeviceMemoryKey,
-  isGuestFreeSpreadId,
   moderateScale,
   reachMetrikaGoal,
   MetrikaGoal,
   shouldPromptWebSignIn,
+  toastWebAuthRequired,
 } from 'shared/lib';
 import { AnalyticAction } from 'shared/types';
 import { Button, NoContent, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
-import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { spreadInnerStyles } from 'shared/lib/spreadInnerUi';
 import { CardDescription } from './CardDescription';
 import SpreadHeroBanner from './SpreadHeroBanner/SpreadHeroBanner';
@@ -40,23 +38,19 @@ function SpreadDescriptionChoice() {
 
   const { spread, checkErrors, question } = useData({ Context: SpreadContext });
 
-  const { isPractitioner, isAuthenticated, authSessionLoading } = useData({
-    Context: UserContext,
-  });
-
-  const { showModal } = useData({ Context: ModalsContext });
+  const { isPractitioner, isAuthenticated, authSessionLoading, refreshAuthSession } =
+    useData({
+      Context: UserContext,
+    });
 
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
   });
 
   const handlePressMakeSpread = useCallback(async () => {
-    if (
-      shouldPromptWebSignIn(isAuthenticated, authSessionLoading) &&
-      spread &&
-      !isGuestFreeSpreadId(spread.id)
-    ) {
-      showModal?.(<SignInForSpreadsModal />);
+    if (shouldPromptWebSignIn(isAuthenticated, authSessionLoading)) {
+      void refreshAuthSession?.();
+      toastWebAuthRequired();
       return;
     }
 
@@ -77,7 +71,10 @@ function SpreadDescriptionChoice() {
     await handleVibrationClick?.();
 
     if (!isPractitioner && isLocked) {
-      showModal?.(<SignInForSpreadsModal />);
+      Toast.show({
+        type: 'info',
+        text1: t('spread:question.error'),
+      });
       return;
     }
 
@@ -98,9 +95,9 @@ function SpreadDescriptionChoice() {
     checkErrors,
     isAuthenticated,
     authSessionLoading,
+    refreshAuthSession,
     isPractitioner,
     question,
-    showModal,
     spread?.name,
     handleVibrationClick,
     spread?.id,

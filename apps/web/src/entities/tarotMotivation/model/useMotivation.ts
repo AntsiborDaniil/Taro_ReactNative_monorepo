@@ -20,12 +20,10 @@ import {
   getTarotCardReadings,
   getValueForAsyncDeviceMemoryKey,
   saveAsyncDeviceMemoryKey,
+  toastWebAuthRequired,
 } from 'shared/lib';
 import { patchCachedAuthMeQuota } from 'shared/lib/web/fetchAuthMeSession';
-import {
-  DailyTarotLimitModal,
-  SignInForSpreadsModal,
-} from 'features/tarotAccess/ui';
+import { DailyTarotLimitModal } from 'features/tarotAccess/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import {
   getMotivationAIRequestBody,
@@ -126,9 +124,7 @@ export function useMotivation(): TTarotMotivationHookResult {
 
       if (!aiInterpretationResponse.ok) {
         if (aiInterpretationResponse.status === 401) {
-          showModal?.(createElement(SignInForSpreadsModal, {
-            i18nNamespace: 'moodAndEnergy',
-          }));
+          toastWebAuthRequired();
           return null;
         }
 

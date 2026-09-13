@@ -4,6 +4,7 @@ import {
   getTarotAiApiBaseUrl,
 } from 'shared/api';
 import { setDevAccessToken } from './devAccessToken';
+import { syncTarotAppHeight } from './lockMobileInputZoom';
 import {
   trackMetrikaAuthTelegram,
   trackMetrikaMiniAppOpen,
@@ -13,11 +14,23 @@ const TELEGRAM_SCRIPT_SRC = 'https://telegram.org/js/telegram-web-app.js';
 const TELEGRAM_SCRIPT_ID = 'telegram-web-app-js';
 const AUTH_ME_CACHE_KEY = 'tarot_auth_me_session';
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** True when Telegram WebApp bridge is present (even before initData arrives). */
+export function isLikelyTelegramMiniApp(): boolean {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') {
+    return false;
+  }
+  return Boolean(window.Telegram?.WebApp);
+}
+
 export function isTelegramMiniApp(): boolean {
   if (Platform.OS !== 'web' || typeof window === 'undefined') {
     return false;
   }
-  return Boolean(window.Telegram?.WebApp?.initData);
+  return Boolean(window.Telegram?.WebApp?.initData?.trim());
 }
 
 export function readTelegramSafeAreaInsets(): {
@@ -119,6 +132,13 @@ export function initTelegramWebAppChrome(): void {
   tg.expand();
   tg.setHeaderColor('#171F2C');
   tg.setBackgroundColor('#171F2C');
+  // Desktop Mini App often expands after ready — sync layout height.
+  syncTarotAppHeight();
+  if (typeof window !== 'undefined') {
+    window.setTimeout(() => syncTarotAppHeight(), 100);
+    window.setTimeout(() => syncTarotAppHeight(), 400);
+    window.setTimeout(() => syncTarotAppHeight(), 1000);
+  }
 }
 
 function clearAuthMeCache(): void {
@@ -132,59 +152,96 @@ function clearAuthMeCache(): void {
   }
 }
 
-/** Silent login in Telegram Mini App via signed initData. */
-export async function tryAuthenticateTelegramMiniApp(): Promise<boolean> {
-  if (Platform.OS !== 'web' || typeof window === 'undefined') {
+async function waitForInitData(timeoutMs = 3000): Promise<string> {
+  const started = Date.now();
+  while (Date.now() - started < timeoutMs) {
+    const value = window.Telegram?.WebApp?.initData?.trim();
+    if (value) {
+      return value;
+    }
+    await sleep(100);
+  }
+  return window.Telegram?.WebApp?.initData?.trim() || '';
+}
+
+async function postTelegramAuth(initData: string): Promise<boolean> {
+  const response = await fetch(`${getTarotAiApiBaseUrl()}/api/auth/telegram`, {
+    method: 'POST',
+    credentials: authCredentials(),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ initData }),
+  });
+
+  if (!response.ok) {
+    console.warn('[telegram auth] failed', response.status);
     return false;
+  }
+
+  const body = (await response.json().catch(() => null)) as {
+    token?: string;
+  } | null;
+
+  if (typeof body?.token === 'string' && body.token.trim()) {
+    // Bearer backup for Telegram WebViews where HttpOnly cookie can race.
+    setDevAccessToken(body.token.trim());
+  }
+
+  trackMetrikaAuthTelegram();
+  return true;
+}
+
+export type TelegramAuthResult = {
+  inTelegram: boolean;
+  authenticated: boolean;
+};
+
+/**
+ * Prepare Telegram bridge and ensure a session exists.
+ * - Checks / prepares chrome
+ * - If already have a valid flow: force exchange initData when `force`
+ * - Retries initData + auth (Desktop race)
+ */
+export async function tryAuthenticateTelegramMiniApp(options?: {
+  force?: boolean;
+}): Promise<TelegramAuthResult> {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') {
+    return { inTelegram: false, authenticated: false };
   }
 
   try {
     await ensureTelegramWebAppScript();
   } catch {
-    return false;
+    return { inTelegram: false, authenticated: false };
+  }
+
+  if (!window.Telegram?.WebApp) {
+    return { inTelegram: false, authenticated: false };
   }
 
   initTelegramWebAppChrome();
 
-  const initData = window.Telegram?.WebApp?.initData?.trim();
+  const initData = await waitForInitData();
   if (!initData) {
-    return false;
+    console.warn('[telegram auth] initData missing');
+    return { inTelegram: true, authenticated: false };
   }
 
   trackMetrikaMiniAppOpen();
-
-  // Always exchange initData — skipping when a cookie/cache session existed
-  // left users unregistered after opening the app from the bot keyboard.
   clearAuthMeCache();
 
-  try {
-    const response = await fetch(`${getTarotAiApiBaseUrl()}/api/auth/telegram`, {
-      method: 'POST',
-      credentials: authCredentials(),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ initData }),
-    });
-
-    if (!response.ok) {
-      console.warn('[telegram auth] failed', response.status);
-      return false;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const ok = await postTelegramAuth(initData);
+      if (ok) {
+        return { inTelegram: true, authenticated: true };
+      }
+    } catch (error) {
+      console.warn('[telegram auth] error', error);
     }
-
-    const body = (await response.json().catch(() => null)) as {
-      token?: string;
-    } | null;
-
-    if (typeof body?.token === 'string' && body.token.trim()) {
-      // Bearer backup for Telegram WebViews where HttpOnly cookie can race.
-      setDevAccessToken(body.token.trim());
-    }
-
-    trackMetrikaAuthTelegram();
-    return true;
-  } catch (error) {
-    console.warn('[telegram auth] error', error);
-    return false;
+    await sleep(200 * (attempt + 1));
   }
+
+  return { inTelegram: true, authenticated: false };
 }

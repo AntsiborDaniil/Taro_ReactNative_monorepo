@@ -4,13 +4,11 @@ import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
-import { SignInForSpreadsModal } from 'features/tarotAccess/ui';
 import { useData } from 'shared/DataProvider';
 import { Platform } from 'react-native';
-import { AsyncMemorySettingKey, isWebAuthConfirmed } from 'shared/lib';
+import { AsyncMemorySettingKey, isWebAuthConfirmed, toastWebAuthRequired } from 'shared/lib';
 import { AnalyticAction } from 'shared/types';
 import { CardsList, ScreenLayout } from 'shared/ui';
-import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { DECK_STYLES } from '../../lib';
 import { useSettings } from '../../model';
 
@@ -22,9 +20,7 @@ function DeckStyle() {
     asyncMemoryKey: AsyncMemorySettingKey.Appearance,
   });
 
-  const { isAuthenticated, authSessionLoading } = useData({ Context: UserContext });
-
-  const { showModal } = useData({ Context: ModalsContext });
+  const { isAuthenticated, authSessionLoading, refreshAuthSession } = useData({ Context: UserContext });
 
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
@@ -49,8 +45,8 @@ function DeckStyle() {
           cards={DECK_STYLES}
           onPressLocked={async () => {
             await handleVibrationClick?.();
-
-            showModal?.(<SignInForSpreadsModal i18nNamespace="settings" />);
+            void refreshAuthSession?.();
+            toastWebAuthRequired();
           }}
           onPress={async (item) => {
             await handleVibrationClick?.();

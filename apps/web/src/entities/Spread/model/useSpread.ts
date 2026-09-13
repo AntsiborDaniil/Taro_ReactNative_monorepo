@@ -1,12 +1,11 @@
 import { createElement, useEffect, useMemo, useState } from 'react';
 import AppMetrica from '@appmetrica/react-native-analytics';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import type { LayoutChangeEvent } from 'react-native';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { SignInForSpreadsModal, DailyTarotLimitModal } from 'features/tarotAccess/ui';
+import { DailyTarotLimitModal } from 'features/tarotAccess/ui';
 import {
   SpreadName,
   SpreadsCategory,
@@ -24,17 +23,16 @@ import {
   DIRECTIONS,
   getRandomElementFromArray,
   getTarotCardReadings,
-  isGuestFreeSpreadId,
   isTablet,
   isWebAuthPending,
   MetrikaGoal,
   patchCachedAuthMeQuota,
   reachMetrikaGoal,
   shouldPromptWebSignIn,
+  toastWebAuthRequired,
   buildSharedReadingUrl,
   copyTextToClipboardSync,
 } from 'shared/lib';
-import { AsyncMemoryKey } from 'shared/lib/deviceMemory';
 import { measurePageTopLeft } from 'shared/lib/measurePageCoordinates';
 import { AnalyticAction } from 'shared/types';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
@@ -113,7 +111,7 @@ export function useSpread({
 
   const { setIsFullScreenLoading } = useData({ Context: LoadingsContext });
 
-  const { isPractitioner, isAuthenticated, authSessionLoading, tarotDaily, setTarotDaily, spreadCredits, setSpreadCredits, refreshSpreadQuota } =
+  const { isAuthenticated, authSessionLoading, tarotDaily, setTarotDaily, spreadCredits, setSpreadCredits, refreshSpreadQuota, refreshAuthSession } =
     useData({
       Context: UserContext,
     });
@@ -299,21 +297,22 @@ export function useSpread({
       reachMetrikaGoal(MetrikaGoal.spreadStarted, { spreadId: spread.id });
     }
 
-    const freeUseOfAI = await AsyncStorage.getItem(AsyncMemoryKey.FreeUseOfAI);
     const nextCount = spread.selectedCards.length + 1;
     const willComplete = nextCount === spread.cardsCount;
-    const needsSlot =
-      spread?.id === SpreadName.Simple_DaySuggest ||
-      (!isPractitioner && freeUseOfAI);
+    const needsSlot = spread?.id === SpreadName.Simple_DaySuggest || willComplete;
 
-    if (
-      Platform.OS === 'web' &&
-      willComplete &&
-      needsSlot &&
-      !isGuestFreeSpreadId(spread.id)
-    ) {
+    if (Platform.OS === 'web' && willComplete && needsSlot) {
       if (shouldPromptWebSignIn(isAuthenticated, authSessionLoading)) {
-        showModal?.(createElement(SignInForSpreadsModal));
+        void refreshAuthSession?.();
+        toastWebAuthRequired();
+        return false;
+      }
+      if (
+        tarotDaily != null &&
+        tarotDaily.used >= tarotDaily.limit &&
+        (spreadCredits ?? 0) <= 0
+      ) {
+        showModal?.(createElement(DailyTarotLimitModal));
         return false;
       }
     }
@@ -347,10 +346,7 @@ export function useSpread({
     if (newSelectedCards.length === spread.cardsCount) {
       let completedSpread = newSpread;
 
-      if (
-        spread?.id === SpreadName.Simple_DaySuggest ||
-        (!isPractitioner && freeUseOfAI)
-      ) {
+      if (spread?.id === SpreadName.Simple_DaySuggest) {
         const savedSpread = await saveSpread(newSpread);
 
         if (savedSpread) {
@@ -475,30 +471,6 @@ export function useSpread({
     }
   };
 
-  const applyOfflineGuestInterpretation = async (
-    currentSpread: TSpread
-  ): Promise<boolean> => {
-    const localText =
-      currentSpread.id === SpreadName.Simple_DaySuggest
-        ? t('spread:daySuggest.guestInterpretation')
-        : t('spread:yesNo.guestInterpretation');
-
-    setSpread((prevState) =>
-      prevState ? { ...prevState, interpretation: localText } : prevState
-    );
-    const savedSpread = await saveSpread({
-      ...currentSpread,
-      interpretation: localText,
-    });
-    if (savedSpread) {
-      setSpread({
-        ...savedSpread,
-        question: savedSpread.question ?? currentSpread.question ?? '',
-      });
-    }
-    return true;
-  };
-
   const showInterpretError = (code?: string) => {
     if (code === 'ai_provider_unavailable') {
       Toast.show({
@@ -517,8 +489,6 @@ export function useSpread({
   };
 
   const handleGetAIInterpretation = async (): Promise<boolean> => {
-    const freeUseOfAI = await AsyncStorage.getItem(AsyncMemoryKey.FreeUseOfAI);
-
     if (spread?.interpretation) {
       return true;
     }
@@ -527,27 +497,9 @@ export function useSpread({
       return false;
     }
 
-    const guestFree = isGuestFreeSpreadId(spread?.id);
-    const webGuest = shouldPromptWebSignIn(isAuthenticated, authSessionLoading);
-
-    if (webGuest && guestFree && spread) {
-      return applyOfflineGuestInterpretation(spread);
-    }
-
-    if (
-      !isPractitioner &&
-      freeUseOfAI &&
-      (Platform.OS !== 'web' || webGuest) &&
-      !guestFree
-    ) {
-      if (webGuest) {
-        showModal?.(createElement(SignInForSpreadsModal));
-      }
-      return false;
-    }
-
-    if (webGuest && !guestFree) {
-      showModal?.(createElement(SignInForSpreadsModal));
+    if (shouldPromptWebSignIn(isAuthenticated, authSessionLoading)) {
+      void refreshAuthSession?.();
+      toastWebAuthRequired();
       return false;
     }
 
@@ -607,10 +559,8 @@ export function useSpread({
         }
 
         if (aiInterpretationResponse.status === 401) {
-          if (guestFree && spread) {
-            return applyOfflineGuestInterpretation(spread);
-          }
-          showModal?.(createElement(SignInForSpreadsModal));
+          void refreshAuthSession?.();
+          toastWebAuthRequired();
           return false;
         }
 
@@ -693,15 +643,11 @@ export function useSpread({
       }
 
       AppMetrica.reportEvent(AnalyticAction.GetAIGeneration, {
-        free: !!freeUseOfAI,
+        free: false,
       });
       reachMetrikaGoal(MetrikaGoal.aiGeneration, {
         spreadId: spread?.id,
       });
-
-      if (!isPractitioner && !freeUseOfAI) {
-        await AsyncStorage.setItem(AsyncMemoryKey.FreeUseOfAI, '1');
-      }
 
       return true;
     } catch (e: any) {
