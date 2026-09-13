@@ -150,5 +150,19 @@
 
   "terms.of.use": "Terms of use",
 
-  "privacy.policy": "Privacy policy"
+  "privacy.policy": "Privacy policy",
+
+  "legal.title": "Legal documents",
+  "legal.row.hint": "Terms, public offer, data processing, refunds",
+  "legal.eyebrow": "LEGAL",
+  "legal.hero.body": "Terms of use, payment rules and data processing. The documents cover both the web version and the Telegram mini app.",
+  "legal.updated": "Revision of {{date}}",
+  "legal.badge.age": "18+",
+  "legal.disclaimer": "The service is for entertainment purposes and does not replace professional advice.",
+  "legal.contacts.title": "Any questions?",
+  "legal.contacts.body": "Message support — we reply on business days, usually within one working day.",
+  "legal.contacts.email": "Send an email",
+  "legal.contacts.telegram": "Support in Telegram",
+  "legal.otherDocs": "Other documents",
+  "legal.languageNote": "The documents are published in Russian — the Russian version is the legally binding one."
 }

@@ -5,6 +5,7 @@ import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { CategoryCard } from 'features';
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
+import { LEGAL_ENTITY } from 'shared/config/legal';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { ChevronRightIcon, SettingsIcon } from 'shared/icons';
@@ -144,6 +145,29 @@ function Library() {
             </View>
             <ChevronRightIcon width={isTablet ? 26 : 17} height={isTablet ? 26 : 17} />
           </Pressable>
+
+          <View style={styles.legalFooter}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('settings:legal.title')}
+              onPress={() => navigation.navigate(NavigationRoute.Legal as never)}
+              style={(state: PressableWebState) => [
+                styles.legalButton,
+                (state.hovered || state.pressed) && styles.legalButtonActive,
+              ]}
+            >
+              <Text
+                category={TEXT_TAGS.p2}
+                weight={TEXT_WEIGHT.medium}
+                style={styles.legalButtonText}
+              >
+                {t('settings:legal.title')}
+              </Text>
+            </Pressable>
+            <Text category={TEXT_TAGS.label} style={styles.legalCopy}>
+              {`© ${new Date().getFullYear()} ${LEGAL_ENTITY.brand} · ${t('settings:legal.badge.age')}`}
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </ScreenLayout>
@@ -239,6 +263,37 @@ const styles = StyleSheet.create({
   settingsHint: {
     color: COLORS.SpbSky1,
     lineHeight: 18,
+  },
+  legalFooter: {
+    width: '100%',
+    marginTop: 18,
+    marginBottom: 12,
+    paddingTop: 16,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(244, 244, 245, 0.1)',
+    gap: 8,
+    alignItems: 'center',
+  },
+  legalButton: {
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: getColorOpacity(COLORS.Primary, 34),
+    backgroundColor: getColorOpacity(COLORS.Primary, 10),
+    ...(Platform.OS === 'web'
+      ? ({ cursor: 'pointer', ...WEB_HOVER_TRANSITION } as object)
+      : {}),
+  },
+  legalButtonActive: {
+    borderColor: getColorOpacity(COLORS.Primary, 58),
+    backgroundColor: getColorOpacity(COLORS.Primary, 18),
+  },
+  legalButtonText: {
+    color: COLORS.Primary,
+  },
+  legalCopy: {
+    color: 'rgba(216, 228, 247, 0.38)',
   },
 });
 

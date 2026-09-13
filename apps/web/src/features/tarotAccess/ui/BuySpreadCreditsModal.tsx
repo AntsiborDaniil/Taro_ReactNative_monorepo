@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -12,6 +13,10 @@ import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CardsVoid, LightningBolt } from 'shared/icons';
+import {
+  getLegalDocumentById,
+  getLegalDocumentUrl,
+} from 'shared/config/legal';
 import { useData } from 'shared/DataProvider';
 import { cloudFetch } from 'shared/api/cloud/cloudFetch';
 import { wakeCloudApi } from 'shared/api/cloud/wakeCloudApi';
@@ -29,6 +34,18 @@ import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui/Text';
 import { isCheckoutEmail } from '../lib/isYandexCheckoutEmail';
 
 const SYNTHETIC_TG_EMAIL_RE = /^tg\d+@telegram\.mindful\.app$/i;
+
+/** Документы, условия которых принимаются оплатой. */
+const LEGAL_CONSENT_DOCS = ['offer', 'refund']
+  .map((id) => getLegalDocumentById(id))
+  .filter((document): document is NonNullable<typeof document> => !!document);
+
+function openLegalDocument(id: string): void {
+  const url = getLegalDocumentUrl(id);
+  if (url) {
+    void Linking.openURL(url);
+  }
+}
 
 type BuySpreadCreditsModalProps = {
   titleKey?: string;
@@ -260,6 +277,21 @@ function BuySpreadCreditsModal({
               ? tSpread('dailyLimit.buyLoading')
               : tSpread('dailyLimit.buyCta')}
           </Button>
+          <View style={styles.legalRow}>
+            <Text category={TEXT_TAGS.label} style={styles.legalNote}>
+              {tSpread('dailyLimit.legalNote')}
+            </Text>
+            {LEGAL_CONSENT_DOCS.map((document) => (
+              <Text
+                key={document.id}
+                category={TEXT_TAGS.label}
+                style={styles.legalLink}
+                onPress={() => openLegalDocument(document.id)}
+              >
+                {document.title}
+              </Text>
+            ))}
+          </View>
           <Pressable
             accessibilityRole="button"
             onPress={handleClose}
@@ -383,6 +415,24 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 10,
     width: '100%',
+  },
+  legalRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    columnGap: 6,
+    rowGap: 2,
+    marginTop: 10,
+    paddingHorizontal: 8,
+  },
+  legalNote: {
+    color: getColorOpacity(COLORS.Content, 44),
+  },
+  legalLink: {
+    color: getColorOpacity(COLORS.Primary, 78),
+    textDecorationLine: 'underline',
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : {}),
   },
   laterPress: {
     paddingVertical: 8,

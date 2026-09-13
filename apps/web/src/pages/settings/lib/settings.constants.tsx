@@ -84,13 +84,3 @@ export function getSettingsRoutes(
   return routes;
 }
 
-export const APP_AGREEMENTS = [
-  {
-    title: 'terms.of.use',
-    url: NavigationRoute.TermsOfUse,
-  },
-  {
-    title: 'privacy.policy',
-    url: NavigationRoute.PrivacyPolicy,
-  },
-];

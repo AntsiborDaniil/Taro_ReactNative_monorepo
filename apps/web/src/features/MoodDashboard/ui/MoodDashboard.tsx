@@ -20,12 +20,13 @@ import { COLORS } from 'shared/themes';
 import { AreaGraphs, EmptyResultsModal, Text } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import MoodProgress from './MoodProgress';
-import { MoodMetricBoxes } from './MoodMetricBoxes';
 
 export type MoodDashboardProps = {
   isWidget?: boolean;
   /** Горизонтальные поля снаружи блока; на главной 0 — отступ даёт родитель */
   horizontalInset?: number;
+  /** Блок с прогрессом и картой дня; на странице состояния он отдельной секцией */
+  showProgress?: boolean;
 };
 
 const CONFIG = {
@@ -52,6 +53,7 @@ const GRAPH_KEYS = ['mood', 'energy', 'stress'] as const;
 function MoodDashboard({
   isWidget,
   horizontalInset = 16,
+  showProgress = true,
 }: MoodDashboardProps): ReactElement {
   const { t } = useTranslation('moodAndEnergy');
   const { t: tCore } = useTranslation('core');
@@ -104,8 +106,6 @@ function MoodDashboard({
     );
   }
 
-  const latest = displayData[displayData.length - 1];
-
   return (
     <View
       style={[
@@ -125,8 +125,8 @@ function MoodDashboard({
       {!isWidget && (
         <View style={styles.header}>
           <View style={styles.headerTitleGroup}>
-            <Text style={styles.headerEyebrow}>TAROT INSIGHTS</Text>
-            <Text style={styles.headerTitle}>{t('name.mood')}</Text>
+            <Text style={styles.headerEyebrow}>{t('chart.eyebrow')}</Text>
+            <Text style={styles.headerTitle}>{t('chart.title')}</Text>
           </View>
           <View style={styles.dateActionWrapper}>
             <Pressable
@@ -211,16 +211,22 @@ function MoodDashboard({
           />
         </View>
       )}
-      {!isWidget ? (
-        <MoodMetricBoxes
-          values={{
-            mood: latest.mood ?? 0,
-            energy: latest.energy ?? 0,
-            stress: latest.stress ?? 0,
-          }}
-        />
-      ) : null}
-      <MoodProgress isWidget={isWidget} />
+      {!isWidget && (
+        <View style={styles.legend}>
+          {GRAPH_KEYS.map((key) => (
+            <View key={key} style={styles.legendItem}>
+              <View
+                style={[
+                  styles.legendDot,
+                  { backgroundColor: DESIGN[key].color },
+                ]}
+              />
+              <Text style={styles.legendLabel}>{t(`name.${key}`)}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+      {showProgress && <MoodProgress isWidget={isWidget} />}
     </View>
   );
 }
@@ -384,6 +390,31 @@ const styles = StyleSheet.create({
           filter: 'blur(20px)',
         } as object)
       : {}),
+  },
+  legend: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    paddingHorizontal: 14,
+    paddingTop: 2,
+    paddingBottom: 6,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 999,
+  },
+  legendLabel: {
+    color: 'rgba(216, 228, 247, 0.78)',
+    fontSize: 12,
+    fontWeight: '500',
   },
   decorOrb: {
     position: 'absolute',

@@ -47,6 +47,8 @@
   "dailyLimit.buyUnauthorized": "Войдите в аккаунт, чтобы купить расклады.",
   "dailyLimit.later": "Позже",
 
+  "dailyLimit.legalNote": "Оплачивая, вы принимаете:",
+
   "signInRequired.title": "Нужен вход в аккаунт",
   "signInRequired.body": "Расклады доступны после входа или регистрации.",
   "signInRequired.cta": "Войти",

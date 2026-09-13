@@ -1,7 +1,6 @@
 import React, { ReactNode } from 'react';
 import { TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { StyleService, useStyleSheet } from '@ui-kitten/components';
-import { navigateInTab } from 'app/navigation/navigateInTab';
 import { setNavReturnToMain } from 'app/navigation/navReturnStore';
 import { SmallSpreadCard } from 'features/cards';
 import { TSpread } from 'shared/api';
@@ -36,13 +35,8 @@ function TarotSpreadsCarousel({
   const handleNavigateToSpreads = () => {
     setSelectedTab?.(TabRoute.SpreadsTab);
     setNavReturnToMain();
-    navigateInTab(navigation, {
-      tab: TabRoute.SpreadsTab,
+    navigation.navigate(TabRoute.SpreadsTab, {
       screen: NavigationRoute.Spreads,
-      returnTo: {
-        tab: TabRoute.MainTab,
-        screen: NavigationRoute.Main,
-      },
     });
   };
 

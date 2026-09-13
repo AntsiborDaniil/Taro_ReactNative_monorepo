@@ -7,6 +7,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { CircularProgressBar } from '@ui-kitten/components';
+import Toast from 'react-native-toast-message';
 import { MoodAndEnergyContext } from 'entities/moodAndEnergy';
 import { UserContext } from 'entities/user';
 import { type ReactElement, useState } from 'react';
@@ -53,6 +54,10 @@ function MoodProgress({
 
   const { t } = useTranslation('moodAndEnergy');
 
+  const filledCount = todayProgress?.filledValuesCount ?? 0;
+  const totalCount = todayProgress?.allValuesCount ?? 3;
+  const isComplete = (todayProgress?.percents ?? 0) === 100;
+
   const handleOpenMotivationCard = async () => {
     if (!interactive) {
       return;
@@ -71,6 +76,17 @@ function MoodProgress({
         screen: NavigationRoute.MoodAndEnergy,
       });
 
+      return;
+    }
+
+    if (!isComplete) {
+      Toast.show({
+        type: 'info',
+        text1: t('card.needMore', {
+          filled: filledCount,
+          total: totalCount,
+        }),
+      });
       return;
     }
 
@@ -146,20 +162,32 @@ function MoodProgress({
             !isWidget && styles.mainTextScreen,
           ]}
         >
-          {todayProgress?.percents === 100
-            ? t('progress.howAreYou')
-            : t('progress.assess')}
+          {isWidget
+            ? isComplete
+              ? t('progress.howAreYou')
+              : t('progress.assess')
+            : t('card.title')}
         </Text>
-        {todayProgress?.percents !== 100 && (
+        {isWidget ? (
+          !isComplete && (
+            <Text
+              category={TEXT_TAGS.label}
+              style={[styles.subText, styles.subTextWidget]}
+            >
+              {`${t('progress')} ${filledCount}/${totalCount}`}
+            </Text>
+          )
+        ) : (
           <Text
             category={TEXT_TAGS.label}
-            style={[
-              styles.subText,
-              isWidget && styles.subTextWidget,
-              !isWidget && styles.subTextScreen,
-            ]}
+            style={[styles.subText, styles.subTextScreen]}
           >
-            {`${t('progress')} ${todayProgress?.filledValuesCount}/${todayProgress?.allValuesCount}`}
+            {isComplete
+              ? t('card.ready')
+              : t('card.needMore', {
+                  filled: filledCount,
+                  total: totalCount,
+                })}
           </Text>
         )}
       </View>
@@ -179,20 +207,22 @@ function MoodProgress({
           </View>
 
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('progress.createCard')}
             style={({ pressed }) => [
               styles.tarotAction,
+              isComplete && styles.tarotActionReady,
               pressed && styles.tarotActionPressed,
-              !interactive && styles.tarotActionDisabled,
+              (!interactive || !isComplete) && styles.tarotActionDisabled,
             ]}
             onPress={handleOpenMotivationCard}
             disabled={!interactive}
           >
             <Text style={styles.tarotActionText}>
-              {todayProgress?.percents === 100
-                ? t('progress.howAreYou')
-                : t('progress.assess')}
+              {t('progress.createCard')}
             </Text>
           </Pressable>
+          <Text style={styles.tarotActionHint}>{t('card.cost')}</Text>
         </View>
       )}
     </Pressable>
@@ -218,7 +248,7 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
     alignSelf: 'stretch',
     marginHorizontal: 0,
-    marginVertical: 12,
+    marginVertical: 0,
     paddingHorizontal: 22,
     paddingVertical: 20,
     gap: 20,
@@ -335,15 +365,30 @@ const styles = StyleSheet.create({
     letterSpacing: 1.1,
   },
   tarotAction: {
-    minHeight: 36,
+    minHeight: 40,
     borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
     borderWidth: 1,
     borderColor: 'rgba(179, 153, 255, 0.42)',
     backgroundColor: 'rgba(81, 60, 168, 0.28)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  tarotActionReady: {
+    borderColor: 'rgba(205, 186, 255, 0.8)',
+    backgroundColor: 'rgba(104, 78, 214, 0.55)',
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '0 8px 20px rgba(76, 53, 173, 0.4)',
+        } as object)
+      : {}),
+  },
+  tarotActionHint: {
+    color: 'rgba(216, 204, 255, 0.6)',
+    fontSize: 11,
+    fontWeight: '500',
+    letterSpacing: 0.2,
   },
   tarotActionPressed: {
     opacity: 0.9,

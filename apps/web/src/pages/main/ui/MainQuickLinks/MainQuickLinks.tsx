@@ -4,12 +4,11 @@ import {
   type ImageSourcePropType,
   Platform,
   Pressable,
-  type PressableStateCallbackType,
   StyleSheet,
   useWindowDimensions,
   View,
 } from 'react-native';
-import { navigateInTab } from 'app/navigation/navigateInTab';
+import { setNavReturnToMain } from 'app/navigation/navReturnStore';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,7 +19,12 @@ import { ChevronRightIcon } from 'shared/icons';
 import { getImage, WEB_HOVER_TRANSITION } from 'shared/lib';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { COLORS, getColorOpacity } from 'shared/themes';
-import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
+import {
+  AnalyticAction,
+  NavigationRoute,
+  type PressableWebState,
+  TabRoute,
+} from 'shared/types';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 
 type QuickLink = {
@@ -75,14 +79,14 @@ function MainQuickLinks() {
       await handleVibrationClick?.();
       setSelectedTab?.(link.tabRoute);
       // From Main → nested Library screen: Back returns to Main.
-      navigateInTab(navigation, {
-        tab: link.tabRoute,
-        screen: link.route,
-        returnTo: {
-          tab: TabRoute.MainTab,
-          screen: NavigationRoute.Main,
-        },
-      });
+      setNavReturnToMain();
+      // Plain nested navigate: a full-tab reset no-ops inside the Mini App.
+      // Cast: navigate() overloads don't accept a tab name from a variable.
+      const navigateToTab = navigation.navigate as (
+        tab: TabRoute,
+        params: { screen: NavigationRoute }
+      ) => void;
+      navigateToTab(link.tabRoute, { screen: link.route });
     },
     [handleVibrationClick, navigation, setSelectedTab]
   );
@@ -105,7 +109,7 @@ function MainQuickLinks() {
                 },
               } as object)
             : {})}
-          style={(state: PressableStateCallbackType) => [
+          style={(state: PressableWebState) => [
             styles.chip,
             isCompact && styles.chipCompact,
             (state.pressed || Boolean(state.hovered)) && styles.chipActive,

@@ -14,14 +14,21 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
 import { useData } from 'shared/DataProvider';
-import { BookIcon, CardsIcon, ChevronLeftIcon, ChevronRightIcon, PlanetIcon } from 'shared/icons';
+import {
+  BookIcon,
+  CardsIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  PlanetIcon,
+  SettingsIcon,
+} from 'shared/icons';
 import { blurActiveElement, WEB_HOVER_TRANSITION } from 'shared/lib';
 import {
   useWebViewportInsets,
   WEB_TAB_BAR_CONTENT_HEIGHT,
 } from 'shared/lib/web/useWebViewportInsets';
 import { COLORS } from 'shared/themes';
-import { AnalyticAction, TabRoute } from 'shared/types';
+import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import {
   type AdaptiveTabVariant,
   isWebMobileFabNav,
@@ -43,6 +50,7 @@ type AdaptiveTabBarProps = BottomTabBarProps & {
   onToggleRailCollapsed?: () => void;
   collapseLabel?: string;
   expandLabel?: string;
+  settingsLabel?: string;
 };
 
 export function AdaptiveTabBar({
@@ -52,6 +60,7 @@ export function AdaptiveTabBar({
   onToggleRailCollapsed,
   collapseLabel,
   expandLabel,
+  settingsLabel,
   state,
   descriptors,
   navigation,
@@ -77,6 +86,32 @@ export function AdaptiveTabBar({
     },
     [handleVibrationClick, navigation, selectedTab, setSelectedTab]
   );
+
+  const onSettingsPress = useCallback(async () => {
+    blurActiveElement();
+    await handleVibrationClick?.();
+    AppMetrica.reportEvent(AnalyticAction.ClickSettings);
+    setSelectedTab?.(TabRoute.LibraryTab);
+    (navigation.navigate as (name: string, params?: object) => void)(
+      TabRoute.LibraryTab,
+      { screen: NavigationRoute.Settings }
+    );
+  }, [handleVibrationClick, navigation, setSelectedTab]);
+
+  const settingsFocused = (() => {
+    const activeTab = state.routes[state.index];
+    if (activeTab?.name !== TabRoute.LibraryTab) {
+      return false;
+    }
+    const nested = activeTab.state as
+      | { routes?: Array<{ name: string }>; index?: number }
+      | undefined;
+    const routes = nested?.routes;
+    if (!routes?.length) {
+      return false;
+    }
+    return routes[nested?.index ?? routes.length - 1]?.name === NavigationRoute.Settings;
+  })();
 
   if (isWebMobileFabNav(width)) {
     return <MobileFabTabBar state={state} descriptors={descriptors} navigation={navigation} insets={insets} />;
@@ -181,6 +216,47 @@ export function AdaptiveTabBar({
             </Pressable>
           );
         })}
+
+        <View style={styles.railSpacer} />
+        <View style={styles.railDivider} />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={settingsLabel}
+          accessibilityState={{ selected: settingsFocused }}
+          onPress={onSettingsPress}
+          style={(state) => {
+            const hovered =
+              Platform.OS === 'web' && (state as { hovered?: boolean }).hovered;
+            return [
+              styles.railItem,
+              settingsFocused && styles.railItemActive,
+              hovered && !settingsFocused && styles.railItemHover,
+            ];
+          }}
+        >
+          <View
+            style={
+              railCollapsed ? styles.railItemInnerCollapsed : styles.railItemInner
+            }
+          >
+            <SettingsIcon
+              width={24}
+              height={24}
+              fill={settingsFocused ? COLORS.Primary : COLORS.Content50}
+            />
+            {!railCollapsed ? (
+              <Text
+                style={[
+                  styles.railLabel,
+                  { color: settingsFocused ? COLORS.Content : COLORS.Content50 },
+                ]}
+                numberOfLines={1}
+              >
+                {settingsLabel}
+              </Text>
+            ) : null}
+          </View>
+        </Pressable>
       </View>
     );
   }
@@ -289,6 +365,17 @@ const styles = StyleSheet.create({
   },
   railItemHover: {
     backgroundColor: 'rgba(244, 244, 245, 0.06)',
+  },
+  /** Прижимает «Настройки» к низу колонки. */
+  railSpacer: {
+    flex: 1,
+    minHeight: 16,
+  },
+  railDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(244, 244, 245, 0.1)',
+    marginHorizontal: 14,
+    marginBottom: 4,
   },
   railItemActive: {
     backgroundColor: 'rgba(246, 192, 27, 0.12)',

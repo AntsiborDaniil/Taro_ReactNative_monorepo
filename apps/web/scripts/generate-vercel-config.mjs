@@ -37,9 +37,18 @@ const rewrites = [
     source: '/admin/:path*',
     destination: '/admin/index.html',
   },
-  // SPA fallback — exclude /locales/* and /admin*
+  // Static legal pages (public URLs for payment providers / crawlers)
   {
-    source: '/((?!locales/|admin).*)',
+    source: '/legal',
+    destination: '/legal/index.html',
+  },
+  {
+    source: '/legal/',
+    destination: '/legal/index.html',
+  },
+  // SPA fallback — exclude /locales/*, /legal* and /admin*
+  {
+    source: '/((?!locales/|legal|admin).*)',
     destination: '/index.html',
   },
 ];

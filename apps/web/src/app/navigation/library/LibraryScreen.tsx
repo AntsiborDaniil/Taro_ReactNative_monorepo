@@ -1,5 +1,5 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useTranslation } from 'react-i18next';
+import { LEGAL_DOCUMENTS } from 'shared/config/legal';
 import { NavigationRoute } from 'shared/types';
 import { darkStackScreenOptions } from '../stackScreenOptions';
 import {
@@ -9,19 +9,18 @@ import {
   LazyDetailCard,
   LazyFavoriteCards,
   LazyLanguage,
+  LazyLegal,
+  LazyLegalDocument,
   LazyLibrary,
   LazySettings,
   LazySound,
   LazySpreadReadings,
   LazySpreadsHistory,
-  LazyWebView,
 } from '../lazyScreens';
 
 const LibraryStack = createNativeStackNavigator();
 
 function LibraryScreen() {
-  const { i18n } = useTranslation();
-
   return (
     <LibraryStack.Navigator
       initialRouteName={NavigationRoute.Library}
@@ -66,19 +65,16 @@ function LibraryScreen() {
       <LibraryStack.Screen name={NavigationRoute.Sound} component={LazySound} />
       <LibraryStack.Screen name={NavigationRoute.Auth} component={LazyAuth} />
       <LibraryStack.Screen
-        name={NavigationRoute.TermsOfUse}
-        component={LazyWebView}
-        initialParams={{
-          url: `https://sanmarinotech.github.io/tarot-legal/terms_${i18n.language}.html`,
-        }}
+        name={NavigationRoute.Legal}
+        component={LazyLegal}
       />
-      <LibraryStack.Screen
-        name={NavigationRoute.PrivacyPolicy}
-        component={LazyWebView}
-        initialParams={{
-          url: `https://sanmarinotech.github.io/tarot-legal/privacy_${i18n.language}.html`,
-        }}
-      />
+      {LEGAL_DOCUMENTS.map((document) => (
+        <LibraryStack.Screen
+          key={document.route}
+          name={document.route}
+          component={LazyLegalDocument}
+        />
+      ))}
     </LibraryStack.Navigator>
   );
 }

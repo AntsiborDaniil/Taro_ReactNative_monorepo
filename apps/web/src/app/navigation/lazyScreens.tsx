@@ -6,6 +6,7 @@ import { HabitChoose } from 'pages/habitChoose';
 import { HabitCreate } from 'pages/habitCreate';
 import { HabitWeek } from 'pages/habitWeek';
 import { GoalCelebration } from 'pages/goalCelebration';
+import { Legal, LegalDocument } from 'pages/legal';
 import { Library } from 'pages/library';
 import { MoodAndEnergyScreen } from 'pages/moodAndEnergy';
 import { MotivationScreen } from 'pages/motivation';
@@ -151,6 +152,18 @@ export const LazySound = createLazyScreen(
 export const LazyAuth = createLazyScreen(
   () => import('pages/settings').then((m) => ({ default: m.Auth })),
   Auth,
+  { fallback: pageFallback }
+);
+
+export const LazyLegal = createLazyScreen(
+  () => import('pages/legal').then((m) => ({ default: m.Legal })),
+  Legal,
+  { fallback: pageFallback }
+);
+
+export const LazyLegalDocument = createLazyScreen(
+  () => import('pages/legal').then((m) => ({ default: m.LegalDocument })),
+  LegalDocument,
   { fallback: pageFallback }
 );
 

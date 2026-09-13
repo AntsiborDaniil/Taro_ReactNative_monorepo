@@ -62,7 +62,7 @@ export function useMoodAndEnergy(): TMoodAndEnergyHookResult {
       setAllMoods((prevState) => {
         const todayMoodItem = prevState[prevState.length - 1];
 
-        if (today === todayMoodItem.date) {
+        if (todayMoodItem && today === todayMoodItem.date) {
           const newArray = prevState.slice(0, -1);
 
           newArray.push({
@@ -73,15 +73,17 @@ export function useMoodAndEnergy(): TMoodAndEnergyHookResult {
           return newArray;
         }
 
-        prevState.push({
-          date: today,
-          stress: null,
-          energy: null,
-          mood: null,
-          [name]: value,
-        });
-
-        return prevState;
+        // New array: mutating prevState would skip the re-render.
+        return [
+          ...prevState,
+          {
+            date: today,
+            stress: null,
+            energy: null,
+            mood: null,
+            [name]: value,
+          },
+        ];
       });
     },
     []

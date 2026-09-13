@@ -47,6 +47,8 @@
   "dailyLimit.buyUnauthorized": "Sign in to buy more spreads.",
   "dailyLimit.later": "Later",
 
+  "dailyLimit.legalNote": "By paying you accept:",
+
   "signInRequired.title": "Sign in required",
   "signInRequired.body": "Spreads are available after you sign in or register.",
   "signInRequired.cta": "Sign in",

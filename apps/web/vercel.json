@@ -22,7 +22,15 @@
       "destination": "/admin/index.html"
     },
     {
-      "source": "/((?!locales/|admin).*)",
+      "source": "/legal",
+      "destination": "/legal/index.html"
+    },
+    {
+      "source": "/legal/",
+      "destination": "/legal/index.html"
+    },
+    {
+      "source": "/((?!locales/|legal|admin).*)",
       "destination": "/index.html"
     }
   ],

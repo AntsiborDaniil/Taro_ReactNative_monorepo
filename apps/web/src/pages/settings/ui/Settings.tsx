@@ -21,7 +21,12 @@ import {
 } from 'features/tarotAccess/ui';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { ChevronRightIcon, LightningBolt, ReverseIcon } from 'shared/icons';
+import {
+  BookIcon,
+  ChevronRightIcon,
+  LightningBolt,
+  ReverseIcon,
+} from 'shared/icons';
 import {
   AsyncMemorySettingKey,
   isTablet,
@@ -33,7 +38,7 @@ import { COLORS, SETTINGS_TYPOGRAPHY } from 'shared/themes';
 import { AnalyticAction, NavigationRoute, PressableWebState } from 'shared/types';
 import { ScreenLayout, SwitchElement, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
-import { APP_AGREEMENTS, getSettingsRoutes } from '../lib';
+import { getSettingsRoutes } from '../lib';
 import { useSettings } from '../model';
 import LanguagePickerModal from './Language/LanguagePickerModal';
 
@@ -327,18 +332,48 @@ function Settings() {
             <Text category={TEXT_TAGS.label} style={webStyles.sectionLabel}>
               {t('settings:section.legal')}
             </Text>
-            <View style={webStyles.legalRow}>
-              {APP_AGREEMENTS.map(({ title, url }) => (
-                <Text
-                  style={[styles.agreement, styles.settingsFootnote]}
-                  key={title}
-                  category={TEXT_TAGS.h5}
-                  onPress={() => handlePress(url)}
-                >
-                  {t(`settings:${title}`)}
-                </Text>
-              ))}
-            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('settings:legal.title')}
+              onPress={() => handlePress(NavigationRoute.Legal, 'legal')}
+              style={(s: PressableWebState) => {
+                const { hovered, pressed } = s;
+                return [
+                  webStyles.card,
+                  webStyles.buyRow,
+                  (hovered || pressed) && webStyles.rowActive,
+                ];
+              }}
+            >
+              <View style={styles.iconWrapper}>
+                <View style={styles.icon}>
+                  <BookIcon
+                    width={isTablet ? 28 : 22}
+                    height={isTablet ? 28 : 22}
+                    fill={COLORS.Primary500}
+                  />
+                </View>
+                <View style={webStyles.rowTextCol}>
+                  <Text
+                    category={TEXT_TAGS.h4}
+                    style={[styles.text, styles.settingsBody]}
+                  >
+                    {t('settings:legal.title')}
+                  </Text>
+                  <Text
+                    category={TEXT_TAGS.p2}
+                    style={[webStyles.rowHint, styles.settingsFootnote]}
+                  >
+                    {t('settings:legal.row.hint')}
+                  </Text>
+                </View>
+              </View>
+              <ChevronRightIcon
+                width={isTablet ? 26 : 17}
+                height={isTablet ? 26 : 17}
+              />
+            </Pressable>
+            <View style={webStyles.legalSpacer} />
           </View>
         </ScrollView>
 
@@ -400,16 +435,13 @@ function Settings() {
         ))}
       </ScrollView>
       <View style={styles.agreements}>
-        {APP_AGREEMENTS.map(({ title, url }) => (
-          <Text
-            style={[styles.agreement, styles.settingsFootnote]}
-            key={title}
-            category={TEXT_TAGS.h5}
-            onPress={() => handlePress(url)}
-          >
-            {t(`settings:${title}`)}
-          </Text>
-        ))}
+        <Text
+          style={[styles.agreement, styles.settingsFootnote]}
+          category={TEXT_TAGS.h5}
+          onPress={() => handlePress(NavigationRoute.Legal)}
+        >
+          {t('settings:legal.title')}
+        </Text>
       </View>
     </ScreenLayout>
   );
@@ -494,14 +526,8 @@ function createWebStyles() {
       color: COLORS.SpbSky1,
       lineHeight: 18,
     },
-    legalRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: moderateScale(12),
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 8,
-      marginBottom: 32,
+    legalSpacer: {
+      height: 24,
     },
     modalBackdrop: {
       flex: 1,

@@ -162,6 +162,7 @@ function TarotTabs() {
             }
             collapseLabel={t('nav.rail.collapse')}
             expandLabel={t('nav.rail.expand')}
+            settingsLabel={t('settings:settings')}
           />
         )}
         screenListeners={({ navigation }) => ({
