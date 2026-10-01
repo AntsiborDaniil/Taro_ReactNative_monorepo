@@ -1,0 +1,33 @@
+.frame {
+  container-type: inline-size;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  position: relative;
+}
+
+.inner {
+  box-sizing: border-box;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  border-radius: 9cqw;
+  background: var(--ds-ground-700);
+  transition: border-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.frame:hover .inner {
+  border-color: var(--ds-accent-400);
+}
+
+.frame:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inner {
+    transition: none;
+  }
+}

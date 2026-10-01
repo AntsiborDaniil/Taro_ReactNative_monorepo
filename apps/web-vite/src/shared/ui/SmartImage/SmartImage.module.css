@@ -1,0 +1,55 @@
+/* Пока картинка грузится: скелет DS прямо на элементе <img> (размер из className). */
+.loading {
+  color: transparent;
+  background-color: var(--ds-skeleton-base);
+  background-image: linear-gradient(90deg, transparent, var(--ds-skeleton-highlight), transparent);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: imageShimmer 1.6s var(--ds-ease) infinite;
+}
+
+.loaded {
+  animation: imageIn var(--ds-dur-state) var(--ds-ease) both;
+}
+
+@keyframes imageShimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@keyframes imageIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Не загрузилась: плашка ground-700 с тихой иконкой по центру. */
+.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ds-ground-700);
+  color: var(--ds-ink-100);
+}
+
+.fallbackIcon {
+  width: 28%;
+  max-width: 40px;
+  min-width: 16px;
+  height: auto;
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading,
+  .loaded {
+    animation: none;
+  }
+}

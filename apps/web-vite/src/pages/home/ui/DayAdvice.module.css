@@ -1,0 +1,284 @@
+.card {
+  container-type: inline-size;
+  position: relative;
+  width: 100%;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  appearance: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card:disabled {
+  cursor: default;
+  opacity: 0.92;
+}
+
+.card:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+  border-radius: 4cqw;
+}
+
+/*
+ * .frame — не .card: border-radius:4cqw должен резолвиться от ширины самого
+ * элемента, а cqw на элементе с container-type (тут — .card) резолвится от
+ * ближайшего АНЦЕСТОР-контейнера, а не от себя. Поэтому радиус/бордер/overflow
+ * переехали на дочерний .frame — он смотрит на .card как на контейнер.
+ */
+.frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  border-radius: 4cqw;
+  background: var(--ds-ground-800);
+  transition: border-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.card:hover .frame {
+  border-color: var(--ds-accent-400);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame {
+    transition: none;
+  }
+}
+
+/* ---- картинка/срез ---- */
+
+.imageCol {
+  position: relative;
+  order: 1;
+  flex: 0 0 auto;
+  width: 100%;
+  /* Герой выше: мир ~45% высоты карточки. */
+  aspect-ratio: 1.6 / 1;
+  overflow: hidden;
+  background: var(--ds-ground-800);
+  clip-path: polygon(0 0, 100% 0, 100% 80.65%, 0 100%);
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.edge {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.edgeLine {
+  stroke: var(--ds-accent-400);
+  stroke-width: 2px;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: dsDrawEdge var(--ds-dur-block) var(--ds-ease) forwards;
+}
+
+@keyframes dsDrawEdge {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edgeLine {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+.edgeRow {
+  display: none;
+}
+
+/* ---- контент ---- */
+
+.content {
+  order: 2;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--ds-space-24);
+  padding: var(--ds-space-24);
+}
+
+.textCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+.title {
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-display-family);
+  font-size: var(--ds-font-display-size);
+  line-height: var(--ds-font-display-line-height);
+  letter-spacing: var(--ds-font-display-letter-spacing);
+}
+
+.dateLeadGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+}
+
+.dateText {
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-micro-family);
+  font-size: var(--ds-font-micro-size);
+  line-height: var(--ds-font-micro-line-height);
+  letter-spacing: var(--ds-font-micro-letter-spacing);
+  margin-top: 2px;
+}
+
+.lead {
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-lead-family);
+  font-size: var(--ds-font-lead-size);
+  line-height: var(--ds-font-lead-line-height);
+}
+
+/* CTA — визуально как Button variant=action, но не отдельный <button> (вся карта уже кнопка). */
+.cta {
+  display: inline-flex;
+  align-self: flex-start;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-8);
+  height: var(--ds-size-button-height);
+  padding: 0 var(--ds-space-24);
+  border-radius: calc(var(--ds-size-button-height) / 2);
+  background: var(--ds-action-500);
+  transition: background-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.card:hover .cta {
+  background: color-mix(in srgb, var(--ds-action-500) 88%, var(--ds-ink-50) 12%);
+}
+
+.ctaText {
+  color: var(--ds-on-action);
+  font-family: var(--ds-font-button-family);
+  font-size: var(--ds-font-button-size);
+  line-height: var(--ds-font-button-line-height);
+}
+
+.ctaIcon {
+  color: var(--ds-on-action);
+  flex: 0 0 auto;
+}
+
+.ctaLoading .ctaText {
+  opacity: 0.6;
+}
+
+/* ---- вход блоков: прорисовка грани уже своя, текст/CTA — fade + сдвиг, стаггер 60мс ---- */
+
+.entryTitle,
+.entryText,
+.entryCta {
+  opacity: 0;
+  animation: dsEntryIn var(--ds-dur-block) var(--ds-ease) forwards;
+}
+
+.entryTitle {
+  animation-delay: var(--ds-dur-block);
+}
+
+.entryText {
+  animation-delay: calc(var(--ds-dur-block) + 60ms);
+}
+
+.entryCta {
+  animation-delay: calc(var(--ds-dur-block) + 120ms);
+}
+
+@keyframes dsEntryIn {
+  from {
+    opacity: 0;
+    transform: translate(-12px, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entryTitle,
+  .entryText,
+  .entryCta {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- >=1024 (container "mainCol", объявлен на странице Home): картинка справа 40% ---- */
+
+@container mainCol (min-width: 1024px) {
+  .frame {
+    flex-direction: row;
+    align-items: stretch;
+    min-height: 340px;
+  }
+
+  .imageCol {
+    order: 2;
+    width: 40%;
+    aspect-ratio: auto;
+    clip-path: polygon(var(--day-card-tilt, 28px) 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .content {
+    order: 1;
+    flex: 1 1 60%;
+    padding: var(--ds-space-32);
+  }
+
+  .cta {
+    width: auto;
+    align-self: flex-start;
+  }
+
+  .edgeStacked {
+    display: none;
+  }
+
+  /*
+   * width:28px (не 100%!) — совпадает с viewBox "0 0 28 100" в DayAdvice.tsx
+   * и с tilt в clip-path выше, так что диагональ линии 1:1 ложится на край
+   * тёмного клина, а не растягивается по всей ширине картинки (было: line
+   * x=28 в viewBox 0..100 при SVG width:100% превращалось в ~28% фактической
+   * ширины и уезжало вглубь изображения).
+   */
+  .edgeRow {
+    display: block;
+    inset: auto;
+    top: 0;
+    left: 0;
+    width: var(--day-card-tilt, 28px);
+    height: 100%;
+  }
+}

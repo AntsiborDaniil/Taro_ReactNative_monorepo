@@ -1,0 +1,56 @@
+.page {
+  container-type: inline-size;
+  container-name: motivationCol;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.column {
+  width: calc(100% - var(--ds-gutter) * 2);
+  max-width: 100%;
+  margin: 0 auto;
+  padding: var(--ds-gutter) 0 var(--ds-space-32);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-24);
+  min-width: 0;
+}
+
+@container motivationCol (min-width: 768px) {
+  .column {
+    max-width: 560px;
+  }
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-12);
+}
+
+.cardWrap {
+  width: min(220px, 56cqw);
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-8);
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  text-align: center;
+}
+
+.interpretation {
+  padding: var(--ds-space-16);
+  border-radius: 18px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-800);
+}

@@ -1,0 +1,85 @@
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-12);
+  cursor: pointer;
+}
+
+.wrapper.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.circle {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--ds-ground-600);
+  transition: border-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.input:checked + .circle {
+  border-color: var(--ds-accent-400);
+}
+
+.input:focus-visible + .circle {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ds-accent-400);
+  opacity: 0;
+  transform: scale(0.5);
+  transition:
+    opacity var(--ds-dur-feedback) var(--ds-ease),
+    transform var(--ds-dur-feedback) var(--ds-ease);
+}
+
+.input:checked + .circle .dot {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.label {
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-body-family);
+  font-size: var(--ds-font-body-size);
+  line-height: var(--ds-font-body-line-height);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+}
+
+.groupHorizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--ds-space-24);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .circle,
+  .dot {
+    transition: none;
+  }
+}

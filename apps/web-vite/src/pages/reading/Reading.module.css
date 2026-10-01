@@ -1,0 +1,123 @@
+.page {
+  container-type: inline-size;
+  container-name: readingCol;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.column {
+  width: calc(100% - var(--ds-gutter) * 2);
+  max-width: 100%;
+  margin: 0 auto;
+  padding: var(--ds-gutter) 0 var(--ds-space-48);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-24);
+  min-width: 0;
+}
+
+@container readingCol (min-width: 768px) {
+  .column {
+    max-width: 720px;
+  }
+}
+
+/* <900px — FabNav (см. SpreadDetail.module.css) перекрывает низ страницы. */
+@media (max-width: 899px) {
+  .column {
+    padding-bottom: 104px;
+  }
+}
+
+.question {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-4);
+  text-align: center;
+}
+
+.completion {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+  align-items: center;
+}
+
+.errorText {
+  text-align: center;
+}
+
+.result {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-24);
+}
+
+/* Вытянутые карты результата: оправа DS (радиус 9% ширины — TarotCardFace),
+   подпись имени снизу, лайк — оверлей сверху справа. */
+.resultCards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--ds-space-16);
+}
+
+.resultCard {
+  position: relative;
+  width: 108px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+@container readingCol (min-width: 600px) {
+  .resultCard {
+    width: 128px;
+  }
+}
+
+.resultCardImage {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.resultCardImage:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+  border-radius: 9%;
+}
+
+.resultCardLike {
+  position: absolute;
+  top: var(--ds-space-4);
+  right: var(--ds-space-4);
+  background: color-mix(in srgb, var(--ds-ground-900) 55%, transparent);
+}
+
+.resultCardName {
+  text-align: center;
+}
+
+.resultText {
+  font-size: 16px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.shareButton {
+  align-self: center;
+}

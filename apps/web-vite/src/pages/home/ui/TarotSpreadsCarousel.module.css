@@ -1,0 +1,225 @@
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-8);
+}
+
+.headerTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-title-family);
+  font-size: var(--ds-font-title-size);
+  line-height: var(--ds-font-title-line-height);
+  letter-spacing: var(--ds-font-title-letter-spacing);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.allLink {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-4);
+  min-height: var(--ds-size-min-touch);
+  padding: 0 var(--ds-space-4);
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ds-accent-400);
+  font-family: var(--ds-font-body-family);
+  font-size: var(--ds-font-body-size);
+  line-height: var(--ds-font-body-line-height);
+  cursor: pointer;
+}
+
+.allLink:hover {
+  background: var(--ds-ground-700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.allLink:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+/* ---- дорожка карточек: горизонтальный скролл со снэпом ---- */
+/* Во всю ширину области контента на любой ширине: дорожка выходит из колонки
+   до краёв контейнера mainCol (100cqw — ширина области под рейкой, не окна),
+   а внутренний отступ возвращает первую карточку на линию поля колонки.
+   --bleed считается только через cqw и max-width колонки (Home.module.css .inner):
+   проценты здесь нельзя — scroll-padding резолвит их от самой дорожки. */
+
+.track {
+  --bleed: var(--ds-gutter);
+  display: flex;
+  gap: var(--ds-space-12);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--bleed);
+  margin: 0 calc(var(--bleed) * -1);
+  padding: 2px var(--bleed) var(--ds-space-8);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+@container mainCol (min-width: 768px) {
+  .track {
+    --bleed: calc((100cqw - min(720px, 100cqw - var(--ds-gutter) * 2)) / 2);
+  }
+}
+
+@container mainCol (min-width: 1024px) {
+  .track {
+    --bleed: calc((100cqw - min(1200px, 100cqw - var(--ds-gutter) * 2)) / 2);
+  }
+}
+
+@container mainCol (min-width: 1440px) {
+  .track {
+    --bleed: calc((100cqw - min(1320px, 100cqw - var(--ds-gutter) * 2)) / 2);
+  }
+}
+
+.card {
+  flex: 0 0 auto;
+  width: 148px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card:active {
+  transform: translateY(1px);
+}
+
+.card:focus-visible .imageInner {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+@container mainCol (min-width: 768px) {
+  .card {
+    width: 168px;
+  }
+}
+
+@container mainCol (min-width: 1024px) {
+  .card {
+    width: 184px;
+  }
+}
+
+@container mainCol (min-width: 1440px) {
+  .card {
+    width: 200px;
+  }
+}
+
+/*
+ * imageFrame задаёт container-type (для cqw) и размер; imageInner несёт
+ * border-radius:4cqw — cqw на элементе с container-type резолвится от
+ * ближайшего ancestor-контейнера, а не от себя, поэтому радиус нужен на
+ * дочернем слое.
+ */
+.imageFrame {
+  container-type: inline-size;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.imageInner {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  border-radius: 4cqw;
+  background: var(--ds-ground-700);
+  transition: border-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.card:hover .imageInner {
+  border-color: var(--ds-accent-400);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .imageInner {
+    transition: none;
+  }
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.textCol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.name {
+  color: var(--ds-ink-50);
+  font-family: 'Onest-Bold', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.cardsCount {
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-micro-family);
+  font-size: var(--ds-font-micro-size);
+  line-height: var(--ds-font-micro-line-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emptyState {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-12);
+  padding: var(--ds-space-24);
+  border: var(--ds-size-hairline) dashed var(--ds-ground-600);
+  border-radius: 18px;
+  color: var(--ds-ink-100);
+  text-align: center;
+}

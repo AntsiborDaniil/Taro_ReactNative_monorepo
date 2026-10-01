@@ -1,0 +1,136 @@
+.page {
+  container-type: inline-size;
+  container-name: legalDocCol;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.column {
+  width: calc(100% - var(--ds-gutter) * 2);
+  max-width: 100%;
+  margin: 0 auto;
+  padding: var(--ds-gutter) 0 var(--ds-space-32);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-16);
+  min-width: 0;
+}
+
+@container legalDocCol (min-width: 760px) {
+  .column {
+    max-width: 720px;
+  }
+}
+
+@media (max-width: 899px) {
+  .column {
+    padding-bottom: 104px;
+  }
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+  padding: var(--ds-space-16);
+  border-radius: 18px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-800);
+}
+
+.badge {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-700);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+  padding: var(--ds-space-16);
+  border-radius: 16px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-800);
+}
+
+.paragraph {
+  line-height: 1.5;
+}
+
+.note {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: var(--ds-size-hairline) solid var(--ds-accent-400);
+  background: var(--ds-ground-700);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+.listItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-12);
+}
+
+.bullet {
+  width: 5px;
+  height: 5px;
+  margin-top: 8px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--ds-accent-400);
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+}
+
+.otherBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+  margin-top: 4px;
+  padding: 0 2px;
+}
+
+.otherTitle {
+  color: var(--ds-accent-400);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-8);
+}
+
+.chip {
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-700);
+  color: var(--ds-ink-100);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--ds-accent-400);
+}
+
+.chipPrimary {
+  border-color: var(--ds-accent-400);
+  color: var(--ds-accent-400);
+}

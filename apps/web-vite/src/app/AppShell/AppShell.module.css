@@ -1,0 +1,17 @@
+.shell {
+  display: flex;
+  min-height: 100dvh;
+  width: 100%;
+}
+
+.content {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 100dvh;
+  /* Telegram Mini App safe-area (шапки/нижний отступ страниц) — см.
+     shared/lib/web/telegramWebApp.ts (readTelegramSafeAreaInsets). Вне
+     Telegram --safe-* падают на env(safe-area-inset-*)/0px — без изменений. */
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  box-sizing: border-box;
+}

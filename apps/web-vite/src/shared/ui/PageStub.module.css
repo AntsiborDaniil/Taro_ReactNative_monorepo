@@ -1,0 +1,14 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: var(--ds-space-32) var(--ds-gutter);
+}
+
+.title {
+  font-family: var(--ds-font-display-family);
+  font-size: var(--ds-font-display-size);
+  line-height: var(--ds-font-display-line-height);
+  letter-spacing: var(--ds-font-display-letter-spacing);
+  color: var(--ds-ink-50);
+}

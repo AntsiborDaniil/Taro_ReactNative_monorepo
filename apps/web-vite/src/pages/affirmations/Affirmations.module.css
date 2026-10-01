@@ -1,0 +1,90 @@
+.page {
+  container-type: inline-size;
+  container-name: affirmationsCol;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.column {
+  width: calc(100% - var(--ds-gutter) * 2);
+  max-width: 100%;
+  margin: 0 auto;
+  padding: var(--ds-gutter) 0 var(--ds-space-32);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-24);
+  min-width: 0;
+}
+
+@container affirmationsCol (min-width: 768px) {
+  .column {
+    max-width: 640px;
+  }
+}
+
+@media (max-width: 899px) {
+  .column {
+    padding-bottom: 104px;
+  }
+}
+
+.statusCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-12) var(--ds-space-16);
+  border-radius: 16px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-800);
+  text-align: center;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ds-accent-400);
+  margin-bottom: 2px;
+}
+
+.statusTitle {
+  margin: 0;
+}
+
+.statusSubtitle {
+  margin: 0;
+}
+
+.visual {
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ds-space-24);
+  border-radius: 24px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-700);
+  text-align: center;
+}
+
+.affirmationText {
+  margin: 0;
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-title-family);
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.wordColored {
+  color: var(--ds-accent-400);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-8);
+  justify-content: center;
+}

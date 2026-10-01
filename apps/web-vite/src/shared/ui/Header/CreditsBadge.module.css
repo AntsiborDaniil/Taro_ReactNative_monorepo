@@ -1,0 +1,56 @@
+.root {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--ds-ground-700);
+  border: var(--ds-size-edge-width) solid var(--ds-accent-400);
+  cursor: pointer;
+}
+
+.root:hover {
+  filter: brightness(1.08);
+}
+
+.root:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+.bolt {
+  color: var(--ds-accent-400);
+}
+
+.badge {
+  position: absolute;
+  bottom: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 8px;
+  border: var(--ds-size-hairline) solid var(--ds-accent-400);
+  background: var(--ds-ground-800);
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-label-family);
+  font-size: 10px;
+  line-height: 12px;
+}
+
+.countBadge {
+  left: -4px;
+}
+
+.plusBadge {
+  right: -4px;
+  border: none;
+  background: var(--ds-accent-400);
+  color: var(--ds-on-action);
+  font-weight: 800;
+}

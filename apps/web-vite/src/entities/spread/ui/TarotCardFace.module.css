@@ -1,0 +1,39 @@
+.card {
+  container-type: inline-size;
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  flex: 0 0 auto;
+}
+
+/*
+ * .inner несёт радиус/бордер/overflow: cqw на .card (container-type) резолвится
+ * от ближайшего ancestor-контейнера, а не от себя, поэтому 9% ширины карты
+ * (DS §07) считается на дочернем слое, который смотрит на .card как на
+ * контейнер.
+ */
+.inner {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 9cqw;
+  overflow: hidden;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-700);
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--ds-dur-block) var(--ds-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image {
+    transition: none;
+  }
+}

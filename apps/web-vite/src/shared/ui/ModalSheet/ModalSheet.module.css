@@ -1,0 +1,97 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--ds-scrim-ground-900);
+}
+
+.sheet {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 100%;
+  max-height: 92dvh;
+  overflow-y: auto;
+  background: var(--ds-ground-800);
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  border-bottom: none;
+  border-radius: 5vw 5vw 0 0;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  /* Заголовок строго по центру: пустой столбец слева той же ширины, что и «закрыть». */
+  display: grid;
+  grid-template-columns: var(--ds-size-min-touch) 1fr var(--ds-size-min-touch);
+  align-items: center;
+  gap: var(--ds-space-8);
+  padding: var(--ds-space-16) var(--ds-space-24) var(--ds-space-8);
+  background: var(--ds-ground-800);
+}
+
+.title {
+  grid-column: 2;
+  text-align: center;
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-title-family);
+  font-size: 21px;
+  line-height: 26px;
+  margin: 0;
+}
+
+.closeButton {
+  grid-column: 3;
+  justify-self: end;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-size-min-touch);
+  height: var(--ds-size-min-touch);
+  margin: calc(var(--ds-space-8) * -1);
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ds-ink-100);
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  color: var(--ds-ink-50);
+  background: var(--ds-ground-700);
+}
+
+.closeButton:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+.content {
+  /* Весь текст модалок — по центру; поля и кнопки остаются во всю ширину. */
+  text-align: center;
+  padding: var(--ds-space-8) var(--ds-space-24) var(--ds-space-24);
+}
+
+@media (min-width: 768px) {
+  .root {
+    align-items: center;
+    padding: var(--ds-space-16);
+  }
+
+  .sheet {
+    max-width: var(--modal-max-width, 480px);
+    border-bottom: var(--ds-size-hairline) solid var(--ds-ground-600);
+    border-radius: 4%;
+    max-height: 88dvh;
+  }
+}

@@ -1,0 +1,140 @@
+import type { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSettings } from '@entities/settings';
+import { useAppDispatch, useAppSelector } from '@shared/lib/store';
+import { setThemePreference, useThemePreference, type ThemePreference } from '@shared/lib/theme';
+import { AnalyticAction, track } from '@shared/lib/analytics';
+import {
+  BookIcon,
+  Chip,
+  Header,
+  LanguageIcon,
+  LightningIcon,
+  ListRow,
+  openModal,
+  PaintIcon,
+  ReverseIcon,
+  Switch,
+  Text,
+  ThemeIcon,
+} from '@shared/ui';
+import styles from './Settings.module.css';
+
+/**
+ * Перенос apps/web/src/pages/settings/ui/Settings.tsx (web-ветка) —
+ * группы: Расклады (перевёрнутые карты + покупка зарядов), Внешний вид
+ * (тема DS §02, язык, колода), Документы. «Личный кабинет» и «Звук и вибрация»
+ * убраны из настроек по решению владельца (маршруты остаются).
+ */
+export default function SettingsPage(): ReactElement {
+  const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const { settings, updateSetting, handleVibrationClick } = useSettings();
+  const spreadCredits = useAppSelector((state) => state.user.spreadCredits);
+  const theme = useThemePreference();
+
+  const themeOptions: { value: ThemePreference; label: string }[] = [
+    { value: 'dark', label: t('settings:theme.dark', { defaultValue: 'Тёмная' }) },
+    { value: 'light', label: t('settings:theme.light', { defaultValue: 'Светлая' }) },
+    { value: 'system', label: t('settings:theme.system', { defaultValue: 'Как в системе' }) },
+  ];
+
+  const handleReversedChange = (checked: boolean) => {
+    handleVibrationClick();
+    updateSetting('spread', { hasReversed: checked });
+  };
+
+  const handleBuyCredits = () => {
+    handleVibrationClick();
+    track(AnalyticAction.ClickSettingsSegment, { segment: 'credits.buy' });
+    dispatch(openModal({ id: 'buy-credits' }));
+  };
+
+  return (
+    <div className={styles.page}>
+      <Header title={t('settings:settings')} />
+      <div className={styles.column}>
+        <section className={styles.section}>
+          <Text role="label" as="h2" className={styles.sectionTitle}>
+            {t('settings:section.game')}
+          </Text>
+          <div className={styles.group}>
+            <ListRow
+              leadingIcon={<ReverseIcon width={22} height={22} />}
+              title={t('settings:hasReversed')}
+              trailing={
+                <Switch
+                  checked={settings.spread?.hasReversed ?? true}
+                  onChange={(event) => handleReversedChange(event.target.checked)}
+                  aria-label={t('settings:hasReversed')}
+                />
+              }
+            />
+            <ListRow
+              leadingIcon={<LightningIcon width={22} height={22} />}
+              title={t('settings:credits.buy.row')}
+              subtitle={t('settings:credits.buy.rowHint', { count: spreadCredits ?? 0 })}
+              onClick={handleBuyCredits}
+            />
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <Text role="label" as="h2" className={styles.sectionTitle}>
+            {t('settings:section.look')}
+          </Text>
+          <div className={styles.group}>
+            <div className={styles.themeRow}>
+              <div className={styles.themeHead}>
+                <ThemeIcon width={22} height={22} className={styles.themeIcon} />
+                <Text role="body" tone="ink50">
+                  {t('settings:theme.title', { defaultValue: 'Тема оформления' })}
+                </Text>
+              </div>
+              <div className={styles.themeOptions} role="radiogroup" aria-label={t('settings:theme.title', { defaultValue: 'Тема оформления' })}>
+                {themeOptions.map((option) => (
+                  <Chip
+                    key={option.value}
+                    role="radio"
+                    aria-checked={theme === option.value}
+                    selected={theme === option.value}
+                    onClick={() => {
+                      handleVibrationClick();
+                      setThemePreference(option.value);
+                    }}
+                  >
+                    {option.label}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+            <ListRow
+              leadingIcon={<LanguageIcon width={22} height={22} />}
+              title={t('settings:language')}
+              to="/settings/language"
+            />
+            <ListRow
+              leadingIcon={<PaintIcon width={22} height={22} />}
+              title={t('settings:deck.style')}
+              to="/settings/deck"
+            />
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <Text role="label" as="h2" className={styles.sectionTitle}>
+            {t('settings:section.legal')}
+          </Text>
+          <div className={styles.group}>
+            <ListRow
+              leadingIcon={<BookIcon width={22} height={22} />}
+              title={t('settings:legal.title')}
+              subtitle={t('settings:legal.row.hint')}
+              to="/documents"
+            />
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}

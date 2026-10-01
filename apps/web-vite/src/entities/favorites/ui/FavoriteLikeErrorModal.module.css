@@ -1,0 +1,27 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-12);
+  text-align: center;
+}
+
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-700);
+  color: var(--ds-accent-400);
+}
+
+.title {
+  text-align: center;
+}
+
+.body {
+  text-align: center;
+}

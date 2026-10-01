@@ -1,0 +1,108 @@
+.page {
+  container-type: inline-size;
+  container-name: spreadsCol;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ширина = calc(100% - 2*gutter) вместо padding внутри max-width — гарантирует
+ * минимум 25px поле с обеих сторон даже когда контейнер (spreadsCol) лишь
+ * чуть превышает текущий max-width брейкпоинт (см. Home.module.css .inner). */
+.column {
+  width: calc(100% - var(--ds-gutter) * 2);
+  max-width: 100%;
+  margin: 0 auto;
+  padding: var(--ds-gutter) 0 var(--ds-space-32);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-32);
+  min-width: 0;
+}
+
+@container spreadsCol (min-width: 768px) {
+  .column {
+    max-width: 720px;
+    gap: var(--ds-space-32);
+  }
+}
+
+@container spreadsCol (min-width: 1024px) {
+  .column {
+    max-width: 1200px;
+    gap: var(--ds-space-48);
+  }
+}
+
+@container spreadsCol (min-width: 1440px) {
+  .column {
+    max-width: 1320px;
+  }
+}
+
+.section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-title-family);
+  font-size: var(--ds-font-title-size);
+  line-height: var(--ds-font-title-line-height);
+  letter-spacing: var(--ds-font-title-letter-spacing);
+}
+
+/*
+ * auto-fill по ширине контейнера (не окна) — колонки сами дозаполняют ряд без
+ * «слепого» остатка на любой ширине; нижняя граница тайла растёт по
+ * брейкпоинтам (DS §08 gutter/IDEAL_TILE_WIDTH), верхняя — 1fr, тайлы тянутся
+ * равномерно.
+ */
+.grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--ds-space-16);
+}
+
+@container spreadsCol (min-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  }
+}
+
+@container spreadsCol (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+.emptyAction {
+  min-width: 200px;
+  height: var(--ds-size-chip-height);
+  padding: 0 var(--ds-space-24);
+  border-radius: calc(var(--ds-size-chip-height) / 2);
+  border: var(--ds-size-hairline) solid var(--ds-accent-400);
+  background: var(--ds-ground-700);
+  color: var(--ds-accent-400);
+  font-family: var(--ds-font-label-family);
+  font-size: var(--ds-font-label-size);
+  letter-spacing: var(--ds-font-label-letter-spacing);
+  text-transform: var(--ds-font-label-transform);
+  cursor: pointer;
+}
+
+.emptyAction:hover {
+  border-color: var(--ds-accent-400);
+  background: var(--ds-ground-600);
+}
+
+.emptyAction:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}

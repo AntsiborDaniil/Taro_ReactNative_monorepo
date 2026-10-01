@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://taro-react-native-monorepo.vercel.app/sitemap.xml

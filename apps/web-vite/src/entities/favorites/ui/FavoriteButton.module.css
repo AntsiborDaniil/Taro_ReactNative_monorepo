@@ -1,0 +1,44 @@
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--ds-size-min-touch);
+  height: var(--ds-size-min-touch);
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ds-ink-100);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--ds-dur-state) var(--ds-ease), background-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.button:hover {
+  background: var(--ds-ground-700);
+}
+
+.button:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+.active {
+  color: var(--ds-accent-400);
+}
+
+.icon {
+  fill: transparent;
+  transition: fill var(--ds-dur-state) var(--ds-ease);
+}
+
+.active .icon {
+  fill: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .icon {
+    transition: none;
+  }
+}

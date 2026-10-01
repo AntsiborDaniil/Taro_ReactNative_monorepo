@@ -1,0 +1,24 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+.spreadsWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+}
+
+.spreadsRow {
+  display: flex;
+  gap: var(--ds-space-12);
+}
+
+.spreadsTile {
+  width: 148px;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}

@@ -1,0 +1,129 @@
+.base {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-8);
+  height: var(--ds-size-button-height);
+  padding: 0 var(--ds-space-24);
+  border-radius: calc(var(--ds-size-button-height) / 2);
+  border: var(--ds-size-hairline) solid transparent;
+  font-family: var(--ds-font-button-family);
+  font-size: var(--ds-font-button-size);
+  line-height: var(--ds-font-button-line-height);
+  letter-spacing: var(--ds-font-button-letter-spacing);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform var(--ds-dur-feedback) var(--ds-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.base::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ds-press-dim);
+  opacity: 0;
+  transition: opacity var(--ds-dur-state) var(--ds-ease);
+  pointer-events: none;
+}
+
+.base:hover:not(:disabled)::after,
+.base:active:not(:disabled)::after {
+  opacity: 1;
+}
+
+.base:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.base:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+/* variant: action */
+.action {
+  background: var(--ds-action-500);
+  color: var(--ds-on-action);
+}
+
+/* variant: quiet */
+.quiet {
+  background: var(--ds-ground-600);
+  color: var(--ds-ink-50);
+  border-color: var(--ds-ground-600);
+}
+
+.quietAccent {
+  border-color: var(--ds-accent-400);
+}
+
+/* variant: link */
+.link {
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  color: var(--ds-accent-400);
+}
+
+.link::after {
+  display: none;
+}
+
+.link:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.link:active:not(:disabled) {
+  transform: none;
+}
+
+.base:disabled,
+.base[aria-disabled='true'] {
+  background: var(--ds-ground-600);
+  color: var(--ds-ink-100);
+  border-color: var(--ds-ground-600);
+  cursor: not-allowed;
+}
+
+.base:disabled::after,
+.base[aria-disabled='true']::after {
+  opacity: 0;
+}
+
+.link:disabled,
+.link[aria-disabled='true'] {
+  background: transparent;
+}
+
+.label {
+  transition: opacity var(--ds-dur-state) var(--ds-ease);
+}
+
+.loading .label {
+  opacity: 0.55;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .base,
+  .base::after,
+  .label {
+    transition: none;
+  }
+}

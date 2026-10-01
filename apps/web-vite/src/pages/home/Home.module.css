@@ -1,0 +1,127 @@
+/**
+ * `.root` — именованный контейнер `mainCol` БЕЗ паддингов: размер меряется от
+ * полной ширины колонки контента под <main> (слева рейка навигации ≥900px),
+ * как старый `useMainLayout` (containerWidth = onLayout SafeAreaView — паддинг
+ * gutter применялся уже ВНУТРИ, на styles.column, после замера). Если считать
+ * container query от `.inner` (где уже вычтен gutter 25*2), на 1280px с
+ * развёрнутой рейкой (228) остаётся ~1002px — чуть меньше 1024, и 2-колоночная
+ * раскладка не включалась бы. DS §08: gutter 25, maxWidth/sectionGap по
+ * брейкпоинтам контейнера 768/1024/1440.
+ */
+.root {
+  container-type: inline-size;
+  container-name: mainCol;
+  width: 100%;
+}
+
+/*
+ * Ширина считается как calc(100% - 2*gutter), а не через padding внутри
+ * max-width: так гарантируется минимум 25px поле с обеих сторон всегда, даже
+ * когда ширина контейнера (mainCol) лишь чуть превышает текущий брейкпоинт
+ * max-width (например, 1204px при свёрнутой рейке против max-width:1200) —
+ * иначе margin:auto вокруг переполненного max-width box оставлял бы лишь
+ * пару пикселей поля вместо 25px (правая колонка «упиралась» в край окна).
+ */
+.inner {
+  width: calc(100% - var(--ds-gutter) * 2);
+  max-width: 100%;
+  margin: 0 auto;
+  padding: var(--ds-space-24) 0 var(--ds-space-32);
+  box-sizing: border-box;
+}
+
+@container mainCol (min-width: 768px) {
+  .inner {
+    max-width: 720px;
+  }
+}
+
+@container mainCol (min-width: 1024px) {
+  .inner {
+    max-width: 1200px;
+  }
+}
+
+@container mainCol (min-width: 1440px) {
+  .inner {
+    max-width: 1320px;
+  }
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    'day'
+    'quick'
+    'spreads'
+    'habits'
+    'mood';
+  gap: var(--ds-space-32);
+}
+
+@container mainCol (min-width: 1024px) {
+  .layout {
+    grid-template-columns: 7fr 5fr;
+    /* Карусель раскладов — отдельной строкой во всю ширину под колонками. */
+    grid-template-areas:
+      'day quick'
+      'day habits'
+      'day mood'
+      'spreads spreads';
+    grid-template-rows: auto auto 1fr auto;
+    column-gap: var(--ds-space-32);
+    row-gap: var(--ds-space-24);
+  }
+
+  .day {
+    align-self: start;
+  }
+
+  .spreads {
+    margin-top: var(--ds-space-24);
+  }
+}
+
+/*
+ * min-width: 0 на всех grid-area — иначе grid-item берёт intrinsic
+ * min-content ширину (по умолчанию min-width:auto), и горизонтальная
+ * "full-bleed" дорожка карточек в TarotSpreadsCarousel (flex, ширина по
+ * контенту) распирает .spreads шире отведённого 7fr-трека, а вместе с ним —
+ * весь .layout/.inner и страницу (появляется горизонтальный скролл ВСЕЙ
+ * страницы, а не локальный скролл дорожки, и правая колонка "quick/habits/
+ * mood" вылезает за край окна). min-width:0 разрешает grid-треку сжиматься
+ * до отведённой доли, после чего overflow-x:auto в самой дорожке работает
+ * как задумано — локально.
+ */
+.day,
+.quick,
+.spreads,
+.habits,
+.mood {
+  min-width: 0;
+}
+
+.day {
+  grid-area: day;
+}
+
+.quick {
+  grid-area: quick;
+}
+
+.spreads {
+  grid-area: spreads;
+}
+
+.habits {
+  grid-area: habits;
+  border-top: var(--ds-size-hairline) solid var(--ds-ground-600);
+  padding-top: var(--ds-space-16);
+}
+
+.mood {
+  grid-area: mood;
+  border-top: var(--ds-size-hairline) solid var(--ds-ground-600);
+  padding-top: var(--ds-space-16);
+}

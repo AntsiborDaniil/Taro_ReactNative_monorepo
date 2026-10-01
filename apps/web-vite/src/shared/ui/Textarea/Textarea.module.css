@@ -1,0 +1,19 @@
+.textarea {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-height: calc(var(--ds-size-field-height) * 1.6);
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: vertical;
+  padding: 18px 20px;
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-body-family);
+  font-size: var(--ds-font-body-size);
+  line-height: var(--ds-font-body-line-height);
+}
+
+.textarea::placeholder {
+  color: var(--ds-ink-100);
+}

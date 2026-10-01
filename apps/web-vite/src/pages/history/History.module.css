@@ -1,0 +1,62 @@
+.page {
+  container-type: inline-size;
+  container-name: historyCol;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.column {
+  width: calc(100% - var(--ds-gutter) * 2);
+  max-width: 100%;
+  margin: 0 auto;
+  padding: var(--ds-gutter) 0 var(--ds-space-32);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-24);
+  min-width: 0;
+}
+
+@container historyCol (min-width: 768px) {
+  .column {
+    max-width: 720px;
+  }
+}
+
+/* <900px — FabNav перекрывает низ страницы. */
+@media (max-width: 899px) {
+  .column {
+    padding-bottom: 104px;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-label-family);
+  font-size: var(--ds-font-label-size);
+  letter-spacing: var(--ds-font-label-letter-spacing);
+  text-transform: var(--ds-font-label-transform);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+.thumb {
+  width: 40px;
+  flex: 0 0 auto;
+}
+
+.loadMore {
+  align-self: center;
+}

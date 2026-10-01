@@ -1,0 +1,310 @@
+.root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-24);
+}
+
+/* ---- слоты позиций ---- */
+
+.slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--ds-space-16) var(--ds-space-8);
+}
+
+.slotItem {
+  /* До 6 позиций в ряд: ширина слота сжимается под колонку, но не больше 72px. */
+  width: min(72px, calc((100% - (var(--slots-per-row, 6) - 1) * var(--ds-space-8)) / var(--slots-per-row, 6)));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-8);
+}
+
+@container readingCol (min-width: 600px) {
+  .slotItem {
+    width: 88px;
+  }
+
+  .slotLabel {
+    font-size: var(--ds-font-micro-size);
+    line-height: var(--ds-font-micro-line-height);
+  }
+}
+
+.slot {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  border-radius: 9%;
+}
+
+.slotEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed var(--ds-ground-600);
+  background: var(--ds-ground-800);
+  transition: border-color var(--ds-dur-state) var(--ds-ease), background-color var(--ds-dur-state) var(--ds-ease);
+}
+
+/* Следующая позиция: кант accent-400, без пульсаций (DS §10). */
+.slotNext {
+  border-color: var(--ds-accent-400);
+  background: var(--ds-ground-700);
+}
+
+.slotNumber {
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-title-family);
+  font-size: var(--ds-font-title-size);
+  line-height: 1;
+}
+
+.slotNext .slotNumber {
+  color: var(--ds-accent-400);
+}
+
+/* Карта, только что легшая в слот: короткий доворот (один вход на блок). */
+.slotReveal > * {
+  animation: slotSettle var(--ds-dur-block) var(--ds-ease) both;
+}
+
+@keyframes slotSettle {
+  from {
+    transform: translateY(-6px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.slotLabel {
+  width: 100%;
+  text-align: center;
+  /* Узкие слоты на телефоне: пол DS 11px и переносы, без вылезания за слот. */
+  font-size: 11px;
+  line-height: 14px;
+  hyphens: auto;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---- счётчик сегментами (DS §11) ---- */
+
+.progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-8);
+  text-align: center;
+}
+
+.segments {
+  display: flex;
+  gap: var(--ds-space-4);
+}
+
+.segment,
+.segmentOn {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ds-ground-600);
+  transition: background-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.segmentOn {
+  background: var(--ds-accent-400);
+}
+
+/* ---- колода: coverflow в 3D ---- */
+
+.deck {
+  /* Во всю ширину области контента (контейнер readingCol, не окно): колода
+     выходит за колонку 720px, родитель .root центрирует её симметрично. */
+  position: relative;
+  width: 100cqw;
+  max-width: none;
+  flex: 0 0 auto;
+  --deck-card-w: 92px;
+  transition: opacity var(--ds-dur-block) var(--ds-ease);
+}
+
+@container readingCol (min-width: 768px) {
+  .deck {
+    --deck-card-w: 120px;
+  }
+}
+
+/* Все карты вытянуты — колода остаётся на месте, но приглушена и неактивна. */
+.deckDone {
+  opacity: 0.45;
+}
+
+.deckDone .stage {
+  pointer-events: none;
+  cursor: default;
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  height: calc(var(--deck-card-w) * 16 / 9 + var(--ds-space-48));
+  perspective: 1100px;
+  perspective-origin: 50% 40%;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+}
+
+.stage:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: -2px;
+  border-radius: var(--ds-radius-list-row);
+}
+
+.stageDragging {
+  cursor: grabbing;
+}
+
+.deckCard {
+  position: absolute;
+  left: 50%;
+  top: var(--ds-space-24);
+  width: var(--deck-card-w);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition:
+    transform var(--ds-dur-block) var(--ds-ease),
+    opacity var(--ds-dur-block) var(--ds-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stageDragging .deckCard {
+  transition: none;
+}
+
+.deckCardInner {
+  display: block;
+  border-radius: 9%;
+  transition:
+    transform var(--ds-dur-state) var(--ds-ease),
+    box-shadow var(--ds-dur-state) var(--ds-ease);
+}
+
+/* Центральная карта: грань accent-400 и подъём на наведении — приглашение тянуть. */
+.deckCardActive .deckCardInner {
+  box-shadow: 0 0 0 var(--ds-size-edge-width) var(--ds-accent-400);
+}
+
+@media (hover: hover) {
+  .deckCardActive:hover .deckCardInner {
+    transform: translateY(-12px);
+  }
+}
+
+.deckCardActive:active .deckCardInner {
+  transform: translateY(1px);
+}
+
+.navButton {
+  position: absolute;
+  top: 50%;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-size-min-touch);
+  height: var(--ds-size-min-touch);
+  transform: translateY(-50%);
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  border-radius: 50%;
+  background: var(--ds-ground-800);
+  color: var(--ds-ink-50);
+  cursor: pointer;
+  transition: border-color var(--ds-dur-state) var(--ds-ease), opacity var(--ds-dur-state) var(--ds-ease);
+}
+
+.navPrev {
+  left: var(--ds-gutter);
+}
+
+.navNext {
+  right: var(--ds-gutter);
+}
+
+.navButton:hover:not(:disabled) {
+  border-color: var(--ds-accent-400);
+}
+
+.navButton:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.navButton:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+/* Телефон: свайп вместо стрелок. */
+@container readingCol (max-width: 767px) {
+  .navButton {
+    display: none;
+  }
+}
+
+.hint {
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deckCard,
+  .deckCardInner,
+  .deck,
+  .segment,
+  .segmentOn,
+  .slotEmpty {
+    transition: none;
+  }
+
+  .slotReveal > * {
+    animation: none;
+  }
+}
+
+/* Летящая карта — создаётся императивно в CardChoice.tsx (document.body), не
+   часть React-дерева: FLIP-перелёт через Web Animations API. Обычные (не
+   :global) классы CSS Modules — styles.flyer/styles.flyerImage дают хэшированные
+   имена в JS, которые и присваиваются созданным элементам. */
+.flyer {
+  position: fixed;
+  z-index: 999;
+  pointer-events: none;
+  border-radius: 9%;
+  overflow: hidden;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+}
+
+.flyerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

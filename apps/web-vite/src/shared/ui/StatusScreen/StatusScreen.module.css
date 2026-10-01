@@ -1,0 +1,43 @@
+.wrapper {
+  width: 100%;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ds-gutter);
+  box-sizing: border-box;
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-12);
+  padding: var(--ds-space-24);
+  border-radius: 20px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-800);
+  box-sizing: border-box;
+}
+
+.image {
+  width: 100%;
+  max-width: 220px;
+  height: 160px;
+  object-fit: contain;
+}
+
+.title {
+  text-align: center;
+}
+
+.description {
+  text-align: center;
+}
+
+.action {
+  width: 100%;
+  margin-top: var(--ds-space-8);
+}

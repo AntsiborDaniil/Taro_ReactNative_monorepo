@@ -1,0 +1,149 @@
+/**
+ * DS-токены (строго по n8n-tarot/design-system.html), сгенерированы из
+ * apps/web/src/shared/themes/ds/index.ts. Значения синхронизировать вручную
+ * при изменении источника — этот файл не генерируется автоматически.
+ *
+ * Брейкпоинты контейнера (DS_BREAKPOINTS, считать по ширине контейнера, не окна):
+ *   tablet: 768px, desktop: 1024px, wide: 1440px.
+ * Навигация: рейка слева от >=900px, FAB-навигация ниже 900px.
+ */
+
+:root {
+  /* ----------------------------------------------------------- цвета §02 */
+  --ds-ground-900: #091519;
+  --ds-ground-800: #0f2228;
+  --ds-ground-700: #17333d;
+  --ds-ground-600: #204956;
+  --ds-calm-600: #206a75;
+  --ds-calm-500: #2c8e9e;
+  --ds-accent-400: #eaa433;
+  --ds-action-500: #ef5334;
+  --ds-alarm-600: #b04027;
+  --ds-ink-100: #dadbbc;
+  --ds-ink-50: #ecedcb;
+  --ds-on-action: #091519;
+  /* Текст и знаки на заливке calm-600: кремовый в обеих темах (#ecedcb на #206a75 — 5.6). */
+  --ds-on-calm: #ecedcb;
+  --ds-press-dim: rgba(9, 21, 25, 0.18);
+  --ds-scrim-ground-900: rgba(9, 21, 25, 0.8);
+  --ds-skeleton-base: #17333d;
+  --ds-skeleton-highlight: #204956;
+
+  /* --------------------------------------------------------- отступы §08 */
+  --ds-space-4: 4px;
+  --ds-space-8: 8px;
+  --ds-space-12: 12px;
+  --ds-space-16: 16px;
+  --ds-space-24: 24px;
+  --ds-space-32: 32px;
+  --ds-space-48: 48px;
+
+  /* ----------------------------------------------------------- гаттер */
+  --ds-gutter: 25px;
+
+  /* ------------------------------------------------------- типографика §06 */
+  --ds-font-display-family: 'Geologica-Black', system-ui, sans-serif;
+  --ds-font-display-size: 34px;
+  --ds-font-display-line-height: 36px;
+  --ds-font-display-letter-spacing: -0.68px;
+
+  --ds-font-title-family: 'Geologica-ExtraBold', system-ui, sans-serif;
+  --ds-font-title-size: 25px;
+  --ds-font-title-line-height: 29px;
+  --ds-font-title-letter-spacing: -0.37px;
+
+  --ds-font-lead-family: 'Onest-Bold', system-ui, sans-serif;
+  --ds-font-lead-size: 19px;
+  --ds-font-lead-line-height: 25px;
+  --ds-font-lead-letter-spacing: 0px;
+
+  --ds-font-body-family: 'Onest-Medium', system-ui, sans-serif;
+  --ds-font-body-size: 16px;
+  --ds-font-body-line-height: 24px;
+  --ds-font-body-letter-spacing: 0px;
+
+  --ds-font-label-family: 'Onest-Bold', system-ui, sans-serif;
+  --ds-font-label-size: 13px;
+  --ds-font-label-line-height: 18px;
+  --ds-font-label-letter-spacing: 1.3px;
+  --ds-font-label-transform: uppercase;
+
+  --ds-font-micro-family: 'Onest-SemiBold', system-ui, sans-serif;
+  --ds-font-micro-size: 12px;
+  --ds-font-micro-line-height: 17px;
+  --ds-font-micro-letter-spacing: 0.72px;
+
+  --ds-font-button-family: 'Onest-ExtraBold', system-ui, sans-serif;
+  --ds-font-button-size: 19px;
+  --ds-font-button-line-height: 23px;
+  --ds-font-button-letter-spacing: 0px;
+
+  --ds-font-chip-family: 'Onest-Bold', system-ui, sans-serif;
+  --ds-font-chip-size: 15px;
+  --ds-font-chip-line-height: 18px;
+  --ds-font-chip-letter-spacing: 2.2px;
+  --ds-font-chip-transform: uppercase;
+
+  /* ------------------------------------------------------------ радиусы §07 */
+  --ds-radius-list-row: 18px;
+
+  /* -------------------------------------------------------- размеры §11 */
+  --ds-size-button-height: 52px;
+  --ds-size-chip-height: 40px;
+  --ds-size-list-row-height: 64px;
+  --ds-size-list-row-thumb: 40px;
+  --ds-size-selection-bar: 5px;
+  --ds-size-field-height: 74px;
+  --ds-size-field-radius: 24px;
+  --ds-size-field-border: 1.6px;
+  --ds-size-field-border-focus: 2.4px;
+  --ds-size-min-touch: 44px;
+  --ds-size-edge-width: 2px;
+  --ds-size-focus-ring-width: 2px;
+  --ds-size-hairline: 1px;
+
+  /* ----------------------------------------------------------- движение §10 */
+  --ds-dur-feedback: 100ms;
+  --ds-dur-state: 220ms;
+  --ds-dur-block: 400ms;
+  --ds-dur-scene: 700ms;
+  --ds-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /*
+   * Safe-area (вырезы/статус-бар) — браузерный env() по умолчанию, перебивается
+   * инлайн-стилями на :root из shared/lib/web/telegramWebApp.ts
+   * (readTelegramSafeAreaInsets, события viewportChanged/safeAreaChanged), когда
+   * открыто внутри Telegram Mini App и Telegram отдаёт свой safeAreaInset.
+   */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+/*
+ * Светлая тема DS §02 («Светлая тема»): ground-50 холст, ground-100 поверхность,
+ * ground-200 граница, calm-700/600, accent-700 грань на светлом, action-600 действие,
+ * alarm-700 тревога, ink-900/800 текст. Имена переменных те же, что у тёмной темы,
+ * подставляются значения по роли. Текст на кнопке действия — кремовый холст:
+ * #b04027 на #f2f1e3 даёт 5.12 (DS: «кнопка звенит»).
+ */
+:root[data-theme='light'] {
+  --ds-ground-900: #f2f1e3;
+  --ds-ground-800: #e6e5d2;
+  --ds-ground-700: #e6e5d2;
+  --ds-ground-600: #d5d6c0;
+  --ds-calm-600: #175a64;
+  --ds-calm-500: #206a75;
+  --ds-accent-400: #9c6a1e;
+  --ds-action-500: #b04027;
+  --ds-alarm-600: #8e2f1c;
+  --ds-ink-100: #17333d;
+  --ds-ink-50: #0f2228;
+  --ds-on-action: #f2f1e3;
+  --ds-on-calm: #f2f1e3;
+  --ds-press-dim: rgba(15, 34, 40, 0.1);
+  --ds-scrim-ground-900: rgba(15, 34, 40, 0.45);
+  --ds-skeleton-base: #e6e5d2;
+  --ds-skeleton-highlight: #d5d6c0;
+}

@@ -1,0 +1,74 @@
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-16);
+  cursor: pointer;
+}
+
+.wrapper.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.track {
+  box-sizing: border-box;
+  position: relative;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 26px;
+  border-radius: 13px;
+  background: var(--ds-ground-600);
+  transition: background-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.input:checked + .track {
+  background: var(--ds-calm-600);
+}
+
+/* Включённый: бегунок кремовый на calm-заливке — читается в обеих темах. */
+.input:checked + .track .thumb {
+  background: var(--ds-on-calm);
+}
+
+.input:focus-visible + .track {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+.thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--ds-ink-50);
+  transition: transform var(--ds-dur-state) var(--ds-ease);
+}
+
+.input:checked + .track .thumb {
+  transform: translateX(18px);
+}
+
+.label {
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-body-family);
+  font-size: var(--ds-font-body-size);
+  line-height: var(--ds-font-body-line-height);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track,
+  .thumb {
+    transition: none;
+  }
+}

@@ -1,0 +1,70 @@
+.display {
+  font-family: var(--ds-font-display-family);
+  font-size: var(--ds-font-display-size);
+  line-height: var(--ds-font-display-line-height);
+  letter-spacing: var(--ds-font-display-letter-spacing);
+  margin: 0;
+}
+
+.title {
+  font-family: var(--ds-font-title-family);
+  font-size: var(--ds-font-title-size);
+  line-height: var(--ds-font-title-line-height);
+  letter-spacing: var(--ds-font-title-letter-spacing);
+  margin: 0;
+}
+
+.lead {
+  font-family: var(--ds-font-lead-family);
+  font-size: var(--ds-font-lead-size);
+  line-height: var(--ds-font-lead-line-height);
+  letter-spacing: var(--ds-font-lead-letter-spacing);
+  margin: 0;
+}
+
+.body {
+  font-family: var(--ds-font-body-family);
+  font-size: var(--ds-font-body-size);
+  line-height: var(--ds-font-body-line-height);
+  letter-spacing: var(--ds-font-body-letter-spacing);
+  margin: 0;
+}
+
+.label {
+  font-family: var(--ds-font-label-family);
+  font-size: var(--ds-font-label-size);
+  line-height: var(--ds-font-label-line-height);
+  letter-spacing: var(--ds-font-label-letter-spacing);
+  text-transform: var(--ds-font-label-transform);
+  margin: 0;
+}
+
+.micro {
+  font-family: var(--ds-font-micro-family);
+  font-size: var(--ds-font-micro-size);
+  line-height: var(--ds-font-micro-line-height);
+  letter-spacing: var(--ds-font-micro-letter-spacing);
+  margin: 0;
+}
+
+.toneInk50 {
+  color: var(--ds-ink-50);
+}
+
+.toneInk100 {
+  color: var(--ds-ink-100);
+}
+
+.toneAccent {
+  color: var(--ds-accent-400);
+}
+
+.toneAlarm {
+  color: var(--ds-alarm-600);
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

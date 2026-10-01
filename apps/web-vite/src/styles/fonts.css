@@ -1,0 +1,51 @@
+/**
+ * Шрифты DS. Файлы — legacy assets apps/web (алиас @assets), не копируются.
+ */
+
+@font-face {
+  font-family: 'Geologica-ExtraBold';
+  src: url('@assets/fonts/Geologica-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geologica-Black';
+  src: url('@assets/fonts/Geologica-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Onest-Medium';
+  src: url('@assets/fonts/Onest-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Onest-SemiBold';
+  src: url('@assets/fonts/Onest-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Onest-Bold';
+  src: url('@assets/fonts/Onest-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Onest-ExtraBold';
+  src: url('@assets/fonts/Onest-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}

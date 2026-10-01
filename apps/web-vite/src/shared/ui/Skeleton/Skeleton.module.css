@@ -1,0 +1,37 @@
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--ds-skeleton-base);
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+}
+
+.circle {
+  border-radius: 50%;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--ds-skeleton-highlight), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 1.6s var(--ds-ease) infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+    display: none;
+  }
+}

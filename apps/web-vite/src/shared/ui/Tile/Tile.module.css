@@ -1,0 +1,9 @@
+.tile {
+  container-type: inline-size;
+  box-sizing: border-box;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: 4cqw;
+  background: var(--ds-ground-800);
+}

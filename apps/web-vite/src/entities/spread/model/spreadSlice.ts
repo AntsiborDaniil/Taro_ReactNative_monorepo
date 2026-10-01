@@ -1,0 +1,104 @@
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { TSelectedTarotCard } from '@legacy-data';
+import type { TSpread } from './catalog';
+
+export type SpreadFlowStatus = 'choosing' | 'interpreting' | 'done' | 'error';
+
+export type SpreadState = {
+  /** Клон выбранного расклада каталога (не мутирует catalog.ts) + runtime-поля (selectedCards/question/interpretation). */
+  selectedSpread: TSpread | null;
+  question: string;
+  status: SpreadFlowStatus;
+  errorCode: string | null;
+};
+
+const initialState: SpreadState = {
+  selectedSpread: null,
+  question: '',
+  status: 'choosing',
+  errorCode: null,
+};
+
+const spreadSlice = createSlice({
+  name: 'spread',
+  initialState,
+  reducers: {
+    /** Клонируем из каталога — selectedCards/question/interpretation runtime, catalog.ts остаётся неизменным эталоном. */
+    selectSpread(state, action: PayloadAction<TSpread>) {
+      state.selectedSpread = {
+        ...action.payload,
+        selectedCards: [],
+        question: '',
+        interpretation: '',
+      };
+      state.question = '';
+      state.status = 'choosing';
+      state.errorCode = null;
+    },
+    setQuestion(state, action: PayloadAction<string>) {
+      state.question = action.payload;
+      if (state.selectedSpread) {
+        state.selectedSpread.question = action.payload;
+      }
+    },
+    addSelectedCard(state, action: PayloadAction<TSelectedTarotCard>) {
+      if (!state.selectedSpread) return;
+      if (state.selectedSpread.selectedCards.length >= state.selectedSpread.cardsCount) return;
+      state.selectedSpread.selectedCards.push(action.payload);
+    },
+    clearSelectedCards(state) {
+      if (!state.selectedSpread) return;
+      state.selectedSpread.selectedCards = [];
+    },
+    setInterpretation(state, action: PayloadAction<string>) {
+      if (!state.selectedSpread) return;
+      state.selectedSpread.interpretation = action.payload;
+      state.status = 'done';
+      state.errorCode = null;
+    },
+    setStatus(state, action: PayloadAction<SpreadFlowStatus>) {
+      state.status = action.payload;
+    },
+    setError(state, action: PayloadAction<string | null>) {
+      state.status = 'error';
+      state.errorCode = action.payload;
+    },
+    /** После сохранения в историю (локально/облако) — uid/date/packKey нужны для повторного сохранения и шаринга. */
+    setSpreadMeta(state, action: PayloadAction<{ uid?: string; date?: string; packKey?: string }>) {
+      if (!state.selectedSpread) return;
+      Object.assign(state.selectedSpread, action.payload);
+    },
+    /**
+     * Открыть уже сохранённый расклад (история /history, шаренная ссылка) —
+     * в отличие от selectSpread, НЕ сбрасывает selectedCards/interpretation:
+     * экран /reading увидит его уже «завершённым» и покажет готовый ответ
+     * без повторной интерпретации.
+     */
+    openSavedSpread(state, action: PayloadAction<TSpread>) {
+      state.selectedSpread = action.payload;
+      state.question = action.payload.question ?? '';
+      state.status = action.payload.interpretation ? 'done' : 'choosing';
+      state.errorCode = null;
+    },
+    clearSpread(state) {
+      state.selectedSpread = null;
+      state.question = '';
+      state.status = 'choosing';
+      state.errorCode = null;
+    },
+  },
+});
+
+export const {
+  selectSpread,
+  setQuestion,
+  addSelectedCard,
+  clearSelectedCards,
+  setInterpretation,
+  setStatus,
+  setError,
+  setSpreadMeta,
+  openSavedSpread,
+  clearSpread,
+} = spreadSlice.actions;
+export const spreadReducer = spreadSlice.reducer;

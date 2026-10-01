@@ -1,0 +1,93 @@
+.row {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-16);
+  width: 100%;
+  min-height: var(--ds-size-list-row-height);
+  padding: var(--ds-space-12) var(--ds-space-16);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-700);
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  color: inherit;
+  text-decoration: none;
+  text-align: left;
+  cursor: default;
+  transition: background-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.interactive {
+  cursor: pointer;
+}
+
+.interactive:hover:not(:disabled) {
+  background: var(--ds-ground-600);
+}
+
+.interactive:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+.selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: var(--ds-space-8);
+  bottom: var(--ds-space-8);
+  width: var(--ds-size-selection-bar);
+  border-radius: 3px;
+  background: var(--ds-accent-400);
+}
+
+.leading {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-size-list-row-thumb);
+  height: var(--ds-size-list-row-thumb);
+  color: var(--ds-ink-50);
+}
+
+.body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-body-family);
+  font-size: var(--ds-font-body-size);
+  line-height: var(--ds-font-body-line-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subtitle {
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-micro-family);
+  font-size: var(--ds-font-micro-size);
+  line-height: var(--ds-font-micro-line-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trailing {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  color: var(--ds-ink-100);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
+}

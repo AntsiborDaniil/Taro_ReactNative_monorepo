@@ -1,0 +1,21 @@
+{
+  "headerTitle": "Главная страница",
+
+  "popularSpreads": "Популярные расклады",
+  "popularRituals": "Популярные Ритуалы",
+
+  "affirmationsBlock.title": "Аффирмации",
+  "affirmationsBlock.caption": "Для вас есть аффирмация",
+
+  "dayCard.lead": "Один совет на сегодня",
+  "dayCard.cta": "Вытянуть карту",
+  "dayCard.a11y": "Карта дня, {{date}}. Вытянуть карту",
+
+  "allSpreads": "Все расклады",
+  "spreadCardsCount_one": "{{count}} карта",
+  "spreadCardsCount_few": "{{count}} карты",
+  "spreadCardsCount_many": "{{count}} карт",
+  "spreadCardsCount_other": "{{count}} карты",
+  "spreadCard.a11y": "{{name}}, {{cards}}",
+  "quickLinks.a11yHint": "Открыть в библиотеке"
+}

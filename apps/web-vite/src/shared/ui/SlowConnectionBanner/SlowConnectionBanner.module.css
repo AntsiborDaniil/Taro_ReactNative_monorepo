@@ -1,0 +1,59 @@
+.banner {
+  position: fixed;
+  top: var(--safe-top, 0px);
+  left: 0;
+  right: 0;
+  z-index: 950;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-8);
+  min-height: 40px;
+  padding: var(--ds-space-8) var(--ds-space-12) var(--ds-space-8) var(--ds-space-16);
+  border-bottom: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-800);
+  animation: bannerIn var(--ds-dur-state) var(--ds-ease) both;
+}
+
+@keyframes bannerIn {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.text {
+  flex: 1 1 auto;
+  text-align: center;
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-micro-family);
+  font-size: var(--ds-font-micro-size);
+  line-height: var(--ds-font-micro-line-height);
+}
+
+.close {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: var(--ds-ground-700);
+  color: var(--ds-ink-50);
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner {
+    animation: none;
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "web-vite",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/generate-vercel-config.mjs && node scripts/generate-legal-html.mjs && vite build && node scripts/inject-seo-html.mjs && pnpm --filter tarot-admin build && node scripts/copy-admin-dist.mjs",
+    "preview": "vite preview --port 5174",
+    "typecheck": "tsc --noEmit",
+    "build:app": "vite build"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.5.1",
+    "@supabase/supabase-js": "^2.49.8",
+    "cookie": "^1.0.2",
+    "i18next": "^24.2.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-i18next": "^15.4.1",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/react": "~19.0.10",
+    "@types/react-dom": "~19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~5.8.3",
+    "vite": "^6.2.2"
+  }
+}
