@@ -554,18 +554,12 @@ importers:
       babel-preset-expo:
         specifier: ~13.0.0
         version: 13.0.0(@babel/core@7.29.0)
-      jsdom:
-        specifier: ^26.1.0
-        version: 26.1.0
       react-native-svg-transformer:
         specifier: ^1.5.1
         version: 1.5.3(react-native-svg@15.11.2(react-native@0.79.6(@babel/core@7.29.0)(@types/react@19.0.14)(react@19.0.0))(react@19.0.0))(react-native@0.79.6(@babel/core@7.29.0)(@types/react@19.0.14)(react@19.0.0))(typescript@5.8.3)
       typescript:
         specifier: ~5.8.3
         version: 5.8.3
-      vitest:
-        specifier: 3.2.7
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@24.12.0)(jsdom@26.1.0)(lightningcss@1.27.0)(msw@2.15.0(@types/node@24.12.0)(typescript@5.8.3))(terser@5.46.0)(yaml@2.8.2)
 
   apps/web-vite:
     dependencies:
