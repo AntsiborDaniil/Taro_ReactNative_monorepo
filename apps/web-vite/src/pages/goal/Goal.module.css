@@ -25,6 +25,12 @@
   }
 }
 
+@media (max-width: 899px) {
+  .column {
+    padding-bottom: 104px;
+  }
+}
+
 .card {
   flex: 1;
   display: flex;

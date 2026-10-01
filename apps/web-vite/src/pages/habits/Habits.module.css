@@ -24,6 +24,12 @@
   }
 }
 
+@media (max-width: 899px) {
+  .column {
+    padding-bottom: 104px;
+  }
+}
+
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.08em;

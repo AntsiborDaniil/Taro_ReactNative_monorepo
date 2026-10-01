@@ -24,6 +24,12 @@
   }
 }
 
+@media (max-width: 899px) {
+  .column {
+    padding-bottom: 104px;
+  }
+}
+
 .card {
   display: flex;
   flex-direction: column;

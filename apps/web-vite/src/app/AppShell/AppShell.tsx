@@ -10,6 +10,7 @@ import { tryDevQuickLogin } from '@shared/lib/devQuickLogin';
 import { trackMetrikaPaymentSuccessIfNeeded } from '@shared/lib/metrika';
 import { useAppSelector } from '@shared/lib/store';
 import { lockMobileInputZoom } from '@shared/lib/web/lockMobileInputZoom';
+import { initSafeAreaInsetVars } from '@shared/lib/web/safeAreaInsets';
 import { isLikelyTelegramMiniApp, tryAuthenticateTelegramMiniApp } from '@shared/lib/web/telegramWebApp';
 import { useTelegramBackButton } from '@shared/lib/web/useTelegramBackButton';
 import { NavRail } from './NavRail';
@@ -40,6 +41,7 @@ export function AppShell(): ReactElement {
   // AppShell не размонтируется в течение жизни SPA).
   useEffect(() => {
     lockMobileInputZoom();
+    initSafeAreaInsetVars();
   }, []);
 
   // Dev-only: VITE_DEV_QUICK_LOGIN=1 — авто-вход гостя тестовой сессией (см.

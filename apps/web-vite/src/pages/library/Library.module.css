@@ -30,6 +30,12 @@
   }
 }
 
+@media (max-width: 899px) {
+  .column {
+    padding-bottom: 104px;
+  }
+}
+
 .intro {
   margin: 0;
   max-width: 560px;
