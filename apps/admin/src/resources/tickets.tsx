@@ -80,7 +80,9 @@ export function TicketEdit() {
         <TextInput
           source="admin_reply"
           label="Ответ пользователю (уйдёт в бот)"
+          helperText="Заголовок «Ответ поддержки», цитата вопроса и подсказка про /support добавляются автоматически — пиши только по делу."
           multiline
+          rows={6}
         />
       </SimpleForm>
     </Edit>

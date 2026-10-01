@@ -109,19 +109,6 @@
   cursor: pointer;
 }
 
-.orRow {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-12);
-  color: var(--ds-ink-100);
-}
-
-.orLine {
-  flex: 1 1 auto;
-  height: var(--ds-size-hairline);
-  background: var(--ds-ground-600);
-}
-
 .fieldLabel {
   color: var(--ds-ink-100);
 }

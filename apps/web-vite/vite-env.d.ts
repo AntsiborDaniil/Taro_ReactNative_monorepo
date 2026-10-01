@@ -1,5 +1,12 @@
 /// <reference types="vite/client" />
 
+interface ImportMetaEnv {
+  readonly VITE_USE_MOCKS?: string;
+  readonly VITE_DEV_QUICK_LOGIN?: string;
+  readonly VITE_TELEGRAM_BOT_USERNAME?: string;
+  readonly VITEST?: boolean;
+}
+
 
 declare module '*.module.css' {
   const classes: { readonly [key: string]: string };

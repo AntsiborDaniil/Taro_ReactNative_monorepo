@@ -1,66 +1,76 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement, type TransitionEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ALL_NAV_ITEMS } from './navItems';
 import styles from './FabNav.module.css';
 
-const SCROLL_HIDE_THRESHOLD = 12;
-const NEAR_BOTTOM_PX = 24;
-
-/** Прячется при скролле вниз, возвращается при скролле вверх и у конца страницы. */
-function useScrollVisible(): boolean {
-  const [visible, setVisible] = useState(true);
-  const lastY = useRef(typeof window === 'undefined' ? 0 : window.scrollY);
-
-  useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY;
-      const doc = document.documentElement;
-      const nearBottom = y + window.innerHeight >= doc.scrollHeight - NEAR_BOTTOM_PX;
-      const delta = y - lastY.current;
-
-      if (nearBottom || y <= 0) {
-        setVisible(true);
-      } else if (delta > SCROLL_HIDE_THRESHOLD) {
-        setVisible(false);
-      } else if (delta < -SCROLL_HIDE_THRESHOLD) {
-        setVisible(true);
-      }
-
-      lastY.current = y;
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  return visible;
-}
-
+/**
+ * Мобильная навигация: FAB всегда на экране.
+ * present — меню в DOM; entered — класс открытия (после paint, иначе нет enter-анимации).
+ */
 export function FabNav(): ReactElement {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const visible = useScrollVisible();
+  const [present, setPresent] = useState(false);
+  const [entered, setEntered] = useState(false);
 
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (open) {
+      setPresent(true);
+      return;
+    }
+    setEntered(false);
+  }, [open]);
+
+  // Без transition (reduced-motion) onTransitionEnd не придёт — снимаем меню сразу.
+  useEffect(() => {
+    if (open || !present) return;
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    setPresent(false);
+  }, [open, present]);
+
+  useEffect(() => {
+    if (!present || !open) return;
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setEntered(true));
+    });
+    return () => cancelAnimationFrame(id);
+  }, [present, open]);
+
+  const handleMenuTransitionEnd = (event: TransitionEvent<HTMLUListElement>) => {
+    if (event.target !== event.currentTarget) return;
+    if (event.propertyName !== 'opacity') return;
+    if (!open) setPresent(false);
+  };
+
   const activeItem = ALL_NAV_ITEMS.find((item) => item.isActive(pathname)) ?? ALL_NAV_ITEMS[0];
   const ActiveIcon = activeItem.Icon;
 
   return (
-    <div className={visible ? styles.root : `${styles.root} ${styles.rootHidden}`}>
-      {open && (
-        <ul className={styles.menu}>
-          {ALL_NAV_ITEMS.map(({ to, labelKey, Icon, isActive }) => {
+    <div className={styles.root}>
+      {present ? (
+        <ul
+          className={entered ? `${styles.menu} ${styles.menuOpen}` : styles.menu}
+          onTransitionEnd={handleMenuTransitionEnd}
+          aria-hidden={!open}
+        >
+          {ALL_NAV_ITEMS.map(({ to, labelKey, Icon, isActive }, index) => {
             const active = isActive(pathname);
             return (
-              <li key={to}>
+              <li
+                key={to}
+                className={styles.menuItemWrap}
+                style={{ ['--fab-item-index' as string]: index }}
+              >
                 <button
                   type="button"
+                  tabIndex={open ? 0 : -1}
                   className={active ? `${styles.menuItem} ${styles.menuItemActive}` : styles.menuItem}
                   onClick={() => {
                     navigate(to);
@@ -74,10 +84,10 @@ export function FabNav(): ReactElement {
             );
           })}
         </ul>
-      )}
+      ) : null}
       <button
         type="button"
-        className={styles.fab}
+        className={open ? `${styles.fab} ${styles.fabOpen}` : styles.fab}
         aria-expanded={open}
         aria-label={open ? t('nav.fab.close') : t('nav.fab.open')}
         onClick={() => setOpen((v) => !v)}

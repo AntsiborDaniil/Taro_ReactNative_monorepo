@@ -46,6 +46,13 @@ const spreadSlice = createSlice({
       if (state.selectedSpread.selectedCards.length >= state.selectedSpread.cardsCount) return;
       state.selectedSpread.selectedCards.push(action.payload);
     },
+    /** Сразу заполнить оставшиеся слоты (кнопка «вытянуть все» в CardChoice). */
+    addSelectedCards(state, action: PayloadAction<TSelectedTarotCard[]>) {
+      if (!state.selectedSpread || action.payload.length === 0) return;
+      const room = state.selectedSpread.cardsCount - state.selectedSpread.selectedCards.length;
+      if (room <= 0) return;
+      state.selectedSpread.selectedCards.push(...action.payload.slice(0, room));
+    },
     clearSelectedCards(state) {
       if (!state.selectedSpread) return;
       state.selectedSpread.selectedCards = [];
@@ -93,6 +100,7 @@ export const {
   selectSpread,
   setQuestion,
   addSelectedCard,
+  addSelectedCards,
   clearSelectedCards,
   setInterpretation,
   setStatus,

@@ -2,10 +2,9 @@ import { useSyncExternalStore } from 'react';
 
 /**
  * Тема интерфейса DS §02: тёмная (по умолчанию) и светлая. Значения цветов —
- * в styles/tokens.css (:root и [data-theme='light']). Выбор пользователя хранится
- * в localStorage; 'system' следует prefers-color-scheme.
+ * в styles/tokens.css (:root и [data-theme='light']). Выбор в localStorage.
  */
-export type ThemePreference = 'dark' | 'light' | 'system';
+export type ThemePreference = 'dark' | 'light';
 export type ResolvedTheme = 'dark' | 'light';
 
 const STORAGE_KEY = 'theme';
@@ -17,21 +16,34 @@ export const THEME_CANVAS: Record<ResolvedTheme, string> = {
 
 const listeners = new Set<() => void>();
 
+function systemTheme(): ResolvedTheme {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches
+    ? 'light'
+    : 'dark';
+}
+
 function readPreference(): ThemePreference {
   try {
     const value = localStorage.getItem(STORAGE_KEY);
-    return value === 'light' || value === 'system' ? value : 'dark';
+    if (value === 'light') return 'light';
+    // Раньше была опция 'system' — сводим к явной теме.
+    if (value === 'system') {
+      const resolved = systemTheme();
+      try {
+        localStorage.setItem(STORAGE_KEY, resolved);
+      } catch {
+        /* ignore */
+      }
+      return resolved;
+    }
+    return 'dark';
   } catch {
     return 'dark';
   }
 }
 
-function systemTheme(): ResolvedTheme {
-  return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-}
-
 export function resolveTheme(preference: ThemePreference): ResolvedTheme {
-  return preference === 'system' ? systemTheme() : preference;
+  return preference;
 }
 
 /** Ставит data-theme на <html> и цвет адресной строки. */
@@ -43,7 +55,17 @@ export function applyTheme(preference: ThemePreference = readPreference()): void
   const meta = document.querySelector('meta[name="theme-color"]');
   meta?.setAttribute('content', THEME_CANVAS[resolved]);
   // Telegram Mini App: шапка и фон клиента — в цвет холста темы.
-  const tg = (window as { Telegram?: { WebApp?: { initData?: string; setHeaderColor?: (c: string) => void; setBackgroundColor?: (c: string) => void } } }).Telegram?.WebApp;
+  const tg = (
+    window as {
+      Telegram?: {
+        WebApp?: {
+          initData?: string;
+          setHeaderColor?: (c: string) => void;
+          setBackgroundColor?: (c: string) => void;
+        };
+      };
+    }
+  ).Telegram?.WebApp;
   if (tg?.initData) {
     tg.setHeaderColor?.(THEME_CANVAS[resolved]);
     tg.setBackgroundColor?.(THEME_CANVAS[resolved]);
@@ -60,15 +82,9 @@ export function setThemePreference(preference: ThemePreference): void {
   listeners.forEach((listener) => listener());
 }
 
-/** Один раз при старте: применить тему и следить за системной, если выбрана 'system'. */
+/** Один раз при старте: применить сохранённую тему. */
 export function initTheme(): void {
   applyTheme();
-  window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
-    if (readPreference() === 'system') {
-      applyTheme('system');
-      listeners.forEach((listener) => listener());
-    }
-  });
 }
 
 function subscribe(listener: () => void): () => void {

@@ -8,6 +8,7 @@
     "build": "node scripts/generate-vercel-config.mjs && node scripts/generate-legal-html.mjs && vite build && node scripts/inject-seo-html.mjs && pnpm --filter tarot-admin build && node scripts/copy-admin-dist.mjs",
     "preview": "vite preview --port 5174",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "build:app": "vite build"
   },
   "dependencies": {
@@ -26,7 +27,15 @@
     "@types/react": "~19.0.10",
     "@types/react-dom": "~19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^26.1.0",
+    "msw": "^2.15.0",
     "typescript": "~5.8.3",
-    "vite": "^6.2.2"
+    "vite": "^6.2.2",
+    "vitest": "^5.0.3"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

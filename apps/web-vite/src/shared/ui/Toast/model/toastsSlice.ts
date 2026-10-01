@@ -32,7 +32,7 @@ const toastsSlice = createSlice({
           id: `toast-${(nextId += 1)}`,
           type: payload.type,
           message: payload.message,
-          duration: payload.duration ?? 3500,
+          duration: payload.duration ?? 2000,
         },
       }),
     },

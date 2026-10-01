@@ -25,6 +25,9 @@ import {
   lavaPaymentCancelledText,
   lavaPaymentFailedText,
   lavaPaymentSuccessText,
+  supportAcceptedText,
+  supportFailedText,
+  supportPromptText,
   welcomeText,
 } from './messages';
 import { ingestSupportTicket } from './support';
@@ -101,9 +104,7 @@ async function beginSupport(ctx: Context): Promise<void> {
   if (ctx.from?.id) {
     pendingSupportByUser.add(ctx.from.id);
   }
-  await ctx.reply(
-    'Напиши одним сообщением, что случилось — оплата, заряды, ошибка в раскладе. Текст уйдёт в поддержку, ответ придёт сюда в бот.'
-  );
+  await ctx.reply(supportPromptText, { parse_mode: 'Markdown' });
 }
 
 bot.command('start', async (ctx) => {
@@ -202,16 +203,14 @@ bot.on('message:text', async (ctx) => {
       displayName: [from.first_name, from.last_name].filter(Boolean).join(' '),
       message: ctx.message.text,
     });
-    await ctx.reply(
-      'Приняли обращение. Ответим здесь в боте. Пока можно открыть приложение кнопкой ниже.',
-      { reply_markup: openMiniAppInlineKeyboard() }
-    );
+    await ctx.reply(supportAcceptedText, {
+      parse_mode: 'Markdown',
+      reply_markup: openMiniAppInlineKeyboard(),
+    });
   } catch (error) {
     console.error('[bot] support ingest failed:', error);
     pendingSupportByUser.add(from.id);
-    await ctx.reply(
-      'Сейчас не получилось отправить сообщение в поддержку. Попробуй ещё раз через минуту или напиши /support.'
-    );
+    await ctx.reply(supportFailedText, { parse_mode: 'Markdown' });
   }
 });
 

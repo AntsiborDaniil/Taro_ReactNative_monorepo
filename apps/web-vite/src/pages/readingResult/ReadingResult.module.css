@@ -50,7 +50,7 @@
 }
 
 .cardItem {
-  width: 84px;
+  width: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -65,7 +65,13 @@
 
 @container resultCol (min-width: 600px) {
   .cardItem {
-    width: 104px;
+    width: 148px;
+  }
+}
+
+@container resultCol (min-width: 900px) {
+  .cardItem {
+    width: 200px;
   }
 }
 

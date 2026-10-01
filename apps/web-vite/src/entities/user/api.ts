@@ -51,6 +51,25 @@ export const userApi = baseApi.injectEndpoints({
       query: () => ({ url: '/api/auth/signout', method: 'POST' }),
       invalidatesTags: ['User', 'Settings', 'Favorites', 'Spreads'],
     }),
+    /**
+     * POST /api/auth/telegram. С заголовком X-Web-Cookie-Auth API отдаёт только
+     * { user } (cookie tarot_session), без JWT в JSON.
+     */
+    telegramAuth: build.mutation<{ user: AuthSessionUser }, { initData: string }>({
+      query: (body) => ({ url: '/api/auth/telegram', method: 'POST', body }),
+      invalidatesTags: ['User', 'Settings', 'Favorites', 'Spreads'],
+    }),
+    /**
+     * POST /api/auth/dev/quick-login. Тело обязательно `{}`: Fastify отвергает
+     * пустой application/json. Ручка всегда кладёт token в JSON (memory-бэкенд).
+     */
+    devQuickLogin: build.mutation<
+      { user: AuthSessionUser; token: string; refreshToken: string },
+      void
+    >({
+      query: () => ({ url: '/api/auth/dev/quick-login', method: 'POST', body: {} }),
+      invalidatesTags: ['User', 'Settings', 'Favorites', 'Spreads'],
+    }),
   }),
 });
 
@@ -64,4 +83,6 @@ export const {
   useUpdateProfileMutation,
   useChangePasswordMutation,
   useSignOutMutation,
+  useTelegramAuthMutation,
+  useDevQuickLoginMutation,
 } = userApi;

@@ -13,11 +13,13 @@
 
 .toast {
   pointer-events: auto;
+  position: relative;
   box-sizing: border-box;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
   gap: var(--ds-space-12);
-  padding: var(--ds-space-12) var(--ds-space-16);
+  padding: var(--ds-space-12) 44px;
   border-radius: 14px;
   background: var(--ds-ground-700);
   border: var(--ds-size-hairline) solid var(--ds-ground-600);
@@ -35,13 +37,19 @@
 .message {
   flex: 1 1 auto;
   min-width: 0;
+  margin: 0;
   color: var(--ds-ink-50);
   font-family: var(--ds-font-body-family);
   font-size: 15px;
   line-height: 20px;
+  text-align: center;
 }
 
 .closeButton {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
   flex: 0 0 auto;
   display: flex;
   align-items: center;

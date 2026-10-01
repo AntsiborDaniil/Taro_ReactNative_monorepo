@@ -22,9 +22,9 @@ const VARIANT_CLASS: Record<ButtonVariant, string> = {
 };
 
 /**
- * DS-кнопка §11: action500 капсула / quiet ground600 / link. Hover и press —
- * translateY(1px) + затемнение 18% через ::after (без scale). loading — без
- * спиннера, снижение прозрачности текста + aria-busy.
+ * DS-кнопка §11: action500 капсула / quiet ground600 / link.
+ * Hover — плавная смена фона/цвета (без translateY и без underline).
+ * Press — затемнение через ::after. loading — aria-busy + приглушённый текст.
  */
 export function Button({
   variant = 'action',

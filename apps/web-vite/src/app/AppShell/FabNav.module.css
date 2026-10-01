@@ -5,25 +5,15 @@
   bottom: calc(var(--ds-space-16) + var(--safe-bottom));
   z-index: 40;
   display: flex;
-  /* Меню над кнопкой: в DOM меню идёт перед FAB. */
   flex-direction: column;
   align-items: flex-start;
   gap: var(--ds-space-12);
-  transition:
-    transform var(--ds-dur-state) var(--ds-ease),
-    opacity var(--ds-dur-state) var(--ds-ease);
 }
 
 @media (min-width: 900px) {
   .root {
     display: none;
   }
-}
-
-.rootHidden {
-  transform: translateY(calc(100% + var(--ds-space-16)));
-  opacity: 0;
-  pointer-events: none;
 }
 
 .fab {
@@ -37,6 +27,19 @@
   border: var(--ds-size-edge-width) solid var(--ds-accent-400);
   color: var(--ds-ink-50);
   cursor: pointer;
+  transition:
+    background-color var(--ds-dur-state) var(--ds-ease),
+    border-color var(--ds-dur-state) var(--ds-ease),
+    transform var(--ds-dur-state) var(--ds-ease);
+}
+
+.fab:hover {
+  background: var(--ds-ground-700);
+}
+
+.fabOpen {
+  background: var(--ds-ground-700);
+  transform: rotate(90deg);
 }
 
 .fabIcon {
@@ -53,6 +56,34 @@
   border: var(--ds-size-hairline) solid var(--ds-ground-600);
   border-radius: var(--ds-radius-list-row);
   box-shadow: none;
+  transform-origin: bottom left;
+  opacity: 0;
+  transform: translateY(10px) scale(0.94);
+  pointer-events: none;
+  transition:
+    opacity var(--ds-dur-block) var(--ds-ease),
+    transform var(--ds-dur-block) var(--ds-ease);
+}
+
+.menuOpen {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.menuItemWrap {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity var(--ds-dur-state) var(--ds-ease),
+    transform var(--ds-dur-state) var(--ds-ease);
+  transition-delay: 0ms;
+}
+
+.menuOpen .menuItemWrap {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: calc(40ms * var(--fab-item-index, 0));
 }
 
 .menuItem {
@@ -70,6 +101,12 @@
   font-size: var(--ds-font-body-size);
   cursor: pointer;
   white-space: nowrap;
+  transition: background-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.menuItem:hover {
+  background: var(--ds-ground-600);
+  color: var(--ds-ink-50);
 }
 
 .menuItemActive {
@@ -80,4 +117,31 @@
 .menuIcon {
   width: 20px;
   height: 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fab,
+  .menu,
+  .menuItemWrap,
+  .menuItem {
+    transition: none;
+  }
+
+  .menu {
+    opacity: 1;
+    transform: none;
+  }
+
+  .menu:not(.menuOpen) {
+    opacity: 0;
+  }
+
+  .menuItemWrap {
+    opacity: 1;
+    transform: none;
+  }
+
+  .fabOpen {
+    transform: none;
+  }
 }

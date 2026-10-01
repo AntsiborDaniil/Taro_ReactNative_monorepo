@@ -25,10 +25,6 @@
   border-color: var(--ds-accent-400);
 }
 
-.row:active {
-  transform: translateY(1px);
-}
-
 .row:focus-visible {
   outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
   outline-offset: 2px;

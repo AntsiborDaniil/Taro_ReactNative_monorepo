@@ -41,7 +41,18 @@ for (const [path, loader] of Object.entries(localeGlob)) {
 }
 
 export function normalizeLanguage(lng: string | null | undefined): AppLanguage {
-  return ALLOWED_I18N_LANGUAGES.includes(lng as AppLanguage) ? (lng as AppLanguage) : 'ru';
+  if (!lng) return 'ru';
+  const base = lng.toLowerCase().split(/[-_]/)[0] ?? '';
+  if (base === 'en') return 'en';
+  if (base === 'ru') return 'ru';
+  return 'ru';
+}
+
+/** Язык интерфейса из Telegram `language_code` (только ru/en в приложении). */
+export function languageFromTelegramCode(code: string | null | undefined): AppLanguage {
+  if (!code) return 'ru';
+  const base = code.toLowerCase().split(/[-_]/)[0] ?? '';
+  return base === 'ru' ? 'ru' : 'en';
 }
 
 export async function loadLocaleNamespace(

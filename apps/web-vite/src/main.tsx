@@ -18,6 +18,12 @@ initTheme();
 injectYandexMetrika();
 
 async function bootstrap() {
+  // Моки только в dev и только по флагу: прод-сборка этот импорт выкидывает (DEV === false).
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCKS === '1') {
+    const { startMockWorker } = await import('@shared/api/mocks/browser');
+    await startMockWorker();
+  }
+
   const i18n = await i18nReady;
 
   createRoot(document.getElementById('root') as HTMLElement).render(

@@ -11,6 +11,11 @@ body,
   min-height: 100%;
 }
 
+/* Mac-трекпад: горизонтальный overscroll не должен уводить «назад» по истории. */
+html {
+  overscroll-behavior-x: none;
+}
+
 body {
   margin: 0;
   min-height: 100dvh;

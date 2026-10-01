@@ -1,24 +1,38 @@
 import { Suspense, useEffect, useRef, type ReactElement } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useAuthMeQuery } from '@entities/user/api';
-import { ModalRoot, PageSkeleton, SlowConnectionBanner, Toaster } from '@shared/ui';
+import { ModalRoot, PageSkeleton, Toaster } from '@shared/ui';
 // Побочный эффект: регистрирует модалки 'buy-credits'/'daily-limit' в реестре ModalSheet до первого рендера ModalRoot.
 import '@features/tarotAccess';
 // Побочный эффект: регистрирует модалку 'favorite-like-error'.
 import '@entities/favorites';
 import { tryDevQuickLogin } from '@shared/lib/devQuickLogin';
+import { syncLanguageFromTelegram } from '@shared/i18n';
 import { trackMetrikaPaymentSuccessIfNeeded } from '@shared/lib/metrika';
 import { useAppSelector } from '@shared/lib/store';
 import { lockMobileInputZoom } from '@shared/lib/web/lockMobileInputZoom';
 import { initSafeAreaInsetVars } from '@shared/lib/web/safeAreaInsets';
-import { isLikelyTelegramMiniApp, tryAuthenticateTelegramMiniApp } from '@shared/lib/web/telegramWebApp';
+import {
+  ensureTelegramWebAppScript,
+  isLikelyTelegramMiniApp,
+  tryAuthenticateTelegramMiniApp,
+} from '@shared/lib/web/telegramWebApp';
 import { useTelegramBackButton } from '@shared/lib/web/useTelegramBackButton';
 import { NavRail } from './NavRail';
 import { FabNav } from './FabNav';
 import { useSharedReadingDeepLink } from './useSharedReadingDeepLink';
 import styles from './AppShell.module.css';
 
+/** SPA не сбрасывает window.scroll при смене роута — без этого новая страница открывается «с середины». */
+function useScrollToTopOnNavigate(): void {
+  const { pathname, search } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname, search]);
+}
+
 export function AppShell(): ReactElement {
+  useScrollToTopOnNavigate();
   // Сессия cookie-based (tarot_session): грузим её один раз на верхнем уровне,
   // entities/user/model/userSlice заполняется через extraReducers по authMe.
   const { isError, refetch } = useAuthMeQuery();
@@ -42,6 +56,16 @@ export function AppShell(): ReactElement {
   useEffect(() => {
     lockMobileInputZoom();
     initSafeAreaInsetVars();
+  }, []);
+
+  // Mini App: язык интерфейса = language_code Telegram (пока пользователь сам
+  // не выбрал язык в настройках). Script в index.html с defer — после ready
+  // initDataUnsafe.user уже доступен.
+  useEffect(() => {
+    if (!isLikelyTelegramMiniApp()) return;
+    void ensureTelegramWebAppScript()
+      .then(() => syncLanguageFromTelegram())
+      .catch(() => undefined);
   }, []);
 
   // Dev-only: VITE_DEV_QUICK_LOGIN=1 — авто-вход гостя тестовой сессией (см.
@@ -77,7 +101,6 @@ export function AppShell(): ReactElement {
   return (
     <div className={styles.shell}>
       <NavRail />
-      <SlowConnectionBanner />
       <main className={styles.content}>
         {/* Код страницы грузится лениво — на медленной сети показываем скелет, навигация остаётся. */}
         <Suspense fallback={<PageSkeleton />}>

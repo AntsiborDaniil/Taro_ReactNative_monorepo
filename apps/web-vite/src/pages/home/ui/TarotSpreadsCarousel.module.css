@@ -43,12 +43,16 @@
   font-size: var(--ds-font-body-size);
   line-height: var(--ds-font-body-line-height);
   cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color var(--ds-dur-state) var(--ds-ease),
+    color var(--ds-dur-state) var(--ds-ease);
 }
 
 .allLink:hover {
   background: var(--ds-ground-700);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: color-mix(in srgb, var(--ds-accent-400) 75%, var(--ds-ink-50) 25%);
+  text-decoration: none;
 }
 
 .allLink:focus-visible {
@@ -69,6 +73,8 @@
   gap: var(--ds-space-12);
   overflow-x: auto;
   overflow-y: hidden;
+  /* contain не блокирует gesture «назад» в Chrome на Mac — none + wheel preventDefault. */
+  overscroll-behavior-x: none;
   scroll-snap-type: x proximity;
   scroll-padding-inline: var(--bleed);
   margin: 0 calc(var(--bleed) * -1);
@@ -114,10 +120,6 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.card:active {
-  transform: translateY(1px);
-}
-
 .card:focus-visible .imageInner {
   outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
   outline-offset: 2px;
@@ -125,19 +127,19 @@
 
 @container mainCol (min-width: 768px) {
   .card {
-    width: 168px;
+    width: 180px;
   }
 }
 
 @container mainCol (min-width: 1024px) {
   .card {
-    width: 184px;
+    width: 216px;
   }
 }
 
 @container mainCol (min-width: 1440px) {
   .card {
-    width: 200px;
+    width: 240px;
   }
 }
 

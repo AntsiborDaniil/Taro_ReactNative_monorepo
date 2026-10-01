@@ -1,3 +1,5 @@
+import { store } from '@app/store';
+import { userApi } from '@entities/user/api';
 import { THEME_CANVAS } from '../theme';
 import { trackMetrikaAuthTelegram, trackMetrikaMiniAppOpen } from '../metrika';
 
@@ -120,13 +122,8 @@ async function waitForInitData(timeoutMs = 3000): Promise<string> {
 }
 
 async function postTelegramAuth(initData: string): Promise<boolean> {
-  const response = await fetch('/api/auth/telegram', {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', 'X-Web-Cookie-Auth': '1' },
-    body: JSON.stringify({ initData }),
-  });
-  return response.ok;
+  const result = await store.dispatch(userApi.endpoints.telegramAuth.initiate({ initData }));
+  return userApi.endpoints.telegramAuth.matchFulfilled(result);
 }
 
 export type TelegramAuthResult = { inTelegram: boolean; authenticated: boolean };

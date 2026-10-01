@@ -1,12 +1,14 @@
+/// <reference types="vitest/config" />
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { adminStaticPlugin } from './scripts/adminDevMiddleware';
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), adminStaticPlugin()],
   resolve: {
     alias: {
       '@app': path.resolve(rootDir, 'src/app'),
@@ -44,5 +46,9 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/shared/api/mocks/setup.ts'],
   },
 });

@@ -19,4 +19,3 @@ export * from './StatusScreen';
 export * from './AILoader';
 export * from './SmartImage';
 export * from './PageSkeleton';
-export * from './SlowConnectionBanner';

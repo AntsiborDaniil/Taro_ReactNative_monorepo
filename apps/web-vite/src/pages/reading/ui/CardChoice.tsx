@@ -15,7 +15,7 @@ import { TarotCardDirection, type SpreadName, type TSelectedTarotCard } from '@l
 import { getTarotCardReadings, pickRandomCard, TarotCardFace, type TSpread } from '@entities/spread';
 import { getImage, DECK_STYLE_FLAT } from '@shared/lib/getImage';
 import { useAppSelector } from '@shared/lib/store';
-import { ChevronLeftIcon, ChevronRightIcon, Text } from '@shared/ui';
+import { Button, ChevronLeftIcon, ChevronRightIcon, Text } from '@shared/ui';
 import styles from './CardChoice.module.css';
 
 const DECK_SIZE = 21;
@@ -31,6 +31,8 @@ type CardChoiceProps = {
   spread: TSpread;
   selectedCards: TSelectedTarotCard[];
   onDraw: (card: TSelectedTarotCard) => void;
+  /** Заполнить все оставшиеся слоты сразу (без анимации перелёта). */
+  onDrawAll: (cards: TSelectedTarotCard[]) => void;
 };
 
 function prefersReducedMotion(): boolean {
@@ -51,7 +53,7 @@ function clamp(value: number, min: number, max: number): number {
  * исчезают из колоды. После выбора всех карт колода остаётся, но неактивна.
  * prefers-reduced-motion — без анимаций.
  */
-export function CardChoice({ spread, selectedCards, onDraw }: CardChoiceProps): ReactElement {
+export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardChoiceProps): ReactElement {
   const { t } = useTranslation();
   const cardsCount = spread.cardsCount;
   const isComplete = selectedCards.length >= cardsCount;
@@ -188,6 +190,35 @@ export function CardChoice({ spread, selectedCards, onDraw }: CardChoiceProps): 
     },
     [backImage, deck, deckStyle, hasReversed, isComplete, onDraw, selectedCards.length, selectedIdsMap, spread.id],
   );
+
+  /** Оставшиеся позиции — случайные уникальные карты, без перелёта по одной. */
+  const drawAllRandom = useCallback(() => {
+    if (busyRef.current || isComplete) return;
+    const remaining = cardsCount - selectedCards.length;
+    if (remaining <= 0) return;
+
+    const used: Record<string, boolean> = { ...selectedIdsMap };
+    const startSlot = selectedCards.length;
+    const readings: TSelectedTarotCard[] = [];
+
+    for (let i = 0; i < remaining; i += 1) {
+      const card = pickRandomCard(used);
+      used[String(card.id)] = true;
+      readings.push(
+        getTarotCardReadings({
+          card,
+          spreadId: spread.id as SpreadName,
+          index: startSlot + i,
+          direction: hasReversed ? undefined : TarotCardDirection.Upright,
+        }),
+      );
+    }
+
+    setDeck((prev) => prev.slice(0, Math.max(0, prev.length - remaining)));
+    setPos((current) => clamp(Math.round(current), 0, Math.max(0, deck.length - remaining - 1)));
+    setJustFilled(startSlot + remaining - 1);
+    onDrawAll(readings);
+  }, [cardsCount, deck.length, hasReversed, isComplete, onDrawAll, selectedCards.length, selectedIdsMap, spread.id]);
 
   /* ---- перетаскивание ---- */
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -388,9 +419,14 @@ export function CardChoice({ spread, selectedCards, onDraw }: CardChoiceProps): 
       </div>
 
       {!isComplete ? (
-        <Text role="micro" tone="ink100" className={styles.hint}>
-          {t('core:choice.scrollCards')} · {t('core:choice.tapToChoice')}
-        </Text>
+        <>
+          <Button type="button" variant="quiet" quietTone="accent" className={styles.drawAll} onClick={drawAllRandom}>
+            {t('core:choice.drawAll')}
+          </Button>
+          <Text role="micro" tone="ink100" className={styles.hint}>
+            {t('core:choice.scrollCards')} · {t('core:choice.tapToChoice')}
+          </Text>
+        </>
       ) : null}
     </div>
   );

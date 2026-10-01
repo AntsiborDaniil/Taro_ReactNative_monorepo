@@ -57,6 +57,7 @@ async function bootstrap(): Promise<void> {
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
       'Content-Type',
+      'Cache-Control',
       'Authorization',
       'X-Web-Cookie-Auth',
       'X-Tarot-Client',

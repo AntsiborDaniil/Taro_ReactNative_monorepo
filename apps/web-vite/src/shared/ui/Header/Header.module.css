@@ -43,6 +43,7 @@
   background: transparent;
   color: var(--ds-ink-50);
   cursor: pointer;
+  transition: background-color var(--ds-dur-state) var(--ds-ease);
 }
 
 .backButton:hover {

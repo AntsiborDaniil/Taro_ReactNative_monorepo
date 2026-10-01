@@ -37,6 +37,20 @@
   max-width: 55%;
 }
 
+@container cardDetailCol (min-width: 768px) {
+  .imageWrap {
+    width: 280px;
+    max-width: 42%;
+  }
+}
+
+@container cardDetailCol (min-width: 1100px) {
+  .imageWrap {
+    width: 320px;
+    max-width: 36%;
+  }
+}
+
 .image {
   width: 100%;
 }

@@ -36,7 +36,6 @@ export default function SettingsPage(): ReactElement {
   const themeOptions: { value: ThemePreference; label: string }[] = [
     { value: 'dark', label: t('settings:theme.dark', { defaultValue: 'Тёмная' }) },
     { value: 'light', label: t('settings:theme.light', { defaultValue: 'Светлая' }) },
-    { value: 'system', label: t('settings:theme.system', { defaultValue: 'Как в системе' }) },
   ];
 
   const handleReversedChange = (checked: boolean) => {

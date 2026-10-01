@@ -17,14 +17,12 @@ import {
   passwordValidationCodeToI18nKey,
   validateStrongPassword,
 } from '@shared/lib/passwordPolicy';
-import { buildGoogleOAuthUrl, useHandleWebOAuthReturn } from '@shared/lib/handleWebOAuthReturn';
 import { migrateLocalDataToCloud } from '@shared/lib/cloudMigration/migrateLocalToCloud';
 import { useSettings } from '@entities/settings';
 import {
   Button,
   EyeHideIcon,
   EyeShowIcon,
-  GoogleIcon,
   Header,
   Input,
   ModalSheet,
@@ -48,15 +46,14 @@ function validateAuthEmail(value: string, t: (key: string) => string): string | 
 /**
  * Перенос apps/web/src/pages/settings/ui/Auth/Auth.tsx (только web-логика:
  * cookie-сессия, без AsyncStorage/token-ветки) — вход/регистрация email,
- * подтверждение кода, профиль, смена пароля, выход, Google OAuth. RN-разметка
- * не переносилась, визуал — DS Input/Button/ListRow-карты.
+ * подтверждение кода, профиль, смена пароля, выход. Google OAuth убран:
+ * продукт — Telegram Mini App (тихий логин по initData).
  */
 export default function Auth(): ReactElement {
   const { t, i18n } = useTranslation();
   const dispatch = useAppDispatch();
   const toast = useToast();
   const { handleVibrationClick } = useSettings();
-  useHandleWebOAuthReturn();
 
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
   const sessionLoading = useAppSelector((state) => state.user.sessionLoading);
@@ -273,12 +270,6 @@ export default function Auth(): ReactElement {
     toast.success(t('settings:auth.signOutSuccess'));
   };
 
-  const handleGoogle = () => {
-    handleVibrationClick();
-    const next = `${window.location.pathname}${window.location.search}`;
-    window.location.href = buildGoogleOAuthUrl(next);
-  };
-
   return (
     <div className={styles.page}>
       <Header title={t('settings:account')} />
@@ -424,17 +415,6 @@ export default function Auth(): ReactElement {
             </div>
 
             <div className={styles.card}>
-              <Button variant="quiet" fullWidth icon={<GoogleIcon width={20} height={20} />} onClick={handleGoogle}>
-                {t('settings:auth.google')}
-              </Button>
-              <div className={styles.orRow}>
-                <span className={styles.orLine} />
-                <Text role="micro" tone="ink100">
-                  {t('settings:auth.or')}
-                </Text>
-                <span className={styles.orLine} />
-              </div>
-
               <div className={styles.tabs} role="tablist">
                 <button
                   type="button"

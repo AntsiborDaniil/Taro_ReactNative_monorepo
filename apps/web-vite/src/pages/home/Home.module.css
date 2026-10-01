@@ -60,22 +60,49 @@
   gap: var(--ds-space-32);
 }
 
+/*
+ * Мобилка: дети .side участвуют в родительской сетке напрямую, чтобы
+ * сохранить areas day → quick → spreads → habits → mood.
+ * Десктоп: .side становится колонкой той же высоты, что и .day.
+ */
+.side {
+  display: contents;
+}
+
 @container mainCol (min-width: 1024px) {
   .layout {
     grid-template-columns: 7fr 5fr;
     /* Карусель раскладов — отдельной строкой во всю ширину под колонками. */
     grid-template-areas:
-      'day quick'
-      'day habits'
-      'day mood'
+      'day side'
       'spreads spreads';
-    grid-template-rows: auto auto 1fr auto;
+    grid-template-rows: auto auto;
     column-gap: var(--ds-space-32);
     row-gap: var(--ds-space-24);
+    align-items: stretch;
+  }
+
+  .side {
+    display: flex;
+    flex-direction: column;
+    grid-area: side;
+    gap: var(--ds-space-24);
+    justify-content: space-between;
+    min-width: 0;
+    min-height: 0;
   }
 
   .day {
-    align-self: start;
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+  }
+
+  /* Внутри flex-.side grid-area не нужна; бордер оставляем между блоками. */
+  .quick,
+  .habits,
+  .mood {
+    grid-area: auto;
   }
 
   .spreads {

@@ -41,8 +41,12 @@
   font-family: var(--ds-font-micro-family);
   font-size: var(--ds-font-micro-size);
   line-height: var(--ds-font-micro-line-height);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration: none;
+  transition: color var(--ds-dur-state) var(--ds-ease);
+}
+
+.legalLink:hover {
+  color: color-mix(in srgb, var(--ds-accent-400) 75%, var(--ds-ink-50) 25%);
 }
 
 .legalLink:focus-visible {

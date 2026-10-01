@@ -1,7 +1,7 @@
 import { useEffect, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { addSelectedCard } from '@entities/spread';
+import { addSelectedCard, addSelectedCards } from '@entities/spread';
 import type { TSelectedTarotCard } from '@legacy-data';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
@@ -64,6 +64,7 @@ export default function ReadingPage(): ReactElement {
           spread={selectedSpread}
           selectedCards={selectedCards}
           onDraw={(card: TSelectedTarotCard) => dispatch(addSelectedCard(card))}
+          onDrawAll={(cards: TSelectedTarotCard[]) => dispatch(addSelectedCards(cards))}
         />
 
         {isComplete ? (

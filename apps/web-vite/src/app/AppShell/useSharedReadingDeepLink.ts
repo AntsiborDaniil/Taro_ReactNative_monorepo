@@ -8,8 +8,8 @@ import { clearIncomingSharedReadingFromUrl, readIncomingSharedReadingId } from '
 
 /**
  * Перенос apps/web/src/app/navigation/useSharedReadingDeepLink.ts — открывает
- * расшаренную интерпретацию по `?reading=<uuid>` (или старому `r_<hex32>` из
- * t.me-ссылок, см. shared/lib/sharedReadingLink) через публичный
+ * расшаренную интерпретацию по Telegram startapp `r_<hex>` / `?reading=<uuid>`
+ * через публичный
  * GET /api/spreads/shared/:id, без авторизации.
  */
 export function useSharedReadingDeepLink(): void {

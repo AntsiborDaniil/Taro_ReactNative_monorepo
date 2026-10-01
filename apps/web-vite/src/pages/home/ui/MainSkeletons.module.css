@@ -22,3 +22,21 @@
   flex-direction: column;
   gap: var(--ds-space-8);
 }
+
+@container mainCol (min-width: 768px) {
+  .spreadsTile {
+    width: 180px;
+  }
+}
+
+@container mainCol (min-width: 1024px) {
+  .spreadsTile {
+    width: 216px;
+  }
+}
+
+@container mainCol (min-width: 1440px) {
+  .spreadsTile {
+    width: 240px;
+  }
+}

@@ -446,13 +446,24 @@ export async function replyAdminTicket(
     telegramId > 0 &&
     text !== previousReply
   ) {
+    const question =
+      typeof ticket.message === 'string' ? ticket.message : '';
     try {
       await sendTelegramMessage(
         telegramId,
-        `Ответ поддержки Mindful Tarot:\n\n${text}`
+        buildSupportReplyHtml(text, question),
+        'HTML'
       );
     } catch (error) {
       console.error('[admin] telegram reply failed:', error);
+      try {
+        await sendTelegramMessage(
+          telegramId,
+          buildSupportReplyPlain(text, question)
+        );
+      } catch (fallbackError) {
+        console.error('[admin] telegram reply fallback failed:', fallbackError);
+      }
     }
   }
 
@@ -524,7 +535,65 @@ export async function getAdminPayment(id: string): Promise<Record<string, unknow
   return data as Record<string, unknown> | null;
 }
 
-async function sendTelegramMessage(chatId: number, text: string): Promise<void> {
+const TELEGRAM_TEXT_LIMIT = 4096;
+const SUPPORT_REPLY_HEADER = '💬 Ответ поддержки Mindful Tarot';
+const SUPPORT_REPLY_FOOTER =
+  'Вопрос остался? Напиши сюда ещё раз или отправь /support — продолжим в этом чате. Отвечаем по будням, обычно в течение рабочего дня.';
+
+function escapeTelegramHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/** Цитата исходного обращения: ответ может прийти через день, полезно напомнить контекст. */
+function shortenQuestion(question: string): string {
+  const flat = question.replace(/\s+/g, ' ').trim();
+  if (flat.length <= 180) {
+    return flat;
+  }
+  return `${flat.slice(0, 179).trimEnd()}…`;
+}
+
+function clampTelegramText(text: string): string {
+  return text.length > TELEGRAM_TEXT_LIMIT
+    ? `${text.slice(0, TELEGRAM_TEXT_LIMIT - 1)}…`
+    : text;
+}
+
+function buildSupportReplyHtml(replyText: string, question: string): string {
+  const quote = shortenQuestion(question);
+  const blocks = [
+    `<b>${SUPPORT_REPLY_HEADER}</b>`,
+    escapeTelegramHtml(replyText),
+  ];
+  if (quote) {
+    blocks.push(
+      `<blockquote>Твой вопрос: ${escapeTelegramHtml(quote)}</blockquote>`
+    );
+  }
+  blocks.push(SUPPORT_REPLY_FOOTER);
+
+  return clampTelegramText(blocks.join('\n\n'));
+}
+
+function buildSupportReplyPlain(replyText: string, question: string): string {
+  const quote = shortenQuestion(question);
+  const blocks = [SUPPORT_REPLY_HEADER, replyText];
+  if (quote) {
+    blocks.push(`Твой вопрос: «${quote}»`);
+  }
+  blocks.push(SUPPORT_REPLY_FOOTER);
+
+  return clampTelegramText(blocks.join('\n\n'));
+}
+
+async function sendTelegramMessage(
+  chatId: number,
+  text: string,
+  parseMode?: 'HTML'
+): Promise<void> {
   const token = getTelegramBotToken();
   const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
@@ -532,6 +601,8 @@ async function sendTelegramMessage(chatId: number, text: string): Promise<void> 
     body: JSON.stringify({
       chat_id: chatId,
       text,
+      ...(parseMode ? { parse_mode: parseMode } : {}),
+      link_preview_options: { is_disabled: true },
     }),
   });
   if (!response.ok) {

@@ -46,6 +46,9 @@
   background: transparent;
   color: var(--ds-ink-100);
   cursor: pointer;
+  transition:
+    background-color var(--ds-dur-state) var(--ds-ease),
+    color var(--ds-dur-state) var(--ds-ease);
 }
 
 .toggleButton:hover {

@@ -16,7 +16,6 @@ export {
   BookIcon,
   ReverseIcon,
   CheckIcon,
-  GoogleIcon,
   SettingsIcon,
   ArcanaMajorIcon,
   CupsIcon,

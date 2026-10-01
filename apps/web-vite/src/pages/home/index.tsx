@@ -14,10 +14,10 @@ import styles from './Home.module.css';
  * Перенос apps/web/src/pages/main (Main.tsx + useMainLayout) — раскладка
  * mobile-в-один-столбец / desktop 7:5 сделана через CSS Grid + container query
  * `mainCol` (объявлен на .root ниже), а не JS-замер ширины контейнера: секции
- * занимают grid-area независимо от DOM-порядка, поэтому на десктопе «Карта
- * дня» + «Популярные расклады» уходят в левую колонку (7), «Быстрые ссылки» +
- * виджеты — в правую (5), при этом DOM-порядок остаётся как на мобильном
- * (доступность и порядок табуляции не ломаются).
+ * занимают grid-area независимо от DOM-порядка. На десктопе «Карта дня» и
+ * правая колонка (.side) — одна строка с равной высотой; карусель раскладов
+ * во всю ширину ниже. На мобилке .side = display:contents, порядок areas
+ * day → quick → spreads → habits → mood сохраняется.
  */
 export default function HomePage(): ReactElement {
   const { t } = useTranslation();
@@ -29,24 +29,31 @@ export default function HomePage(): ReactElement {
           <div className={styles.day}>
             <DayAdvice />
           </div>
-          <div className={styles.quick}>
-            <DeferredMount delayMs={100} fallback={<QuickLinksSkeleton />}>
-              <MainQuickLinks />
-            </DeferredMount>
+          {/*
+            .side: на мобилке display:contents — quick/habits/mood остаются
+            отдельными grid-area (порядок day → quick → spreads → habits → mood).
+            На десктопе — одна колонка той же высоты, что и «Карта дня».
+          */}
+          <div className={styles.side}>
+            <div className={styles.quick}>
+              <DeferredMount delayMs={100} fallback={<QuickLinksSkeleton />}>
+                <MainQuickLinks />
+              </DeferredMount>
+            </div>
+            <div className={styles.habits}>
+              <DeferredMount delayMs={240} fallback={<WidgetSkeleton />}>
+                <HabitWidget />
+              </DeferredMount>
+            </div>
+            <div className={styles.mood}>
+              <DeferredMount delayMs={320} fallback={<WidgetSkeleton tall />}>
+                <MoodDashboard />
+              </DeferredMount>
+            </div>
           </div>
           <div className={styles.spreads}>
             <DeferredMount delayMs={160} fallback={<SpreadsSkeleton />}>
               <TarotSpreadsCarousel title={t('main:popularSpreads')} spreads={FAVORITE_SPREADS} />
-            </DeferredMount>
-          </div>
-          <div className={styles.habits}>
-            <DeferredMount delayMs={240} fallback={<WidgetSkeleton />}>
-              <HabitWidget />
-            </DeferredMount>
-          </div>
-          <div className={styles.mood}>
-            <DeferredMount delayMs={320} fallback={<WidgetSkeleton tall />}>
-              <MoodDashboard />
             </DeferredMount>
           </div>
         </div>

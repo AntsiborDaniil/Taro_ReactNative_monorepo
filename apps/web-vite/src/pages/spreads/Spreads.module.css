@@ -72,13 +72,13 @@
 
 @container spreadsCol (min-width: 600px) {
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(184px, 1fr));
   }
 }
 
 @container spreadsCol (min-width: 1024px) {
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   }
 }
 
@@ -95,6 +95,11 @@
   letter-spacing: var(--ds-font-label-letter-spacing);
   text-transform: var(--ds-font-label-transform);
   cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color var(--ds-dur-state) var(--ds-ease),
+    border-color var(--ds-dur-state) var(--ds-ease),
+    color var(--ds-dur-state) var(--ds-ease);
 }
 
 .emptyAction:hover {

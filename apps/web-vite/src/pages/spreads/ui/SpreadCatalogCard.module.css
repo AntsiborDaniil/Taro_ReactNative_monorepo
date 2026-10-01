@@ -11,10 +11,6 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.card:active {
-  transform: translateY(1px);
-}
-
 .card:focus-visible .imageInner {
   outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
   outline-offset: 2px;

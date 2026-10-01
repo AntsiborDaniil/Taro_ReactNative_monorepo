@@ -1,14 +1,24 @@
 /**
- * Перенос apps/web/src/shared/lib/web/telegram-web-app.d.ts 1-в-1 (минимальный
- * набор полей Telegram WebApp bridge, которые реально используются).
+ * Минимальный набор полей Telegram WebApp bridge, которые реально используются.
  */
 export {};
 
 declare global {
+  interface TelegramWebAppUser {
+    id?: number;
+    language_code?: string;
+    first_name?: string;
+    last_name?: string;
+    username?: string;
+  }
+
   interface TelegramWebApp {
     initData?: string;
-    /** Разобранный initData; start_param — параметр запуска (например, lava_success). */
-    initDataUnsafe?: { start_param?: string };
+    /** Разобранный initData; start_param — параметр запуска (например, lava_success / r_<hex>). */
+    initDataUnsafe?: {
+      start_param?: string;
+      user?: TelegramWebAppUser;
+    };
     ready: () => void;
     expand: () => void;
     setHeaderColor: (color: string) => void;
@@ -23,6 +33,9 @@ declare global {
       offClick: (cb: () => void) => void;
     };
     openLink?: (link: string, options?: { try_instant_view?: boolean }) => void;
+    openTelegramLink?: (url: string) => void;
+    /** Bot API 8+: диалог «поделиться» URL внутри клиента Telegram. */
+    shareURL?: (url: string, text?: string) => void;
   }
 
   interface Window {

@@ -24,6 +24,8 @@ import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { ensureI18nNamespaces } from '@shared/i18n';
 import { isWebAuthPending, shouldPromptWebSignIn } from '@shared/lib/webAuthGate';
 import { buildSharedReadingUrl } from '@shared/lib/sharedReadingLink';
+import { copyTextToClipboard } from '@shared/lib/web/copyTextToClipboard';
+import { isTelegramMiniApp } from '@shared/lib/web/telegramWebApp';
 import { AILoader, Button, ChevronRightIcon, Header, openModal, ShareIcon, Text, useToast } from '@shared/ui';
 import styles from './ReadingResult.module.css';
 
@@ -148,18 +150,32 @@ export default function ReadingResultPage(): ReactElement {
     if (!spread?.uid || !isCloudSpread(spread)) return;
     track(AnalyticAction.ClickShareSpread, { spread: spread.name });
     const url = buildSharedReadingUrl(spread.uid);
-    if (navigator.share) {
+    const title = t(spread.name);
+
+    // Mini App: нативный shareURL клиента Telegram (Bot API 8+).
+    const tgShare = window.Telegram?.WebApp?.shareURL;
+    if (isTelegramMiniApp() && typeof tgShare === 'function') {
       try {
-        await navigator.share({ url, title: t(spread.name) });
+        tgShare(url, title);
+        return;
+      } catch {
+        // fallback ниже
+      }
+    }
+
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ url, title });
         return;
       } catch {
         // отменено или не поддержано — копируем ссылку
       }
     }
-    try {
-      await navigator.clipboard.writeText(url);
+
+    const copied = await copyTextToClipboard(url);
+    if (copied) {
       toast.success(t('core:ai.copy.shareSuccess'));
-    } catch {
+    } else {
       toast.error(t('core:ai.copy.fail'));
     }
   };

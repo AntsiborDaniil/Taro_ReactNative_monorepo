@@ -14,7 +14,11 @@
   letter-spacing: var(--ds-font-button-letter-spacing);
   cursor: pointer;
   overflow: hidden;
-  transition: transform var(--ds-dur-feedback) var(--ds-ease);
+  text-decoration: none;
+  transition:
+    background-color var(--ds-dur-state) var(--ds-ease),
+    border-color var(--ds-dur-state) var(--ds-ease),
+    color var(--ds-dur-state) var(--ds-ease);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -28,13 +32,12 @@
   pointer-events: none;
 }
 
-.base:hover:not(:disabled)::after,
-.base:active:not(:disabled)::after {
-  opacity: 1;
+.base:hover:not(:disabled)::after {
+  opacity: 0.55;
 }
 
-.base:active:not(:disabled) {
-  transform: translateY(1px);
+.base:active:not(:disabled)::after {
+  opacity: 1;
 }
 
 .base:focus-visible {
@@ -52,6 +55,10 @@
   color: var(--ds-on-action);
 }
 
+.action:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ds-action-500) 88%, var(--ds-ink-50) 12%);
+}
+
 /* variant: quiet */
 .quiet {
   background: var(--ds-ground-600);
@@ -59,8 +66,18 @@
   border-color: var(--ds-ground-600);
 }
 
+.quiet:hover:not(:disabled) {
+  background: var(--ds-ground-700);
+  border-color: var(--ds-accent-400);
+}
+
 .quietAccent {
   border-color: var(--ds-accent-400);
+}
+
+.quietAccent:hover:not(:disabled) {
+  border-color: var(--ds-accent-400);
+  background: color-mix(in srgb, var(--ds-ground-600) 70%, var(--ds-accent-400) 30%);
 }
 
 /* variant: link */
@@ -78,11 +95,8 @@
 }
 
 .link:hover:not(:disabled) {
-  text-decoration: underline;
-}
-
-.link:active:not(:disabled) {
-  transform: none;
+  color: color-mix(in srgb, var(--ds-accent-400) 75%, var(--ds-ink-50) 25%);
+  text-decoration: none;
 }
 
 .base:disabled,
