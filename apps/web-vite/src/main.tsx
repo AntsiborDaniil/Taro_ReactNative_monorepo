@@ -8,10 +8,35 @@ import { router } from '@app/router';
 import { i18nReady } from '@shared/i18n';
 import { initTheme } from '@shared/lib/theme';
 import { injectYandexMetrika } from '@shared/lib/metrika';
+import { PageSkeleton } from '@shared/ui';
 import '@shared/api/baseApi';
 import './styles/fonts.css';
 import './styles/tokens.css';
 import './styles/global.css';
+
+/** Снимает #boot-splash из index.html после первого кадра React. */
+function dismissBootSplash(): void {
+  const el = document.getElementById('boot-splash');
+  if (!el) return;
+
+  const remove = () => {
+    el.remove();
+  };
+
+  const reduceMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (reduceMotion) {
+    remove();
+    return;
+  }
+
+  el.classList.add('boot-splash--out');
+  el.setAttribute('aria-busy', 'false');
+  el.addEventListener('transitionend', remove, { once: true });
+  window.setTimeout(remove, 500);
+}
 
 // Тему ставим до первого рендера — без вспышки тёмного холста в светлой теме.
 initTheme();
@@ -30,13 +55,18 @@ async function bootstrap() {
     <StrictMode>
       <Provider store={store}>
         <I18nextProvider i18n={i18n}>
-          <Suspense fallback={null}>
+          <Suspense fallback={<PageSkeleton />}>
             <RouterProvider router={router} />
           </Suspense>
         </I18nextProvider>
       </Provider>
     </StrictMode>,
   );
+
+  // Двойной rAF: сначала React красит #root, потом гасим splash — без мигания пустоты.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => dismissBootSplash());
+  });
 }
 
 void bootstrap();

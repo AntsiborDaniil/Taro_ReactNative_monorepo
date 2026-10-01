@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -23,10 +23,20 @@ import { AnalyticAction, track } from '@shared/lib/analytics';
 import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { ensureI18nNamespaces } from '@shared/i18n';
 import { isWebAuthPending, shouldPromptWebSignIn } from '@shared/lib/webAuthGate';
-import { buildSharedReadingUrl } from '@shared/lib/sharedReadingLink';
+import { buildSharedReadingUrl, isShareableReadingUid } from '@shared/lib/sharedReadingLink';
 import { copyTextToClipboard } from '@shared/lib/web/copyTextToClipboard';
 import { isTelegramMiniApp } from '@shared/lib/web/telegramWebApp';
-import { AILoader, Button, ChevronRightIcon, Header, openModal, ShareIcon, Text, useToast } from '@shared/ui';
+import {
+  AILoader,
+  Button,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  Header,
+  openModal,
+  ShareIcon,
+  Text,
+  useToast,
+} from '@shared/ui';
 import styles from './ReadingResult.module.css';
 
 /** Абзацы ответа AI: пустая строка — граница абзаца. */
@@ -39,10 +49,11 @@ function toParagraphs(text: string): string[] {
 
 /**
  * Страница толкования расклада. Карты раскрываются по очереди (переворот), клик по
- * карте открывает её разбор в позиции: направление, ключевые слова, значение и
- * совет (ключи card.json из getTarotCardReadings). Ниже — общий разбор от AI
- * (POST /api/interpret запускается сам при первом открытии), «Поделиться» и
- * «Новый расклад». Сохранение в историю — как раньше на /reading.
+ * карте или стрелки «назад/вперёд» открывают её разбор в позиции: направление,
+ * ключевые слова, значение и совет (ключи card.json из getTarotCardReadings).
+ * Ниже — общий разбор от AI (POST /api/interpret запускается сам при первом
+ * открытии), «Поделиться» и «Новый расклад». Сохранение в историю — как раньше
+ * на /reading.
  */
 export default function ReadingResultPage(): ReactElement {
   const { t, i18n } = useTranslation();
@@ -60,9 +71,12 @@ export default function ReadingResultPage(): ReactElement {
   const [createSpreadHistory] = useCreateSpreadHistoryMutation();
   const [updateSpreadHistory] = useUpdateSpreadHistoryMutation();
   const attempted = useRef(false);
+  /** Фоновое сохранение после интерпретации — «Поделиться» ждёт именно его uid. */
+  const persistPromise = useRef<Promise<TSpread | null> | null>(null);
 
   const [cardNsReady, setCardNsReady] = useState(false);
   const [activeCard, setActiveCard] = useState(0);
+  const [isSharing, setIsSharing] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -84,17 +98,31 @@ export default function ReadingResultPage(): ReactElement {
     else if (!isComplete) navigate('/reading', { replace: true });
   }, [spread, isComplete, navigate]);
 
-  const persistSpreadToHistory = async (value: TSpread) => {
+  // Другой расклад (история, ссылка) — читаем снова с первой карты.
+  useEffect(() => {
+    setActiveCard(0);
+  }, [spread?.id]);
+
+  /** Облачная запись (POST/PATCH /api/spreads) — только она даёт uid для ссылки. */
+  const saveSpreadToCloud = async (value: TSpread): Promise<TSpread | null> => {
     try {
-      const saved = isAuthenticated
-        ? value.uid && isCloudSpread(value)
+      const saved =
+        value.uid && isCloudSpread(value)
           ? await updateSpreadHistory({ uid: value.uid, spread: value }).unwrap()
-          : await createSpreadHistory(value).unwrap()
-        : saveSpreadLocally(value);
+          : await createSpreadHistory(value).unwrap();
       dispatch(setSpreadMeta({ uid: saved.uid, date: saved.date, packKey: saved.packKey }));
+      return saved;
     } catch {
-      // История — best effort, ошибка сохранения не должна ломать показ результата.
+      return null;
     }
+  };
+
+  const persistSpreadToHistory = async (value: TSpread): Promise<TSpread | null> => {
+    // История — best effort, ошибка сохранения не должна ломать показ результата.
+    if (isAuthenticated) return saveSpreadToCloud(value);
+    const saved = saveSpreadLocally(value);
+    dispatch(setSpreadMeta({ uid: saved.uid, date: saved.date, packKey: saved.packKey }));
+    return saved;
   };
 
   const handleInterpret = async () => {
@@ -109,7 +137,11 @@ export default function ReadingResultPage(): ReactElement {
     }
 
     const body = getAIRequestBody({ spread, t, language: i18n.language });
-    if (!body) return;
+    if (!body) {
+      // Без тела запроса толкования не будет — страница не должна «висеть» под AILoader.
+      dispatch(setError('failed'));
+      return;
+    }
 
     dispatch(setStatus('interpreting'));
     track(AnalyticAction.ClickCompleteSpread, { spread: spread.name });
@@ -119,7 +151,7 @@ export default function ReadingResultPage(): ReactElement {
       dispatch(setInterpretation(result.interpretation));
       track(AnalyticAction.GetAIGeneration, { free: false });
       reachMetrikaGoal(MetrikaGoal.aiGeneration, { spreadId: spread.id });
-      void persistSpreadToHistory({ ...spread, interpretation: result.interpretation });
+      persistPromise.current = persistSpreadToHistory({ ...spread, interpretation: result.interpretation });
     } catch (err) {
       const rtkError = err as { status?: number; data?: InterpretErrorBody };
       if (rtkError.status === 401) {
@@ -146,37 +178,71 @@ export default function ReadingResultPage(): ReactElement {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isComplete, interpretation, cardNsReady, sessionLoading]);
 
+  /**
+   * Ссылка живёт только у облачной записи. Сохранение после интерпретации —
+   * best effort и могло не успеть или упасть, поэтому перед шарингом дожимаем
+   * сохранение и берём свежий uid (раньше кнопка в этом случае просто пропадала).
+   */
+  const ensureShareableUid = async (): Promise<string | null> => {
+    if (!spread) return null;
+
+    // Сначала дожидаемся фонового сохранения, иначе создадим вторую запись того же расклада.
+    const pending = await persistPromise.current;
+    const cloudSpread = pending && isCloudSpread(pending) ? pending : isCloudSpread(spread) ? spread : null;
+    const cloudUid = cloudSpread?.uid;
+    if (isShareableReadingUid(cloudUid)) return cloudUid;
+    if (!isAuthenticated) return null;
+
+    const saved = await saveSpreadToCloud({ ...spread, interpretation });
+    const savedUid = saved?.uid;
+    return isShareableReadingUid(savedUid) ? savedUid : null;
+  };
+
   const handleShare = async () => {
-    if (!spread?.uid || !isCloudSpread(spread)) return;
+    if (!spread || !interpretation || isSharing) return;
     track(AnalyticAction.ClickShareSpread, { spread: spread.name });
-    const url = buildSharedReadingUrl(spread.uid);
-    const title = t(spread.name);
+    setIsSharing(true);
 
-    // Mini App: нативный shareURL клиента Telegram (Bot API 8+).
-    const tgShare = window.Telegram?.WebApp?.shareURL;
-    if (isTelegramMiniApp() && typeof tgShare === 'function') {
-      try {
-        tgShare(url, title);
+    try {
+      const uid = await ensureShareableUid();
+      if (!uid) {
+        toast.error(
+          isAuthenticated ? t('core:ai.copy.shareFailed') : t('core:ai.copy.shareNeedAuth'),
+        );
         return;
-      } catch {
-        // fallback ниже
       }
-    }
 
-    if (typeof navigator.share === 'function') {
-      try {
-        await navigator.share({ url, title });
-        return;
-      } catch {
-        // отменено или не поддержано — копируем ссылку
+      const url = buildSharedReadingUrl(uid);
+      const title = t(spread.name);
+
+      // Mini App: нативный shareURL клиента Telegram (Bot API 8+).
+      const tgShare = window.Telegram?.WebApp?.shareURL;
+      if (isTelegramMiniApp() && typeof tgShare === 'function') {
+        try {
+          tgShare(url, title);
+          return;
+        } catch {
+          // fallback ниже
+        }
       }
-    }
 
-    const copied = await copyTextToClipboard(url);
-    if (copied) {
-      toast.success(t('core:ai.copy.shareSuccess'));
-    } else {
-      toast.error(t('core:ai.copy.fail'));
+      if (typeof navigator.share === 'function') {
+        try {
+          await navigator.share({ url, title });
+          return;
+        } catch {
+          // отменено или не поддержано — копируем ссылку
+        }
+      }
+
+      const copied = await copyTextToClipboard(url);
+      if (copied) {
+        toast.success(t('core:ai.copy.shareSuccess'));
+      } else {
+        toast.error(t('core:ai.copy.fail'));
+      }
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -190,7 +256,39 @@ export default function ReadingResultPage(): ReactElement {
     );
   }
 
+  const isLoading = status === 'interpreting' || isInterpreting;
+  /**
+   * Толкования ещё нет и ошибки не было — ждём AI. Показываем только оверлей:
+   * иначе до старта запроса (загрузка namespace card, ожидание сессии) успевает
+   * мелькнуть «готовая» страница результата с пустым разбором.
+   */
+  const isAwaitingInterpretation = !interpretation && !errorCode;
+
+  if (isAwaitingInterpretation) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.column}>
+          <Header title={t(spread.name)} showBack />
+        </div>
+        <AILoader />
+      </div>
+    );
+  }
+
   const current = cards[Math.min(activeCard, cards.length - 1)];
+  const hasManyCards = cards.length > 1;
+  const goToCard = (index: number) => {
+    setActiveCard(Math.min(Math.max(index, 0), cards.length - 1));
+  };
+  const handleCardsKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      goToCard(activeCard - 1);
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      goToCard(activeCard + 1);
+    }
+  };
   // Тексты карты — ключи card.json; у части (keywords) нет префикса namespace.
   const cardText = (key?: string): string => {
     if (!key) return '';
@@ -205,7 +303,6 @@ export default function ReadingResultPage(): ReactElement {
     return meaning ? t(`spread:${meaning}`) : '';
   };
   const reversed = current.direction === TarotCardDirection.Reversed;
-  const isLoading = status === 'interpreting' || isInterpreting;
 
   return (
     <div className={styles.page}>
@@ -224,7 +321,12 @@ export default function ReadingResultPage(): ReactElement {
         ) : null}
 
         {/* Карты расклада: раскрываются по очереди, выбранная — с гранью accent-400. */}
-        <div className={styles.cards} role="tablist" aria-label={t('spread:flow.positionsTitle')}>
+        <div
+          className={styles.cards}
+          role="tablist"
+          aria-label={t('spread:flow.positionsTitle')}
+          onKeyDown={handleCardsKeyDown}
+        >
           {cards.map((card, index) => (
             <button
               key={`${card.id}-${index}`}
@@ -245,6 +347,38 @@ export default function ReadingResultPage(): ReactElement {
           ))}
         </div>
 
+        {/* Боковые стрелки: в раскладе несколько карт, и каждую читают по очереди. */}
+        {hasManyCards ? (
+          <div className={styles.cardNav}>
+            <button
+              type="button"
+              className={styles.navButton}
+              onClick={() => goToCard(activeCard - 1)}
+              disabled={activeCard === 0}
+              aria-label={t('core:button.prev')}
+            >
+              <ChevronLeftIcon width={20} height={20} />
+            </button>
+            <div className={styles.navCounter}>
+              <Text role="label" tone="accent">
+                {t('spread:flow.cardCounter', { current: activeCard + 1, total: cards.length })}
+              </Text>
+              <Text role="micro" tone="ink100">
+                {t('spread:flow.cardNavHint')}
+              </Text>
+            </div>
+            <button
+              type="button"
+              className={styles.navButton}
+              onClick={() => goToCard(activeCard + 1)}
+              disabled={activeCard === cards.length - 1}
+              aria-label={t('core:button.next')}
+            >
+              <ChevronRightIcon width={20} height={20} />
+            </button>
+          </div>
+        ) : null}
+
         {/* Разбор выбранной карты в её позиции. key — плавная смена панели. */}
         <section key={`${current.id}-${activeCard}`} className={styles.detail} aria-live="polite">
           <div className={styles.detailHead}>
@@ -263,7 +397,7 @@ export default function ReadingResultPage(): ReactElement {
 
           <div className={styles.chips}>
             <span className={reversed ? styles.chipReversed : styles.chip}>
-              {reversed ? t('spread:reverseCard') : t('spread:uprightCard', { defaultValue: 'Прямая карта' })}
+              {reversed ? t('spread:reverseCard') : t('spread:uprightCard')}
             </span>
           </div>
 
@@ -282,7 +416,7 @@ export default function ReadingResultPage(): ReactElement {
               {advice ? (
                 <div className={styles.advice}>
                   <Text role="label" tone="accent">
-                    {t('spread:adviceTitle', { defaultValue: 'Совет' })}
+                    {t('spread:adviceTitle')}
                   </Text>
                   <Text role="body" tone="ink50">
                     {advice}
@@ -292,22 +426,40 @@ export default function ReadingResultPage(): ReactElement {
             </>
           ) : null}
 
-          <Button
-            variant="link"
-            className={styles.cardLink}
-            icon={<ChevronRightIcon width={16} height={16} />}
-            iconPosition="end"
-            onClick={() => navigate(`/card/${current.id}`)}
-          >
-            {t('spread:aboutCard', { defaultValue: 'Подробнее о карте' })}
-          </Button>
+          <div className={styles.detailFooter}>
+            <Button
+              variant="link"
+              className={styles.cardLink}
+              icon={<ChevronRightIcon width={16} height={16} />}
+              iconPosition="end"
+              onClick={() => navigate(`/card/${current.id}`)}
+            >
+              {t('spread:aboutCard')}
+            </Button>
+            {hasManyCards && activeCard < cards.length - 1 ? (
+              <Button
+                variant="quiet"
+                quietTone="accent"
+                icon={<ChevronRightIcon width={16} height={16} />}
+                iconPosition="end"
+                onClick={() => goToCard(activeCard + 1)}
+              >
+                {t('spread:flow.nextCard')}
+              </Button>
+            ) : null}
+          </div>
         </section>
 
-        {/* Общий разбор от AI. */}
+        {/* Общий разбор от AI — отдельный блок с кантом, чтобы его не приняли за разбор карты. */}
         <section className={styles.summary}>
-          <Text role="title" tone="ink50" as="h2">
-            {t('spread:summaryTitle')}
-          </Text>
+          <div className={styles.summaryHead}>
+            <Text role="title" tone="ink50" as="h2">
+              {t('spread:summaryTitle')}
+            </Text>
+            <Text role="micro" tone="ink100">
+              {t('spread:summaryHint')}
+            </Text>
+          </div>
 
           {isLoading ? (
             <AILoader />
@@ -339,13 +491,16 @@ export default function ReadingResultPage(): ReactElement {
 
         {interpretation ? (
           <div className={styles.actions}>
-            {spread.uid && isCloudSpread(spread) ? (
-              <Button variant="quiet" icon={<ShareIcon width={18} height={18} />} onClick={handleShare}>
-                {t('core:ai.copy.share', { defaultValue: 'Поделиться' })}
-              </Button>
-            ) : null}
+            <Button
+              variant="quiet"
+              icon={<ShareIcon width={18} height={18} />}
+              loading={isSharing}
+              onClick={handleShare}
+            >
+              {t('core:ai.copy.share')}
+            </Button>
             <Button variant="quiet" quietTone="neutral" onClick={() => navigate('/spreads')}>
-              {t('spread:newSpread', { defaultValue: 'Новый расклад' })}
+              {t('spread:newSpread')}
             </Button>
           </div>
         ) : null}

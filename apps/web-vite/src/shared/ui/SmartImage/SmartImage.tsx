@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactElement } from 'react';
+import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactElement } from 'react';
 import styles from './SmartImage.module.css';
 
 export type SmartImageProps = {
@@ -13,24 +13,27 @@ export type SmartImageProps = {
 };
 
 /**
- * Картинка с заглушками на медленной сети: пока грузится — мягкий скелет DS на месте
- * картинки (тот же className, поэтому размер и позиция совпадают), если не загрузилась —
+ * Картинка с заглушкой на медленной сети: пока грузится — синий fade DS
+ * (calm) под кадром, затем картинка проявляется поверх. Если не загрузилась —
  * fallbackSrc, а если нет и его — плашка ground-700 с тихой иконкой.
+ * className задаёт размер и object-fit и на рамке, и на img.
  */
 export function SmartImage({ src, alt = '', className, style, fallbackSrc, lazy = true }: SmartImageProps): ReactElement {
   const [current, setCurrent] = useState(src);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
+  const srcRef = useRef(src);
 
-  useEffect(() => {
+  if (srcRef.current !== src) {
+    srcRef.current = src;
     setCurrent(src);
     setLoaded(false);
     setFailed(false);
-  }, [src]);
+  }
 
-  // Картинка уже в кеше браузера — load мог пройти до подписки.
-  useEffect(() => {
+  // Картинка уже в кеше браузера — load мог пройти до подписки, до первой отрисовки.
+  useLayoutEffect(() => {
     const img = imgRef.current;
     if (img?.complete && img.naturalWidth > 0) setLoaded(true);
   }, [current]);
@@ -38,6 +41,7 @@ export function SmartImage({ src, alt = '', className, style, fallbackSrc, lazy 
   const handleError = () => {
     if (fallbackSrc && current !== fallbackSrc) {
       setCurrent(fallbackSrc);
+      setLoaded(false);
       return;
     }
     setFailed(true);
@@ -56,16 +60,18 @@ export function SmartImage({ src, alt = '', className, style, fallbackSrc, lazy 
   }
 
   return (
-    <img
-      ref={imgRef}
-      className={[className, loaded ? styles.loaded : styles.loading].filter(Boolean).join(' ')}
-      style={style}
-      src={current}
-      alt={alt}
-      loading={lazy ? 'lazy' : 'eager'}
-      decoding="async"
-      onLoad={() => setLoaded(true)}
-      onError={handleError}
-    />
+    <span className={[styles.frame, className].filter(Boolean).join(' ')} style={style}>
+      <span className={[styles.placeholder, loaded ? styles.placeholderDone : ''].filter(Boolean).join(' ')} aria-hidden="true" />
+      <img
+        ref={imgRef}
+        className={[styles.image, className, loaded ? styles.loaded : ''].filter(Boolean).join(' ')}
+        src={current}
+        alt={alt}
+        loading={lazy ? 'lazy' : 'eager'}
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        onError={handleError}
+      />
+    </span>
   );
 }

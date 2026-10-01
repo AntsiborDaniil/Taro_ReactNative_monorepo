@@ -188,8 +188,17 @@
   "card.description.title": "Значение карты",
 
   "reverseCard": "Перевернутая карта",
+  "uprightCard": "Прямая карта",
+  "adviceTitle": "Совет",
+  "aboutCard": "Подробнее о карте",
+  "newSpread": "Новый расклад",
+
+  "flow.cardCounter": "Карта {{current}} из {{total}}",
+  "flow.cardNavHint": "Листайте стрелками — у каждой карты свой разбор",
+  "flow.nextCard": "Следующая карта",
 
   "summaryTitle": "Общий разбор расклада",
+  "summaryHint": "Как карты складываются в одну историю — ответ AI на ваш вопрос",
 
   "catalog.count_one": "{{count}} карта",
   "catalog.count_few": "{{count}} карты",

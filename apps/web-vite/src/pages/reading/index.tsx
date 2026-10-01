@@ -1,8 +1,9 @@
-import { useEffect, type ReactElement } from 'react';
+import { useEffect, useRef, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { addSelectedCard, addSelectedCards } from '@entities/spread';
 import type { TSelectedTarotCard } from '@legacy-data';
+import { ensureI18nNamespaces } from '@shared/i18n';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { Button, Header, Text } from '@shared/ui';
@@ -22,14 +23,29 @@ export default function ReadingPage(): ReactElement {
   const selectedSpread = useAppSelector((state) => state.spread.selectedSpread);
 
   const hasInterpretation = Boolean(selectedSpread?.interpretation?.trim());
+  const drawnCount = selectedSpread?.selectedCards?.length ?? 0;
+  // Готовое толкование показываем на /reading/result, только если карты есть:
+  // иначе та страница вернёт нас обратно и роуты зациклятся.
+  const hasAllCards = drawnCount > 0 && drawnCount >= (selectedSpread?.cardsCount ?? 0);
 
   useEffect(() => {
     if (!selectedSpread) {
       navigate('/spreads', { replace: true });
-    } else if (hasInterpretation) {
+    } else if (hasInterpretation && hasAllCards) {
       navigate('/reading/result', { replace: true });
     }
-  }, [selectedSpread, hasInterpretation, navigate]);
+  }, [selectedSpread, hasInterpretation, hasAllCards, navigate]);
+
+  // Пока идёт выбор карт, заранее тянем чанк страницы толкования и тяжёлый
+  // namespace card: после «Читать объяснение» сразу идёт ожидание AI, без
+  // скелета страницы и паузы на загрузке card.json.
+  const prefetched = useRef(false);
+  useEffect(() => {
+    if (drawnCount === 0 || prefetched.current) return;
+    prefetched.current = true;
+    void import('@pages/readingResult');
+    void ensureI18nNamespaces('card');
+  }, [drawnCount]);
 
   if (!selectedSpread) {
     return (
@@ -42,7 +58,7 @@ export default function ReadingPage(): ReactElement {
   }
 
   const selectedCards = selectedSpread.selectedCards ?? [];
-  const isComplete = selectedSpread.cardsCount > 0 && selectedCards.length >= selectedSpread.cardsCount;
+  const isComplete = selectedSpread.cardsCount > 0 && hasAllCards;
 
   return (
     <div className={styles.page}>

@@ -188,8 +188,17 @@
   "card.description.title": "Card Meaning",
 
   "reverseCard": "Reversed Card",
+  "uprightCard": "Upright card",
+  "adviceTitle": "Advice",
+  "aboutCard": "More about the card",
+  "newSpread": "New spread",
+
+  "flow.cardCounter": "Card {{current}} of {{total}}",
+  "flow.cardNavHint": "Use the arrows — every card has its own reading",
+  "flow.nextCard": "Next card",
 
   "summaryTitle": "General overview",
+  "summaryHint": "How the cards come together — the AI answer to your question",
 
   "catalog.count_one": "{{count}} card",
   "catalog.count_other": "{{count}} cards",

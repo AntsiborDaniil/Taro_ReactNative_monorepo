@@ -124,6 +124,61 @@
   overflow: hidden;
 }
 
+/* ---- переключение карт (стрелки по бокам + счётчик) ---- */
+
+.cardNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-12);
+}
+
+.navButton {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-800);
+  color: var(--ds-ink-50);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background var(--ds-dur-state) var(--ds-ease),
+    border-color var(--ds-dur-state) var(--ds-ease),
+    opacity var(--ds-dur-state) var(--ds-ease);
+}
+
+@media (hover: hover) {
+  .navButton:not(:disabled):hover {
+    border-color: var(--ds-accent-400);
+    color: var(--ds-accent-400);
+  }
+}
+
+.navButton:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.navButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--ds-size-focus-ring-width) var(--ds-calm-500);
+}
+
+.navCounter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-4);
+  min-width: 0;
+  text-align: center;
+}
+
 /* ---- разбор выбранной карты ---- */
 
 .detail {
@@ -204,6 +259,14 @@
   border-left: var(--ds-size-edge-width) solid var(--ds-accent-400);
 }
 
+.detailFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-12);
+}
+
 .cardLink {
   align-self: flex-start;
 }
@@ -214,6 +277,16 @@
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-16);
+  padding: var(--ds-space-24);
+  border-radius: var(--ds-radius-list-row);
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-800);
+}
+
+.summaryHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
 }
 
 .summary h2 {

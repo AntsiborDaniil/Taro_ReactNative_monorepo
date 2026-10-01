@@ -19,6 +19,9 @@
   "ai.copy.shareHint": "Friends open the Mini App on the reading page",
   "ai.copy.shareLead": "My «{{name}}» reading in MindFullTaro:",
   "ai.copy.shareOpenFailed": "Could not open this shared reading",
+  "ai.copy.share": "Share",
+  "ai.copy.shareFailed": "Could not prepare the link. Try again.",
+  "ai.copy.shareNeedAuth": "Sign in to share your reading",
   "ai.copy.fail": "Could not copy. Try again.",
 
   "button.prev": "Previous",

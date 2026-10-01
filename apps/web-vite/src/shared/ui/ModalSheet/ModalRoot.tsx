@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
-import { closeModal } from './model/modalsSlice';
-import { getModal } from './registry';
-import { ModalSheet } from './ModalSheet';
+import { closeModal, type ModalStackItem } from './model/modalsSlice';
+import { getModal, type ModalRegistryEntry } from './registry';
+import { ModalSheet, useModalSheetClose } from './ModalSheet';
 
 /**
  * Глобальный модальный слой: рендерит верхнюю модалку стека `modals` по её
@@ -24,7 +24,14 @@ export function ModalRoot(): ReactElement | null {
 
   return (
     <ModalSheet open={Boolean(top)} onClose={close} title={entry?.title}>
-      {top && entry ? <entry.Component onClose={close} {...top.props} /> : null}
+      {top && entry ? <StackModal entry={entry} item={top} /> : null}
     </ModalSheet>
   );
+}
+
+/** onClose дочерней модалки идёт через лист, чтобы кнопка тоже дождалась выхода. */
+function StackModal({ entry, item }: { entry: ModalRegistryEntry; item: ModalStackItem }): ReactElement {
+  const requestClose = useModalSheetClose();
+  const onClose = requestClose ?? (() => undefined);
+  return <entry.Component {...item.props} onClose={onClose} />;
 }

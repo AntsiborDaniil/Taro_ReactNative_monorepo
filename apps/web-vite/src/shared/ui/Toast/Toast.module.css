@@ -12,6 +12,7 @@
 }
 
 .toast {
+  --toast-shift: 0px;
   pointer-events: auto;
   position: relative;
   box-sizing: border-box;
@@ -24,6 +25,27 @@
   background: var(--ds-ground-700);
   border: var(--ds-size-hairline) solid var(--ds-ground-600);
   border-left: 3px solid var(--ds-calm-500);
+  touch-action: none;
+  opacity: 0;
+  transform: translateY(calc(-12px + var(--toast-shift)));
+  transition:
+    transform var(--ds-dur-block) var(--ds-ease),
+    opacity var(--ds-dur-state) var(--ds-ease);
+}
+
+.shown {
+  opacity: 1;
+  transform: translateY(var(--toast-shift));
+}
+
+.leave {
+  opacity: 0;
+  transform: translateY(calc(-110% - 8px));
+  pointer-events: none;
+}
+
+.dragging {
+  transition: none;
 }
 
 .success {
@@ -71,4 +93,12 @@
 .closeButton:focus-visible {
   outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .shown,
+  .leave {
+    transition: none;
+  }
 }

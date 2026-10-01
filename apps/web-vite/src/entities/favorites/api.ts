@@ -17,10 +17,34 @@ export const favoritesApi = baseApi.injectEndpoints({
     addFavorite: build.mutation<{ ok: boolean }, string>({
       query: (cardId) => ({ url: '/api/favorites', method: 'POST', body: { cardId } }),
       invalidatesTags: ['Favorites'],
+      async onQueryStarted(cardId, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          favoritesApi.util.updateQueryData('getFavorites', undefined, (draft) => {
+            if (!draft.cardIds.includes(cardId)) draft.cardIds.push(cardId);
+          }),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
     }),
     removeFavorite: build.mutation<{ ok: boolean }, string>({
       query: (cardId) => ({ url: `/api/favorites/${encodeURIComponent(cardId)}`, method: 'DELETE' }),
       invalidatesTags: ['Favorites'],
+      async onQueryStarted(cardId, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          favoritesApi.util.updateQueryData('getFavorites', undefined, (draft) => {
+            draft.cardIds = draft.cardIds.filter((id) => id !== cardId);
+          }),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
     }),
   }),
 });
