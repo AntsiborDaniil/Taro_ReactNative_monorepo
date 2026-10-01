@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
-const DEFAULT_WEB_APP_URL = 'https://taro-react-native-monorepo.vercel.app/';
+const DEFAULT_WEB_APP_URL =
+  'https://taro-react-native-monorepo-web-vite.vercel.app/';
 
 function requireEnv(name: string): string {
   const value = process.env[name]?.trim();
