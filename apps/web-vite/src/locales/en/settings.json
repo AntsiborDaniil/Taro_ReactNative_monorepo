@@ -63,6 +63,15 @@
   "mobile.app": "Get the mobile app",
   "mobile.app.hint": "Subscriptions, favorites, and notifications work in the Mindful app",
 
+  "homeScreen.sheetTitle": "Add to Home Screen",
+  "homeScreen.body": "Add Mindful to your phone’s home screen — open it like a regular app, without hunting for the bot in chats.",
+  "homeScreen.add": "Add",
+  "homeScreen.later": "Not now",
+  "homeScreen.added": "Shortcut added to your home screen",
+  "homeScreen.unsupported": "This Telegram client can’t add a home screen shortcut",
+  "homeScreen.row": "Add to Home Screen",
+  "homeScreen.rowHint": "Mini App shortcut — open without the bot chat",
+
   "store.modal.title": "Open store",
   "store.modal.subtitle": "Download Mindful for the full experience",
 

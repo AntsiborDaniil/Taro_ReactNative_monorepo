@@ -196,3 +196,58 @@ export function openExternalPaymentUrl(url: string): boolean {
   window.location.assign(href);
   return true;
 }
+
+/** Статус ярлыка Mini App на домашнем экране (Bot API 8+). */
+export type HomeScreenStatus = 'unsupported' | 'unknown' | 'added' | 'missed';
+
+/** Клиент поддерживает Bot API 8+ home screen shortcut. */
+export function supportsAddToHomeScreen(): boolean {
+  if (typeof window === 'undefined') return false;
+  const tg = window.Telegram?.WebApp;
+  return typeof tg?.addToHomeScreen === 'function' && typeof tg?.checkHomeScreenStatus === 'function';
+}
+
+/**
+ * Статус ярлыка на домашнем экране. `null` — не Mini App / API нет / таймаут.
+ * На части клиентов до ответа приходит `unknown`.
+ */
+export function checkTelegramHomeScreenStatus(timeoutMs = 2500): Promise<HomeScreenStatus | null> {
+  if (!isTelegramMiniApp() || !supportsAddToHomeScreen()) return Promise.resolve(null);
+  const tg = window.Telegram!.WebApp!;
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (status: HomeScreenStatus | null) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
+      resolve(status);
+    };
+    const timer = window.setTimeout(() => finish(null), timeoutMs);
+    try {
+      tg.checkHomeScreenStatus?.((status) => finish(status));
+    } catch {
+      finish(null);
+    }
+  });
+}
+
+/** Нативный диалог Telegram «добавить на домашний экран». */
+export function requestTelegramAddToHomeScreen(): boolean {
+  if (!isTelegramMiniApp() || !supportsAddToHomeScreen()) return false;
+  try {
+    window.Telegram!.WebApp!.addToHomeScreen?.();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Подписка на успешное добавление ярлыка (событие может прийти и при неопределённом статусе). */
+export function onTelegramHomeScreenAdded(callback: () => void): () => void {
+  const tg = window.Telegram?.WebApp;
+  if (!tg?.onEvent || !tg.offEvent) return () => undefined;
+  const handler = () => callback();
+  tg.onEvent('homeScreenAdded', handler);
+  return () => tg.offEvent?.('homeScreenAdded', handler);
+}

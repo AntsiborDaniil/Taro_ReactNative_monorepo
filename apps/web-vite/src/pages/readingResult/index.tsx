@@ -26,6 +26,7 @@ import { isWebAuthPending, shouldPromptWebSignIn } from '@shared/lib/webAuthGate
 import { buildSharedReadingUrl, isShareableReadingUid } from '@shared/lib/sharedReadingLink';
 import { copyTextToClipboard } from '@shared/lib/web/copyTextToClipboard';
 import { isTelegramMiniApp } from '@shared/lib/web/telegramWebApp';
+import { maybeOfferAddToHomeScreen } from '@features/telegramHomeScreen';
 import {
   AILoader,
   Button,
@@ -154,6 +155,8 @@ export default function ReadingResultPage(): ReactElement {
       track(AnalyticAction.GetAIGeneration, { free: false });
       reachMetrikaGoal(MetrikaGoal.aiGeneration, { spreadId: spread.id });
       persistPromise.current = persistSpreadToHistory({ ...spread, interpretation: result.interpretation });
+      // После первой ценности в Mini App — один раз предложить ярлык на домашний экран.
+      void maybeOfferAddToHomeScreen(() => dispatch(openModal({ id: 'add-to-home-screen' })));
     } catch (err) {
       const rtkError = err as { status?: number; data?: InterpretErrorBody };
       if (rtkError.status === 401) {

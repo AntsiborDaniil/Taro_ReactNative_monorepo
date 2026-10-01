@@ -4,6 +4,8 @@ import { useAuthMeQuery } from '@entities/user/api';
 import { ModalRoot, PageSkeleton, Toaster } from '@shared/ui';
 // Побочный эффект: регистрирует модалки 'buy-credits'/'daily-limit' в реестре ModalSheet до первого рендера ModalRoot.
 import '@features/tarotAccess';
+// Побочный эффект: модалка 'add-to-home-screen' (ярлык Mini App на домашний экран).
+import '@features/telegramHomeScreen';
 // Побочный эффект: регистрирует модалку 'favorite-like-error'.
 import '@entities/favorites';
 import { tryDevQuickLogin } from '@shared/lib/devQuickLogin';

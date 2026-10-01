@@ -63,6 +63,15 @@
   "mobile.app": "Установить на телефон",
   "mobile.app.hint": "Подписка, избранное и уведомления — в приложении Mindful",
 
+  "homeScreen.sheetTitle": "На домашний экран",
+  "homeScreen.body": "Добавьте Mindful на домашний экран телефона — открывайте как обычное приложение, без поиска бота в чатах.",
+  "homeScreen.add": "Добавить",
+  "homeScreen.later": "Не сейчас",
+  "homeScreen.added": "Ярлык добавлен на домашний экран",
+  "homeScreen.unsupported": "Этот клиент Telegram не умеет добавлять ярлык",
+  "homeScreen.row": "На домашний экран",
+  "homeScreen.rowHint": "Ярлык Mini App — открывать без чата с ботом",
+
   "store.modal.title": "Открыть в магазине",
   "store.modal.subtitle": "Скачайте Mindful для полного опыта",
 

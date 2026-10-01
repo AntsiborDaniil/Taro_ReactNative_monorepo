@@ -1,9 +1,20 @@
-import type { ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '@entities/settings';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { setThemePreference, useThemePreference, type ThemePreference } from '@shared/lib/theme';
 import { AnalyticAction, track } from '@shared/lib/analytics';
+import {
+  checkTelegramHomeScreenStatus,
+  isTelegramMiniApp,
+  onTelegramHomeScreenAdded,
+  requestTelegramAddToHomeScreen,
+  supportsAddToHomeScreen,
+} from '@shared/lib/web/telegramWebApp';
+import {
+  readHomeScreenPromptState,
+  writeHomeScreenPromptState,
+} from '@features/telegramHomeScreen';
 import {
   BookIcon,
   Chip,
@@ -13,10 +24,12 @@ import {
   ListRow,
   openModal,
   PaintIcon,
+  PlusIcon,
   ReverseIcon,
   Switch,
   Text,
   ThemeIcon,
+  useToast,
 } from '@shared/ui';
 import styles from './Settings.module.css';
 
@@ -29,9 +42,52 @@ import styles from './Settings.module.css';
 export default function SettingsPage(): ReactElement {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
+  const toast = useToast();
   const { settings, updateSetting, handleVibrationClick } = useSettings();
   const spreadCredits = useAppSelector((state) => state.user.spreadCredits);
   const theme = useThemePreference();
+  /** Показывать строку «на домашний экран» только в Mini App, пока ярлык не добавлен. */
+  const [showHomeScreenRow, setShowHomeScreenRow] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    const sync = async () => {
+      if (!isTelegramMiniApp() || !supportsAddToHomeScreen()) {
+        if (alive) setShowHomeScreenRow(false);
+        return;
+      }
+      const stored = readHomeScreenPromptState();
+      if (stored === 'added' || stored === 'unsupported') {
+        if (alive) setShowHomeScreenRow(false);
+        return;
+      }
+      const status = await checkTelegramHomeScreenStatus();
+      if (!alive) return;
+      if (status === 'added') {
+        writeHomeScreenPromptState('added');
+        setShowHomeScreenRow(false);
+        return;
+      }
+      if (status === 'unsupported') {
+        writeHomeScreenPromptState('unsupported');
+        setShowHomeScreenRow(false);
+        return;
+      }
+      setShowHomeScreenRow(true);
+    };
+    void sync();
+    const unsub = onTelegramHomeScreenAdded(() => {
+      writeHomeScreenPromptState('added');
+      if (alive) {
+        setShowHomeScreenRow(false);
+        toast.success(t('settings:homeScreen.added'));
+      }
+    });
+    return () => {
+      alive = false;
+      unsub();
+    };
+  }, [t, toast]);
 
   const themeOptions: { value: ThemePreference; label: string }[] = [
     { value: 'dark', label: t('settings:theme.dark', { defaultValue: 'Dark' }) },
@@ -47,6 +103,18 @@ export default function SettingsPage(): ReactElement {
     handleVibrationClick();
     track(AnalyticAction.ClickSettingsSegment, { segment: 'credits.buy' });
     dispatch(openModal({ id: 'buy-credits' }));
+  };
+
+  const handleAddToHomeScreen = () => {
+    handleVibrationClick();
+    track(AnalyticAction.ClickSettingsSegment, { segment: 'homeScreen' });
+    const ok = requestTelegramAddToHomeScreen();
+    if (!ok) {
+      writeHomeScreenPromptState('unsupported');
+      setShowHomeScreenRow(false);
+      toast.info(t('settings:homeScreen.unsupported'));
+    }
+    // Успех — через onTelegramHomeScreenAdded в useEffect выше.
   };
 
   return (
@@ -119,6 +187,22 @@ export default function SettingsPage(): ReactElement {
             />
           </div>
         </section>
+
+        {showHomeScreenRow ? (
+          <section className={styles.section}>
+            <Text role="label" as="h2" className={styles.sectionTitle}>
+              {t('settings:section.mobile')}
+            </Text>
+            <div className={styles.group}>
+              <ListRow
+                leadingIcon={<PlusIcon width={22} height={22} />}
+                title={t('settings:homeScreen.row')}
+                subtitle={t('settings:homeScreen.rowHint')}
+                onClick={handleAddToHomeScreen}
+              />
+            </div>
+          </section>
+        ) : null}
 
         <section className={styles.section}>
           <Text role="label" as="h2" className={styles.sectionTitle}>

@@ -40,6 +40,15 @@ declare global {
     openTelegramLink?: (url: string) => void;
     /** Bot API 8+: диалог «поделиться» URL внутри клиента Telegram. */
     shareURL?: (url: string, text?: string) => void;
+    /**
+     * Bot API 8+: предложить добавить Mini App на домашний экран телефона.
+     * Статус установки — через checkHomeScreenStatus / события homeScreen*.
+     */
+    addToHomeScreen?: () => void;
+    /** Bot API 8+: callback получает unsupported | unknown | added | missed. */
+    checkHomeScreenStatus?: (
+      callback: (status: 'unsupported' | 'unknown' | 'added' | 'missed') => void,
+    ) => void;
   }
 
   interface Window {
