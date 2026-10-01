@@ -18,7 +18,13 @@
   "sound.moon.notifications": "Уведомления о фазах Луны",
 
   "language": "Язык приложения",
+  "language.options.ru": "Русский",
+  "language.options.en": "English",
   "language.modal.subtitle": "Интерфейс обновится сразу, перезагрузка не нужна.",
+
+  "theme.title": "Тема оформления",
+  "theme.dark": "Тёмная",
+  "theme.light": "Светлая",
   "account": "Личный кабинет",
 
   "hasReversed": "Перевернутые карты",
@@ -26,6 +32,8 @@
   "credits.buy.row": "Купить +3 расклада",
   "credits.buy.rowHint": "Заряды после дневного лимита. Сейчас: {{count}}",
   "credits.buy.title": "Пакет +3 расклада",
+  "credits.buy.sheetTitle": "Пополнение зарядов",
+  "credits.limit.sheetTitle": "Лимит раскладов",
   "credits.buy.body": "После оплаты в баланс добавятся 3 заряда (обычно до 5 минут). Они тратятся, когда дневной лимит уже исчерпан.",
   "credits.buy.balance": "Сейчас у вас зарядов: {{count}}",
   "credits.badge.a11yDaily": "Осталось бесплатных раскладов сегодня: {{count}}. Нажмите, чтобы пополнить заряды",

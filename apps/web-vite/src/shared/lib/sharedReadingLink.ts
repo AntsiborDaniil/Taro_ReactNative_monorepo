@@ -21,6 +21,16 @@ function getBotUsername(): string {
   return fromEnv || DEFAULT_BOT;
 }
 
+/**
+ * Короткое имя Mini App из BotFather (`/newapp`). С ним ссылка
+ * `t.me/<bot>/<app>?startapp=…` всегда открывает приложение; без него Telegram
+ * открывает Mini App только если у бота настроен Main Mini App, иначе — чат бота.
+ */
+function getMiniAppShortName(): string {
+  const fromEnv = (import.meta.env.VITE_TELEGRAM_MINI_APP_SHORT_NAME as string | undefined)?.trim();
+  return fromEnv ? fromEnv.replace(/^\/+|\/+$/g, '') : '';
+}
+
 /** UUID → 32 hex для Telegram startapp (лимит 64 символа). */
 export function encodeSharedReadingStartParam(spreadUid: string): string {
   const hex = spreadUid.replace(/-/g, '').toLowerCase();
@@ -51,10 +61,20 @@ function decodeSharedReadingParam(param: string | null | undefined): string | nu
   return uuidMatch ? uuidMatch[1].toLowerCase() : null;
 }
 
-/** Ссылка для шаринга: Telegram Mini App deep link. */
+/**
+ * Ссылка для шаринга: Telegram Mini App deep link.
+ * Приоритет — прямая ссылка на приложение `t.me/<bot>/<app>?startapp=…`;
+ * без VITE_TELEGRAM_MINI_APP_SHORT_NAME остаётся `t.me/<bot>?startapp=…`
+ * (сработает при настроенном Main Mini App, иначе бот ответит кнопкой —
+ * см. apps/bot/src/sharedReading.ts).
+ */
 export function buildSharedReadingUrl(spreadUid: string): string {
   const startapp = encodeSharedReadingStartParam(spreadUid);
-  return `https://t.me/${getBotUsername()}?startapp=${startapp}`;
+  const bot = getBotUsername();
+  const shortName = getMiniAppShortName();
+  return shortName
+    ? `https://t.me/${bot}/${shortName}?startapp=${startapp}`
+    : `https://t.me/${bot}?startapp=${startapp}`;
 }
 
 /** `#tgWebAppData=…&tgWebAppStartParam=r_…` — фрагмент, которым Telegram открывает Mini App. */

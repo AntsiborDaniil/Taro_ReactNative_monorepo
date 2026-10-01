@@ -6,10 +6,10 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 
-const SKELETON_BASE = 'rgba(255, 255, 255, 0.06)';
-const SKELETON_SHIMMER = 'rgba(255, 255, 255, 0.1)';
+const SKELETON_BASE = DS_COLORS.skeletonBase;
+const SKELETON_SHIMMER = DS_COLORS.skeletonHighlight;
 
 type SkeletonProps = {
   width?: number | string;
@@ -55,7 +55,7 @@ export function Skeleton({
           width,
           height,
           borderRadius,
-          borderColor: COLORS.SpbSky3,
+          borderColor: DS_COLORS.ground600,
         },
         style,
       ]}

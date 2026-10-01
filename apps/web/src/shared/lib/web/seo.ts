@@ -1,4 +1,5 @@
 /** Default document meta for web (SEO + social previews). */
+import { DS_COLORS } from 'shared/themes/ds';
 
 export const WEB_SEO = {
   siteName: 'Mindful Tarot',
@@ -21,7 +22,7 @@ export const WEB_SEO = {
     'tarot spreads',
     'mindful tarot',
   ].join(', '),
-  themeColor: '#171F2C',
+  themeColor: DS_COLORS.ground900,
   locale: 'ru_RU',
 } as const;
 

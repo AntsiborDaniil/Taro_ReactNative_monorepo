@@ -5,19 +5,20 @@ import {
   ingestAcquisition,
   isTrackedStartPayload,
 } from './acquisition';
+import { parseSharedReadingStartPayload } from './sharedReading';
 import {
   openMiniAppInlineKeyboard,
+  openSharedReadingInlineKeyboard,
   mainReplyKeyboard,
   channelInlineKeyboard,
   faqInlineKeyboard,
   isFaqTopicId,
-  BTN_CHANNEL,
-  BTN_FAQ,
-  BTN_SUPPORT,
-  BTN_HELP,
-  CHANNEL_URL,
 } from './keyboards';
+import type { BotLang } from './lang';
+import { resolveBotLang, webAppUrlWithLang } from './lang';
 import {
+  accountUnknownText,
+  botCommandDescriptions,
   channelText,
   faqIntroText,
   faqTopics,
@@ -25,10 +26,14 @@ import {
   lavaPaymentCancelledText,
   lavaPaymentFailedText,
   lavaPaymentSuccessText,
+  matchesReplyBtn,
+  MENU_BUTTON_TEXT,
   supportAcceptedText,
   supportFailedText,
+  sharedReadingText,
   supportPromptText,
   welcomeText,
+  CHANNEL_URL,
 } from './messages';
 import { ingestSupportTicket } from './support';
 
@@ -42,6 +47,10 @@ function startPayload(ctx: { match?: string | RegExpMatchArray }): string {
     return ctx.match.trim();
   }
   return '';
+}
+
+function langOf(ctx: Context): BotLang {
+  return resolveBotLang(ctx.from?.language_code);
 }
 
 function fromMeta(ctx: Context) {
@@ -74,84 +83,123 @@ async function trackStartIfNeeded(ctx: Context, payload: string): Promise<void> 
   }
 }
 
-async function sendWelcome(ctx: Context): Promise<void> {
-  await ctx.reply(welcomeText, {
+/** Menu Button с ?lang= для этого чата — язык Mini App совпадает с ботом. */
+async function configureUserMenuButton(
+  ctx: Context,
+  lang: BotLang,
+): Promise<void> {
+  const chatId = ctx.chat?.id;
+  if (chatId == null) return;
+  try {
+    await ctx.api.setChatMenuButton({
+      chat_id: chatId,
+      menu_button: {
+        type: 'web_app',
+        text: MENU_BUTTON_TEXT[lang],
+        web_app: { url: webAppUrlWithLang(config.webAppUrl, lang) },
+      },
+    });
+  } catch (error) {
+    console.warn('[bot] setChatMenuButton(chat) failed:', error);
+  }
+}
+
+async function sendWelcome(ctx: Context, lang: BotLang): Promise<void> {
+  await configureUserMenuButton(ctx, lang);
+  await ctx.reply(welcomeText[lang], {
     parse_mode: 'Markdown',
-    reply_markup: mainReplyKeyboard(),
+    reply_markup: mainReplyKeyboard(lang),
   });
 }
 
-async function sendChannel(ctx: Context): Promise<void> {
-  await ctx.reply(channelText, {
-    reply_markup: channelInlineKeyboard(),
+async function sendChannel(ctx: Context, lang: BotLang): Promise<void> {
+  await ctx.reply(channelText[lang], {
+    reply_markup: channelInlineKeyboard(lang),
   });
 }
 
-async function sendFaq(ctx: Context): Promise<void> {
-  await ctx.reply(faqIntroText, {
-    reply_markup: faqInlineKeyboard(),
+async function sendFaq(ctx: Context, lang: BotLang): Promise<void> {
+  await ctx.reply(faqIntroText[lang], {
+    reply_markup: faqInlineKeyboard(lang),
   });
 }
 
-async function sendHelp(ctx: Context): Promise<void> {
-  await ctx.reply(helpText, {
+async function sendHelp(ctx: Context, lang: BotLang): Promise<void> {
+  await ctx.reply(helpText[lang], {
     parse_mode: 'Markdown',
-    reply_markup: openMiniAppInlineKeyboard(),
+    reply_markup: openMiniAppInlineKeyboard(lang),
   });
 }
 
-async function beginSupport(ctx: Context): Promise<void> {
+async function beginSupport(ctx: Context, lang: BotLang): Promise<void> {
   if (ctx.from?.id) {
     pendingSupportByUser.add(ctx.from.id);
   }
-  await ctx.reply(supportPromptText, { parse_mode: 'Markdown' });
+  await ctx.reply(supportPromptText[lang], { parse_mode: 'Markdown' });
 }
 
 bot.command('start', async (ctx) => {
   const payload = startPayload(ctx);
-  const replyMarkup = openMiniAppInlineKeyboard();
+  const lang = langOf(ctx);
+  const replyMarkup = openMiniAppInlineKeyboard(lang);
+
+  await configureUserMenuButton(ctx, lang);
 
   if (payload === 'lava_success') {
-    await ctx.reply(lavaPaymentSuccessText, { reply_markup: replyMarkup });
+    await ctx.reply(lavaPaymentSuccessText[lang], { reply_markup: replyMarkup });
     return;
   }
   if (payload === 'lava_failed') {
-    await ctx.reply(lavaPaymentFailedText, { reply_markup: replyMarkup });
+    await ctx.reply(lavaPaymentFailedText[lang], { reply_markup: replyMarkup });
     return;
   }
   if (payload === 'lava_cancelled') {
-    await ctx.reply(lavaPaymentCancelledText, { reply_markup: replyMarkup });
+    await ctx.reply(lavaPaymentCancelledText[lang], {
+      reply_markup: replyMarkup,
+    });
+    return;
+  }
+
+  // Шаринг расклада: `r_<hex32>`. Telegram доводит до бота, когда ссылка
+  // `?startapp=` открыла чат (у бота не настроен Main Mini App) — отдаём
+  // кнопку, которая открывает Mini App сразу на этом раскладе.
+  const sharedReadingUid = parseSharedReadingStartPayload(payload);
+  if (sharedReadingUid) {
+    await ctx.reply(sharedReadingText[lang], {
+      reply_markup: openSharedReadingInlineKeyboard(sharedReadingUid, lang),
+    });
     return;
   }
 
   await trackStartIfNeeded(ctx, payload);
-  await sendWelcome(ctx);
+  await sendWelcome(ctx, lang);
 });
 
 bot.command('channel', async (ctx) => {
-  await sendChannel(ctx);
+  await sendChannel(ctx, langOf(ctx));
 });
 
 bot.command('help', async (ctx) => {
-  await sendHelp(ctx);
+  await sendHelp(ctx, langOf(ctx));
 });
 
 bot.command('support', async (ctx) => {
-  await beginSupport(ctx);
+  await beginSupport(ctx, langOf(ctx));
 });
 
 bot.command('faq', async (ctx) => {
-  await sendFaq(ctx);
+  await sendFaq(ctx, langOf(ctx));
 });
 
 bot.callbackQuery(/^faq:(.+)$/, async (ctx) => {
   const topic = ctx.match[1];
+  const lang = langOf(ctx);
   await ctx.answerCallbackQuery();
   if (!isFaqTopicId(topic)) {
     return;
   }
-  await ctx.reply(faqTopics[topic], {
-    reply_markup: faqInlineKeyboard(),
+  await ctx.reply(faqTopics[lang][topic], {
+    reply_markup: faqInlineKeyboard(lang),
   });
 });
 
@@ -161,35 +209,36 @@ bot.on('message:text', async (ctx) => {
   }
 
   const text = ctx.message.text.trim();
+  const lang = langOf(ctx);
 
-  if (text === BTN_CHANNEL) {
-    await sendChannel(ctx);
+  if (matchesReplyBtn(text, 'channel')) {
+    await sendChannel(ctx, lang);
     return;
   }
-  if (text === BTN_FAQ) {
-    await sendFaq(ctx);
+  if (matchesReplyBtn(text, 'faq')) {
+    await sendFaq(ctx, lang);
     return;
   }
-  if (text === BTN_HELP) {
-    await sendHelp(ctx);
+  if (matchesReplyBtn(text, 'help')) {
+    await sendHelp(ctx, lang);
     return;
   }
-  if (text === BTN_SUPPORT) {
-    await beginSupport(ctx);
+  if (matchesReplyBtn(text, 'support')) {
+    await beginSupport(ctx, lang);
     return;
   }
 
   const from = ctx.from;
   if (!from) {
-    await ctx.reply('Не удалось определить аккаунт Telegram. Напиши ещё раз.');
+    await ctx.reply(accountUnknownText[lang]);
     return;
   }
 
   const awaitingSupport = pendingSupportByUser.has(from.id);
   if (!awaitingSupport) {
-    await ctx.reply(helpText, {
+    await ctx.reply(helpText[lang], {
       parse_mode: 'Markdown',
-      reply_markup: openMiniAppInlineKeyboard(),
+      reply_markup: openMiniAppInlineKeyboard(lang),
     });
     return;
   }
@@ -203,24 +252,35 @@ bot.on('message:text', async (ctx) => {
       displayName: [from.first_name, from.last_name].filter(Boolean).join(' '),
       message: ctx.message.text,
     });
-    await ctx.reply(supportAcceptedText, {
+    await ctx.reply(supportAcceptedText[lang], {
       parse_mode: 'Markdown',
-      reply_markup: openMiniAppInlineKeyboard(),
+      reply_markup: openMiniAppInlineKeyboard(lang),
     });
   } catch (error) {
     console.error('[bot] support ingest failed:', error);
     pendingSupportByUser.add(from.id);
-    await ctx.reply(supportFailedText, { parse_mode: 'Markdown' });
+    await ctx.reply(supportFailedText[lang], { parse_mode: 'Markdown' });
   }
 });
 
-async function configureMenuButton(): Promise<void> {
+async function configureDefaultMenuButton(): Promise<void> {
   await bot.api.setChatMenuButton({
     menu_button: {
       type: 'web_app',
-      text: 'Открыть Tarot',
-      web_app: { url: config.webAppUrl },
+      text: MENU_BUTTON_TEXT.ru,
+      web_app: { url: webAppUrlWithLang(config.webAppUrl, 'ru') },
     },
+  });
+}
+
+async function configureLocalizedCommands(): Promise<void> {
+  // Без language_code — дефолт (русский). Затем en/ru для клиентов Telegram.
+  await bot.api.setMyCommands(botCommandDescriptions.ru);
+  await bot.api.setMyCommands(botCommandDescriptions.ru, {
+    language_code: 'ru',
+  });
+  await bot.api.setMyCommands(botCommandDescriptions.en, {
+    language_code: 'en',
   });
 }
 
@@ -229,16 +289,10 @@ async function main(): Promise<void> {
   startHealthServer(config.port);
 
   try {
-    await bot.api.setMyCommands([
-      { command: 'start', description: 'Приветствие и приложение' },
-      { command: 'channel', description: 'Наш Telegram-канал' },
-      { command: 'faq', description: 'Оплата, заряды и правила' },
-      { command: 'support', description: 'Написать в поддержку' },
-      { command: 'help', description: 'Список команд' },
-    ]);
-    await configureMenuButton();
+    await configureLocalizedCommands();
+    await configureDefaultMenuButton();
   } catch (error) {
-    console.warn('[bot] setChatMenuButton failed, continuing:', error);
+    console.warn('[bot] menu/commands setup failed, continuing:', error);
   }
 
   bot.catch((err) => {

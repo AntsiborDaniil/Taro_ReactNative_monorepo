@@ -99,6 +99,11 @@ export function initTelegramWebAppChrome(): void {
 
   tg.ready();
   tg.expand();
+  // Bot API 7.7+: вертикальный свайп сворачивал приложение посреди скролла
+  // страницы. Выход остаётся через стрелку назад (BackButton) и кнопку закрытия,
+  // поэтому подтверждение закрытия включаем, а свайп гасим.
+  tg.disableVerticalSwipes?.();
+  tg.enableClosingConfirmation?.();
   tg.setHeaderColor(telegramBg());
   tg.setBackgroundColor(telegramBg());
   applyTelegramSafeAreaCssVars();

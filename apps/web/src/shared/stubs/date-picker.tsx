@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { DS_COLORS } from '../themes/ds';
+import { getColorOpacity } from '../themes/getColorOpacity';
 
 type DatePickerProps = {
   open?: boolean;
@@ -62,9 +64,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(10, 15, 24, 0.72)',
+        backgroundColor: getColorOpacity(DS_COLORS.ground900, 80),
         zIndex: 99999,
-        backdropFilter: 'blur(6px)',
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
@@ -77,7 +78,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         role="dialog"
         aria-modal="true"
         style={{
-          background: '#1E232B',
+          background: DS_COLORS.ground800,
           borderRadius: 20,
           padding: 24,
           display: 'flex',
@@ -85,10 +86,10 @@ const DatePicker: React.FC<DatePickerProps> = ({
           gap: 20,
           minWidth: 300,
           maxWidth: 'calc(100vw - 32px)',
-          border: '2px solid rgba(246, 192, 27, 0.45)',
+          border: `1px solid ${DS_COLORS.ground600}`,
         }}
       >
-        <h2 style={{ margin: 0, color: '#F4F4F5', fontSize: 22 }}>{title}</h2>
+        <h2 style={{ margin: 0, color: DS_COLORS.ink50, fontSize: 22 }}>{title}</h2>
         <input
           ref={inputRef}
           type="date"
@@ -100,9 +101,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
             fontSize: 22,
             padding: '14px 16px',
             borderRadius: 12,
-            border: '1px solid rgba(246, 192, 27, 0.35)',
-            color: '#F4F4F5',
-            background: '#171F2C',
+            border: `1.6px solid ${DS_COLORS.ground600}`,
+            color: DS_COLORS.ink50,
+            background: DS_COLORS.ground700,
             colorScheme: 'dark',
           }}
         />

@@ -4,17 +4,15 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import { ProgressBar } from '@ui-kitten/components';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { HabitsContext } from 'entities/habits';
 import { useTranslation } from 'react-i18next';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { getCurrentDate, getHabitDayProgress } from 'shared/lib';
-import { WEB_HOVER_TRANSITION } from 'shared/lib';
-import { COLORS } from 'shared/themes';
+import { getCurrentDate, getHabitDayProgress, WEB_HOVER_TRANSITION } from 'shared/lib';
 import { NavigationRoute, TabRoute } from 'shared/types';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
+import { DS_COLORS, dsWebTransition } from 'shared/themes/ds';
 
 function HabitWidget() {
   const date = getCurrentDate();
@@ -75,17 +73,20 @@ function HabitWidget() {
                 weight={TEXT_WEIGHT.medium}
                 style={styles.dateText}
               >
-                {`${date[0].toUpperCase()}${date.slice(1)}`}
+                {`${date.charAt(0).toUpperCase()}${date.slice(1).toLowerCase()}`}
               </Text>
-              <Text
-                style={styles.percent}
-                category={TEXT_TAGS.h4}
-                weight={TEXT_WEIGHT.medium}
-              >
+              <Text style={styles.percent} category={TEXT_TAGS.h4} weight={TEXT_WEIGHT.medium}>
                 {`${(progressPercent * 100).toFixed(0)}%`}
               </Text>
             </View>
-            <ProgressBar style={styles.progress} progress={progressPercent} />
+            <View style={styles.progressTrack}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${Math.round(Math.min(1, Math.max(0, progressPercent)) * 100)}%` },
+                ]}
+              />
+            </View>
             {habitsOfTheDay?.length ? (
               <Text style={styles.goalsText} category={TEXT_TAGS.p1}>
                 {t('habits:widget.completedGoals', {
@@ -119,7 +120,12 @@ function HabitWidget() {
               });
             }}
           >
-            <Text style={[styles.plus, { fontSize: plusFont, lineHeight: plusFont }]}>+</Text>
+            <Text
+              weight={TEXT_WEIGHT.bold}
+              style={[styles.plus, { fontSize: plusFont, lineHeight: plusFont }]}
+            >
+              +
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -130,15 +136,11 @@ function HabitWidget() {
 const styles = StyleSheet.create({
   rootPressable: {
     borderRadius: 16,
-    ...({
-      cursor: 'pointer',
-      ...WEB_HOVER_TRANSITION,
-    } as object),
+    ...({ cursor: 'pointer', ...WEB_HOVER_TRANSITION } as object),
+    ...dsWebTransition,
   },
   rootHovered: {
-    ...({
-      boxShadow: '0 10px 24px rgba(0,0,0,0.22)',
-    } as object),
+    borderColor: DS_COLORS.accent400,
   },
   rootPressed: {
     opacity: 0.95,
@@ -146,22 +148,11 @@ const styles = StyleSheet.create({
   container: {
     borderWidth: 1,
     borderRadius: 18,
-    borderColor: 'rgba(246, 192, 27, 0.18)',
-    backgroundColor: 'rgba(22, 28, 38, 0.55)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     paddingHorizontal: 16,
     paddingVertical: 14,
     gap: 12,
-    ...(globalThis?.window
-      ? ({
-          boxShadow: 'inset 0 1px 0 rgba(246, 192, 27, 0.06)',
-        } as object)
-      : {}),
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 8,
   },
   topRow: {
     flexDirection: 'row',
@@ -176,46 +167,35 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   plus: {
-    fontWeight: 700,
     textAlign: 'center',
-    color: COLORS.Primary100,
+    color: DS_COLORS.ink50,
   },
   image: {
-    backgroundColor: 'rgba(246, 192, 27, 0.12)',
+    backgroundColor: DS_COLORS.ground600,
     borderWidth: 1,
-    borderColor: COLORS.Primary500,
+    borderColor: DS_COLORS.accent400,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-    ...(globalThis?.window
-      ? ({
-          boxShadow: '0 0 18px rgba(246, 192, 27, 0.18)',
-        } as object)
-      : {}),
   },
   dateText: {
-    fontSize: 14,
-    lineHeight: 18,
-    color: COLORS.Primary300,
-    letterSpacing: 0.4,
-    textTransform: 'capitalize',
+    color: DS_COLORS.ink100,
   },
   goalsText: {
     width: '100%',
     textAlign: 'center',
-    fontSize: 16,
-    lineHeight: 20,
-    color: 'rgba(255,255,255,0.74)',
+    color: DS_COLORS.ink100,
     paddingHorizontal: 4,
     marginTop: 8,
   },
   percent: {
-    backgroundColor: 'rgba(41, 167, 92, 0.85)',
+    backgroundColor: DS_COLORS.calm600,
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(83, 232, 115, 0.35)',
+    borderColor: DS_COLORS.calm500,
+    color: DS_COLORS.ink50,
     overflow: 'hidden',
   },
   main: {
@@ -224,9 +204,17 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
   },
-  progress: {
+  progressTrack: {
     height: 12,
     borderRadius: 16,
+    backgroundColor: DS_COLORS.ground600,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 16,
+    backgroundColor: DS_COLORS.calm500,
   },
 });
 

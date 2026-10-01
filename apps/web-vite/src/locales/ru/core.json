@@ -6,6 +6,8 @@
   "card.reversed": "Перевернутое",
   "card.added1": "Карта Таро добавлена в избранное.",
   "card.added2": "Нажми, чтобы посмотреть",
+  "card.like": "В избранное",
+  "card.unlike": "Убрать из избранного",
   "card.favoriteError.title": "Не удалось добавить в избранное",
   "card.favoriteError.body": "Проверьте подключение к интернету и попробуйте снова.",
 
@@ -26,6 +28,7 @@
 
   "button.prev": "Предыдущая",
   "button.next": "Следующая",
+  "button.loadMore": "Показать ещё",
   "button.resetDayCard": "Сбросить карту дня",
 
   "choice.tapToChoice": "Нажми, чтобы выбрать карту",
@@ -67,6 +70,11 @@
   "errorBoundary.alternativeTitle": "Приложение устарело",
   "errorBoundary.description": "Попробуйте обновить приложение",
   "errorBoundary.button": "Обновить",
+  "errorBoundary.goHome": "На главную",
+
+  "notFound.title": "Страница не найдена",
+  "notFound.description": "Такой страницы не существует или она была перемещена.",
+  "notFound.home": "На главную",
 
   "history.noSpreads": "Вы еще не делали расклады",
   "favoriteCards.noCards": "Вы еще не добавили карты в избранное",
@@ -104,6 +112,8 @@
   "nav.tab.main": "Главная",
   "nav.tab.spreads": "Расклады",
   "nav.tab.library": "Библиотека",
+  "nav.tab.settings": "Настройки",
+  "nav.landmark": "Основная навигация",
   "nav.fab.open": "Открыть меню навигации",
   "nav.fab.close": "Закрыть меню навигации",
   "nav.fab.settings": "Настройки",
@@ -113,6 +123,8 @@
 
   "a11y.scrollToTop": "Прокрутить в начало",
   "a11y.back": "Назад",
+  "a11y.close": "Закрыть",
+  "a11y.dismissToast": "Закрыть уведомление",
   "a11y.settings": "Открыть настройки",
   "a11y.headerActions": "Дополнительные действия",
   "a11y.horizontalList": "Горизонтальный список",

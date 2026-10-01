@@ -13,7 +13,8 @@ import {
 } from 'shared/config/legal';
 import { useNativeNavigation } from 'shared/hooks';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { NavigationRoute, type PressableWebState } from 'shared/types';
 import { ScreenLayout, Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 
@@ -102,7 +103,7 @@ function LegalDocument() {
         <View style={[styles.column, { maxWidth: contentMax }]}>
           <View style={styles.hero}>
             <Text
-              category={TEXT_TAGS.h4}
+              category={TEXT_TAGS.h3}
               weight={TEXT_WEIGHT.semibold}
               style={styles.heroTitle}
             >
@@ -193,8 +194,8 @@ const styles = StyleSheet.create({
   hero: {
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: getColorOpacity(COLORS.Primary, 18),
-    backgroundColor: COLORS.Background2,
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
     paddingVertical: 18,
     paddingHorizontal: 18,
     gap: 8,
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
     color: COLORS.Content,
   },
   heroShort: {
-    color: getColorOpacity(COLORS.Content, 64),
+    color: DS_COLORS.ink100,
     lineHeight: 20,
   },
   badge: {
@@ -212,18 +213,18 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: 'rgba(132, 176, 230, 0.26)',
-    backgroundColor: 'rgba(132, 176, 230, 0.1)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     marginTop: 2,
   },
   badgeText: {
-    color: 'rgba(216, 228, 247, 0.9)',
+    color: DS_COLORS.ink100,
   },
   section: {
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(132, 176, 230, 0.14)',
-    backgroundColor: 'rgba(255, 255, 255, 0.025)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
     paddingVertical: 16,
     paddingHorizontal: 16,
     gap: 10,
@@ -233,19 +234,19 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   paragraph: {
-    color: getColorOpacity(COLORS.Content, 76),
-    lineHeight: 22,
+    color: DS_COLORS.ink100,
+    lineHeight: 24,
   },
   note: {
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: getColorOpacity(COLORS.Primary, 30),
-    backgroundColor: getColorOpacity(COLORS.Primary, 9),
+    borderColor: DS_COLORS.accent400,
+    backgroundColor: DS_COLORS.ground700,
     paddingVertical: 12,
     paddingHorizontal: 14,
   },
   noteText: {
-    color: getColorOpacity(COLORS.Content, 88),
+    color: DS_COLORS.ink50,
     lineHeight: 21,
   },
   list: {
@@ -260,14 +261,14 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 999,
-    backgroundColor: getColorOpacity(COLORS.Primary, 70),
+    backgroundColor: DS_COLORS.accent400,
     marginTop: 8,
     flexShrink: 0,
   },
   listText: {
     flex: 1,
     minWidth: 0,
-    color: getColorOpacity(COLORS.Content, 74),
+    color: DS_COLORS.ink100,
     lineHeight: 21,
   },
   fields: {
@@ -277,7 +278,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   fieldLabel: {
-    color: getColorOpacity(COLORS.Content, 48),
+    color: DS_COLORS.ink100,
     letterSpacing: 0.3,
   },
   fieldValue: {
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   otherTitle: {
-    color: getColorOpacity(COLORS.Content, 48),
+    color: DS_COLORS.accent400,
     letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
@@ -299,27 +300,28 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
   },
+  /** Тихая кнопка: фон ground700, кант ground600. */
   chip: {
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: 'rgba(132, 176, 230, 0.24)',
-    backgroundColor: 'rgba(132, 176, 230, 0.08)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     ...(Platform.OS === 'web'
       ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
   chipActive: {
-    borderColor: getColorOpacity(COLORS.Primary, 44),
-    backgroundColor: getColorOpacity(COLORS.Primary, 14),
+    borderColor: DS_COLORS.accent400,
+    backgroundColor: DS_COLORS.pressDim,
   },
   chipText: {
-    color: 'rgba(216, 228, 247, 0.86)',
+    color: DS_COLORS.ink100,
   },
   chipPrimary: {
-    borderColor: getColorOpacity(COLORS.Primary, 40),
-    backgroundColor: getColorOpacity(COLORS.Primary, 10),
+    borderColor: DS_COLORS.accent400,
+    backgroundColor: DS_COLORS.ground700,
   },
   chipPrimaryText: {
     color: COLORS.Primary,

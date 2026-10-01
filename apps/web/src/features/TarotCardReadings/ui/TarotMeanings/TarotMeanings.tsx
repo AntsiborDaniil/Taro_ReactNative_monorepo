@@ -5,6 +5,7 @@ import { TSelectedTarotCard } from 'shared/api';
 import { webCardMeaningsProps } from 'shared/lib/web/webScrollClasses';
 import { SeparatorIcon } from 'shared/icons';
 import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { Text, TEXT_TAGS } from 'shared/ui';
 
 type TarotTextsProps = {
@@ -105,7 +106,9 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   adviceContainer: {
-    backgroundColor: COLORS.Primary,
+    backgroundColor: DS_COLORS.ground700,
+    borderWidth: 1,
+    borderColor: DS_COLORS.accent400,
     padding: 16,
     borderRadius: 16,
     alignItems: 'stretch',
@@ -113,11 +116,11 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   adviceText: {
-    color: COLORS.Background,
+    color: DS_COLORS.accent400,
     textAlign: 'center',
   },
   adviceTextCommon: {
-    color: COLORS.Background,
+    color: DS_COLORS.ink50,
     lineHeight: 24,
     textAlign: 'left',
   },

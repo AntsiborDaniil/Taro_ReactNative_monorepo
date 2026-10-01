@@ -1,17 +1,10 @@
 import { useCallback } from 'react';
-import {
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { CrossIcon } from 'shared/icons';
 import { blurActiveElement } from 'shared/lib';
-import { COLORS } from 'shared/themes';
-import { Text, TEXT_TAGS } from 'shared/ui';
+import { DS_COLORS } from 'shared/themes/ds';
+import { DsModalSheet, Text, TEXT_TAGS } from 'shared/ui';
 import LanguagePickerBody from './LanguagePickerBody';
 
 type LanguagePickerModalProps = {
@@ -34,13 +27,11 @@ function LanguagePickerModal({ visible, onClose }: LanguagePickerModalProps) {
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <View style={styles.root} pointerEvents="box-none">
-        <Pressable
-          style={styles.backdrop}
-          accessibilityRole="button"
-          accessibilityLabel={t('core:stub.emptyResultsModal.closeBackdrop')}
-          onPress={handleClose}
-        />
+      <DsModalSheet
+        onClose={handleClose}
+        closeAccessibilityLabel={t('core:stub.emptyResultsModal.closeBackdrop')}
+        maxWidth={420}
+      >
         <View style={styles.card} accessibilityViewIsModal>
           <View style={styles.header}>
             <Text category={TEXT_TAGS.h3} style={styles.title}>
@@ -57,37 +48,18 @@ function LanguagePickerModal({ visible, onClose }: LanguagePickerModalProps) {
           </View>
           <LanguagePickerBody variant="modal" onAfterChange={handleClose} />
         </View>
-      </View>
+      </DsModalSheet>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-  },
   card: {
     width: '100%',
-    maxWidth: 420,
-    borderRadius: 28,
+    backgroundColor: DS_COLORS.ground800,
     paddingHorizontal: 22,
     paddingTop: 22,
     paddingBottom: 20,
-    backgroundColor: COLORS.Background2,
-    borderWidth: 1,
-    borderColor: 'rgba(175, 161, 232, 0.25)',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 12px 48px rgba(0,0,0,0.35)',
-        } as object)
-      : {}),
   },
   header: {
     flexDirection: 'row',
@@ -98,7 +70,7 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
   },
 });
 

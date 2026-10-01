@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { LightningIcon } from '../Icon';
 import { openModal } from '../ModalSheet';
@@ -14,6 +15,7 @@ export function CreditsBadge(): ReactElement | null {
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
   const tarotDaily = useAppSelector((state) => state.user.tarotDaily);
   const spreadCredits = useAppSelector((state) => state.user.spreadCredits);
+  const { t } = useTranslation('settings');
   const dispatch = useAppDispatch();
 
   if (!isAuthenticated) {
@@ -24,13 +26,17 @@ export function CreditsBadge(): ReactElement | null {
   const dailyRemaining = tarotDaily != null ? Math.max(0, tarotDaily.limit - tarotDaily.used) : 0;
   const remaining = dailyRemaining + credits;
   const countLabel = remaining > 99 ? '99+' : String(Math.max(0, Math.floor(remaining)));
+  const ariaLabel =
+    credits > 0
+      ? t('credits.badge.a11yCredits', { count: remaining })
+      : t('credits.badge.a11yDaily', { count: remaining });
 
   return (
     <button
       type="button"
       className={styles.root}
       onClick={() => dispatch(openModal({ id: 'buy-credits' }))}
-      aria-label={`Заряды: ${countLabel}, пополнить`}
+      aria-label={ariaLabel}
     >
       <LightningIcon width={20} height={20} className={styles.bolt} />
       <span className={`${styles.badge} ${styles.countBadge}`}>{countLabel}</span>

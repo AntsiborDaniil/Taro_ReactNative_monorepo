@@ -18,27 +18,6 @@ export type LayoutViewportInsets = {
   right: number;
 };
 
-/** Chrome/Safari toolbar — ignore keyboard-sized visualViewport shrink. */
-const MAX_BROWSER_CHROME_INSET = 80;
-
-function readBrowserChromeBottomInset(): number {
-  if (typeof window === 'undefined') {
-    return 0;
-  }
-
-  const vv = window.visualViewport;
-  if (!vv) {
-    return 0;
-  }
-
-  const gap = window.innerHeight - (vv.height + vv.offsetTop);
-  const chrome = Math.max(0, Math.round(gap));
-  if (chrome > MAX_BROWSER_CHROME_INSET) {
-    return 0;
-  }
-  return chrome;
-}
-
 function readCssSafeAreaInsets(): LayoutViewportInsets {
   if (typeof document === 'undefined' || !document.body) {
     return { top: 0, bottom: 0, left: 0, right: 0 };
@@ -61,7 +40,7 @@ function readCssSafeAreaInsets(): LayoutViewportInsets {
 }
 
 /**
- * Safe area + mobile browser chrome on web (visualViewport).
+ * Safe area (CSS env + Telegram) on web.
  * Native: react-native-safe-area-context only.
  */
 export function useWebViewportInsets(): LayoutViewportInsets {
@@ -80,10 +59,10 @@ export function useWebViewportInsets(): LayoutViewportInsets {
 
     const update = () => {
       const css = readCssSafeAreaInsets();
-      const browserBottom = readBrowserChromeBottomInset();
+      // Browser toolbar is not added: app height is 100dvh, i.e. already the visible area.
       setWebExtra({
         top: css.top,
-        bottom: Math.max(css.bottom, browserBottom),
+        bottom: css.bottom,
         left: css.left,
         right: css.right,
       });

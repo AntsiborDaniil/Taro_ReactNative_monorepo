@@ -1,4 +1,4 @@
-import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useMobileFabScrollOnScroll } from 'app/navigation/tabs/MobileFabScrollContext';
 import { tryNavigateNavReturn, useNavReturn } from 'app/navigation/navReturnStore';
 import AppMetrica from '@appmetrica/react-native-analytics';
@@ -17,13 +17,17 @@ import {
   toastWebAuthRequired,
 } from 'shared/lib';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
-import { ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
+import { ScreenLayout } from 'shared/ui';
+import { DS_COLORS, dsText } from 'shared/themes/ds';
 
 import SpreadCatalogCard from './SpreadCatalogCard';
-import { useSpreadsLayout } from './useSpreadsLayout';
+import SpreadsEmptyState from './SpreadsEmptyState';
+import { useContainerWidth, useSpreadsLayout } from './useSpreadsLayout';
 
 export default function Spreads() {
-  const layout = useSpreadsLayout();
+  const { width: windowWidth } = useWindowDimensions();
+  const [containerWidth, onContainerLayout] = useContainerWidth(windowWidth);
+  const layout = useSpreadsLayout(containerWidth);
 
   const { isAuthenticated, authSessionLoading, refreshAuthSession } = useData({
     Context: UserContext,
@@ -43,8 +47,10 @@ export default function Spreads() {
 
   const onFabScroll = useMobileFabScrollOnScroll();
 
+  const lockedLabel = t('spread:catalog.locked');
+
   return (
-    <ScreenLayout>
+    <ScreenLayout style={{ backgroundColor: DS_COLORS.ground900 }}>
       <Header
         showBackButton={navReturn != null}
         backAction={
@@ -55,70 +61,73 @@ export default function Spreads() {
             : undefined
         }
         title={t('core:page.spreadsGroups')}
+        leadingTitle
+        stylesWrapper={{
+          maxWidth: layout.contentMaxWidth,
+          alignSelf: 'center',
+          paddingHorizontal: layout.gutter,
+        }}
       />
-      <ScrollView
-        onScroll={onFabScroll}
-        scrollEventThrottle={16}
-        contentContainerStyle={[
-          styles.scrollInner,
-          { paddingBottom: layout.scrollBottomPad },
-        ]}
-      >
-        <View
-          style={[
-            styles.spreads,
-            {
-              width: layout.contentWidth,
-              alignSelf: 'center',
-              paddingHorizontal: layout.padding,
-              paddingTop: layout.padding,
-              gap: layout.gap + 4,
-            },
+      <View style={styles.measureFill} onLayout={onContainerLayout}>
+        <ScrollView
+          onScroll={onFabScroll}
+          scrollEventThrottle={16}
+          contentContainerStyle={[
+            styles.scrollInner,
+            { paddingBottom: layout.scrollBottomPad },
           ]}
         >
-          <View style={[styles.decorOrb, styles.decorOrbTop]} />
-          <View style={[styles.decorOrb, styles.decorOrbBottom]} />
-          {!!spreadsSections?.length &&
-            spreadsSections.map((data) => (
-              <View
-                style={[styles.sectionCard, { gap: layout.gap - 2 }]}
-                key={data.title}
-              >
-                <Text
-                  category={TEXT_TAGS.h4}
-                  style={[
-                    styles.sectionTitle,
-                    {
-                      fontSize: layout.sectionTitleSize,
-                      lineHeight: layout.sectionTitleLine,
-                    },
-                  ]}
-                >
-                  {t(data.title)}
-                </Text>
-
+          <View
+            style={[
+              styles.column,
+              {
+                maxWidth: layout.contentMaxWidth,
+                paddingHorizontal: layout.gutter,
+                paddingTop: layout.gutter,
+                gap: layout.sectionGap,
+              },
+            ]}
+          >
+            {!spreadsSections?.length ? (
+              <SpreadsEmptyState
+                title={t('spread:catalog.empty.title')}
+                actionLabel={t('spread:catalog.empty.action')}
+                onAction={() => {
+                  navigation.navigate(TabRoute.MainTab, {
+                    screen: NavigationRoute.Main,
+                  });
+                }}
+              />
+            ) : (
+              spreadsSections.map((section) => (
                 <View
-                  style={[
-                    layout.columns > 1
-                      ? styles.columnWrapper
-                      : styles.flatListContainer,
-                    { gap: layout.gap },
-                  ]}
+                  key={section.title}
+                  style={[styles.section, { gap: layout.headingGap }]}
                 >
-                  {data.data.map((item) => {
-                    return (
+                  <Text
+                    accessibilityRole="header"
+                    numberOfLines={2}
+                    style={dsText('title', DS_COLORS.ink50)}
+                  >
+                    {t(section.title)}
+                  </Text>
+
+                  <View style={[styles.grid, { gap: layout.tileGap }]}>
+                    {section.data.map((item) => (
                       <SpreadCatalogCard
                         key={item.id}
-                        layout={layout}
-                        title={t(item.name)}
+                        name={t(item.name)}
+                        cardsLabel={t('spread:catalog.count', {
+                          count: item.cardsCount,
+                        })}
+                        lockedLabel={lockedLabel}
                         imageSource={getImage([
                           'spreads',
                           DeckStyle.FlatIllustration,
                           item.id,
                         ])}
+                        width={layout.tileWidth}
                         isLocked={false}
-                        width={layout.cardWidth}
-                        imageAreaHeight={layout.previewHeight}
                         onPress={async () => {
                           AppMetrica.reportEvent(
                             AnalyticAction.ClickSpreadInCategory,
@@ -157,69 +166,37 @@ export default function Spreads() {
                           });
                         }}
                       />
-                    );
-                  })}
+                    ))}
+                  </View>
                 </View>
-              </View>
-            ))}
-        </View>
-      </ScrollView>
+              ))
+            )}
+          </View>
+        </ScrollView>
+      </View>
     </ScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
+  measureFill: {
+    flex: 1,
+    width: '100%',
+  },
   scrollInner: {
     flexGrow: 1,
   },
-  spreads: {
+  column: {
+    width: '100%',
     maxWidth: '100%',
-    position: 'relative',
+    alignSelf: 'center',
   },
-  sectionTitle: {
-    marginBottom: 8,
-    letterSpacing: 0.15,
-    color: '#F4F6FF',
-  },
-  flatListContainer: {
+  section: {
     width: '100%',
   },
-  columnWrapper: {
+  grid: {
     width: '100%',
-    justifyContent: 'flex-start',
     flexDirection: 'row',
     flexWrap: 'wrap',
-  },
-  sectionCard: {
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(141, 178, 235, 0.16)',
-    backgroundColor: 'rgba(255, 255, 255, 0.015)',
-    padding: 14,
-    overflow: 'hidden',
-    ...(globalThis?.window
-      ? ({
-          boxShadow: '0 10px 22px rgba(10, 15, 26, 0.2)',
-        } as object)
-      : {}),
-  },
-  decorOrb: {
-    position: 'absolute',
-    borderRadius: 999,
-    zIndex: 0,
-  },
-  decorOrbTop: {
-    width: 180,
-    height: 180,
-    top: -80,
-    right: -48,
-    backgroundColor: 'rgba(112, 87, 236, 0.14)',
-  },
-  decorOrbBottom: {
-    width: 220,
-    height: 220,
-    bottom: 40,
-    left: -90,
-    backgroundColor: 'rgba(74, 122, 232, 0.1)',
   },
 });

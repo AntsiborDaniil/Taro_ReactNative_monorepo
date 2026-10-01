@@ -9,7 +9,7 @@ import EmojiPicker from 'rn-emoji-keyboard';
 import { Header } from 'features/header';
 import { EmojiIcon } from 'shared/icons';
 import { getLocalizedWeekdays, WEB_HOVER_TRANSITION } from 'shared/lib';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS, dsWebTransition } from 'shared/themes/ds';
 import {
   HabitFrequency,
   HabitType,
@@ -43,9 +43,8 @@ function HabitCreate() {
 
   const weekDays = getLocalizedWeekdays(i18n.language);
   const inputBaseProps = {
-    placeholderTextColor: 'rgba(255,255,255,0.46)',
-    selectionColor: COLORS.Primary,
-    cursorColor: COLORS.Primary,
+    selectionColor: DS_COLORS.accent400,
+    cursorColor: DS_COLORS.accent400,
   } as const;
 
   const {
@@ -84,25 +83,8 @@ function HabitCreate() {
         style={styles.wrapper}
         contentContainerStyle={styles.container}
       >
-        <View
-          style={[
-            styles.introCard,
-            isBuildHabit ? styles.introCardBuild : styles.introCardQuit,
-          ]}
-        >
-          <View
-            style={[
-              styles.sectionGlow,
-              isBuildHabit ? styles.sectionGlowBuild : styles.sectionGlowQuit,
-            ]}
-          />
-          <Text
-            category={TEXT_TAGS.label}
-            style={[
-              styles.introEyebrow,
-              !isBuildHabit && styles.introEyebrowQuit,
-            ]}
-          >
+        <View style={styles.introCard}>
+          <Text category={TEXT_TAGS.label} style={styles.introEyebrow}>
             {isBuildHabit
               ? t('habits:choose.badge.build')
               : t('habits:choose.badge.quit')}
@@ -123,18 +105,12 @@ function HabitCreate() {
           </Text>
         </View>
         <View style={styles.shape}>
-          <View style={styles.sectionGlow} />
           <View style={styles.row}>
             <View style={styles.column}>
               <Input
                 baseInputProps={{
                   ...inputBaseProps,
-                  style: [
-                    styles.input,
-                    styles.largeInput,
-                    styles.habitFieldInput,
-                    { maxWidth: screen.width - 168 },
-                  ],
+                  style: [{ maxWidth: screen.width - 168 }],
                   value: habit.title,
                   onChangeText: handleChangeHabit('title'),
                   placeholder: t('habits:placeholder.habitTitle'),
@@ -143,12 +119,7 @@ function HabitCreate() {
               <Input
                 baseInputProps={{
                   ...inputBaseProps,
-                  style: [
-                    styles.input,
-                    styles.largeInput,
-                    styles.habitFieldInput,
-                    { maxWidth: screen.width - 168 },
-                  ],
+                  style: [{ maxWidth: screen.width - 168 }],
                   value: habit.description,
                   onChangeText: handleChangeHabit('description'),
                   placeholder: t('habits:placeholder.habitDesc'),
@@ -183,8 +154,7 @@ function HabitCreate() {
         {habitType === HabitType.BuildPositive && (
           <>
             <View style={styles.shape}>
-              <View style={styles.sectionGlow} />
-              <View style={styles.row}>
+                  <View style={styles.row}>
                 <Text category={TEXT_TAGS.h4} style={styles.sectionTitle}>
                   {t('habits:title.goal')}
                 </Text>
@@ -192,12 +162,7 @@ function HabitCreate() {
                   <Input
                     baseInputProps={{
                       ...inputBaseProps,
-                      style: [
-                        styles.input,
-                        styles.smallInput,
-                        styles.goalInput,
-                        styles.innerInput,
-                      ],
+                      style: [styles.goalInput],
                       value: habitGoal.amount
                         ? habitGoal.amount.toString()
                         : '',
@@ -208,12 +173,7 @@ function HabitCreate() {
                   <Input
                     baseInputProps={{
                       ...inputBaseProps,
-                      style: [
-                        styles.input,
-                        styles.smallInput,
-                        styles.goalInput,
-                        styles.innerInput,
-                      ],
+                      style: [styles.goalInput],
                       value: habitGoal.unit,
                       onChangeText: handleChangeHabitGoal('unit'),
                       placeholder: t('habits:placeholder.goalUnit'),
@@ -223,20 +183,25 @@ function HabitCreate() {
               </View>
             </View>
             <View style={[styles.shape, { gap: 16 }]}>
-              <View style={styles.sectionGlow} />
-              <View style={styles.row}>
+                  <View style={styles.row}>
                 <Button
                   style={[
                     styles.controlButton,
                     styles.radioButton,
-                    (habit as IPositiveHabit).frequency === HabitFrequency.Daily
-                      ? styles.radioUnpressed
+                    (habit as IPositiveHabit).frequency !== HabitFrequency.Daily
+                      ? styles.controlButtonActive
                       : null,
                   ]}
                   onPress={() => handleChangeFrequency(HabitFrequency.OneTime)}
                 >
                   <Text
                     category={TEXT_TAGS.label}
+                    weight={
+                      (habit as IPositiveHabit).frequency ===
+                      HabitFrequency.OneTime
+                        ? TEXT_WEIGHT.semibold
+                        : undefined
+                    }
                     style={[
                       styles.radioTextMuted,
                       (habit as IPositiveHabit).frequency ===
@@ -253,14 +218,20 @@ function HabitCreate() {
                     styles.controlButton,
                     styles.radioButton,
                     (habit as IPositiveHabit).frequency ===
-                    HabitFrequency.OneTime
-                      ? styles.radioUnpressed
+                    HabitFrequency.Daily
+                      ? styles.controlButtonActive
                       : null,
                   ]}
                   onPress={() => handleChangeFrequency(HabitFrequency.Daily)}
                 >
                   <Text
                     category={TEXT_TAGS.label}
+                    weight={
+                      (habit as IPositiveHabit).frequency ===
+                      HabitFrequency.Daily
+                        ? TEXT_WEIGHT.semibold
+                        : undefined
+                    }
                     style={[
                       styles.radioTextMuted,
                       (habit as IPositiveHabit).frequency ===
@@ -293,13 +264,20 @@ function HabitCreate() {
                             (habit as IPositiveHabit).frequencyDays.includes(
                               item.index
                             )
-                              ? null
-                              : styles.radioUnpressed,
+                              ? styles.controlButtonActive
+                              : null,
                           ]}
                           onPress={() => handleClickFrequencyDays(item.index)}
                         >
                           <Text
                             category={TEXT_TAGS.label}
+                            weight={
+                              (habit as IPositiveHabit).frequencyDays.includes(
+                                item.index
+                              )
+                                ? TEXT_WEIGHT.semibold
+                                : undefined
+                            }
                             style={[
                               styles.radioTextMuted,
                               (habit as IPositiveHabit).frequencyDays.includes(
@@ -323,8 +301,7 @@ function HabitCreate() {
         )}
         {!!habit.startDate && (
           <View style={styles.shape}>
-            <View style={styles.sectionGlow} />
-            <View style={styles.row}>
+              <View style={styles.row}>
               <Text category={TEXT_TAGS.h4} style={styles.sectionTitle}>
                 {t('habits:title.startDate')}
               </Text>
@@ -341,8 +318,7 @@ function HabitCreate() {
         )}
         {habitType === HabitType.QuitNegative && (
           <View style={styles.shape}>
-            <View style={styles.sectionGlow} />
-            <SwitchElement
+              <SwitchElement
               value={(habit as INegativeHabit).isAutoFillEnabled}
               name={t('habits:title.autoFill')}
               onValueChange={handleToggleAutoFill}
@@ -353,7 +329,6 @@ function HabitCreate() {
           </View>
         )}
         <View style={styles.shape}>
-          <View style={styles.sectionGlow} />
           <SwitchElement
             value={!!habit.endDate}
             name={t('habits:title.endDate')}
@@ -376,9 +351,7 @@ function HabitCreate() {
         style={[styles.button, { marginBottom: bottom + 16 }]}
         onPress={handleSubmit}
       >
-        <Text category={TEXT_TAGS.h3} style={styles.buttonText}>
-          {t('habits:button.create')}
-        </Text>
+        {t('habits:button.create')}
       </Button>
       <EmojiPicker
         open={isEmojiOpen}
@@ -415,92 +388,53 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   introCard: {
-    backgroundColor: 'rgba(22, 28, 38, 0.94)',
+    backgroundColor: DS_COLORS.ground800,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(246, 192, 27, 0.18)',
+    borderColor: DS_COLORS.ground600,
     paddingHorizontal: 16,
     paddingVertical: 16,
     gap: 6,
     overflow: 'hidden',
-    ...(globalThis?.window
-      ? ({
-          boxShadow: '0 12px 28px rgba(8, 12, 20, 0.32)',
-        } as object)
-      : {}),
-  },
-  introCardBuild: {
-    borderColor: 'rgba(246, 192, 27, 0.28)',
-  },
-  introCardQuit: {
-    borderColor: 'rgba(255, 99, 127, 0.28)',
   },
   introEyebrow: {
-    color: COLORS.Primary400,
+    color: DS_COLORS.accent400,
     letterSpacing: 1.2,
     textTransform: 'uppercase',
     marginBottom: 2,
   },
-  introEyebrowQuit: {
-    color: COLORS.Danger400,
-  },
   introTitle: {
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
     letterSpacing: 0.2,
     marginBottom: 2,
   },
   introDescription: {
-    color: 'rgba(244, 244, 245, 0.68)',
+    color: DS_COLORS.ink100,
     lineHeight: 22,
   },
   sectionTitle: {
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
   },
   sectionDescription: {
-    color: 'rgba(244, 244, 245, 0.68)',
+    color: DS_COLORS.ink100,
     lineHeight: 22,
     marginTop: 2,
   },
   emoji: {
     fontSize: 64,
   },
-  innerInput: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderColor: 'rgba(246, 192, 27, 0.16)',
-    paddingLeft: 12,
-    borderRadius: 12,
-  },
-  radioUnpressed: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderColor: 'rgba(246, 192, 27, 0.14)',
-  },
   radioText: {
-    color: COLORS.Content,
-    fontWeight: 600,
+    color: DS_COLORS.ink50,
   },
   radioTextMuted: {
-    color: 'rgba(255,255,255,0.62)',
+    color: DS_COLORS.ink100,
   },
   button: {
     right: 0,
     left: 0,
     marginHorizontal: 16,
     marginTop: 24,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(246, 192, 27, 0.5)',
-    backgroundColor: 'rgba(246, 192, 27, 0.18)',
     minHeight: 56,
-    ...(globalThis?.window
-      ? ({
-          boxShadow:
-            '0 10px 28px rgba(85, 62, 21, 0.28), 0 0 20px rgba(246, 192, 27, 0.12)',
-        } as object)
-      : {}),
-  },
-  buttonText: {
-    color: '#F9ECD2',
-    letterSpacing: 0.3,
   },
   emojiButton: {
     aspectRatio: '1/1',
@@ -511,7 +445,7 @@ const styles = StyleSheet.create({
   emojiBackground: {
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(246, 192, 27, 0.22)',
+    borderColor: DS_COLORS.ground600,
     overflow: 'hidden',
   },
   row: {
@@ -523,13 +457,18 @@ const styles = StyleSheet.create({
   controlButton: {
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(246, 192, 27, 0.18)',
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     minHeight: 52,
     ...WEB_HOVER_TRANSITION,
+    ...dsWebTransition,
+  },
+  controlButtonActive: {
+    backgroundColor: DS_COLORS.calm600,
+    borderColor: DS_COLORS.accent400,
   },
   controlButtonText: {
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
   },
   column: {
     flexDirection: 'column',
@@ -539,64 +478,20 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderRadius: 18,
-    borderColor: 'rgba(246, 192, 27, 0.14)',
-    backgroundColor: 'rgba(22, 28, 38, 0.9)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
     gap: 12,
     overflow: 'hidden',
-    ...({
-      boxShadow: '0 10px 24px rgba(8, 12, 20, 0.28)',
-    } as object),
-  },
-  sectionGlow: {
-    position: 'absolute',
-    width: 72,
-    height: 3,
-    top: 0,
-    left: 16,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    backgroundColor: COLORS.Primary500,
-  },
-  sectionGlowBuild: {
-    backgroundColor: COLORS.Primary500,
-  },
-  sectionGlowQuit: {
-    backgroundColor: COLORS.Danger500,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: 'rgba(246, 192, 27, 0.16)',
-    paddingLeft: 12,
-    backgroundColor: 'rgba(255,255,255,0.035)',
-    borderRadius: 12,
-    fontFamily: 'Montserrat-Regular',
-    fontSize: 14,
-    fontWeight: 400,
-    color: '#FFFFFF',
-  },
-  largeInput: {
-    minHeight: 56,
-    paddingVertical: 12,
   },
   radioButton: {
     width: '50%',
   },
-  smallInput: {
-    fontSize: 14,
-    fontWeight: 400,
-  },
-  habitFieldInput: {
-    fontSize: 16,
-    lineHeight: 22,
-  },
   goalInput: {
     minHeight: 52,
-    paddingVertical: 10,
   },
   sliderStyle: {
     borderRadius: 20,
     marginTop: 6,
-    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
   },
   dayButton: {
     width: 50,

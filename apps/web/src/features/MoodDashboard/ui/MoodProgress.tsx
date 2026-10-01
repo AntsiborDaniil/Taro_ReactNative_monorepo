@@ -2,11 +2,11 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  TextStyle,
+  Text as RNText,
   View,
   useWindowDimensions,
 } from 'react-native';
-import { CircularProgressBar } from '@ui-kitten/components';
+import { Circle, Svg } from 'react-native-svg';
 import Toast from 'react-native-toast-message';
 import { MoodAndEnergyContext } from 'entities/moodAndEnergy';
 import { UserContext } from 'entities/user';
@@ -14,16 +14,72 @@ import { type ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
+import { TarotDeck } from 'shared/icons';
 import {
   WEB_HOVER_TRANSITION,
   shouldPromptWebSignIn,
   toastWebAuthRequired,
 } from 'shared/lib';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS, dsRadius, dsWebTransition } from 'shared/themes/ds';
 import { NavigationRoute, TabRoute, PressableWebState } from 'shared/types';
-import { Text, TEXT_TAGS } from 'shared/ui';
+import { Button, Text, TEXT_TAGS } from 'shared/ui';
 import { MotivationContext } from '../../../entities/tarotMotivation';
 import { MotivationKey } from '../../../shared/api';
+
+/**
+ * UI Kitten CircularProgressBar красит трек/индикатор только через eva `status`
+ * (фиксированный набор тем-цветов), произвольные DS-токены (ground600/calm500)
+ * так не задать без правки общей темы — кольцо рисуем сами через react-native-svg.
+ */
+function DsCircularProgress({
+  size,
+  trackWidth,
+  progress,
+}: {
+  size: number;
+  trackWidth: number;
+  progress: number;
+}) {
+  const clamped = Math.max(0, Math.min(1, progress));
+  const radius = (size - trackWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const center = size / 2;
+
+  return (
+    <View style={{ width: size, height: size }}>
+      <Svg width={size} height={size}>
+        <Circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke={DS_COLORS.ground600}
+          strokeWidth={trackWidth}
+          fill="none"
+        />
+        <Circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke={DS_COLORS.calm500}
+          strokeWidth={trackWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={`${circumference}`}
+          strokeDashoffset={circumference * (1 - clamped)}
+          rotation={-90}
+          origin={`${center}, ${center}`}
+        />
+      </Svg>
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        <View style={styles.dsProgressTextWrap}>
+          <RNText style={[styles.dsProgressText, { fontSize: Math.round(size * 0.23) }]}>
+            {`${Math.round(clamped * 100)}%`}
+          </RNText>
+        </View>
+      </View>
+    </View>
+  );
+}
 
 export type MoodProgressProps = {
   isWidget?: boolean;
@@ -36,7 +92,6 @@ function MoodProgress({
 }: MoodProgressProps): ReactElement {
   const { width: winW } = useWindowDimensions();
   const isCompact = winW < (isWidget ? 460 : 760);
-  const [isHovered, setIsHovered] = useState(false);
 
   const { todayProgress } = useData({
     Context: MoodAndEnergyContext,
@@ -111,40 +166,20 @@ function MoodProgress({
       style={({ pressed, ...rest }: PressableWebState) => {
         const hovered = rest.hovered;
         return [
-        styles.wrapper,
-        !isWidget && styles.wrapperScreen,
-        isWidget && styles.wrapperWidget,
-        isCompact && styles.wrapperCompact,
-        interactive &&
-          hovered &&
-          !isWidget &&
-          Platform.OS === 'web' &&
-          styles.wrapperScreenHover,
-        interactive && pressed && styles.wrapperPressed,
-        !interactive && styles.wrapperStatic,
-      ];
-      }}
-      onHoverIn={() => {
-        if (Platform.OS === 'web') {
-          setIsHovered(true);
-        }
-      }}
-      onHoverOut={() => {
-        if (Platform.OS === 'web') {
-          setIsHovered(false);
-        }
+          styles.wrapper,
+          !isWidget && styles.wrapperScreen,
+          isWidget && styles.wrapperWidget,
+          isCompact && styles.wrapperCompact,
+          interactive && hovered && Platform.OS === 'web' && styles.wrapperHover,
+          interactive && pressed && styles.wrapperPressed,
+          !interactive && styles.wrapperStatic,
+        ];
       }}
       onPress={handleOpenMotivationCard}
     >
-      <CircularProgressBar
-        size={isWidget ? 'medium' : 'large'}
-        style={styles.progress}
-        textStyle={
-          StyleSheet.flatten([
-            styles.progressPercentLabel,
-            !isWidget && styles.progressPercentLabelScreen,
-          ]) as TextStyle
-        }
+      <DsCircularProgress
+        size={isWidget ? 60 : 68}
+        trackWidth={isWidget ? 5 : 6}
         progress={(todayProgress?.percents ?? 0) / 100}
       />
       <View
@@ -193,36 +228,20 @@ function MoodProgress({
       </View>
       {!isWidget && (
         <View style={[styles.tarotPanel, isCompact && styles.tarotPanelCompact]}>
-          <View
-            style={[
-              styles.tarotCardPreview,
-              Platform.OS === 'web' && isHovered && styles.tarotCardPreviewHover,
-            ]}
-          >
-            <View style={styles.tarotCardBack} />
-            <View style={styles.tarotCardFront}>
-              <Text style={styles.tarotCardGlyph}>✦</Text>
-              <Text style={styles.tarotCardLabel}>TAROT</Text>
-            </View>
+          <View style={styles.tarotIconWrap}>
+            <TarotDeck width={32} height={32} />
           </View>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('progress.createCard')}
-            style={({ pressed }) => [
-              styles.tarotAction,
-              isComplete && styles.tarotActionReady,
-              pressed && styles.tarotActionPressed,
-              (!interactive || !isComplete) && styles.tarotActionDisabled,
-            ]}
+          <Button
+            disabled={!interactive || !isComplete}
+            style={styles.tarotAction}
             onPress={handleOpenMotivationCard}
-            disabled={!interactive}
           >
-            <Text style={styles.tarotActionText}>
-              {t('progress.createCard')}
-            </Text>
-          </Pressable>
-          <Text style={styles.tarotActionHint}>{t('card.cost')}</Text>
+            {t('progress.createCard')}
+          </Button>
+          <Text category={TEXT_TAGS.label} style={styles.tarotActionHint}>
+            {t('card.cost')}
+          </Text>
         </View>
       )}
     </Pressable>
@@ -234,14 +253,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingVertical: 18,
     alignItems: 'center',
-    borderRadius: 12,
-    borderColor: 'rgba(132, 176, 230, 0.28)',
+    borderRadius: dsRadius.plate(64),
+    borderColor: DS_COLORS.ground600,
     borderWidth: 1,
-    backgroundColor: 'rgba(16, 25, 37, 0.72)',
+    backgroundColor: DS_COLORS.ground700,
     flexDirection: 'row',
     gap: 18,
     marginHorizontal: 16,
     marginVertical: 10,
+    ...dsWebTransition,
   },
   wrapperScreen: {
     width: '100%',
@@ -252,36 +272,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingVertical: 20,
     gap: 20,
-    borderRadius: 16,
-    borderColor: 'rgba(132, 176, 230, 0.26)',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 10px 24px rgba(0, 0, 0, 0.16)',
-          ...WEB_HOVER_TRANSITION,
-        } as object)
-      : {}),
+    borderRadius: 18,
   },
-  wrapperScreenHover:
-    Platform.OS === 'web'
-      ? ({
-          borderColor: 'rgba(160, 198, 255, 0.5)',
-          boxShadow: '0 12px 28px rgba(0, 0, 0, 0.22)',
-          backgroundColor: 'rgba(26, 34, 48, 0.92)',
-        } as object)
-      : {},
-  wrapperPressed: {
-    opacity: 0.94,
-    transform: [{ scale: 0.995 }],
-  },
+  wrapperHover: Platform.OS === 'web'
+    ? ({ borderColor: DS_COLORS.accent400 } as object)
+    : {},
+  wrapperPressed: Platform.select({
+    web: { transform: [{ translateY: 1 }] } as object,
+    default: { opacity: 0.94 },
+  }),
   wrapperStatic: {
     opacity: 0.98,
-    ...(
-      Platform.OS === 'web'
-        ? ({
-            cursor: 'default',
-          } as object)
-        : {}
-    ),
+    ...(Platform.OS === 'web' ? ({ cursor: 'default' } as object) : {}),
   },
   wrapperWidget: {
     width: '100%',
@@ -302,7 +304,7 @@ const styles = StyleSheet.create({
   tarotPanel: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: 10,
     marginLeft: 'auto',
   },
   tarotPanelCompact: {
@@ -310,109 +312,34 @@ const styles = StyleSheet.create({
     marginLeft: 0,
     alignItems: 'flex-start',
   },
-  tarotCardPreview: {
-    width: 84,
-    height: 108,
-    position: 'relative',
-    ...WEB_HOVER_TRANSITION,
-  },
-  tarotCardPreviewHover:
-    Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 12px 28px rgba(76, 53, 173, 0.42)',
-        } as object)
-      : {},
-  tarotCardBack: {
-    position: 'absolute',
-    width: 74,
-    height: 96,
-    borderRadius: 10,
-    right: 0,
-    top: 6,
+  tarotIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: dsRadius.window(56),
     borderWidth: 1,
-    borderColor: 'rgba(126, 103, 240, 0.45)',
-    backgroundColor: 'rgba(38, 31, 74, 0.8)',
-  },
-  tarotCardFront: {
-    position: 'absolute',
-    width: 74,
-    height: 96,
-    borderRadius: 10,
-    left: 0,
-    top: 0,
-    borderWidth: 1,
-    borderColor: 'rgba(198, 176, 255, 0.72)',
-    backgroundColor: 'rgba(21, 20, 46, 0.96)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow:
-            '0 8px 20px rgba(76, 53, 173, 0.35), inset 0 0 18px rgba(166, 133, 255, 0.18)',
-        } as object)
-      : {}),
-  },
-  tarotCardGlyph: {
-    color: '#C7AEFF',
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  tarotCardLabel: {
-    color: '#D8CCFF',
-    fontSize: 10,
-    fontWeight: '600',
-    letterSpacing: 1.1,
   },
   tarotAction: {
     minHeight: 40,
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderWidth: 1,
-    borderColor: 'rgba(179, 153, 255, 0.42)',
-    backgroundColor: 'rgba(81, 60, 168, 0.28)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tarotActionReady: {
-    borderColor: 'rgba(205, 186, 255, 0.8)',
-    backgroundColor: 'rgba(104, 78, 214, 0.55)',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 8px 20px rgba(76, 53, 173, 0.4)',
-        } as object)
-      : {}),
   },
   tarotActionHint: {
-    color: 'rgba(216, 204, 255, 0.6)',
-    fontSize: 11,
-    fontWeight: '500',
-    letterSpacing: 0.2,
-  },
-  tarotActionPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.99 }],
-  },
-  tarotActionDisabled: {
-    opacity: 0.65,
-  },
-  tarotActionText: {
-    color: '#E9E3FF',
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 0.25,
+    color: DS_COLORS.ink100,
   },
   progress: {
     flexShrink: 0,
   },
-  progressPercentLabel: {
-    paddingHorizontal: 8,
-    textAlign: 'center',
+  dsProgressTextWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  progressPercentLabelScreen: {
-    paddingHorizontal: 8,
-    fontSize: 18,
+  dsProgressText: {
+    color: DS_COLORS.ink50,
+    fontFamily: 'Onest-Bold',
+    textAlign: 'center',
   },
   texts: {
     flex: 1,
@@ -430,6 +357,7 @@ const styles = StyleSheet.create({
   },
   mainText: {
     lineHeight: 22,
+    color: DS_COLORS.ink50,
   },
   mainTextWidget: {
     fontSize: 14,
@@ -441,7 +369,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.15,
   },
   subText: {
-    color: COLORS.SpbSky1,
+    color: DS_COLORS.ink100,
     lineHeight: 22,
   },
   subTextWidget: {

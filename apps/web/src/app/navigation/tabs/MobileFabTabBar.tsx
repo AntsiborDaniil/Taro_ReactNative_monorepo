@@ -28,6 +28,7 @@ import {
 import { blurActiveElement, WEB_HOVER_TRANSITION } from 'shared/lib';
 import { useWebViewportInsets } from 'shared/lib/web/useWebViewportInsets';
 import { COLORS } from 'shared/themes';
+import { DS_COLORS, DS_MOTION, DS_SIZES } from 'shared/themes/ds';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import {
@@ -71,6 +72,8 @@ type FabActionItemProps = {
   Icon: FabIcon;
   label: string;
   focused: boolean;
+  /** Closed menu: items stay mounted for the animation but must not catch taps. */
+  interactive: boolean;
   openProgress: SharedValue<number>;
   onPress: () => void;
 };
@@ -80,6 +83,7 @@ function FabActionItem({
   Icon,
   label,
   focused,
+  interactive,
   openProgress,
   onPress,
 }: FabActionItemProps) {
@@ -95,15 +99,20 @@ function FabActionItem({
     return {
       opacity: progress,
       transform: [
-        { translateY: interpolate(progress, [0, 1], [18, 0]) },
-        { scale: interpolate(progress, [0, 1], [0.75, 1]) },
+        { translateY: interpolate(progress, [0, 1], [DS_MOTION.entryShift, 0]) },
       ],
     };
   });
 
   return (
-    <Animated.View style={animatedStyle} pointerEvents="box-none">
+    <Animated.View
+      style={animatedStyle}
+      pointerEvents={interactive ? 'box-none' : 'none'}
+      aria-hidden={!interactive}
+    >
       <Pressable
+        disabled={!interactive}
+        focusable={interactive}
         accessibilityRole="button"
         accessibilityState={{ selected: focused }}
         accessibilityLabel={label}
@@ -275,9 +284,6 @@ export function MobileFabTabBar({
         {
           translateY: interpolate(peekHide.value, [0, 1], [0, hideOffset]),
         },
-        {
-          scale: interpolate(peekHide.value, [0, 1], [1, 0.9]),
-        },
       ],
     };
   });
@@ -287,23 +293,20 @@ export function MobileFabTabBar({
       {
         rotate: `${interpolate(openProgress.value, [0, 1], [0, 90])}deg`,
       },
-      {
-        scale: interpolate(openProgress.value, [0, 0.5, 1], [1, 1.05, 1]),
-      },
     ],
   }));
 
   const planetIconStyle = useAnimatedStyle(() => ({
     opacity: interpolate(openProgress.value, [0, 0.35], [1, 0]),
     transform: [
-      { scale: interpolate(openProgress.value, [0, 0.35], [1, 0.6]) },
+      { translateY: interpolate(openProgress.value, [0, 0.35], [0, -DS_MOTION.entryShift / 2]) },
     ],
   }));
 
   const crossIconStyle = useAnimatedStyle(() => ({
     opacity: interpolate(openProgress.value, [0.45, 1], [0, 1]),
     transform: [
-      { scale: interpolate(openProgress.value, [0.45, 1], [0.6, 1]) },
+      { translateY: interpolate(openProgress.value, [0.45, 1], [DS_MOTION.entryShift / 2, 0]) },
     ],
   }));
 
@@ -325,12 +328,13 @@ export function MobileFabTabBar({
         />
       </Animated.View>
 
+      {/* Web: fixed to the bottom edge of the screen (CSS viewport), FAB grows up from it. */}
+      <View
+        style={[styles.anchorPoint, { left: anchorLeft, bottom: anchorBottom }]}
+        pointerEvents="box-none"
+      >
       <Animated.View
-        style={[
-          styles.anchor,
-          { left: anchorLeft, bottom: anchorBottom },
-          anchorStyle,
-        ]}
+        style={[styles.anchor, anchorStyle]}
         pointerEvents="box-none"
       >
         <Animated.View
@@ -344,6 +348,7 @@ export function MobileFabTabBar({
               Icon={Icon}
               label={t(labelKey)}
               focused={route === focusedRoute}
+              interactive={menuOpen}
               openProgress={openProgress}
               onPress={() => navigateTo(route)}
             />
@@ -353,6 +358,7 @@ export function MobileFabTabBar({
             Icon={SettingsIcon}
             label={t('nav.fab.settings')}
             focused={settingsFocused}
+            interactive={menuOpen}
             openProgress={openProgress}
             onPress={() => {
               void openSettings();
@@ -370,14 +376,15 @@ export function MobileFabTabBar({
             style={[styles.fab, fabStyle, menuOpen && styles.fabOpen]}
           >
             <Animated.View style={[styles.fabIconLayer, planetIconStyle]}>
-              <PlanetIcon width={24} height={24} fill={COLORS.Background} />
+              <PlanetIcon width={24} height={24} fill={DS_COLORS.ink50} />
             </Animated.View>
             <Animated.View style={[styles.fabIconLayer, crossIconStyle]}>
-              <CrossIcon width={22} height={22} fill={COLORS.Content} />
+              <CrossIcon width={22} height={22} fill={DS_COLORS.ink50} />
             </Animated.View>
           </Animated.View>
         </Pressable>
       </Animated.View>
+      </View>
     </View>
   );
 }
@@ -396,7 +403,7 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(8, 12, 20, 0.55)',
+    backgroundColor: `${DS_COLORS.ground900}CC`,
     ...(Platform.OS === 'web'
       ? ({
           position: 'fixed',
@@ -408,9 +415,11 @@ const styles = StyleSheet.create({
         } as object)
       : {}),
   },
-  anchor: {
+  /** Zero-height line at the FAB bottom edge; full width so labels are not squeezed. */
+  anchorPoint: {
     position: 'absolute',
-    alignItems: 'flex-start',
+    right: 0,
+    height: 0,
     zIndex: 130,
     pointerEvents: 'box-none',
     ...(Platform.OS === 'web'
@@ -418,6 +427,13 @@ const styles = StyleSheet.create({
           position: 'fixed',
         } as object)
       : {}),
+  },
+  anchor: {
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    alignItems: 'flex-start',
+    pointerEvents: 'box-none',
   },
   actionsColumn: {
     flexDirection: 'column-reverse',
@@ -432,29 +448,22 @@ const styles = StyleSheet.create({
     minHeight: ACTION_SIZE,
     paddingRight: 14,
     borderRadius: ACTION_SIZE / 2,
-    backgroundColor: COLORS.Background2,
+    backgroundColor: DS_COLORS.ground700,
     borderWidth: 1,
-    borderColor: 'rgba(244, 244, 245, 0.12)',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 6px 18px rgba(0, 0, 0, 0.32)',
-          cursor: 'pointer',
-        } as object)
-      : {
-          elevation: 6,
-        }),
+    borderColor: DS_COLORS.ground600,
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : {}),
     ...WEB_HOVER_TRANSITION,
   },
   actionPressableFocused: {
-    borderColor: 'rgba(246, 192, 27, 0.5)',
-    backgroundColor: 'rgba(246, 192, 27, 0.14)',
+    borderColor: DS_COLORS.accent400,
+    backgroundColor: DS_COLORS.ground700,
   },
   actionPressableHover: {
     opacity: 0.92,
   },
   actionPressablePressed: {
     opacity: 0.85,
-    transform: [{ scale: 0.96 }],
+    transform: [{ translateY: DS_MOTION.pressShiftY }],
   },
   actionIconBtn: {
     width: ACTION_SIZE,
@@ -471,7 +480,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   actionLabelFocused: {
-    color: COLORS.Primary,
+    color: DS_COLORS.accent400,
   },
   fab: {
     width: FAB_SIZE,
@@ -479,28 +488,15 @@ const styles = StyleSheet.create({
     borderRadius: FAB_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.Primary,
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 8px 22px rgba(246, 192, 27, 0.42)',
-        } as object)
-      : {
-          shadowColor: COLORS.Primary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.38,
-          shadowRadius: 10,
-          elevation: 10,
-        }),
+    /** DS: плашка ground600 с гранью accent400 — навигация заметна, но не спорит с action500 экрана. */
+    backgroundColor: DS_COLORS.ground600,
+    borderWidth: DS_SIZES.edgeWidth,
+    borderColor: DS_COLORS.accent400,
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : {}),
   },
   fabOpen: {
-    backgroundColor: COLORS.Background2,
-    borderWidth: 1,
-    borderColor: 'rgba(244, 244, 245, 0.15)',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 6px 18px rgba(0, 0, 0, 0.38)',
-        } as object)
-      : {}),
+    backgroundColor: DS_COLORS.ground800,
+    borderColor: DS_COLORS.accent400,
   },
   fabIconLayer: {
     ...StyleSheet.absoluteFillObject,

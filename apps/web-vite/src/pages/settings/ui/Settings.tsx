@@ -34,8 +34,8 @@ export default function SettingsPage(): ReactElement {
   const theme = useThemePreference();
 
   const themeOptions: { value: ThemePreference; label: string }[] = [
-    { value: 'dark', label: t('settings:theme.dark', { defaultValue: 'Тёмная' }) },
-    { value: 'light', label: t('settings:theme.light', { defaultValue: 'Светлая' }) },
+    { value: 'dark', label: t('settings:theme.dark', { defaultValue: 'Dark' }) },
+    { value: 'light', label: t('settings:theme.light', { defaultValue: 'Light' }) },
   ];
 
   const handleReversedChange = (checked: boolean) => {
@@ -87,10 +87,10 @@ export default function SettingsPage(): ReactElement {
               <div className={styles.themeHead}>
                 <ThemeIcon width={22} height={22} className={styles.themeIcon} />
                 <Text role="body" tone="ink50">
-                  {t('settings:theme.title', { defaultValue: 'Тема оформления' })}
+                  {t('settings:theme.title', { defaultValue: 'Theme' })}
                 </Text>
               </div>
-              <div className={styles.themeOptions} role="radiogroup" aria-label={t('settings:theme.title', { defaultValue: 'Тема оформления' })}>
+              <div className={styles.themeOptions} role="radiogroup" aria-label={t('settings:theme.title', { defaultValue: 'Theme' })}>
                 {themeOptions.map((option) => (
                   <Chip
                     key={option.value}

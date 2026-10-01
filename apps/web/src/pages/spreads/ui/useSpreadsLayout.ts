@@ -1,103 +1,112 @@
-import { useMemo } from 'react';
-import { Platform, useWindowDimensions } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { type LayoutChangeEvent, Platform, useWindowDimensions } from 'react-native';
 import { TAB_BREAKPOINT_RAIL } from 'app/navigation/tabs/adaptiveTabLayout';
 import { useWebBottomTabBarInset } from 'shared/lib/web/useWebViewportInsets';
-import { GLOBAL_UI_TEXT_PX } from 'shared/themes/typography';
+import { DS_LAYOUT, DS_SPACE, type DsViewport, getDsViewport } from 'shared/themes/ds';
 
-const MAX_CONTENT_WIDTH = 1280;
-const BASE_W = 375;
-const SECTION_CARD_HORIZONTAL_PADDING = 28;
+/** Мобайл/планшет — фиксированные колонки (плотная сетка, проверено скриншотами). */
+const FIXED_COLUMNS: Partial<Record<DsViewport, number>> = {
+  mobile: 2,
+  tablet: 3,
+};
 
-function ms(screenW: number, size: number, factor = 0.5) {
-  return size + ((screenW / BASE_W) * size - size) * factor;
+/** Desktop/wide — колонки считаем от фактической ширины, чтобы сетка всегда
+ *  дозаполняла колонку без «слепого» поля справа (см. ревью: фикс. 4/5 колонок
+ *  на 1280/1440 оставляли остаток шириной с половину тайла). */
+const IDEAL_TILE_WIDTH = 200;
+const MIN_FLUID_COLUMNS = 4;
+const MAX_FLUID_COLUMNS = 6;
+
+function computeColumns(
+  viewport: DsViewport,
+  innerWidth: number,
+  tileGap: number
+): number {
+  const fixed = FIXED_COLUMNS[viewport];
+  if (fixed != null) {
+    return fixed;
+  }
+  const raw = Math.round(
+    (innerWidth + tileGap) / (IDEAL_TILE_WIDTH + tileGap)
+  );
+  return Math.min(MAX_FLUID_COLUMNS, Math.max(MIN_FLUID_COLUMNS, raw));
 }
 
 export type SpreadsLayout = {
-  contentWidth: number;
-  padding: number;
-  gap: number;
+  viewport: DsViewport;
+  /** Замер ширины КОНТЕЙНЕРА экрана (onLayout), а не окна — слева может быть рейка навигации. */
+  containerWidth: number;
+  /** Макс. ширина колонки контента (undefined на mobile — во всю ширину). */
+  contentMaxWidth: number | undefined;
+  /** Поле экрана (DS §08 — 25). */
+  gutter: number;
+  /** Зазор между секциями каталога. */
+  sectionGap: number;
+  /** Зазор заголовок секции → сетка. */
+  headingGap: number;
+  /** Число колонок сетки тайлов. */
   columns: number;
-  cardWidth: number;
-  previewHeight: number;
-  sectionTitleSize: number;
-  sectionTitleLine: number;
+  /** Зазор между тайлами. */
+  tileGap: number;
+  /** Ширина тайла (тайл — квадрат, см. dsRadius.window). */
+  tileWidth: number;
+  /** Отступ снизу у скролла (под FAB/таббар на мобильном web). */
   scrollBottomPad: number;
-  /** карточка каталога */
-  cardBorderRadius: number;
-  textPadH: number;
-  textPadTop: number;
-  textPadBottom: number;
-  textBlockGap: number;
-  titleFontSize: number;
-  hintFontSize: number;
-  lockIconSize: number;
-  imageFadeHeight: number;
 };
 
-export function useSpreadsLayout(): SpreadsLayout {
-  const { width: W, height: H } = useWindowDimensions();
+/** Замер ширины контейнера через onLayout — не через useWindowDimensions (рейка съедает часть окна). */
+export function useContainerWidth(fallback: number) {
+  const [width, setWidth] = useState(fallback);
+
+  const onLayout = useCallback((event: LayoutChangeEvent) => {
+    const measured = Math.round(event.nativeEvent.layout.width);
+    setWidth((prev) => (Math.abs(prev - measured) > 0.5 ? measured : prev));
+  }, []);
+
+  return [width, onLayout] as const;
+}
+
+export function useSpreadsLayout(containerWidth: number): SpreadsLayout {
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const bottomTabInset = useWebBottomTabBarInset();
 
   return useMemo(() => {
-    const contentWidth = Math.min(W, MAX_CONTENT_WIDTH);
-    const padding = Math.round(Math.min(28, Math.max(10, ms(W, 14) + W * 0.02)));
-    const gap = Math.round(Math.min(24, Math.max(10, ms(W, 14) + W * 0.015)));
+    const viewport = getDsViewport(containerWidth);
+    const contentMaxWidth = DS_LAYOUT.maxWidth[viewport];
+    const gutter = DS_LAYOUT.gutter;
+    const sectionGap = DS_LAYOUT.sectionGap[viewport];
+    const headingGap = DS_SPACE.m;
+    const tileGap = DS_SPACE.l;
 
-    let columns = 1;
-    if (W >= 640) columns = 2;
-    if (W >= 1040) columns = 3;
-
-    const inner = contentWidth - 2 * padding;
-    const gridInner = Math.max(0, inner - SECTION_CARD_HORIZONTAL_PADDING);
-    const cardWidth =
-      columns <= 1
-        ? gridInner
-        : (gridInner - gap * (columns - 1)) / columns;
-
-    const v = (n: number) => (H / 812) * n;
-    const byAspect = Math.round(cardWidth * 0.82);
-    const floor = columns >= 3 ? v(260) : columns >= 2 ? v(280) : v(300);
-    const cap = v(480);
-    const previewHeight = Math.min(cap, Math.max(floor, byAspect));
-
-    const sectionTitleSize = GLOBAL_UI_TEXT_PX;
-    const sectionTitleLine = Math.round(sectionTitleSize * 1.35);
-
-    const mobileWebTabPad =
-      Platform.OS === 'web' && W < TAB_BREAKPOINT_RAIL ? bottomTabInset : 0;
-    const scrollBottomPad = Math.round(
-      Math.max(24, v(32)) + mobileWebTabPad
+    const effectiveWidth = contentMaxWidth
+      ? Math.min(containerWidth, contentMaxWidth)
+      : containerWidth;
+    const innerWidth = Math.max(0, effectiveWidth - gutter * 2);
+    const columns = computeColumns(viewport, innerWidth, tileGap);
+    const tileWidth = Math.floor(
+      (innerWidth - tileGap * (columns - 1)) / columns
     );
 
-    const cardBorderRadius = Math.round(Math.min(24, Math.max(12, W * 0.018)));
-    const textPadH = Math.round(Math.min(26, Math.max(14, W * 0.045)));
-    const textPadTop = Math.round(Math.min(22, Math.max(12, v(16))));
-    const textPadBottom = Math.round(Math.min(30, Math.max(18, v(24))));
-    const textBlockGap = 0;
-    const titleFontSize = 14;
-    const hintFontSize = GLOBAL_UI_TEXT_PX;
-    const lockIconSize = Math.round(Math.min(40, Math.max(28, W * 0.07)));
-    const imageFadeHeight = Math.round(Math.min(56, Math.max(36, v(44))));
+    // Рейка навигации — по ширине ОКНА (её видимость решает AdaptiveTabBar), не контейнера.
+    const mobileWebTabPad =
+      Platform.OS === 'web' && windowWidth < TAB_BREAKPOINT_RAIL
+        ? bottomTabInset
+        : 0;
+    const scrollBottomPad = Math.round(
+      Math.max(24, (windowHeight / 812) * 32) + mobileWebTabPad
+    );
 
     return {
-      contentWidth,
-      padding,
-      gap,
+      viewport,
+      containerWidth,
+      contentMaxWidth,
+      gutter,
+      sectionGap,
+      headingGap,
       columns,
-      cardWidth,
-      previewHeight,
-      sectionTitleSize,
-      sectionTitleLine,
+      tileGap,
+      tileWidth: Math.max(0, tileWidth),
       scrollBottomPad,
-      cardBorderRadius,
-      textPadH,
-      textPadTop,
-      textPadBottom,
-      textBlockGap,
-      titleFontSize,
-      hintFontSize,
-      lockIconSize,
-      imageFadeHeight,
     };
-  }, [W, H, bottomTabInset]);
+  }, [containerWidth, windowWidth, windowHeight, bottomTabInset]);
 }

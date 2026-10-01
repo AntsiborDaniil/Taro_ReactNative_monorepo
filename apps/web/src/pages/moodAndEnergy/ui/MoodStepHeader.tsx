@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 
 export type MoodStepHeaderProps = {
@@ -74,12 +74,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: getColorOpacity(COLORS.Primary, 42),
-    backgroundColor: getColorOpacity(COLORS.Primary, 14),
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     flexShrink: 0,
   },
   stepBadgeText: {
-    color: COLORS.Primary,
+    color: DS_COLORS.accent400,
     fontSize: 13,
     lineHeight: 16,
   },
@@ -89,11 +89,11 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   title: {
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
     letterSpacing: 0.2,
   },
   hint: {
-    color: getColorOpacity(COLORS.Content, 58),
+    color: DS_COLORS.ink100,
     lineHeight: 16,
   },
   badge: {
@@ -101,12 +101,12 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: 'rgba(132, 176, 230, 0.26)',
-    backgroundColor: 'rgba(132, 176, 230, 0.1)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     flexShrink: 0,
   },
   badgeText: {
-    color: 'rgba(216, 228, 247, 0.9)',
+    color: DS_COLORS.ink100,
   },
 });
 

@@ -12,6 +12,7 @@ import {
 import { SpreadContext } from 'entities/Spread';
 import type { AnimatedProps } from 'react-native-reanimated';
 import Animated, {
+  interpolateColor,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
@@ -22,7 +23,7 @@ import { ANIMATED_CARD_TIMEOUT } from 'shared/constants';
 import { useData } from 'shared/DataProvider';
 import { getImage } from 'shared/lib';
 import { measurePageCenter } from 'shared/lib/measurePageCoordinates';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS, DS_MOTION } from 'shared/themes/ds';
 import { AnimationCarouselContext } from '../model';
 
 interface Props extends AnimatedProps<ViewProps> {
@@ -53,13 +54,18 @@ function SlideItem({
 
   const isAnimating = useRef(false);
   const pressableRef = useRef<React.ComponentRef<typeof Pressable>>(null);
-  const pressScale = useSharedValue(1);
+  /** DS §10: нажатие — сдвиг на pressShiftY, без scale. */
+  const pressShift = useSharedValue(0);
   const selectGlow = useSharedValue(0);
 
   const pressAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pressScale.value }],
-    borderColor: `rgba(246, 192, 27, ${0.2 + selectGlow.value * 0.8})`,
-    borderWidth: 1 + selectGlow.value * 2,
+    transform: [{ translateY: pressShift.value }],
+    borderColor: interpolateColor(
+      selectGlow.value,
+      [0, 1],
+      [DS_COLORS.ground600, DS_COLORS.accent400]
+    ),
+    borderWidth: 1,
   }));
 
   useEffect(() => {
@@ -104,10 +110,9 @@ function SlideItem({
     }
 
     isAnimating.current = true;
-    pressScale.value = withSequence(
-      withSpring(0.88, { damping: 12, stiffness: 340 }),
-      withSpring(1.08, { damping: 11, stiffness: 240 }),
-      withSpring(1, { damping: 14, stiffness: 260 })
+    pressShift.value = withSequence(
+      withSpring(DS_MOTION.pressShiftY, { damping: 12, stiffness: 340 }),
+      withSpring(0, { damping: 14, stiffness: 260 })
     );
     // Immediate visible feedback on desktop (no haptics)
     selectGlow.value = withSequence(
@@ -211,9 +216,6 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderRadius: 12,
     overflow: 'hidden',
-    ...({
-      boxShadow: '0 18px 28px rgba(0,0,0,0.35)',
-    } as object),
   },
   overlay: {
     position: 'absolute',
@@ -221,18 +223,17 @@ const styles = StyleSheet.create({
     left: 0,
     width: '100%',
     height: '100%',
-    backgroundColor: 'black',
+    backgroundColor: DS_COLORS.ground900,
     zIndex: 5,
     borderRadius: 11,
-    opacity: 0.6,
+    opacity: 0.55,
   },
   card: {
     width: '100%',
     height: '100%',
     borderWidth: 1,
-    borderColor: COLORS.Content,
+    borderColor: DS_COLORS.ground600,
     borderRadius: 12,
-    overlayColor: 'black',
   },
 });
 

@@ -1,6 +1,6 @@
 import { Image, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { COLORS } from '../../themes';
+import { DS_COLORS } from '../../themes/ds';
 import { useNativeNavigation } from '../../hooks';
 import { getImage } from '../../lib';
 import { NavigationRoute, TabRoute } from '../../types';
@@ -71,9 +71,9 @@ const styles = StyleSheet.create({
     maxWidth: 360,
     height: 300,
     borderRadius: 20,
-    backgroundColor: COLORS.SpbSky4,
+    backgroundColor: DS_COLORS.ground800,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: DS_COLORS.ground600,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',

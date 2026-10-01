@@ -11,7 +11,7 @@ export const DEMO_USER: AuthSessionUser = {
   createdAt: '2026-01-01T00:00:00.000Z',
 };
 
-export const DEMO_QUOTA: TarotDailyQuota = { used: 0, limit: 3, day: '2026-10-01' };
+export const DEMO_QUOTA: TarotDailyQuota = { used: 0, limit: 1, day: '2026-10-01' };
 export const DEMO_CREDITS = 3;
 /** UUID как в реальной БД: от формата id зависит ссылка шаринга (t.me/?startapp=r_<hex32>). */
 export const DEMO_SPREAD_ID = '11111111-1111-4111-8111-111111111111';

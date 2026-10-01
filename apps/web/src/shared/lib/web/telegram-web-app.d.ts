@@ -14,6 +14,10 @@ declare global {
         close: () => void;
         setHeaderColor: (color: string) => void;
         setBackgroundColor: (color: string) => void;
+        /** Bot API 7.7+: отключает свайп вниз, который сворачивает Mini App. */
+        disableVerticalSwipes?: () => void;
+        /** Bot API 6.2+: подтверждение при закрытии Mini App. */
+        enableClosingConfirmation?: () => void;
         safeAreaInset?: {
           top?: number;
           bottom?: number;

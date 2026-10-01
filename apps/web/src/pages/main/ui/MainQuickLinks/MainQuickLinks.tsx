@@ -5,31 +5,42 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  useWindowDimensions,
+  Text,
   View,
 } from 'react-native';
 import { setNavReturnToMain } from 'app/navigation/navReturnStore';
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { ChevronRightIcon } from 'shared/icons';
-import { getImage, WEB_HOVER_TRANSITION } from 'shared/lib';
+import { getImage } from 'shared/lib';
 import { TabsAndRoutesContext } from 'shared/contexts/TabsAndRoutes';
-import { COLORS, getColorOpacity } from 'shared/themes';
 import {
   AnalyticAction,
   NavigationRoute,
-  type PressableWebState,
   TabRoute,
 } from 'shared/types';
-import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
+import {
+  DS_COLORS,
+  DS_MOTION,
+  DS_SIZES,
+  DS_SPACE,
+  dsFocusRing,
+  dsRadius,
+  dsText,
+  dsWebTransition,
+  dsWebTransitionReduced,
+} from 'shared/themes/ds';
+import { useReducedMotion } from 'react-native-reanimated';
+import { dsItemName } from 'pages/main/lib/dsExtra';
+import { useKeyboardFocusVisible } from 'pages/main/lib/useKeyboardFocusVisible';
+import { Chevron } from '../icons';
 
 type QuickLink = {
   id: string;
   labelKey: string;
+  subtitleKey: string;
   tabRoute: TabRoute;
   route: NavigationRoute;
   img: ImageSourcePropType;
@@ -39,6 +50,7 @@ const LINKS: QuickLink[] = [
   {
     id: 'favorite',
     labelKey: 'core:library.tile.favorite.title',
+    subtitleKey: 'core:library.tile.favorite.subtitle',
     tabRoute: TabRoute.LibraryTab,
     route: NavigationRoute.FavoriteCards,
     img: getImage([
@@ -49,6 +61,7 @@ const LINKS: QuickLink[] = [
   {
     id: 'dictionary',
     labelKey: 'core:library.tile.dictionary.title',
+    subtitleKey: 'core:library.tile.dictionary.subtitle',
     tabRoute: TabRoute.LibraryTab,
     route: NavigationRoute.CardsDictionary,
     img: getImage([
@@ -58,12 +71,14 @@ const LINKS: QuickLink[] = [
   },
 ];
 
+const ROW_RADIUS = dsRadius.listRow;
+const THUMB_RADIUS = dsRadius.card(DS_SIZES.listRowThumb);
+
 function MainQuickLinks() {
   const { t } = useTranslation();
   const navigation = useNativeNavigation();
-  const { width } = useWindowDimensions();
-  const isCompact = width < 430;
-  const thumb = isCompact ? 40 : 46;
+  const reducedMotion = useReducedMotion();
+  const hint = t('main:quickLinks.a11yHint');
 
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
@@ -92,161 +107,128 @@ function MainQuickLinks() {
   );
 
   return (
-    <View style={[styles.row, isCompact && styles.rowCompact]}>
+    <View style={styles.list}>
       {LINKS.map((link) => (
-        <Pressable
+        <QuickLinkRow
           key={link.id}
-          accessibilityRole="button"
-          accessibilityLabel={t(link.labelKey)}
+          link={link}
+          hint={hint}
+          reducedMotion={!!reducedMotion}
           onPress={() => {
             void onPress(link);
           }}
-          {...(Platform.OS === 'web'
-            ? ({
-                onClick: (event: { stopPropagation?: () => void }) => {
-                  event?.stopPropagation?.();
-                  void onPress(link);
-                },
-              } as object)
-            : {})}
-          style={(state: PressableWebState) => [
-            styles.chip,
-            isCompact && styles.chipCompact,
-            (state.pressed || Boolean(state.hovered)) && styles.chipActive,
-          ]}
-        >
-          <LinearGradient
-            pointerEvents="none"
-            colors={[
-              getColorOpacity(COLORS.Primary, 10),
-              'rgba(30, 35, 43, 0)',
-            ]}
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}
-            style={StyleSheet.absoluteFill}
-          />
-          <View
-            style={[
-              styles.thumbRing,
-              {
-                width: thumb,
-                height: thumb,
-                borderRadius: Math.round(thumb * 0.32),
-              },
-            ]}
-          >
-            <Image
-              source={link.img}
-              resizeMode="contain"
-              style={[
-                styles.thumb,
-                {
-                  width: thumb - 2,
-                  height: thumb - 2,
-                  borderRadius: Math.round((thumb - 2) * 0.3),
-                },
-              ]}
-            />
-          </View>
-          <Text
-            category={TEXT_TAGS.h5}
-            weight={TEXT_WEIGHT.medium}
-            numberOfLines={2}
-            style={[styles.label, isCompact && styles.labelCompact]}
-          >
-            {t(link.labelKey)}
-          </Text>
-          <ChevronRightIcon
-            width={isCompact ? 16 : 18}
-            height={isCompact ? 16 : 18}
-            opacity={0.55}
-          />
-        </Pressable>
+        />
       ))}
     </View>
+  );
+}
+
+function QuickLinkRow({
+  link,
+  hint,
+  reducedMotion,
+  onPress,
+}: {
+  link: QuickLink;
+  hint: string;
+  reducedMotion: boolean;
+  onPress: () => void;
+}) {
+  const { t } = useTranslation();
+  const { focusVisible, onFocus, onBlur } = useKeyboardFocusVisible();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t(link.labelKey)}
+      accessibilityHint={hint || undefined}
+      onPress={onPress}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      {...(Platform.OS === 'web'
+        ? ({
+            onClick: (event: { stopPropagation?: () => void }) => {
+              event?.stopPropagation?.();
+              onPress();
+            },
+          } as object)
+        : {})}
+      style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
+        styles.row,
+        reducedMotion ? dsWebTransitionReduced : dsWebTransition,
+        {
+          borderColor: hovered ? DS_COLORS.accent400 : 'transparent',
+          transform: pressed ? [{ translateY: DS_MOTION.pressShiftY }] : undefined,
+        },
+        focusVisible && dsFocusRing,
+      ]}
+    >
+      {({ pressed }: { pressed: boolean }) => (
+        <>
+          <View style={styles.thumbFrame}>
+            <Image source={link.img} resizeMode="contain" style={styles.thumbImage} />
+          </View>
+          <View style={styles.textCol}>
+            <Text numberOfLines={2} style={dsItemName(DS_COLORS.ink50)}>
+              {t(link.labelKey)}
+            </Text>
+            <Text numberOfLines={1} style={dsText('micro', DS_COLORS.ink100)}>
+              {t(link.subtitleKey)}
+            </Text>
+          </View>
+          <Chevron size={18} color={DS_COLORS.accent400} />
+          {pressed ? (
+            <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.pressOverlay]} />
+          ) : null}
+        </>
+      )}
+    </Pressable>
   );
 }
 
 export default MainQuickLinks;
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    gap: 10,
+  list: {
     width: '100%',
+    flexDirection: 'column',
+    gap: DS_SPACE.s,
   },
-  rowCompact: {
-    gap: 8,
-  },
-  chip: {
-    flex: 1,
-    minWidth: 0,
+  row: {
+    width: '100%',
+    height: DS_SIZES.listRowHeight,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingVertical: 7,
-    paddingLeft: 7,
-    paddingRight: 10,
-    borderRadius: 14,
+    gap: DS_SPACE.m,
+    paddingHorizontal: DS_SPACE.l,
+    borderRadius: ROW_RADIUS,
     borderWidth: 1,
-    borderColor: 'rgba(246, 192, 27, 0.18)',
-    backgroundColor: 'rgba(30, 35, 43, 0.62)',
-    overflow: 'hidden',
+    backgroundColor: DS_COLORS.ground600,
     position: 'relative',
-    zIndex: 1,
-    ...(Platform.OS === 'web'
-      ? ({
-          cursor: 'pointer',
-          boxShadow:
-            '0 10px 22px rgba(8, 12, 20, 0.32), inset 0 1px 0 rgba(246, 192, 27, 0.07)',
-          ...WEB_HOVER_TRANSITION,
-        } as object)
-      : {}),
+    overflow: 'hidden',
   },
-  chipCompact: {
-    gap: 8,
-    paddingVertical: 6,
-    paddingLeft: 6,
-    paddingRight: 8,
-    borderRadius: 12,
-  },
-  chipActive: {
-    borderColor: 'rgba(246, 192, 27, 0.4)',
-    backgroundColor: 'rgba(38, 44, 54, 0.9)',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow:
-            '0 12px 26px rgba(8, 12, 20, 0.4), 0 0 18px rgba(246, 192, 27, 0.12), inset 0 1px 0 rgba(246, 192, 27, 0.12)',
-          transform: [{ translateY: -1 }],
-        } as object)
-      : {}),
-  },
-  thumbRing: {
+  thumbFrame: {
+    width: DS_SIZES.listRowThumb,
+    height: DS_SIZES.listRowThumb,
+    borderRadius: THUMB_RADIUS,
+    borderWidth: 1,
+    borderColor: DS_COLORS.ground700,
+    backgroundColor: DS_COLORS.ground800,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(246, 192, 27, 0.38)',
-    backgroundColor: 'transparent',
     overflow: 'hidden',
     flexShrink: 0,
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 0 12px rgba(246, 192, 27, 0.12)',
-        } as object)
-      : {}),
   },
-  thumb: {
-    backgroundColor: 'transparent',
+  thumbImage: {
+    width: DS_SIZES.listRowThumb - 10,
+    height: DS_SIZES.listRowThumb - 10,
   },
-  label: {
+  textCol: {
     flex: 1,
     minWidth: 0,
-    color: COLORS.Content,
-    letterSpacing: 0.25,
+    gap: 2,
   },
-  labelCompact: {
-    fontSize: 12,
-    lineHeight: 15,
+  pressOverlay: {
+    backgroundColor: DS_COLORS.pressDim,
   },
 });

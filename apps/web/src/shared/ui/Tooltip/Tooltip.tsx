@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import TooltipBase, { TooltipProps } from 'react-native-walkthrough-tooltip';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
-import { COLORS } from '../../themes';
+import { DS_COLORS } from '../../themes/ds';
 
 type AnchorRect = {
   top: number;
@@ -202,7 +202,9 @@ const Tooltip = ({
 
 const styles = StyleSheet.create({
   content: {
-    backgroundColor: COLORS.Background,
+    backgroundColor: DS_COLORS.ground700,
+    borderWidth: 1,
+    borderColor: DS_COLORS.ground600,
     borderRadius: 16,
     padding: 12,
   },
@@ -229,8 +231,6 @@ const styles = StyleSheet.create({
     zIndex: TOOLTIP_Z_INDEX,
     minWidth: 220,
     maxWidth: 320,
-    // @ts-expect-error RN Web supports boxShadow
-    boxShadow: '0 4px 24px rgba(0, 0, 0, 0.45)',
   },
 });
 

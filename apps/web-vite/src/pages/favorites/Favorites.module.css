@@ -36,13 +36,6 @@
   }
 }
 
-/* <900px — FabNav перекрывает низ страницы. */
-@media (max-width: 899px) {
-  .column {
-    padding-bottom: 104px;
-  }
-}
-
 .grid {
   width: 100%;
   display: grid;

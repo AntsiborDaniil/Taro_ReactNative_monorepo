@@ -24,15 +24,6 @@
   }
 }
 
-/* <900px — плавающий FabNav (56px круг + 16px отступ) перекрывает низ страницы
-   (см. AppShell/FabNav.module.css) — увеличиваем нижнее поле, чтобы CTA
-   «Сделать расклад» не пряталась под ним. */
-@media (max-width: 899px) {
-  .column {
-    padding-bottom: 104px;
-  }
-}
-
 .hero {
   width: 100%;
   aspect-ratio: 2 / 1;

@@ -13,6 +13,8 @@ import { Platform, type NativeScrollEvent, type NativeSyntheticEvent } from 'rea
 const SCROLL_TOP_SHOW_Y = 72;
 const SCROLL_DELTA_HIDE = 8;
 const SCROLL_DELTA_SHOW = 6;
+/** У конца страницы FAB всегда возвращается — иначе после прокрутки вниз навигация пропадает. */
+const SCROLL_BOTTOM_SHOW_GAP = 48;
 
 type MobileFabScrollContextValue = {
   fabPeekVisible: boolean;
@@ -64,11 +66,16 @@ export function useMobileFabScrollOnScroll(): (
         return;
       }
 
-      const y = event.nativeEvent.contentOffset.y;
+      const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+      const y = contentOffset.y;
       const lastY = lastYRef.current;
       const delta = y - lastY;
+      const atBottom =
+        contentSize != null &&
+        layoutMeasurement != null &&
+        y + layoutMeasurement.height >= contentSize.height - SCROLL_BOTTOM_SHOW_GAP;
 
-      if (y <= SCROLL_TOP_SHOW_Y) {
+      if (y <= SCROLL_TOP_SHOW_Y || atBottom) {
         ctx.setFabPeekVisible(true);
       } else if (delta > SCROLL_DELTA_HIDE) {
         ctx.setFabPeekVisible(false);

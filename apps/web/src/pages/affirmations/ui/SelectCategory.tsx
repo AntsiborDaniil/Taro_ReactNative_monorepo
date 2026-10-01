@@ -23,69 +23,45 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useData } from 'shared/DataProvider';
 import { ChevronRightIcon } from 'shared/icons';
-import { WEB_HOVER_TRANSITION, toastWebAuthRequired } from 'shared/lib';
-import { COLORS } from 'shared/themes';
+import { toastWebAuthRequired, WEB_HOVER_TRANSITION } from 'shared/lib';
+import { DS_COLORS, DS_MOTION } from 'shared/themes/ds';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 
 import AffirmationCategoryChip from './AffirmationCategoryChip';
 import type { AffirmationsLayout } from './useAffirmationsLayout';
 
 const EXPAND_SPRING = { damping: 22, stiffness: 260, mass: 0.85 };
-const COLLAPSE_DURATION = 280;
+const COLLAPSE_DURATION = DS_MOTION.state;
 
 const CATEGORIES = [
   {
     category: AffirmationCategory.General,
     name: 'affirmations:general',
-    gradient: ['rgba(18, 24, 36, 0.55)', 'rgba(135, 206, 235, 0.72)'] as [
-      string,
-      string,
-    ],
     hasLock: false,
   },
   {
     category: AffirmationCategory.Career,
     name: 'affirmations:career',
-    gradient: ['rgba(18, 24, 36, 0.55)', 'rgba(255, 140, 0, 0.68)'] as [
-      string,
-      string,
-    ],
     hasLock: true,
   },
   {
     category: AffirmationCategory.Love,
     name: 'affirmations:love',
-    gradient: ['rgba(18, 24, 36, 0.55)', 'rgba(255, 20, 147, 0.68)'] as [
-      string,
-      string,
-    ],
     hasLock: true,
   },
   {
     category: AffirmationCategory.Purpose,
     name: 'affirmations:purpose',
-    gradient: ['rgba(18, 24, 36, 0.55)', 'rgba(138, 43, 226, 0.68)'] as [
-      string,
-      string,
-    ],
     hasLock: true,
   },
   {
     category: AffirmationCategory.Health,
     name: 'affirmations:health',
-    gradient: ['rgba(18, 24, 36, 0.55)', 'rgba(34, 139, 34, 0.68)'] as [
-      string,
-      string,
-    ],
     hasLock: true,
   },
   {
     category: AffirmationCategory.Motivation,
     name: 'affirmations:motivation',
-    gradient: ['rgba(18, 24, 36, 0.55)', 'rgba(255, 69, 0, 0.68)'] as [
-      string,
-      string,
-    ],
     hasLock: true,
   },
 ] as const;
@@ -119,7 +95,6 @@ const SelectCategory = ({ layout }: SelectCategoryProps) => {
   );
 
   const chevronRotation = useSharedValue(90);
-  const swatchScale = useSharedValue(1);
 
   const contentAnimatedStyle = useAnimatedStyle(() => {
     const height = measuredContentHeight.value * expandProgress.value;
@@ -131,9 +106,6 @@ const SelectCategory = ({ layout }: SelectCategoryProps) => {
         {
           translateY: interpolate(expandProgress.value, [0, 1], [10, 0]),
         },
-        {
-          scale: interpolate(expandProgress.value, [0, 1], [0.98, 1]),
-        },
       ],
     };
   });
@@ -142,22 +114,12 @@ const SelectCategory = ({ layout }: SelectCategoryProps) => {
     transform: [{ rotate: `${chevronRotation.value}deg` }],
   }));
 
-  const swatchAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: swatchScale.value }],
-  }));
-
   useEffect(() => {
     chevronRotation.value = withTiming(isOpen ? -90 : 90, {
-      duration: 240,
+      duration: DS_MOTION.state,
       easing: Easing.out(Easing.cubic),
     });
   }, [isOpen, chevronRotation]);
-
-  useEffect(() => {
-    swatchScale.value = withSpring(1.12, { damping: 10, stiffness: 260 }, () => {
-      swatchScale.value = withSpring(1, { damping: 12, stiffness: 200 });
-    });
-  }, [selectedMeta.category, swatchScale]);
 
   const setExpanded = (next: boolean) => {
     setIsOpen(next);
@@ -238,15 +200,8 @@ const SelectCategory = ({ layout }: SelectCategoryProps) => {
                   : t(selectedMeta.name)}
               </Text>
             </View>
-            <Animated.View
-              style={[
-                styles.previewSwatch,
-                swatchAnimatedStyle,
-                { backgroundColor: selectedMeta.gradient[1] },
-              ]}
-            />
             <Animated.View style={[styles.chevronWrap, chevronAnimatedStyle]}>
-              <ChevronRightIcon width={18} height={18} fill={COLORS.Primary} />
+              <ChevronRightIcon width={18} height={18} fill={DS_COLORS.accent400} />
             </Animated.View>
           </View>
         </Pressable>
@@ -269,13 +224,10 @@ const SelectCategory = ({ layout }: SelectCategoryProps) => {
                 },
               ]}
             >
-              {CATEGORIES.map((item, index) => (
+              {CATEGORIES.map((item) => (
                 <AffirmationCategoryChip
                   key={item.category}
-                  index={index}
-                  animateIn={isOpen}
                   labelKey={item.name}
-                  gradient={item.gradient}
                   width={layout.categoryChipWidth}
                   height={layout.categoryChipHeight}
                   fontSize={layout.categoryTitleSize}
@@ -304,15 +256,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
     borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.14)',
-    backgroundColor: 'rgba(14, 18, 28, 0.94)',
-    ...(Platform.OS === 'web'
-      ? ({
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          boxShadow: '0 -12px 40px rgba(0,0,0,0.45)',
-        } as object)
-      : {}),
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
   },
   sheetInner: {
     width: '100%',
@@ -325,7 +270,7 @@ const styles = StyleSheet.create({
     ...WEB_HOVER_TRANSITION,
   },
   handleRowHovered: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: DS_COLORS.pressDim,
   },
   handleRowPressed: {
     opacity: 0.92,
@@ -335,7 +280,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 4,
-    backgroundColor: 'rgba(255,255,255,0.22)',
+    backgroundColor: DS_COLORS.ground600,
     marginBottom: 10,
   },
   handleMain: {
@@ -349,19 +294,12 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   handleEyebrow: {
-    color: 'rgba(186, 204, 235, 0.62)',
+    color: DS_COLORS.ink100,
     fontSize: 12,
     lineHeight: 16,
   },
   handleTitle: {
-    color: COLORS.Content,
-  },
-  previewSwatch: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+    color: DS_COLORS.ink50,
   },
   chevronWrap: {
     width: 32,
@@ -369,7 +307,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: DS_COLORS.ground700,
   },
   content: {
     overflow: 'hidden',

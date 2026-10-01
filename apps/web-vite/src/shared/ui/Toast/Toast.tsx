@@ -9,6 +9,7 @@ import {
   type TouchEvent as ReactTouchEvent,
   type TransitionEvent as ReactTransitionEvent,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { CloseIcon } from '../Icon';
 import { dismissToast, type ToastItem } from './model/toastsSlice';
@@ -29,6 +30,7 @@ function prefersReducedMotion(): boolean {
 }
 
 function ToastRow({ item, onDismiss }: { item: ToastItem; onDismiss: (id: string) => void }): ReactElement {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<'enter' | 'shown' | 'leave'>('enter');
   const [drag, setDrag] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -123,7 +125,7 @@ function ToastRow({ item, onDismiss }: { item: ToastItem; onDismiss: (id: string
       onTouchCancel={onTouchEnd}
     >
       <p className={styles.message}>{item.message}</p>
-      <button type="button" className={styles.closeButton} onClick={requestLeave} aria-label="Закрыть уведомление">
+      <button type="button" className={styles.closeButton} onClick={requestLeave} aria-label={t('core:a11y.dismissToast')}>
         <CloseIcon width={14} height={14} />
       </button>
     </div>

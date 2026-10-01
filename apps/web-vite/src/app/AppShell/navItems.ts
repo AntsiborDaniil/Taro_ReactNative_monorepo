@@ -3,7 +3,7 @@ import { BookIcon, CardsIcon, PlanetIcon, SettingsIcon } from './icons';
 
 export type NavItem = {
   to: string;
-  /** Ключ core.json (nav.tab.* или nav.fab.*), см. apps/web/src/app/navigation/tabs. */
+  /** Ключ core.json (nav.tab.*), см. apps/web/src/app/navigation/tabs. */
   labelKey: string;
   Icon: ComponentType<SVGProps<SVGSVGElement>>;
   isActive: (pathname: string) => boolean;
@@ -42,7 +42,7 @@ export const MAIN_NAV_ITEMS: NavItem[] = [
 
 export const SETTINGS_NAV_ITEM: NavItem = {
   to: '/settings',
-  labelKey: 'nav.fab.settings',
+  labelKey: 'nav.tab.settings',
   Icon: SettingsIcon,
   isActive: (p) => p.startsWith('/settings'),
 };

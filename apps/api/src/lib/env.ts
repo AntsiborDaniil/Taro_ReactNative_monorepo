@@ -22,10 +22,14 @@ export function getOpenAiApiKey(): string | undefined {
   return process.env.OPENAI_API_KEY?.trim();
 }
 
+/**
+ * Бесплатных AI-интерпретаций в сутки. Сутки считает сервер (UTC), поэтому
+ * смена часового пояса/даты на устройстве не даёт лишних слотов.
+ */
 export function getTarotDailyLimit(): number {
   const raw = process.env.TAROT_DAILY_INTERPRET_LIMIT?.trim();
-  const parsed = raw ? Number(raw) : 3;
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 3;
+  const parsed = raw ? Number(raw) : 1;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
 }
 
 export function assertSupabaseEnv(): void {

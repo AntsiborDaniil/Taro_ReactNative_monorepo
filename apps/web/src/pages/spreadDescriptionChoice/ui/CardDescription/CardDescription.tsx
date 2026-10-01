@@ -13,7 +13,7 @@ import { TarotSchemeCard } from 'features/scheme';
 import { SCHEME_CARD_SIZE } from 'shared/constants';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { NavigationRoute } from 'shared/types';
 import { Text, TEXT_TAGS } from 'shared/ui';
 import { spreadInnerStyles } from 'shared/lib/spreadInnerUi';
@@ -60,15 +60,15 @@ function CardDescription({ style }: CardDescriptionProps) {
                   spreadInnerStyles.timelineDot,
                   {
                     borderColor: isDone
-                      ? getColorOpacity(COLORS.Success500, 70)
+                      ? DS_COLORS.calm500
                       : isActive
-                        ? COLORS.Primary
-                        : getColorOpacity(COLORS.SpbSky1, 40),
+                        ? DS_COLORS.accent400
+                        : DS_COLORS.ground600,
                     backgroundColor: isDone
-                      ? getColorOpacity(COLORS.Success500, 35)
+                      ? DS_COLORS.calm500
                       : isActive
-                        ? getColorOpacity(COLORS.Primary, 35)
-                        : COLORS.Background2,
+                        ? DS_COLORS.accent400
+                        : DS_COLORS.ground700,
                   },
                 ]}
               />
@@ -106,7 +106,7 @@ function CardDescription({ style }: CardDescriptionProps) {
                 style={styles.card}
               />
               <View style={styles.description}>
-                <Text style={spreadInnerStyles.positionIndex}>
+                <Text weight="semibold" style={spreadInnerStyles.positionIndex}>
                   {`${t('core:card')} ${index + 1}`}
                 </Text>
                 <Text category={TEXT_TAGS.p2} style={spreadInnerStyles.positionMeaning}>
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   sectionTitle: {
-    color: getColorOpacity(COLORS.Content, 55),
+    color: DS_COLORS.ink100,
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: 8,

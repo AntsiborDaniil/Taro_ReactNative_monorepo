@@ -25,13 +25,6 @@
   }
 }
 
-/* <900px — FabNav (см. SpreadDetail.module.css) перекрывает низ страницы. */
-@media (max-width: 899px) {
-  .column {
-    padding-bottom: 104px;
-  }
-}
-
 .question {
   width: 100%;
   display: flex;

@@ -1,154 +1,150 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo } from 'react';
 import {
   Image,
   type ImageSourcePropType,
-  Platform,
   Pressable,
   StyleSheet,
+  Text,
   View,
-  type DimensionValue,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useTranslation } from 'react-i18next';
-import { LockIcon } from 'shared/icons';
-import { WEB_HOVER_TRANSITION } from 'shared/lib';
-import { COLORS, getColorOpacity } from 'shared/themes';
-import { OverlayIcon } from 'shared/ui/OverlayIcon';
-import { Text, TEXT_TAGS } from 'shared/ui/Text';
-
-import type { SpreadsLayout } from './useSpreadsLayout';
+import Svg, { Path } from 'react-native-svg';
+import type { PressableWebState } from 'shared/types';
+import {
+  DS_COLORS,
+  DS_FONT_FAMILY,
+  DS_MOTION,
+  DS_SPACE,
+  dsFocusRing,
+  dsRadius,
+  dsText,
+  dsWebTransition,
+  dsWebTransitionReduced,
+} from 'shared/themes/ds';
+import { useKeyboardFocusVisible } from '../lib/useKeyboardFocusVisible';
+import { usePrefersReducedMotion } from '../lib/usePrefersReducedMotion';
 
 type SpreadCatalogCardProps = {
-  title: string;
+  /** Уже переведённое имя расклада. */
+  name: string;
+  /** Уже переведённая мета, например «7 карт». */
+  cardsLabel: string;
+  /** Уже переведённый label чипа-замка (используется только если isLocked). */
+  lockedLabel: string;
   imageSource: ImageSourcePropType;
-  width: DimensionValue;
-  imageAreaHeight?: number;
+  width: number;
   isLocked?: boolean;
   onPress: () => void;
-  layout: SpreadsLayout;
 };
 
+/**
+ * Исходники `spreads/flatIllustration` — 1536×768 (2:1). Квадратные версии
+ * (`spreadsSmall/flatIllustration`, как в MainSpreadCard на главной) есть только
+ * для 8 из 13 раскладов каталога — навязывать тайлу 1:1 обрезает сюжет до
+ * абстракции или ломает недостающие. DS §07 разрешает тайл-«окно» без фиксированной
+ * пропорции — берём фактическую 2:1, ничего не обрезаем.
+ */
+const IMAGE_ASPECT = 0.5;
+
+/** Имя тайла — Onest 700 16 (см. бриф §4.3); в DS_TYPE нет отдельной роли под этот кейс,
+ *  но гарнитура и цвет всё равно берутся из DS-токенов. */
+const TILE_NAME_STYLE = {
+  fontFamily: DS_FONT_FAMILY.onest700,
+  fontSize: 16,
+  lineHeight: 22,
+  letterSpacing: 0,
+};
+
+/** Тот же контур, что shared/icons LockIcon.svg, но цвет — из DS-токена (в shared/icons fill захардкожен). */
+function QuietLockGlyph({ size, color }: { size: number; color: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 40 40" fill="none">
+      <Path
+        d="M30.0001 13.3334H28.3334V10.0001C28.3334 5.40008 24.6001 1.66675 20.0001 1.66675C15.4001 1.66675 11.6667 5.40008 11.6667 10.0001V13.3334H10.0001C8.16675 13.3334 6.66675 14.8334 6.66675 16.6667V33.3334C6.66675 35.1667 8.16675 36.6667 10.0001 36.6667H30.0001C31.8334 36.6667 33.3334 35.1667 33.3334 33.3334V16.6667C33.3334 14.8334 31.8334 13.3334 30.0001 13.3334ZM15.0001 10.0001C15.0001 7.23341 17.2334 5.00008 20.0001 5.00008C22.7667 5.00008 25.0001 7.23341 25.0001 10.0001V13.3334H15.0001V10.0001ZM30.0001 33.3334H10.0001V16.6667H30.0001V33.3334ZM20.0001 28.3334C21.8334 28.3334 23.3334 26.8334 23.3334 25.0001C23.3334 23.1667 21.8334 21.6667 20.0001 21.6667C18.1667 21.6667 16.6667 23.1667 16.6667 25.0001C16.6667 26.8334 18.1667 28.3334 20.0001 28.3334Z"
+        fill={color}
+      />
+    </Svg>
+  );
+}
+
 function SpreadCatalogCard({
-  title,
+  name,
+  cardsLabel,
+  lockedLabel,
   imageSource,
   width,
-  imageAreaHeight,
   isLocked = false,
   onPress,
-  layout,
 }: SpreadCatalogCardProps) {
-  const { t } = useTranslation();
-  const [hovered, setHovered] = useState(false);
-  const [pressed, setPressed] = useState(false);
+  const { focusVisible, onFocus, onBlur } = useKeyboardFocusVisible();
+  const reducedMotion = usePrefersReducedMotion();
+  const webTransition = reducedMotion ? dsWebTransitionReduced : dsWebTransition;
 
-  const interactive = hovered || pressed;
-
-  const previewH = imageAreaHeight ?? layout.previewHeight;
-
-  const textBlockStyle = useMemo(
-    () => ({
-      paddingHorizontal: layout.textPadH,
-      paddingTop: layout.textPadTop,
-      paddingBottom: layout.textPadBottom,
-      gap: layout.textBlockGap,
-    }),
-    [layout]
-  );
-
-  const titleStyle = useMemo(
-    () => ({
-      fontSize: layout.titleFontSize,
-      lineHeight: Math.round(layout.titleFontSize * 1.25),
-    }),
-    [layout.titleFontSize]
-  );
-
-  const hintStyle = useMemo(
-    () => ({
-      fontSize: layout.hintFontSize,
-    }),
-    [layout.hintFontSize]
-  );
-
-  const onHoverIn = useCallback(() => setHovered(true), []);
-  const onHoverOut = useCallback(() => setHovered(false), []);
-
-  const a11yHint = isLocked
-    ? t('core:spreads.catalog.hintLocked')
-    : t('core:spreads.catalog.hint');
+  const imageHeight = Math.round(width * IMAGE_ASPECT);
+  const imageRadius = dsRadius.window(width);
+  const a11yLabel = `${name}, ${cardsLabel}`;
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${title}. ${a11yHint}`}
+      accessibilityLabel={isLocked ? `${a11yLabel}, ${lockedLabel}` : a11yLabel}
       onPress={onPress}
-      onHoverIn={onHoverIn}
-      onHoverOut={onHoverOut}
-      onPressIn={() => setPressed(true)}
-      onPressOut={() => setPressed(false)}
-      style={[
+      onFocus={onFocus}
+      onBlur={onBlur}
+      style={({ hovered, pressed }: PressableWebState) => [
         styles.card,
-        { width, borderRadius: layout.cardBorderRadius },
-        interactive && styles.cardActive,
-        pressed && styles.cardPressed,
+        { width },
+        pressed ? { transform: [{ translateY: DS_MOTION.pressShiftY }] } : null,
+        focusVisible ? dsFocusRing : null,
       ]}
     >
-      <View style={[styles.imageShell, { height: previewH }]}>
-        <View style={styles.imageBounds}>
-          <Image
-            accessibilityIgnoresInvertColors
-            source={imageSource}
-            resizeMode="cover"
-            style={styles.spreadImage}
-          />
-          <LinearGradient
-            colors={[
-              getColorOpacity(COLORS.Background2, 0),
-              COLORS.Background2,
+      {({ hovered, pressed }: PressableWebState) => (
+        <>
+          <View
+            style={[
+              styles.imageFrame,
+              {
+                width,
+                height: imageHeight,
+                borderRadius: imageRadius,
+                borderColor: hovered ? DS_COLORS.accent400 : DS_COLORS.ground600,
+              },
+              webTransition,
             ]}
-            style={[styles.imageFade, { height: layout.imageFadeHeight }]}
-          />
-        </View>
-        {isLocked && (
-          <OverlayIcon>
-            <LockIcon
-              width={layout.lockIconSize}
-              height={layout.lockIconSize}
-              fill={COLORS.Content}
-              style={[
-                styles.lockIcon,
-                {
-                  width: layout.lockIconSize + 8,
-                  height: layout.lockIconSize + 8,
-                },
-              ]}
+          >
+            {/* RN Web: Image + StyleSheet.absoluteFill рендерится в натуральном размере
+                картинки, а не растягивается родителем — нужны явные width/height. */}
+            <Image
+              source={imageSource}
+              resizeMode="cover"
+              style={{ position: 'absolute', top: 0, left: 0, width, height: imageHeight }}
+              accessible={false}
+              importantForAccessibility="no"
             />
-          </OverlayIcon>
-        )}
-      </View>
-
-      <View style={[styles.textBlock, textBlockStyle]}>
-        <Text
-          category={TEXT_TAGS.h4}
-          style={[styles.title, titleStyle]}
-          numberOfLines={2}
-        >
-          {title}
-        </Text>
-        <Text
-          category={TEXT_TAGS.p2}
-          style={[
-            styles.hint,
-            hintStyle,
-            interactive && !isLocked && styles.hintActive,
-            isLocked && styles.hintLocked,
-          ]}
-        >
-          {isLocked
-            ? t('core:spreads.catalog.hintLocked')
-            : t('core:spreads.catalog.hint')}
-        </Text>
-      </View>
+            {pressed ? (
+              <View
+                pointerEvents="none"
+                style={[StyleSheet.absoluteFill, styles.pressOverlay]}
+              />
+            ) : null}
+            {isLocked ? (
+              <View style={styles.lockChip}>
+                <QuietLockGlyph size={12} color={DS_COLORS.ink100} />
+                <Text style={dsText('micro', DS_COLORS.ink100)} numberOfLines={1}>
+                  {lockedLabel}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+          <View style={styles.textCol}>
+            <Text style={[TILE_NAME_STYLE, { color: DS_COLORS.ink50 }]} numberOfLines={2}>
+              {name}
+            </Text>
+            <Text style={dsText('micro', DS_COLORS.ink100)} numberOfLines={1}>
+              {cardsLabel}
+            </Text>
+          </View>
+        </>
+      )}
     </Pressable>
   );
 }
@@ -157,91 +153,33 @@ export default memo(SpreadCatalogCard);
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.Background2,
+    flexDirection: 'column',
+    gap: DS_SPACE.s,
+  },
+  imageFrame: {
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: getColorOpacity(COLORS.Primary500, 16),
-    ...Platform.select({
-      web: {
-        boxShadow: '0 12px 28px rgba(8, 12, 20, 0.35)',
-        cursor: 'pointer',
-        ...WEB_HOVER_TRANSITION,
-      },
-      default: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.18,
-        shadowRadius: 14,
-        elevation: 8,
-      },
-    }),
-  },
-  cardActive: Platform.select({
-    web: {
-      borderColor: getColorOpacity(COLORS.Primary500, 45),
-      boxShadow:
-        '0 18px 40px rgba(8, 12, 20, 0.42), 0 0 24px rgba(246, 192, 27, 0.14)',
-      transform: [{ translateY: -2 }],
-    },
-    default: {
-      shadowColor: COLORS.Primary500,
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.22,
-      shadowRadius: 16,
-      elevation: 10,
-    },
-  }),
-  cardPressed: {
-    opacity: 0.94,
-  },
-  imageShell: {
-    width: '100%',
-    backgroundColor: COLORS.SpbSky4,
+    backgroundColor: DS_COLORS.ground700,
     position: 'relative',
-    overflow: 'hidden',
   },
-  imageBounds: {
-    ...StyleSheet.absoluteFillObject,
-    width: '100%',
-    height: '100%',
+  pressOverlay: {
+    backgroundColor: DS_COLORS.pressDim,
   },
-  spreadImage: {
-    width: '100%',
-    height: '100%',
-    minWidth: '100%',
-    alignSelf: 'stretch',
-    ...Platform.select({
-      web: {
-        objectFit: 'cover',
-        objectPosition: 'center center',
-      },
-    }),
-  },
-  imageFade: {
+  lockChip: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    pointerEvents: 'none',
+    left: DS_SPACE.xs,
+    bottom: DS_SPACE.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: DS_SPACE.xs / 2,
+    height: 24,
+    borderRadius: dsRadius.capsule(24),
+    paddingHorizontal: DS_SPACE.s,
+    backgroundColor: DS_COLORS.ground800,
+    borderWidth: 1,
+    borderColor: DS_COLORS.ground600,
   },
-  lockIcon: {},
-  textBlock: {
-    flexDirection: 'column',
-  },
-  title: {
-    letterSpacing: 0.35,
-    color: COLORS.Content,
-  },
-  hint: {
-    marginBottom: 8,
-    color: getColorOpacity(COLORS.Content, 68),
-    letterSpacing: 0.2,
-    lineHeight: 22,
-  },
-  hintActive: {
-    color: COLORS.Primary500,
-  },
-  hintLocked: {
-    color: getColorOpacity(COLORS.Content, 52),
+  textCol: {
+    gap: DS_SPACE.xs / 2,
   },
 });

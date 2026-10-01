@@ -7,20 +7,25 @@ import {
 } from 'react-native';
 import type { PressableProps } from 'react-native';
 import type { CSSProperties, ReactNode } from 'react';
-import { WEB_HOVER_TRANSITION } from 'shared/lib';
-import { COLORS } from '../../themes';
-import { Text, TEXT_TAGS, TEXT_WEIGHT } from '../Text';
+import { DS_COLORS, DS_SIZES, DS_TYPE, dsFocusRing, dsRadius, dsWebTransition } from 'shared/themes/ds';
+import { useKeyboardFocusVisible } from 'shared/lib/web/useKeyboardFocusVisible';
+import { Text, TEXT_WEIGHT } from '../Text';
 
 type TButtonProps = Omit<PressableProps, 'style' | 'children'> & {
   children: ReactNode;
   style?: CSSProperties | StyleProp<ViewStyle>;
 };
 
+/** Единственное действие экрана — капсула action500, текст onAction. DS §11. */
 function Button({ children, style, disabled, ...rest }: TButtonProps) {
+  const { focusVisible, onFocus, onBlur } = useKeyboardFocusVisible();
+
   return (
     <Pressable
       accessibilityRole="button"
       disabled={disabled}
+      onFocus={onFocus}
+      onBlur={onBlur}
       {...rest}
       style={(state) => {
         const hovered =
@@ -34,15 +39,15 @@ function Button({ children, style, disabled, ...rest }: TButtonProps) {
           Platform.OS === 'web' && !disabled ? styles.cursorPointer : null,
           hovered ? styles.buttonHover : null,
           state.pressed && !disabled ? styles.buttonPressed : null,
+          focusVisible ? dsFocusRing : null,
           style,
         ];
       }}
     >
       {typeof children === 'string' ? (
         <Text
-          category={TEXT_TAGS.p1}
-          weight={TEXT_WEIGHT.medium}
-          style={styles.text}
+          weight={TEXT_WEIGHT.extraBold}
+          style={[styles.text, disabled ? styles.textDisabled : null]}
         >
           {children}
         </Text>
@@ -55,36 +60,38 @@ function Button({ children, style, disabled, ...rest }: TButtonProps) {
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 16,
-    backgroundColor: COLORS.Primary,
+    height: DS_SIZES.buttonHeight,
+    borderRadius: dsRadius.capsule(DS_SIZES.buttonHeight),
+    backgroundColor: DS_COLORS.action500,
     borderWidth: 0,
-    padding: 10,
+    paddingHorizontal: 24,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    ...WEB_HOVER_TRANSITION,
+    ...dsWebTransition,
   },
   cursorPointer: Platform.select({
     web: { cursor: 'pointer' } as object,
     default: {},
   }),
   buttonHover: Platform.select({
-    web: {
-      boxShadow: '0 6px 20px rgba(0, 0, 0, 0.28)',
-      filter: 'brightness(1.07)',
-    } as object,
+    web: { filter: 'brightness(1.06)' } as object,
     default: {},
   }),
-  buttonPressed: {
-    opacity: 0.92,
-  },
+  buttonPressed: Platform.select({
+    web: { transform: [{ translateY: 1 }], filter: 'brightness(0.82)' } as object,
+    default: { transform: [{ translateY: 1 }], opacity: 0.82 },
+  }),
+  /** DS: неактивная кнопка — фон ground600, текст ink100, без прозрачности. */
   disabled: {
-    opacity: 0.3,
+    backgroundColor: DS_COLORS.ground600,
   },
   text: {
-    color: COLORS.Content,
-    fontSize: 14,
-    lineHeight: 20,
+    ...DS_TYPE.button,
+    color: DS_COLORS.onAction,
+  },
+  textDisabled: {
+    color: DS_COLORS.ink100,
   },
 });
 

@@ -1,4 +1,5 @@
 import type { ReactElement, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Text } from '../Text';
 import { ChevronLeftIcon } from '../Icon';
@@ -17,6 +18,7 @@ export type HeaderProps = {
 
 /** Шапка экрана DS: «назад» слева, заголовок по центру, CreditsBadge + right справа. */
 export function Header({ title, showBack = true, onBack, right, showCredits = true }: HeaderProps): ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleBack = () => {
@@ -37,7 +39,7 @@ export function Header({ title, showBack = true, onBack, right, showCredits = tr
     <header className={styles.header}>
       <div className={styles.side}>
         {showBack ? (
-          <button type="button" className={styles.backButton} onClick={handleBack} aria-label="Назад">
+          <button type="button" className={styles.backButton} onClick={handleBack} aria-label={t('core:a11y.back')}>
             <ChevronLeftIcon width={24} height={24} />
           </button>
         ) : (

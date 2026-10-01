@@ -8,7 +8,7 @@ import { useData } from 'shared/DataProvider';
 import { Checked } from 'shared/icons';
 import { loadStartupLanguageBundles, type AppLanguage } from 'shared/lib/i18n/loadNamespaces';
 import { isTablet } from 'shared/lib';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS, DS_SIZES } from 'shared/themes/ds';
 import { AnalyticAction } from 'shared/types';
 import { Text, TEXT_TAGS } from 'shared/ui';
 import { LANGUAGES } from '../../lib';
@@ -128,15 +128,16 @@ const styleSheet = StyleService.create({
   },
   itemModal: {
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(175, 161, 232, 0.28)',
-    backgroundColor: COLORS.Background,
+    borderWidth: DS_SIZES.hairline,
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     paddingVertical: 14,
     paddingHorizontal: 16,
   },
+  /** Выбор — кант accent400 (см. DS §правила выбора). */
   itemModalSelected: {
-    borderColor: COLORS.Primary,
-    backgroundColor: 'rgba(246, 192, 27, 0.1)',
+    borderColor: DS_COLORS.accent400,
+    backgroundColor: DS_COLORS.ground600,
   },
   iconWrapper: {
     gap: 18,
@@ -146,11 +147,11 @@ const styleSheet = StyleService.create({
     minWidth: 0,
   },
   titleModal: {
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
   },
   modalFootnote: {
     marginTop: 8,
-    color: COLORS.SpbSky1,
+    color: DS_COLORS.ink100,
     textAlign: 'center',
     lineHeight: 20,
   },

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  type LayoutChangeEvent,
   Platform,
   ScrollView,
   StyleSheet,
@@ -33,15 +34,14 @@ import {
   getImage,
   getTodayISO,
   getValueForAsyncDeviceMemoryKey,
-  isTablet,
   isWebAuthPending,
   MetrikaGoal,
   reachMetrikaGoal,
   shouldPromptWebSignIn,
   toastWebAuthRequired,
-  verticalScale,
 } from 'shared/lib';
 import { COLORS } from 'shared/themes';
+import { DS_COLORS, dsRadius } from 'shared/themes/ds';
 import { AnalyticAction, NavigationRoute } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { spreadInnerStyles } from 'shared/lib/spreadInnerUi';
@@ -49,6 +49,8 @@ import { CardDescription } from '../CardDescription';
 import SpreadStepper from '../SpreadStepper/SpreadStepper';
 
 const PHONE_MAX_WIDTH = 640;
+/** Источники spreads/flatIllustration — 1536×768 (2:1), см. SpreadCatalogCard. */
+const HERO_IMAGE_ASPECT = 0.5;
 
 type SpreadCardsChoiceProps = {
   isSimpleSpread?: boolean;
@@ -70,6 +72,11 @@ function SpreadCardsChoice({
   const { t } = useTranslation();
   const { width, height: windowHeight } = useWindowDimensions();
   const isPhone = width < PHONE_MAX_WIDTH;
+  const [heroImageWidth, setHeroImageWidth] = useState(0);
+  const handleHeroImageLayout = useCallback((event: LayoutChangeEvent) => {
+    const measured = Math.round(event.nativeEvent.layout.width);
+    setHeroImageWidth((prev) => (prev === measured ? prev : measured));
+  }, []);
 
   const {
     spread,
@@ -266,14 +273,31 @@ function SpreadCardsChoice({
                 {isSimpleSpread &&
                   spread?.id !== SpreadName.Simple_DaySuggest &&
                   !hasAskedQuestion && (
-                    <Image
-                      style={styles.image}
-                      source={getImage([
-                        'spreads',
-                        'flatIllustration',
-                        spread?.id ?? 'simple_YesNo',
-                      ])}
-                    />
+                    <View
+                      style={[
+                        styles.imageFrame,
+                        heroImageWidth > 0
+                          ? { borderRadius: dsRadius.window(heroImageWidth) }
+                          : null,
+                      ]}
+                      onLayout={handleHeroImageLayout}
+                    >
+                      {/* RN Web: процентная ширина Image ненадёжна — задаём измеренные px. */}
+                      {heroImageWidth > 0 && (
+                        <Image
+                          resizeMode="cover"
+                          style={{
+                            width: heroImageWidth,
+                            height: Math.round(heroImageWidth * HERO_IMAGE_ASPECT),
+                          }}
+                          source={getImage([
+                            'spreads',
+                            'flatIllustration',
+                            spread?.id ?? 'simple_YesNo',
+                          ])}
+                        />
+                      )}
+                    </View>
                   )}
                 {showCardPicker ? (
                   <View
@@ -307,9 +331,6 @@ function SpreadCardsChoice({
                     )}
                     <AnimatedCard />
                     <View style={spreadInnerStyles.altarZone}>
-                      <View style={spreadInnerStyles.altarGlowClip} pointerEvents="none">
-                        <View style={spreadInnerStyles.altarGlow} />
-                      </View>
                       <CoverFlowCardCarousel
                         style={
                           isSimpleSpread
@@ -317,7 +338,7 @@ function SpreadCardsChoice({
                             : styles.carousel
                         }
                       />
-                      <Text category={TEXT_TAGS.p2} style={spreadInnerStyles.altarHint}>
+                      <Text weight="semibold" style={spreadInnerStyles.altarHint}>
                         {t('spread:flow.pickHint')}
                       </Text>
                       {isSimpleSpread &&
@@ -340,7 +361,7 @@ function SpreadCardsChoice({
                   </View>
                 ) : (
                   <View style={[spreadInnerStyles.glassPanel, styles.questionWrapper]}>
-                    <Text style={spreadInnerStyles.sectionLabel}>
+                    <Text weight="bold" style={spreadInnerStyles.sectionLabel}>
                       {t('spread:flow.questionSection')}
                     </Text>
                     <Question />
@@ -398,14 +419,18 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginHorizontal: 16,
   },
-  image: {
+  /** Колонка контента (как у соседних simpleIntro/questionWrapper) — не шире 520,
+   *  без width:'100%' + marginHorizontal вместе (переполняло экран на wide). */
+  imageFrame: {
     width: '100%',
-    height: isTablet ? verticalScale(320) : verticalScale(260),
+    maxWidth: 520,
+    alignSelf: 'center',
     marginHorizontal: 16,
     borderRadius: 20,
-    opacity: 0.85,
     borderWidth: 1,
-    borderColor: 'rgba(173, 173, 177, 0.2)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
+    overflow: 'hidden',
   },
   button: { width: '100%' },
   schemeInline: {

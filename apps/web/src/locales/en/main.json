@@ -5,5 +5,15 @@
   "popularRituals": "Popular Rituals",
 
   "affirmationsBlock.title": "Affirmations",
-  "affirmationsBlock.caption": "An affirmation is waiting for you"
+  "affirmationsBlock.caption": "An affirmation is waiting for you",
+
+  "dayCard.lead": "One piece of advice for today",
+  "dayCard.cta": "Draw a card",
+  "dayCard.a11y": "Card of the day, {{date}}. Draw a card",
+
+  "allSpreads": "All spreads",
+  "spreadCardsCount_one": "{{count}} card",
+  "spreadCardsCount_other": "{{count}} cards",
+  "spreadCard.a11y": "{{name}}, {{cards}}",
+  "quickLinks.a11yHint": "Opens in the library"
 }

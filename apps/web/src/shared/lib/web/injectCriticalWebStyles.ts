@@ -13,8 +13,9 @@ export function injectCriticalWebStyles(): void {
   style.id = id;
   style.textContent = `
     html, body, #root {
-      background-color: #171f2c;
-      color: #f4f4f5;
+      background-color: #091519;
+      color: #ecedcb;
+      font-family: 'Onest-Medium', system-ui, sans-serif;
       min-height: 100%;
       min-height: 100dvh;
     }

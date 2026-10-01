@@ -5,16 +5,16 @@ export const myTheme = {
   ...dark,
   ...getKittenColors(),
 
-  'text-font-family': 'Montserrat-Regular', // Основной шрифт (обычный текст)
-  'text-font-family-bold': 'Montserrat-Bold', // Жирный шрифт (заголовки, акценты)
-  'text-font-family-italic': 'Montserrat-Italic', // Курсив
+  'text-font-family': 'Onest-Medium', // Основной шрифт (обычный текст)
+  'text-font-family-bold': 'Onest-Bold', // Жирный шрифт (заголовки, акценты)
+  'text-font-family-italic': 'Onest-Medium', // Курсив (DS не использует наклон)
   // Дополнительные стили для разных категорий
-  'text-font-family-h1': 'Montserrat-ExtraBold', // Для заголовков h1
-  'text-font-family-h2': 'Montserrat-Bold', // Для заголовков h2
-  'text-font-family-p1': 'Montserrat-Regular', // Для основного текста
-  'text-font-family-p2': 'Montserrat-Light', // Для вторичного текста
-  'text-font-family-label': 'Montserrat-Medium', // Для меток
-  'text-font-family-caption': 'Montserrat-Thin', // Для подписей
+  'text-font-family-h1': 'Geologica-Black', // Для заголовков h1
+  'text-font-family-h2': 'Geologica-ExtraBold', // Для заголовков h2
+  'text-font-family-p1': 'Onest-Medium', // Для основного текста
+  'text-font-family-p2': 'Onest-Medium', // Для вторичного текста
+  'text-font-family-label': 'Onest-SemiBold', // Для меток
+  'text-font-family-caption': 'Onest-Medium', // Для подписей
 };
 
 export const customMapper: any = {

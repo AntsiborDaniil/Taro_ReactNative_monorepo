@@ -1,6 +1,6 @@
 import Toast, { BaseToast, type ToastConfig } from 'react-native-toast-message';
 import { Platform, StyleSheet } from 'react-native';
-import { COLORS } from '../../themes';
+import { DS_COLORS } from '../../themes/ds';
 
 const toastConfig: ToastConfig = {
   success: (props) => (
@@ -39,22 +39,22 @@ function TarotToast() {
   );
 }
 
+/** DS: лист ground700, рамка ground600. */
 const styles = StyleSheet.create({
   text: {
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
     fontSize: Platform.OS === 'web' ? 15 : 22,
-    fontWeight: '400',
   },
   smallText: {
     fontSize: Platform.OS === 'web' ? 13 : 22,
-    color: 'rgba(218, 230, 255, 0.82)',
+    color: DS_COLORS.ink100,
   },
   baseToast: {
-    borderLeftColor: COLORS.Primary,
-    backgroundColor: COLORS.Background,
-    borderColor: COLORS.Primary,
+    borderLeftColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
+    borderColor: DS_COLORS.ground600,
     borderLeftWidth: 2,
-    borderWidth: 2,
+    borderWidth: 1,
     ...(Platform.OS === 'web'
       ? ({
           maxWidth: 420,
@@ -65,16 +65,13 @@ const styles = StyleSheet.create({
       : {}),
   },
   success: {
-    borderLeftColor: COLORS.Primary,
-    borderColor: COLORS.Primary,
+    borderLeftColor: DS_COLORS.accent400,
   },
   error: {
-    borderLeftColor: COLORS.Fury,
-    borderColor: COLORS.Fury,
+    borderLeftColor: DS_COLORS.alarm600,
   },
   info: {
-    borderLeftColor: COLORS.Primary,
-    borderColor: 'rgba(128, 174, 226, 0.5)',
+    borderLeftColor: DS_COLORS.calm500,
   },
 });
 

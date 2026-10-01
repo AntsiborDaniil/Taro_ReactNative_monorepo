@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { Text, TEXT_TAGS } from 'shared/ui';
 
 type SpreadStepperProps = {
@@ -67,8 +67,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: getColorOpacity(COLORS.Primary500, 12),
-    backgroundColor: 'rgba(22, 28, 38, 0.45)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
   },
   step: {
     flex: 1,
@@ -80,37 +80,32 @@ const styles = StyleSheet.create({
     width: 11,
     height: 11,
     borderRadius: 6,
-    backgroundColor: getColorOpacity(COLORS.SpbSky1, 30),
+    backgroundColor: DS_COLORS.ground700,
     marginBottom: 7,
     borderWidth: 1,
-    borderColor: getColorOpacity(COLORS.Content, 12),
+    borderColor: DS_COLORS.ground600,
   },
   dotActive: {
-    backgroundColor: COLORS.Primary500,
-    borderColor: COLORS.Primary200,
-    transform: [{ scale: 1.2 }],
-    ...({
-      boxShadow: '0 0 12px rgba(246, 192, 27, 0.45)',
-    } as object),
+    backgroundColor: DS_COLORS.accent400,
+    borderColor: DS_COLORS.accent400,
   },
   dotDone: {
-    backgroundColor: getColorOpacity(COLORS.Primary500, 75),
-    borderColor: getColorOpacity(COLORS.Primary300, 50),
+    backgroundColor: DS_COLORS.calm500,
+    borderColor: DS_COLORS.calm500,
   },
   label: {
     fontSize: 10,
     lineHeight: 13,
     textAlign: 'center',
-    color: getColorOpacity(COLORS.Content, 45),
+    color: DS_COLORS.ink100,
     letterSpacing: 0.4,
     textTransform: 'uppercase',
   },
   labelActive: {
-    color: COLORS.Primary300,
-    fontWeight: '600',
+    color: DS_COLORS.accent400,
   },
   labelDone: {
-    color: getColorOpacity(COLORS.Content, 68),
+    color: DS_COLORS.ink100,
   },
   connector: {
     position: 'absolute',
@@ -118,11 +113,11 @@ const styles = StyleSheet.create({
     left: '58%',
     right: '-42%',
     height: 2,
-    backgroundColor: getColorOpacity(COLORS.SpbSky1, 22),
+    backgroundColor: DS_COLORS.ground600,
     zIndex: -1,
   },
   connectorActive: {
-    backgroundColor: getColorOpacity(COLORS.Primary500, 55),
+    backgroundColor: DS_COLORS.accent400,
   },
 });
 

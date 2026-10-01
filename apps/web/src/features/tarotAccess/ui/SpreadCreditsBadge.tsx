@@ -1,6 +1,6 @@
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Infinity as InfinityIcon, LightningBolt } from 'shared/icons';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { DS_COLORS, DS_SIZES } from 'shared/themes/ds';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui/Text';
 
 export type SpreadQuotaBadgeMode = 'daily' | 'credits' | 'unlimited';
@@ -15,9 +15,10 @@ type SpreadCreditsBadgeProps = {
 };
 
 /**
- * Settings header quota indicator:
- * - daily: muted bolt + remaining free spreads
- * - credits / unlimited: static dark-gold glow (no pulse)
+ * Индикатор квоты расклада (шапка, настройки) по DS:
+ * круглая плашка ground700 с ободком accent400, молния всегда accent400,
+ * счётчик — ground800 + кант accent400 + ink50, «+» — метка accent400 с тёмным знаком.
+ * Режимы различаются только числом/∞, без свечения и теней.
  */
 export function SpreadCreditsBadge({
   mode,
@@ -25,12 +26,9 @@ export function SpreadCreditsBadge({
   size = 28,
   showTopUpHint = false,
 }: SpreadCreditsBadgeProps) {
-  const isCharged = mode === 'credits' || mode === 'unlimited';
-  const boltColor = isCharged ? COLORS.Primary600 : COLORS.SpbSky2;
-  const accentBorder = isCharged
-    ? getColorOpacity(COLORS.Primary600, 75)
-    : getColorOpacity(COLORS.SpbSky1, 55);
-  const accentText = isCharged ? COLORS.Primary500 : COLORS.SpbSky1;
+  const boltColor = DS_COLORS.accent400;
+  const accentBorder = DS_COLORS.accent400;
+  const accentText = DS_COLORS.ink50;
 
   const count = Math.max(0, Math.floor(remaining));
   const countLabel =
@@ -41,32 +39,20 @@ export function SpreadCreditsBadge({
   const rootSize = Math.max(30, Math.round(size * 1.7));
   const badgeMin = size <= 18 ? 14 : 16;
   const badgeFont = size <= 18 ? 9 : 10;
+  const iconSize = Math.round(size * 0.9);
 
   return (
     <View
       style={[
         styles.root,
-        { width: rootSize, height: rootSize },
+        { width: rootSize, height: rootSize, borderRadius: rootSize / 2 },
         mode === 'unlimited' && styles.rootWide,
       ]}
       accessibilityRole="text"
       accessibilityLabel={label}
     >
-      {isCharged ? (
-        <View
-          style={[
-            styles.glow,
-            {
-              // Keep glow tight around the bolt (−4px vs previous diameter).
-              width: Math.max(size, size * 1.85 - 4),
-              height: Math.max(size, size * 1.85 - 4),
-              borderRadius: size,
-            },
-          ]}
-        />
-      ) : null}
       <View style={styles.boltRow}>
-        <LightningBolt width={size} height={size} fill={boltColor} />
+        <LightningBolt width={iconSize} height={iconSize} fill={boltColor} />
         {mode === 'unlimited' ? (
           <InfinityIcon
             width={Math.round(size * 0.72)}
@@ -90,10 +76,14 @@ export function SpreadCreditsBadge({
         >
           <Text
             category={TEXT_TAGS.label}
-            weight={TEXT_WEIGHT.bold}
+            weight={TEXT_WEIGHT.extraBold}
             style={[
               styles.badgeText,
-              { color: accentText, fontSize: badgeFont, lineHeight: badgeFont + 2 },
+              {
+                color: DS_COLORS.onAction,
+                fontSize: badgeFont + 1,
+                lineHeight: badgeFont + 3,
+              },
             ]}
           >
             +
@@ -133,24 +123,13 @@ const styles = StyleSheet.create({
   root: {
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: DS_COLORS.ground700,
+    borderWidth: DS_SIZES.edgeWidth,
+    borderColor: DS_COLORS.accent400,
   },
   rootWide: {
     minWidth: 40,
-  },
-  glow: {
-    position: 'absolute',
-    backgroundColor: getColorOpacity(COLORS.Primary700, 38),
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: `0 0 8px ${getColorOpacity(COLORS.Primary600, 45)}, 0 0 3px ${getColorOpacity(COLORS.Primary800, 55)}`,
-        } as object)
-      : {
-          shadowColor: COLORS.Primary700,
-          shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 0.55,
-          shadowRadius: 4,
-          elevation: 4,
-        }),
+    paddingHorizontal: 6,
   },
   boltRow: {
     flexDirection: 'row',
@@ -161,17 +140,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -1,
     paddingHorizontal: 3,
-    backgroundColor: COLORS.Background2,
+    backgroundColor: DS_COLORS.ground800,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   plusBadge: {
-    right: -2,
+    right: -4,
+    bottom: -4,
     paddingHorizontal: 0,
+    backgroundColor: DS_COLORS.accent400,
   },
   countBadge: {
-    left: -2,
+    left: -4,
+    bottom: -4,
   },
   badgeText: {
     fontSize: 10,

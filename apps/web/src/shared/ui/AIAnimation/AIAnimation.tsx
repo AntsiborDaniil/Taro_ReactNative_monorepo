@@ -1,14 +1,53 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
-import { BlurView } from '@react-native-community/blur';
+import { Platform, StyleSheet, View } from 'react-native';
 import { impactAsync, ImpactFeedbackStyle } from 'expo-haptics';
+import { useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import Video from 'react-native-video';
 import { getImage } from 'shared/lib';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS, DS_MOTION, dsWebTransition, dsWebTransitionReduced } from 'shared/themes/ds';
+import { getColorOpacity } from 'shared/themes';
 import { LoadingsContext } from '../../contexts/Loadings';
 import { useData } from '../../DataProvider';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from '../Text';
+
+const LOADING_SEGMENTS = 4;
+const LOADING_SEGMENT_STEP = DS_MOTION.block;
+
+/** Спокойный индикатор ожидания: сегменты грани accent400, смена opacity по кругу. Reduced motion — статично. */
+function LoadingSegments() {
+  const reducedMotion = useReducedMotion();
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      return;
+    }
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % LOADING_SEGMENTS);
+    }, LOADING_SEGMENT_STEP);
+    return () => clearInterval(interval);
+  }, [reducedMotion]);
+
+  const webTransition = reducedMotion ? dsWebTransitionReduced : dsWebTransition;
+
+  return (
+    <View style={styles.segments} accessibilityElementsHidden>
+      {Array.from({ length: LOADING_SEGMENTS }).map((_, index) => (
+        <View
+          key={index}
+          style={[
+            styles.segment,
+            Platform.OS === 'web' ? webTransition : null,
+            {
+              opacity: reducedMotion ? 0.55 : index === activeIndex ? 1 : 0.3,
+            },
+          ]}
+        />
+      ))}
+    </View>
+  );
+}
 
 const LOADING_TEXTS = [
   'loading.1',
@@ -118,17 +157,9 @@ function AIAnimation({ hasVibration }: { hasVibration?: boolean }) {
           ? ({ 'data-tarot-no-swipe-back': true } as object)
           : {})}
       >
-        <View style={[styles.glow, styles.glowLeft]} />
-        <View style={[styles.glow, styles.glowRight]} />
         <View style={styles.card}>
-          <BlurView
-            style={styles.blur}
-            blurType="dark"
-            blurAmount={8}
-            reducedTransparencyFallbackColor="#131B2A"
-          />
           <View style={styles.cardInner}>
-            <ActivityIndicator size="small" color={COLORS.Primary} />
+            <LoadingSegments />
             <Text
               category={TEXT_TAGS.h4}
               weight={TEXT_WEIGHT.medium}
@@ -167,7 +198,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 16,
-    backgroundColor: 'rgba(9, 14, 24, 0.38)',
+    backgroundColor: getColorOpacity(DS_COLORS.ground900, 80),
   },
   card: {
     width: '100%',
@@ -175,57 +206,36 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.16)',
-    ...(
-      Platform.OS === 'web'
-        ? ({
-            boxShadow: '0 18px 42px rgba(0,0,0,0.34)',
-          } as object)
-        : {}
-    ),
-  },
-  blur: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
   },
   cardInner: {
     paddingHorizontal: 18,
     paddingVertical: 16,
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(16, 22, 34, 0.55)',
+    gap: 12,
   },
   title: {
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
     textAlign: 'center',
     fontSize: 18,
     lineHeight: 22,
   },
   subtitle: {
-    color: 'rgba(255,255,255,0.78)',
+    color: DS_COLORS.ink100,
     textAlign: 'center',
     lineHeight: 22,
   },
-  glow: {
-    position: 'absolute',
-    width: 180,
-    height: 180,
-    borderRadius: 999,
-    opacity: 0.2,
-    pointerEvents: 'none',
+  segments: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  glowLeft: {
-    backgroundColor: '#4BA6E8',
-    left: '20%',
-    top: '38%',
-  },
-  glowRight: {
-    backgroundColor: '#8F6AE5',
-    right: '18%',
-    bottom: '30%',
+  segment: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: DS_COLORS.accent400,
   },
 });
 

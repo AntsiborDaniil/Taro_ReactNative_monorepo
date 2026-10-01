@@ -1,16 +1,10 @@
-import React, { ReactElement, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import React, { ReactElement } from 'react';
+import { Platform, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
-import { LinearGradient } from 'expo-linear-gradient';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
 import { TarotCardArcana, TarotCardSuit } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { isTablet } from 'shared/lib';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { DS_COLORS, dsWebTransition } from 'shared/themes/ds';
 import { TSuitItem } from '../lib/constants';
 
 export type SuitItemProps = {
@@ -19,6 +13,7 @@ export type SuitItemProps = {
   suitItem: TSuitItem;
 };
 
+/** Чип-фильтр раздела словаря: капсула DS, выбранный — заливка calm600 + кант accent400. */
 function SuitItem({
   suitItem,
   selectedSuitOrArcana,
@@ -27,24 +22,13 @@ function SuitItem({
   const { width } = useWindowDimensions();
   const { Icon, id, suitOrArcana } = suitItem;
   const isCompact = width < 430;
+  const size = isTablet ? 68 : isCompact ? 50 : 58;
 
   const checked = selectedSuitOrArcana === suitOrArcana;
 
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
   });
-
-  const opacityProgress = useSharedValue(checked ? 1 : 0);
-
-  const animatedGradient = useAnimatedStyle(() => {
-    return {
-      opacity: withTiming(opacityProgress.value, { duration: 100 }),
-    };
-  });
-
-  useEffect(() => {
-    opacityProgress.value = withTiming(checked ? 1 : 0, { duration: 100 });
-  }, [checked, opacityProgress]);
 
   return (
     <TouchableOpacity
@@ -57,53 +41,37 @@ function SuitItem({
       key={id}
       style={[
         styles.item,
-        isCompact && styles.itemCompact,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+        },
+        checked ? styles.itemSelected : null,
       ]}
     >
-      <Animated.View style={[styles.gradientWrapper, animatedGradient]}>
-        <LinearGradient
-          colors={[
-            getColorOpacity(COLORS.SpbSky1, 0),
-            getColorOpacity(COLORS.Primary, 10),
-          ]}
-          style={styles.gradientInner}
-          locations={[0.2, 0.9]}
-        />
-      </Animated.View>
-
       <Icon
-        width={isTablet ? 60 : isCompact ? 30 : 34}
-        height={isTablet ? 60 : isCompact ? 30 : 34}
-        fill={checked ? COLORS.Primary : COLORS.Content}
+        width={isTablet ? 30 : isCompact ? 24 : 26}
+        height={isTablet ? 30 : isCompact ? 24 : 26}
+        fill={checked ? DS_COLORS.ink50 : DS_COLORS.ink100}
       />
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  gradientWrapper: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-  },
-  gradientInner: {
-    borderRadius: 14,
-    width: '100%',
-    height: '100%',
-  },
   item: {
-    width: isTablet ? 68 : 58,
-    height: isTablet ? 68 : 58,
-    backgroundColor: getColorOpacity(COLORS.SpbSky1, 30),
+    backgroundColor: DS_COLORS.ground700,
+    borderWidth: 1,
+    borderColor: DS_COLORS.ground600,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 14,
     position: 'relative',
+    ...dsWebTransition,
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : {}),
   },
-  itemCompact: {
-    width: 50,
-    height: 50,
-    borderRadius: 12,
+  itemSelected: {
+    backgroundColor: DS_COLORS.calm600,
+    borderColor: DS_COLORS.accent400,
   },
 });
 

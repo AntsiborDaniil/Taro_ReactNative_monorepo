@@ -46,8 +46,9 @@ import {
 import { fetchAuthMeSession } from 'shared/lib/web/fetchAuthMeSession';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
+import { DS_COLORS, DS_MOTION, DS_SIZES, DS_TYPE } from 'shared/themes/ds';
 import { PressableWebState } from 'shared/types';
-import { Button, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
+import { Button, DsModalSheet, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { VerifyCodeBoxes } from './VerifyCodeBoxes';
 
 type AuthTab = 'signin' | 'signup';
@@ -168,7 +169,7 @@ function AuthPasswordInput({
         secureTextEntry={masked}
         autoCapitalize="none"
         placeholder={placeholder}
-        placeholderTextColor="rgba(255,255,255,0.42)"
+        placeholderTextColor={DS_COLORS.ink100}
         style={[
           styles.input,
           styles.passwordInputWithReveal,
@@ -939,8 +940,8 @@ function Auth() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.column}>
         <View style={styles.heroCard}>
-          <View pointerEvents="none" style={styles.heroTopGlow} />
           {session ? (
             <>
               <Text category={TEXT_TAGS.h2} style={styles.heroTitle}>
@@ -1007,7 +1008,7 @@ function Auth() {
                     onChangeText={onChange}
                     onBlur={onBlur}
                     placeholder={t('settings:auth.namePlaceholder')}
-                    placeholderTextColor="rgba(255,255,255,0.42)"
+                    placeholderTextColor={DS_COLORS.ink100}
                     style={[
                       styles.input,
                       profileForm.formState.errors.name && styles.inputError,
@@ -1080,7 +1081,7 @@ function Auth() {
                       secureTextEntry={!showAccountPassword}
                       autoCapitalize="none"
                       placeholder={t('settings:auth.passwordPlaceholder')}
-                      placeholderTextColor="rgba(255,255,255,0.42)"
+                      placeholderTextColor={DS_COLORS.ink100}
                       style={[
                         styles.input,
                         passwordForm.formState.errors.currentPassword &&
@@ -1111,7 +1112,7 @@ function Auth() {
                       secureTextEntry={!showAccountPassword}
                       autoCapitalize="none"
                       placeholder={t('settings:auth.passwordPlaceholder')}
-                      placeholderTextColor="rgba(255,255,255,0.42)"
+                      placeholderTextColor={DS_COLORS.ink100}
                       style={[
                         styles.input,
                         passwordForm.formState.errors.newPassword &&
@@ -1151,7 +1152,7 @@ function Auth() {
                       secureTextEntry={!showAccountPassword}
                       autoCapitalize="none"
                       placeholder={t('settings:auth.passwordPlaceholder')}
-                      placeholderTextColor="rgba(255,255,255,0.42)"
+                      placeholderTextColor={DS_COLORS.ink100}
                       style={[
                         styles.input,
                         passwordForm.formState.errors.confirmPassword &&
@@ -1318,7 +1319,7 @@ function Auth() {
                         onChangeText={onChange}
                         onBlur={onBlur}
                         placeholder={t('settings:auth.namePlaceholder')}
-                        placeholderTextColor="rgba(255,255,255,0.42)"
+                        placeholderTextColor={DS_COLORS.ink100}
                         style={[styles.input, errors.name && styles.inputError]}
                       />
                     )}
@@ -1349,7 +1350,7 @@ function Auth() {
                         autoCapitalize="none"
                         keyboardType="email-address"
                         placeholder={t('settings:auth.emailPlaceholder')}
-                        placeholderTextColor="rgba(255,255,255,0.42)"
+                        placeholderTextColor={DS_COLORS.ink100}
                         style={[styles.input, errors.email && styles.inputError]}
                       />
                     )}
@@ -1427,7 +1428,7 @@ function Auth() {
                         autoCapitalize="none"
                         keyboardType="email-address"
                         placeholder={t('settings:auth.emailPlaceholder')}
-                        placeholderTextColor="rgba(255,255,255,0.42)"
+                        placeholderTextColor={DS_COLORS.ink100}
                         style={[styles.input, errors.email && styles.inputError]}
                       />
                     )}
@@ -1486,6 +1487,7 @@ function Auth() {
             )}
           </View>
         )}
+        </View>
       </ScrollView>
 
       <Modal
@@ -1494,13 +1496,11 @@ function Auth() {
         visible={existingAccountModalVisible}
         onRequestClose={() => setExistingAccountModalVisible(false)}
       >
-        <View style={styles.paymentModalRoot}>
-          <Pressable
-            style={styles.paymentModalBackdrop}
-            onPress={() => setExistingAccountModalVisible(false)}
-            accessibilityRole="button"
-            accessibilityLabel={t('settings:auth.existingAccount.close')}
-          />
+        <DsModalSheet
+          onClose={() => setExistingAccountModalVisible(false)}
+          closeAccessibilityLabel={t('settings:auth.existingAccount.close')}
+          maxWidth={420}
+        >
           <View style={styles.paymentModalSheet}>
             <View style={styles.paymentModalHeader}>
               <Text
@@ -1534,7 +1534,7 @@ function Auth() {
               {t('settings:auth.existingAccount.signIn')}
             </Button>
           </View>
-        </View>
+        </DsModalSheet>
       </Modal>
     </ScreenLayout>
   );
@@ -1548,9 +1548,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 25,
     paddingBottom: 28,
     paddingTop: 8,
+  },
+  /** Колонка экрана: во всю ширину на мобайле, до 480 по центру на ≥768. */
+  column: {
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
     gap: 14,
   },
   guestWrap: {
@@ -1558,43 +1564,34 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
   },
   heroCard: {
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(173, 191, 226, 0.2)',
-    backgroundColor: 'rgba(24, 31, 45, 0.9)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
     paddingHorizontal: 16,
     paddingVertical: 18,
     gap: 8,
     overflow: 'hidden',
     position: 'relative',
   },
-  heroTopGlow: {
-    position: 'absolute',
-    width: 140,
-    height: 140,
-    borderRadius: 999,
-    top: -70,
-    right: -50,
-    backgroundColor: 'rgba(111, 87, 236, 0.26)',
-  },
   heroTitle: {
     color: COLORS.Content,
   },
   heroSubtitle: {
-    color: 'rgba(218, 230, 255, 0.78)',
+    color: DS_COLORS.ink100,
     lineHeight: 20,
   },
   memberSince: {
-    color: 'rgba(186, 204, 235, 0.62)',
+    color: DS_COLORS.ink100,
     marginTop: 4,
   },
   segment: {
     flexDirection: 'row',
     borderRadius: 14,
     padding: 4,
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: DS_COLORS.ground700,
     borderWidth: 1,
-    borderColor: 'rgba(166, 186, 218, 0.14)',
+    borderColor: DS_COLORS.ground600,
     gap: 6,
   },
   segmentButton: {
@@ -1604,31 +1601,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  /** Выбранная вкладка — кант accent400 (см. DS §правила выбора). */
   segmentButtonActive: {
-    backgroundColor: 'rgba(102, 154, 211, 0.24)',
+    backgroundColor: DS_COLORS.ground600,
     borderWidth: 1,
-    borderColor: 'rgba(128, 174, 226, 0.34)',
+    borderColor: DS_COLORS.accent400,
   },
   segmentLabel: {
-    color: 'rgba(229, 236, 249, 0.62)',
+    color: DS_COLORS.ink100,
   },
   segmentLabelActive: {
     color: COLORS.Content,
   },
   formCard: {
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(173, 191, 226, 0.2)',
-    backgroundColor: 'rgba(24, 31, 45, 0.86)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
     paddingHorizontal: 16,
     paddingVertical: 16,
     gap: 12,
   },
   loadingCard: {
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(173, 191, 226, 0.2)',
-    backgroundColor: 'rgba(24, 31, 45, 0.86)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
     paddingHorizontal: 16,
     paddingVertical: 22,
     alignItems: 'center',
@@ -1646,10 +1644,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   fieldLabel: {
-    color: 'rgba(221, 231, 247, 0.9)',
+    color: DS_COLORS.ink100,
   },
   passwordHint: {
-    color: 'rgba(186, 204, 235, 0.62)',
+    color: DS_COLORS.ink100,
     lineHeight: 18,
     marginTop: -4,
   },
@@ -1657,16 +1655,16 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   readOnlyValue: {
-    color: 'rgba(218, 230, 255, 0.82)',
+    color: DS_COLORS.ink100,
     paddingVertical: 4,
   },
   accountMeta: {
-    color: 'rgba(186, 204, 235, 0.55)',
+    color: DS_COLORS.ink100,
     fontSize: 12,
     marginTop: 4,
   },
   paymentsHint: {
-    color: 'rgba(216, 228, 247, 0.72)',
+    color: DS_COLORS.ink100,
     lineHeight: 20,
   },
   paymentRow: {
@@ -1677,18 +1675,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(176, 197, 236, 0.22)',
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     ...(Platform.OS === 'web'
       ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
+  /** Наведение/нажатие — затемнение 18% (без scale). */
   paymentRowHover: {
-    backgroundColor: 'rgba(100, 152, 202, 0.12)',
-    borderColor: 'rgba(176, 197, 236, 0.35)',
+    backgroundColor: DS_COLORS.pressDim,
   },
   paymentRowPressed: {
-    opacity: 0.92,
+    transform: [{ translateY: DS_MOTION.pressShiftY }],
   },
   paymentRowLeft: {
     gap: 4,
@@ -1698,18 +1696,18 @@ const styles = StyleSheet.create({
     color: COLORS.Content,
   },
   paymentMasked: {
-    color: 'rgba(218, 230, 255, 0.65)',
+    color: DS_COLORS.ink100,
   },
   demoBadge: {
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 999,
-    backgroundColor: 'rgba(111, 87, 236, 0.22)',
+    backgroundColor: DS_COLORS.ground600,
     borderWidth: 1,
-    borderColor: 'rgba(156, 138, 243, 0.35)',
+    borderColor: DS_COLORS.ground600,
   },
   demoBadgeText: {
-    color: 'rgba(229, 236, 249, 0.92)',
+    color: DS_COLORS.ink100,
     fontSize: 11,
   },
   passwordSectionHead: {
@@ -1749,7 +1747,7 @@ const styles = StyleSheet.create({
       : {}),
   },
   passwordRevealPressed: {
-    opacity: 0.75,
+    transform: [{ translateY: DS_MOTION.pressShiftY }],
   },
   addPaymentButton: {
     flexDirection: 'row',
@@ -1759,19 +1757,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(128, 174, 226, 0.38)',
-    backgroundColor: 'rgba(102, 154, 211, 0.14)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     minHeight: 72,
     ...(Platform.OS === 'web'
       ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
   addPaymentButtonHover: {
-    backgroundColor: 'rgba(102, 154, 211, 0.22)',
-    borderColor: 'rgba(148, 188, 236, 0.48)',
+    backgroundColor: DS_COLORS.pressDim,
   },
   addPaymentButtonPressed: {
-    opacity: 0.92,
+    transform: [{ translateY: DS_MOTION.pressShiftY }],
   },
   addPaymentIconWrap: {
     width: 44,
@@ -1779,9 +1776,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: DS_COLORS.ground800,
     borderWidth: 1,
-    borderColor: 'rgba(176, 197, 236, 0.2)',
+    borderColor: DS_COLORS.ground600,
   },
   addPaymentTextCol: {
     flex: 1,
@@ -1792,27 +1789,26 @@ const styles = StyleSheet.create({
     color: COLORS.Content,
   },
   addPaymentHint: {
-    color: 'rgba(216, 228, 247, 0.68)',
+    color: DS_COLORS.ink100,
     fontSize: 13,
     lineHeight: 18,
   },
+  /** Поле DS §11: h74, r24. */
   input: {
-    borderWidth: 1,
-    borderColor: 'rgba(176, 197, 236, 0.2)',
-    borderRadius: 12,
-    minHeight: 52,
-    fontSize: 16,
+    ...DS_TYPE.body,
+    borderWidth: DS_SIZES.fieldBorder,
+    borderColor: DS_COLORS.ground600,
+    borderRadius: DS_SIZES.fieldRadius,
+    minHeight: DS_SIZES.fieldHeight,
     color: COLORS.Content,
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    backgroundColor: DS_COLORS.ground700,
+    paddingHorizontal: 20,
   },
   inputError: {
-    borderColor: COLORS.Warning500,
-    backgroundColor: 'rgba(255, 186, 58, 0.08)',
+    borderColor: DS_COLORS.alarm600,
   },
   errorText: {
-    color: COLORS.Warning400,
+    color: DS_COLORS.alarm600,
     lineHeight: 18,
   },
   submitButton: {
@@ -1827,29 +1823,29 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(176, 197, 236, 0.2)',
+    backgroundColor: DS_COLORS.ground600,
   },
   dividerText: {
-    color: 'rgba(216, 228, 247, 0.66)',
+    color: DS_COLORS.ink100,
   },
+  /** Тихая кнопка (Google и т.п.): фон ground600/ground700, кант ground600. */
   socialButton: {
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 48,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(176, 197, 236, 0.2)',
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     ...(Platform.OS === 'web'
       ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
   socialButtonHover: {
-    backgroundColor: 'rgba(100, 152, 202, 0.14)',
+    backgroundColor: DS_COLORS.pressDim,
   },
   socialButtonPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.99 }],
+    transform: [{ translateY: DS_MOTION.pressShiftY }],
   },
   socialButtonFull: {
     width: '100%',
@@ -1857,37 +1853,13 @@ const styles = StyleSheet.create({
   socialButtonText: {
     color: COLORS.Content,
   },
-  paymentModalRoot: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 22,
-  },
-  paymentModalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(10, 14, 22, 0.72)',
-  },
   paymentModalSheet: {
     width: '100%',
-    maxWidth: 420,
-    borderRadius: 28,
+    backgroundColor: DS_COLORS.ground800,
     paddingHorizontal: 24,
     paddingTop: 22,
     paddingBottom: 24,
     gap: 16,
-    backgroundColor: 'rgba(24, 31, 45, 0.98)',
-    borderWidth: 1,
-    borderColor: 'rgba(148, 176, 226, 0.35)',
-    overflow: 'hidden',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow:
-            '0 28px 56px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04)',
-        } as object)
-      : {
-          elevation: 12,
-        }),
-    zIndex: 2,
   },
   paymentModalHeader: {
     flexDirection: 'row',
@@ -1910,21 +1882,20 @@ const styles = StyleSheet.create({
       : {}),
   },
   paymentModalClosePressed: {
-    opacity: 0.72,
+    transform: [{ translateY: DS_MOTION.pressShiftY }],
   },
   paymentModalBody: {
-    color: 'rgba(218, 230, 255, 0.82)',
+    color: DS_COLORS.ink100,
     lineHeight: 22,
   },
   paymentModalButton: {
     marginTop: 8,
-    borderRadius: 14,
   },
   verifyTitle: {
     color: COLORS.Content,
   },
   verifySubtitle: {
-    color: 'rgba(218, 230, 255, 0.78)',
+    color: DS_COLORS.ink100,
     lineHeight: 20,
   },
   verifyCodeInput: {
@@ -1944,19 +1915,19 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   verifyBackText: {
-    color: 'rgba(186, 204, 235, 0.72)',
+    color: DS_COLORS.ink100,
   },
   devCodeBanner: {
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(128, 174, 226, 0.45)',
-    backgroundColor: 'rgba(102, 154, 211, 0.12)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     paddingHorizontal: 14,
     paddingVertical: 12,
     gap: 4,
   },
   devCodeLabel: {
-    color: 'rgba(218, 230, 255, 0.78)',
+    color: DS_COLORS.ink100,
   },
   devCodeValue: {
     color: COLORS.Primary,

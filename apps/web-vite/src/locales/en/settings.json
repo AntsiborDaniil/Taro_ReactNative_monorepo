@@ -18,7 +18,13 @@
   "sound.moon.notifications": "Moon phase notifications",
 
   "language": "App language",
+  "language.options.ru": "Русский",
+  "language.options.en": "English",
   "language.modal.subtitle": "The interface updates right away — no reload needed.",
+
+  "theme.title": "Theme",
+  "theme.dark": "Dark",
+  "theme.light": "Light",
   "account": "Account",
 
   "hasReversed": "Reversed cards",
@@ -26,6 +32,8 @@
   "credits.buy.row": "Buy +3 spreads",
   "credits.buy.rowHint": "Charges after the daily limit. Now: {{count}}",
   "credits.buy.title": "+3 spreads pack",
+  "credits.buy.sheetTitle": "Top up charges",
+  "credits.limit.sheetTitle": "Spread limit",
   "credits.buy.body": "After payment, 3 charges are added to your balance (usually within ~5 minutes). They are used when the daily free limit is already spent.",
   "credits.buy.balance": "Your charges now: {{count}}",
   "credits.badge.a11yDaily": "Free spreads left today: {{count}}. Tap to top up charges",

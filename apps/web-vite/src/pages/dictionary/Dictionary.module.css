@@ -36,12 +36,6 @@
   }
 }
 
-@media (max-width: 899px) {
-  .column {
-    padding-bottom: 104px;
-  }
-}
-
 .suits {
   width: 100%;
   display: flex;

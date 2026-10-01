@@ -16,6 +16,7 @@ import { useData } from 'shared/DataProvider';
 import { ChevronRightIcon } from 'shared/icons';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { NavigationRoute, PressableWebState } from 'shared/types';
 import { ScreenLayout } from '../ScreenLayout';
 import { Text, TEXT_TAGS } from '../Text';
@@ -166,13 +167,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(175, 161, 232, 0.22)',
+    borderColor: DS_COLORS.ground600,
     backgroundColor: COLORS.Background2,
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 12px 40px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.04)',
-        } as object)
-      : {}),
   },
   openRow: {
     flexDirection: 'row',
@@ -183,14 +179,14 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: COLORS.Background2,
     borderWidth: 1,
-    borderColor: 'rgba(175, 161, 232, 0.15)',
+    borderColor: DS_COLORS.ground600,
     ...(Platform.OS === 'web'
       ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
   openRowActive: {
-    backgroundColor: 'rgba(100, 152, 202, 0.14)',
-    borderColor: 'rgba(246, 192, 27, 0.35)',
+    backgroundColor: DS_COLORS.ground600,
+    borderColor: DS_COLORS.accent400,
   },
   openRowText: {
     flex: 1,
@@ -216,7 +212,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(175, 161, 232, 0.2)',
+    borderColor: DS_COLORS.ground600,
   },
   nativeWebView: {
     flex: 1,

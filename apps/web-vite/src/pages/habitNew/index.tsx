@@ -108,7 +108,7 @@ export default function HabitNewPage(): ReactElement {
             />
             <Input
               type="time"
-              label={t('habits:label.reminder', { defaultValue: 'Напоминание' })}
+              label={t('habits:label.reminder', { defaultValue: 'Reminder' })}
               value={reminderTime}
               onChange={(event) => setReminderTime(event.target.value)}
             />

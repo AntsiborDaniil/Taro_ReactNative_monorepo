@@ -4,6 +4,7 @@ import Slider from '@react-native-community/slider';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from '../Text';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS, getColorOpacity } from '../../themes';
+import { DS_COLORS } from '../../themes/ds';
 
 type Props = {
   label: string;
@@ -32,7 +33,7 @@ export function InputSlider({
 }: Props) {
   const [hovered, setHovered] = React.useState(false);
 
-  const accent = color ?? COLORS.Primary;
+  const accent = color ?? DS_COLORS.accent400;
 
   const display = unset
     ? '—'
@@ -87,7 +88,7 @@ export function InputSlider({
             weight={TEXT_WEIGHT.bold}
             style={[
               styles.value,
-              { color: unset ? COLORS.SpbSky1 : accent },
+              { color: unset ? DS_COLORS.ink100 : accent },
             ]}
           >
             {display}
@@ -103,7 +104,7 @@ export function InputSlider({
         accessibilityLabel={label}
         minimumValue={minValue}
         maximumValue={maxValue}
-        maximumTrackTintColor={COLORS.SpbSky2}
+        maximumTrackTintColor={DS_COLORS.ground600}
         minimumTrackTintColor={accent}
         thumbTintColor={accent}
         step={step}
@@ -129,17 +130,14 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     paddingHorizontal: 18,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.045)',
+    backgroundColor: DS_COLORS.ground700,
     borderWidth: 1,
     overflow: 'hidden',
     ...WEB_HOVER_TRANSITION,
   },
   cardHover:
     Platform.OS === 'web'
-      ? ({
-          backgroundColor: 'rgba(255, 255, 255, 0.075)',
-          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.28)',
-        } as object)
+      ? ({ backgroundColor: DS_COLORS.ground600 } as object)
       : {},
   accent: {
     position: 'absolute',

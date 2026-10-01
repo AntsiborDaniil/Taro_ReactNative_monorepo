@@ -24,7 +24,7 @@ export function FavoriteLikeErrorModal({ onClose }: ModalComponentProps): ReactE
         {t('core:card.favoriteError.body')}
       </Text>
       <Button variant="action" fullWidth onClick={onClose}>
-        {t('core:stub.emptyResultsModal.button', { defaultValue: 'Понятно' })}
+        {t('core:stub.emptyResultsModal.button', { defaultValue: 'OK' })}
       </Button>
     </div>
   );

@@ -1,125 +1,136 @@
-import { Platform, SafeAreaView, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import {
+  type LayoutChangeEvent,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useMobileFabScrollOnScroll } from 'app/navigation/tabs/MobileFabScrollContext';
 import { MoodDashboard } from 'features/MoodDashboard';
 import { FAVORITE_SPREADS } from '../lib';
 import { DeferredMount } from 'shared/lib/web/DeferredMount';
 import { AnalyticAction } from 'shared/types';
-import { MainSectionSkeleton, ScreenLayout } from 'shared/ui';
+import { ScreenLayout } from 'shared/ui';
+import { DS_COLORS, DS_LAYOUT, DS_SIZES, DS_SPACE } from 'shared/themes/ds';
 import { HabitWidget } from 'widgets/habitWidget';
 import { DayAdvice } from './DayAdvice';
 import { MainQuickLinks } from './MainQuickLinks';
+import { QuickLinksSkeleton, SpreadsSkeleton, WidgetSkeleton } from './MainSkeletons';
 import { TarotSpreadsCarousel } from './TarotSpreadsCarousel';
 import { useMainLayout } from './useMainLayout';
 
+const isWeb = Platform.OS === 'web';
+
 function Main() {
   const { t } = useTranslation();
-  const layout = useMainLayout();
-  const { width } = useWindowDimensions();
-  const isCompact = width < 430;
+  const [containerWidth, setContainerWidth] = useState(0);
+  const layout = useMainLayout(containerWidth);
   const onFabScroll = useMobileFabScrollOnScroll();
 
-  const popularSpreads = (
-    <View style={styles.carouselPad}>
+  // Ширина контейнера колонки (не окна) — на ≥900 слева рейка навигации
+  // 76–228 px, поэтому useWindowDimensions даёт лишние пиксели и ломает
+  // 2-колоночную раскладку. Меряем то, что реально осталось под контент.
+  const handleContainerLayout = useCallback((event: LayoutChangeEvent) => {
+    const w = event.nativeEvent.layout.width;
+    if (w > 0) {
+      setContainerWidth((prev) => (prev === w ? prev : w));
+    }
+  }, []);
+
+  const renderQuickLinks = () =>
+    isWeb ? (
+      <DeferredMount delayMs={100} fallback={<QuickLinksSkeleton />}>
+        <MainQuickLinks />
+      </DeferredMount>
+    ) : (
+      <MainQuickLinks />
+    );
+
+  const renderSpreads = () =>
+    isWeb ? (
+      <DeferredMount delayMs={160} fallback={<SpreadsSkeleton />}>
+        <TarotSpreadsCarousel
+          analyticAction={AnalyticAction.ClickPopularMainPage}
+          spreads={FAVORITE_SPREADS}
+          title={t('main:popularSpreads')}
+        />
+      </DeferredMount>
+    ) : (
       <TarotSpreadsCarousel
         analyticAction={AnalyticAction.ClickPopularMainPage}
         spreads={FAVORITE_SPREADS}
         title={t('main:popularSpreads')}
-        spaceBetween={isCompact ? 12 : 16}
       />
+    );
+
+  const renderHabits = () => (
+    <View style={styles.widgetSeparated}>
+      {isWeb ? (
+        <DeferredMount delayMs={240} fallback={<WidgetSkeleton />}>
+          <HabitWidget />
+        </DeferredMount>
+      ) : (
+        <HabitWidget />
+      )}
+    </View>
+  );
+
+  const renderMood = () => (
+    <View style={styles.widgetSeparated}>
+      {isWeb ? (
+        <DeferredMount delayMs={320} fallback={<WidgetSkeleton tall />}>
+          <MoodDashboard isWidget horizontalInset={0} />
+        </DeferredMount>
+      ) : (
+        <MoodDashboard isWidget horizontalInset={0} />
+      )}
     </View>
   );
 
   return (
-    <ScreenLayout>
+    <ScreenLayout style={{ backgroundColor: DS_COLORS.ground900 }}>
       <ScrollView
         onScroll={onFabScroll}
         scrollEventThrottle={16}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: layout.scrollBottomPad },
+          { paddingBottom: layout.scrollBottomPad + DS_SPACE.xxl },
         ]}
       >
-        <SafeAreaView
-          style={[styles.safe, { marginBottom: layout.bottomMargin }]}
-        >
+        <SafeAreaView style={styles.safe} onLayout={handleContainerLayout}>
           <View
             style={[
               styles.column,
-              isCompact && styles.columnCompact,
               {
-                maxWidth: layout.contentWidth,
-                paddingHorizontal: layout.padding,
-                gap: layout.sectionGap,
+                maxWidth: layout.maxWidth,
+                paddingHorizontal: layout.gutter,
+                paddingTop: DS_SPACE.xl,
               },
             ]}
           >
-            <View style={styles.decorGrid} pointerEvents="none" />
-            <View style={styles.sectionShell}>
-              <DayAdvice />
-            </View>
-            <View style={[styles.sectionShell, styles.quickLinksShell]}>
-              {Platform.OS === 'web' ? (
-                <DeferredMount delayMs={100} fallback={null}>
-                  <MainQuickLinks />
-                </DeferredMount>
-              ) : (
-                <MainQuickLinks />
-              )}
-            </View>
-            {Platform.OS === 'web' ? (
-              <>
-                <View
-                  style={[
-                    styles.tarotCluster,
-                    { gap: isCompact ? 10 : 12 },
-                  ]}
-                >
-                  <View style={styles.sectionShell}>
-                    <DeferredMount
-                      delayMs={160}
-                      fallback={<MainSectionSkeleton />}
-                    >
-                      {popularSpreads}
-                    </DeferredMount>
-                  </View>
+            {layout.isTwoColumn ? (
+              <View style={[styles.desktopRow, { gap: DS_LAYOUT.columnGap }]}>
+                <View style={[styles.desktopColumnPrimary, { gap: layout.sectionGap }]}>
+                  <DayAdvice viewport={layout.viewport} />
+                  {renderSpreads()}
                 </View>
-                <View style={styles.sectionShell}>
-                  <DeferredMount
-                    delayMs={240}
-                    fallback={<MainSectionSkeleton />}
-                  >
-                    <HabitWidget />
-                  </DeferredMount>
+                <View style={[styles.desktopColumnSecondary, { gap: layout.sectionGap }]}>
+                  {renderQuickLinks()}
+                  {renderHabits()}
+                  {renderMood()}
                 </View>
-                <View style={styles.sectionShell}>
-                  <DeferredMount
-                    delayMs={320}
-                    fallback={<MainSectionSkeleton tall />}
-                  >
-                    <MoodDashboard isWidget horizontalInset={0} />
-                  </DeferredMount>
-                </View>
-              </>
+              </View>
             ) : (
-              <>
-                <View
-                  style={[
-                    styles.tarotCluster,
-                    { gap: isCompact ? 10 : 12 },
-                  ]}
-                >
-                  <View style={styles.sectionShell}>
-                    {popularSpreads}
-                  </View>
-                </View>
-                <View style={styles.sectionShell}>
-                  <HabitWidget />
-                </View>
-                <View style={styles.sectionShell}>
-                  <MoodDashboard isWidget horizontalInset={0} />
-                </View>
-              </>
+              <View style={{ gap: layout.sectionGap }}>
+                <DayAdvice viewport={layout.viewport} />
+                {renderQuickLinks()}
+                {renderSpreads()}
+                {renderHabits()}
+                {renderMood()}
+              </View>
             )}
           </View>
         </SafeAreaView>
@@ -141,54 +152,28 @@ const styles = StyleSheet.create({
   column: {
     width: '100%',
     flexDirection: 'column',
-    position: 'relative',
-    overflow: 'hidden',
-    borderRadius: 20,
   },
-  columnCompact: {
-    borderRadius: 14,
-    overflow: 'visible',
-  },
-  sectionShell: {
-    borderWidth: 1,
-    borderColor: 'rgba(246, 192, 27, 0.14)',
-    borderRadius: 18,
-    backgroundColor: 'rgba(30, 35, 43, 0.55)',
-    overflow: 'hidden',
+  desktopRow: {
     width: '100%',
-    maxWidth: '100%',
-    ...(globalThis?.window
-      ? ({
-          boxShadow:
-            '0 12px 28px rgba(8, 12, 20, 0.35), inset 0 1px 0 rgba(246, 192, 27, 0.06)',
-        } as object)
-      : {}),
+    flexDirection: 'row',
+    alignItems: 'flex-start',
   },
-  quickLinksShell: {
-    zIndex: 2,
-    overflow: 'visible',
-    padding: 10,
+  desktopColumnPrimary: {
+    flex: 7,
+    minWidth: 0,
+    flexDirection: 'column',
+    paddingTop: 0,
   },
-  tarotCluster: {
-    width: '100%',
+  desktopColumnSecondary: {
+    flex: 5,
+    minWidth: 0,
+    flexDirection: 'column',
+    paddingTop: 0,
   },
-  carouselPad: {
-    paddingVertical: 14,
-    paddingHorizontal: 4,
-    width: '100%',
-    maxWidth: '100%',
-    overflow: 'hidden',
-  },
-  decorGrid: {
-    position: 'absolute',
-    right: 22,
-    bottom: 40,
-    width: 88,
-    height: 88,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(246, 192, 27, 0.16)',
-    backgroundColor: 'rgba(246, 192, 27, 0.03)',
-    zIndex: 0,
+  /** Виджеты без внешней карточки: разделитель 1px ground-600 отделяет их от предыдущей секции. */
+  widgetSeparated: {
+    borderTopWidth: DS_SIZES.hairline,
+    borderTopColor: DS_COLORS.ground600,
+    paddingTop: DS_SPACE.l,
   },
 });

@@ -14,12 +14,13 @@ import { lockMobileInputZoom } from '@shared/lib/web/lockMobileInputZoom';
 import { initSafeAreaInsetVars } from '@shared/lib/web/safeAreaInsets';
 import {
   ensureTelegramWebAppScript,
+  initTelegramWebAppChrome,
   isLikelyTelegramMiniApp,
   tryAuthenticateTelegramMiniApp,
 } from '@shared/lib/web/telegramWebApp';
 import { useTelegramBackButton } from '@shared/lib/web/useTelegramBackButton';
 import { NavRail } from './NavRail';
-import { FabNav } from './FabNav';
+import { BottomTabBar } from './BottomTabBar';
 import { useSharedReadingDeepLink } from './useSharedReadingDeepLink';
 import styles from './AppShell.module.css';
 
@@ -58,13 +59,18 @@ export function AppShell(): ReactElement {
     initSafeAreaInsetVars();
   }, []);
 
-  // Mini App: язык интерфейса = language_code Telegram (пока пользователь сам
-  // не выбрал язык в настройках). Script в index.html с defer — после ready
+  // Mini App: язык = ?lang= от бота → language_code Telegram (пока пользователь
+  // сам не выбрал язык в настройках). Script в index.html с defer — после ready
   // initDataUnsafe.user уже доступен.
+  // Здесь же — initTelegramWebAppChrome(): expand + disableVerticalSwipes нужны
+  // как можно раньше, до первого скролла (иначе свайп сворачивает приложение).
   useEffect(() => {
     if (!isLikelyTelegramMiniApp()) return;
     void ensureTelegramWebAppScript()
-      .then(() => syncLanguageFromTelegram())
+      .then(() => {
+        initTelegramWebAppChrome();
+        syncLanguageFromTelegram();
+      })
       .catch(() => undefined);
   }, []);
 
@@ -107,7 +113,7 @@ export function AppShell(): ReactElement {
           <Outlet />
         </Suspense>
       </main>
-      <FabNav />
+      <BottomTabBar />
       <ModalRoot />
       <Toaster />
     </div>

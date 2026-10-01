@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Platform,
   StyleSheet,
+  Text as RNText,
   TextStyle,
   View,
   TouchableOpacity,
@@ -13,6 +14,7 @@ import type { StyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
 import { ChevronLeftIcon, SettingsIcon } from 'shared/icons';
 import { isTablet, WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS } from 'shared/themes';
+import { DS_COLORS, dsText } from 'shared/themes/ds';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui/Text';
 import { useHeaderNavigation } from './useHeaderNavigation';
 import {
@@ -33,6 +35,10 @@ interface CustomHeaderProps {
   titleStyle?: StyleProp<TextStyle>;
   /** Hide global credits chip (e.g. when screen already renders its own). */
   hideSpreadQuota?: boolean;
+  /** Hide the centered title (screen renders its own DS-styled title in the page column instead). Back button and credits stay. */
+  hideTitle?: boolean;
+  /** DS title aligned left in the header row (after back button), credits on the right. */
+  leadingTitle?: boolean;
 }
 
 const CustomHeader: React.FC<CustomHeaderProps> = ({
@@ -46,6 +52,8 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   stylesWrapper,
   titleStyle,
   hideSpreadQuota = false,
+  hideTitle = false,
+  leadingTitle = false,
 }) => {
   const styles = useStyleSheet(themedStyles);
   const { t } = useTranslation();
@@ -64,19 +72,28 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       style={StyleSheet.flatten([styles.header, stylesWrapper as StyleProp<ViewStyle>])}
     >
       {/* True screen-center title — ignores unequal left/right action widths */}
-      <View style={styles.titleOverlay} pointerEvents="none">
-        <Text
-          category={TEXT_TAGS.h2}
-          weight={TEXT_WEIGHT.medium}
-          numberOfLines={1}
-          style={StyleSheet.flatten([styles.title, titleStyle])}
-        >
-          {title}
-        </Text>
-      </View>
+      {!hideTitle && !leadingTitle ? (
+        <View style={styles.titleOverlay} pointerEvents="none">
+          <Text
+            category={TEXT_TAGS.h2}
+            weight={TEXT_WEIGHT.medium}
+            numberOfLines={1}
+            style={StyleSheet.flatten([styles.title, titleStyle])}
+          >
+            {title}
+          </Text>
+        </View>
+      ) : null}
 
-      <View style={[styles.sideSlot, styles.leftSlot]}>
+      <View
+        style={[
+          styles.sideSlot,
+          styles.leftSlot,
+          leadingTitle && styles.leftSlotLeading,
+        ]}
+      >
         {leftContent}
+        {leadingTitle && !showBackButton ? null : (
         <TouchableOpacity
           style={styles.backButton}
           onPress={showBackButton ? handleBackPress : undefined}
@@ -92,9 +109,19 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
             height={isTablet ? 32 : 24}
           />
         </TouchableOpacity>
+        )}
+        {leadingTitle ? (
+          <RNText
+            accessibilityRole="header"
+            numberOfLines={1}
+            style={[dsText('title', DS_COLORS.ink50), styles.leadingTitle, titleStyle]}
+          >
+            {title}
+          </RNText>
+        ) : null}
       </View>
 
-      <View style={styles.sideSpacer} />
+      {leadingTitle ? null : <View style={styles.sideSpacer} />}
 
       <View style={[styles.sideSlot, styles.rightSlot]}>
         {showQuota || showCustomRight ? (
@@ -182,6 +209,16 @@ const themedStyles = StyleService.create({
   },
   leftSlot: {
     alignItems: 'flex-start',
+  },
+  leftSlotLeading: {
+    flex: 1,
+    minWidth: 0,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  leadingTitle: {
+    flexShrink: 1,
+    minWidth: 0,
   },
   rightSlot: {
     alignItems: 'flex-end',

@@ -28,6 +28,7 @@ import {
   WEB_TAB_BAR_CONTENT_HEIGHT,
 } from 'shared/lib/web/useWebViewportInsets';
 import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import {
   type AdaptiveTabVariant,
@@ -311,12 +312,9 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     backgroundColor: COLORS.Background2,
     borderRightWidth: StyleSheet.hairlineWidth,
-    borderRightColor: 'rgba(244, 244, 245, 0.08)',
+    borderRightColor: DS_COLORS.ground600,
     ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '4px 0 24px rgba(0, 0, 0, 0.25)',
-          transition: 'width 0.22s ease, min-width 0.22s ease',
-        } as object)
+      ? ({ transition: 'width 0.22s ease, min-width 0.22s ease' } as object)
       : {}),
     justifyContent: 'flex-start',
     gap: 4,
@@ -352,7 +350,7 @@ const styles = StyleSheet.create({
     ...WEB_HOVER_TRANSITION,
   },
   railToggleHover: {
-    backgroundColor: 'rgba(244, 244, 245, 0.08)',
+    backgroundColor: DS_COLORS.ground700,
   },
   railTogglePressed: {
     opacity: 0.85,
@@ -364,7 +362,7 @@ const styles = StyleSheet.create({
     ...WEB_HOVER_TRANSITION,
   },
   railItemHover: {
-    backgroundColor: 'rgba(244, 244, 245, 0.06)',
+    backgroundColor: DS_COLORS.ground700,
   },
   /** Прижимает «Настройки» к низу колонки. */
   railSpacer: {
@@ -373,20 +371,14 @@ const styles = StyleSheet.create({
   },
   railDivider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(244, 244, 245, 0.1)',
+    backgroundColor: DS_COLORS.ground600,
     marginHorizontal: 14,
     marginBottom: 4,
   },
   railItemActive: {
-    backgroundColor: 'rgba(246, 192, 27, 0.12)',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: 'inset 3px 0 0 0 rgba(246, 192, 27, 0.95)',
-        } as object)
-      : {
-          borderLeftWidth: 3,
-          borderLeftColor: COLORS.Primary,
-        }),
+    backgroundColor: DS_COLORS.ground700,
+    borderLeftWidth: 3,
+    borderLeftColor: DS_COLORS.accent400,
   },
   railItemInner: {
     flexDirection: 'row',
@@ -405,7 +397,7 @@ const styles = StyleSheet.create({
   },
   railLabel: {
     flex: 1,
-    fontFamily: 'Montserrat-SemiBold',
+    fontFamily: 'Onest-SemiBold',
     fontSize: TAB_NAV_LABEL_FONT_PX,
     letterSpacing: 0.15,
     ...(Platform.OS === 'web'
@@ -413,21 +405,9 @@ const styles = StyleSheet.create({
       : {}),
   },
   bottomBar: {
-    borderTopWidth: 0,
+    borderTopWidth: 1,
+    borderTopColor: DS_COLORS.ground600,
     backgroundColor: COLORS.Background2,
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.35)',
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-        } as object)
-      : {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.35,
-          shadowRadius: 12,
-          elevation: 16,
-        }),
   },
   bottomBarLabeled: {
     ...(Platform.OS === 'web'

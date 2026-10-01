@@ -11,7 +11,6 @@ import {
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { UserContext } from 'entities/user';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import Animated, {
   useAnimatedStyle,
@@ -31,6 +30,7 @@ import {
   UnlockIcon,
 } from 'shared/icons';
 import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { AnalyticAction } from 'shared/types';
 import { RadioCard, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
@@ -132,11 +132,7 @@ function PaidContent() {
       ) : (
         <>
           <Animated.View style={[styles.gradientWrapper, animatedGradient]}>
-            <LinearGradient
-              colors={[COLORS.Background, COLORS.Accent]}
-              style={styles.gradient}
-              locations={[0.15, 0.9]}
-            />
+            <View style={styles.gradient} />
           </Animated.View>
           <View style={styles.modalOverlay}>
             <Header
@@ -280,7 +276,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  gradient: { width: '100%', height: '100%' },
+  gradient: { width: '100%', height: '100%', backgroundColor: DS_COLORS.ground900 },
   modalOverlay: {
     flex: 1,
     position: 'relative',
@@ -335,25 +331,26 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    backgroundColor: COLORS.Background,
+    backgroundColor: DS_COLORS.ground900,
     borderTopRightRadius: 44,
     borderTopLeftRadius: 44,
-    boxShadow: '0px -10px 10px rgba(255, 255, 255, 0.2)',
+    borderTopWidth: 1,
+    borderColor: DS_COLORS.ground600,
   },
   continueButton: {
     width: '100%',
-    backgroundColor: COLORS.Primary,
+    backgroundColor: DS_COLORS.action500,
     borderRadius: 28,
     padding: 8,
     alignItems: 'center',
   },
   blackText: {
-    color: COLORS.Background,
-    fontWeight: 'bold',
+    color: DS_COLORS.onAction,
     marginBottom: 4,
   },
   greyText: {
-    color: COLORS.SpbSky3,
+    color: DS_COLORS.onAction,
+    opacity: 0.7,
   },
 });
 

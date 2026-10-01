@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { closeModal, type ModalStackItem } from './model/modalsSlice';
 import { getModal, type ModalRegistryEntry } from './registry';
@@ -10,11 +11,13 @@ import { ModalSheet, useModalSheetClose } from './ModalSheet';
  * смонтированы через state, но видна только верхняя (как обычный стек листов).
  */
 export function ModalRoot(): ReactElement | null {
+  const { t } = useTranslation();
   const stack = useAppSelector((state) => state.modals.stack);
   const dispatch = useAppDispatch();
 
   const top = stack.length > 0 ? stack[stack.length - 1] : null;
   const entry = top ? getModal(top.id) : undefined;
+  const title = entry?.titleKey ? t(entry.titleKey) : entry?.title;
 
   const close = () => {
     if (top) {
@@ -23,7 +26,7 @@ export function ModalRoot(): ReactElement | null {
   };
 
   return (
-    <ModalSheet open={Boolean(top)} onClose={close} title={entry?.title}>
+    <ModalSheet open={Boolean(top)} onClose={close} title={title}>
       {top && entry ? <StackModal entry={entry} item={top} /> : null}
     </ModalSheet>
   );

@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { ScreenLayout, Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import MeditativeVisualizer from './MeditativeVisualizer';
 import SelectCategory from './SelectCategory';
@@ -66,8 +66,8 @@ const styles = StyleSheet.create({
   },
   statusCard: {
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
     borderRadius: 16,
     paddingVertical: 12,
     paddingHorizontal: 14,
@@ -78,15 +78,15 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 999,
-    backgroundColor: COLORS.Primary,
+    backgroundColor: DS_COLORS.accent400,
     marginBottom: 2,
   },
   statusTitle: {
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
     textAlign: 'center',
   },
   statusSubtitle: {
-    color: 'rgba(255,255,255,0.66)',
+    color: DS_COLORS.ink100,
     textAlign: 'center',
     lineHeight: 22,
   },

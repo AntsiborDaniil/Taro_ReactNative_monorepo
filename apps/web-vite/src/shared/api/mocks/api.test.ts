@@ -66,7 +66,7 @@ test('интерпретация при дневном лимите отвеча
         {
           code: 'daily_limit_reached',
           message: 'Лимит на сегодня исчерпан',
-          tarotDaily: { used: 3, limit: 3, day: '2026-10-01' },
+          tarotDaily: { used: 1, limit: 1, day: '2026-10-01' },
           spreadCredits: 0,
         },
         { status: 429 },

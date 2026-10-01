@@ -3,6 +3,7 @@ import {
   authCredentials,
   getTarotAiApiBaseUrl,
 } from 'shared/api';
+import { DS_COLORS } from 'shared/themes/ds';
 import { setDevAccessToken } from './devAccessToken';
 import { syncTarotAppHeight } from './lockMobileInputZoom';
 import {
@@ -130,8 +131,11 @@ export function initTelegramWebAppChrome(): void {
 
   tg.ready();
   tg.expand();
-  tg.setHeaderColor('#171F2C');
-  tg.setBackgroundColor('#171F2C');
+  // Bot API 7.7+: вертикальный свайп сворачивал приложение посреди скролла.
+  tg.disableVerticalSwipes?.();
+  tg.enableClosingConfirmation?.();
+  tg.setHeaderColor(DS_COLORS.ground900);
+  tg.setBackgroundColor(DS_COLORS.ground900);
   // Desktop Mini App often expands after ready — sync layout height.
   syncTarotAppHeight();
   if (typeof window !== 'undefined') {

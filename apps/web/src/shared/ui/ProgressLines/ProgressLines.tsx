@@ -1,6 +1,6 @@
 import { SafeAreaView, StyleSheet } from 'react-native';
 import { ProgressBar } from '@ui-kitten/components';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 
 type ProgressLinesProps = {
   linesCount: number;
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 8,
     borderRadius: 6,
-    backgroundColor: COLORS.SpbSky3,
+    backgroundColor: DS_COLORS.ground600,
   },
 });
 

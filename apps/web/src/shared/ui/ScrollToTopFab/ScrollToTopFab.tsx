@@ -4,7 +4,7 @@ import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { UpIcon } from 'shared/icons';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 
 type ScrollToTopFabProps = {
   /** Show after scroll (default). Ignored when alwaysVisible is true. */
@@ -90,24 +90,15 @@ const styles = StyleSheet.create({
     borderRadius: FAB_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.Primary,
+    backgroundColor: DS_COLORS.action500,
     ...Platform.select({
-      web: {
-        boxShadow: '0 8px 22px rgba(246, 192, 27, 0.42)',
-        cursor: 'pointer',
-      },
-      default: {
-        shadowColor: COLORS.Primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.38,
-        shadowRadius: 10,
-        elevation: 10,
-      },
+      web: { cursor: 'pointer' },
+      default: {},
     }),
   },
   fabPressed: {
-    opacity: 0.88,
-    transform: [{ scale: 0.96 }],
+    transform: [{ translateY: 1 }],
+    backgroundColor: DS_COLORS.alarm600,
   },
 });
 

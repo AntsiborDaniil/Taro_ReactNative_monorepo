@@ -81,7 +81,7 @@ export default function MotivationPage(): ReactElement {
     if (motivation || attempted.current || !cardNsReady || !requestState?.key) return;
     if (isWebAuthPending(sessionLoading)) return;
     if (shouldPromptWebSignIn(isAuthenticated, sessionLoading)) {
-      toast.info(t('core:ai.errorProvider', { defaultValue: 'Войдите, чтобы получить толкование' }));
+      toast.info(t('core:ai.errorProvider', { defaultValue: 'Interpretation service is temporarily unavailable.' }));
       setFailed(true);
       return;
     }
@@ -113,11 +113,11 @@ export default function MotivationPage(): ReactElement {
       })
       .catch((err: { status?: number; data?: GenerateMotivationErrorBody }) => {
         if (err.status === 401) {
-          toast.info(t('core:ai.errorProvider', { defaultValue: 'Войдите, чтобы получить толкование' }));
+          toast.info(t('core:ai.errorProvider', { defaultValue: 'Interpretation service is temporarily unavailable.' }));
         } else if (err.status === 429) {
           dispatch(openModal({ id: 'daily-limit' }));
         } else {
-          toast.error(t('core:ai.error1', { defaultValue: 'Не удалось получить толкование' }));
+          toast.error(t('core:ai.error1', { defaultValue: 'The mists of fate have veiled the Tarot cards.' }));
         }
         setFailed(true);
       });
@@ -143,8 +143,8 @@ export default function MotivationPage(): ReactElement {
         <div className={styles.column}>
           <Header title="" />
           <EmptyState
-            title={failed ? t('core:ai.error1', { defaultValue: 'Не удалось получить толкование' }) : t('core:stub.missingData.title')}
-            action={<Button onClick={() => navigate('/mood')}>{t('core:stub.missingData.button', { defaultValue: 'Оценить состояние' })}</Button>}
+            title={failed ? t('core:ai.error1', { defaultValue: 'The mists of fate have veiled the Tarot cards.' }) : t('core:stub.missingData.title')}
+            action={<Button onClick={() => navigate('/mood')}>{t('core:stub.missingData.button', { defaultValue: 'Go to spreads' })}</Button>}
           />
         </div>
       </div>

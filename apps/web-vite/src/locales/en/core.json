@@ -6,6 +6,8 @@
   "card.reversed": "Reversed",
   "card.added1": "Tarot card added to favorites.",
   "card.added2": "Press to view",
+  "card.like": "Add to favorites",
+  "card.unlike": "Remove from favorites",
   "card.favoriteError.title": "Could not add to favorites",
   "card.favoriteError.body": "Check your internet connection and try again.",
 
@@ -26,6 +28,7 @@
 
   "button.prev": "Previous",
   "button.next": "Next",
+  "button.loadMore": "Show more",
   "button.resetDayCard": "Reset day card",
 
   "choice.tapToChoice": "Tap to choose a card",
@@ -70,6 +73,11 @@
   "errorBoundary.alternativeTitle": "App is outdated",
   "errorBoundary.description": "Try updating the app",
   "errorBoundary.button": "Update",
+  "errorBoundary.goHome": "Go home",
+
+  "notFound.title": "Page not found",
+  "notFound.description": "This page does not exist or has been moved.",
+  "notFound.home": "Go home",
 
   "history.noSpreads": "You haven't made any spreads yet",
   "favoriteCards.noCards": "You haven't added any cards to your favorites yet",
@@ -107,6 +115,8 @@
   "nav.tab.main": "Home",
   "nav.tab.spreads": "Spreads",
   "nav.tab.library": "Library",
+  "nav.tab.settings": "Settings",
+  "nav.landmark": "Main navigation",
   "nav.fab.open": "Open navigation menu",
   "nav.fab.close": "Close navigation menu",
   "nav.fab.settings": "Settings",
@@ -116,6 +126,8 @@
 
   "a11y.scrollToTop": "Scroll to top",
   "a11y.back": "Go back",
+  "a11y.close": "Close",
+  "a11y.dismissToast": "Dismiss notification",
   "a11y.settings": "Open settings",
   "a11y.headerActions": "Open actions",
   "a11y.horizontalList": "Horizontal list",

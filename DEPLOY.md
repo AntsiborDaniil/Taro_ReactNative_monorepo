@@ -46,7 +46,7 @@ supabase db push
 
 ```bash
 supabase secrets set OPENAI_API_KEY=sk-...
-supabase secrets set TAROT_DAILY_INTERPRET_LIMIT=10
+supabase secrets set TAROT_DAILY_INTERPRET_LIMIT=1
 
 supabase functions deploy interpret --no-verify-jwt
 supabase functions deploy motivation-mood --no-verify-jwt
@@ -94,7 +94,7 @@ Vercel не запускает долгоживущий Node-сервер — AP
 | `WEB_APP_URL` | `https://taro-react-native-monorepo-x59s.vercel.app` |
 | `API_PUBLIC_URL` | `https://taro-react-native-monorepo.vercel.app` (тот же домен, что Vercel — для OAuth/PKCE) |
 | `ALLOW_VERCEL_PREVIEW` | `1` |
-| `TAROT_DAILY_INTERPRET_LIMIT` | `10` |
+| `TAROT_DAILY_INTERPRET_LIMIT` | `1` (прод: один бесплатный AI-расклад в UTC-сутки) |
 
 После деплоя скопируйте URL сервиса, например: `https://tarot-api.onrender.com`
 

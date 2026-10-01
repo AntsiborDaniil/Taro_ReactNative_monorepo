@@ -11,7 +11,7 @@ import { useNativeNavigation } from 'shared/hooks';
 import { ChevronRightIcon, SettingsIcon } from 'shared/icons';
 import { isTablet, WEB_HOVER_TRANSITION } from 'shared/lib';
 import { AnalyticAction, NavigationRoute, PressableWebState } from 'shared/types';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { DS_COLORS, DS_SIZES, dsRadius } from 'shared/themes/ds';
 import { ScreenLayout, Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import { LIBRARY_PLATES } from '../lib';
 import { useLibraryLayout } from './useLibraryLayout';
@@ -128,7 +128,7 @@ function Library() {
               <SettingsIcon
                 width={iconSize}
                 height={iconSize}
-                fill={COLORS.Content}
+                fill={DS_COLORS.ink50}
               />
             </View>
             <View style={styles.settingsTextCol}>
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   introLead: {
-    color: 'rgba(216, 228, 247, 0.86)',
+    color: DS_COLORS.ink100,
     maxWidth: 560,
     width: '100%',
     alignSelf: 'center',
@@ -192,15 +192,9 @@ const styles = StyleSheet.create({
   gridShell: {
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: getColorOpacity(COLORS.Primary500, 22),
-    backgroundColor: 'rgba(30, 35, 43, 0.55)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
     overflow: 'visible',
-    ...(globalThis?.window
-      ? ({
-          boxShadow:
-            '0 16px 36px rgba(8, 12, 20, 0.38), inset 0 1px 0 rgba(246, 192, 27, 0.08)',
-        } as object)
-      : {}),
   },
   grid: {
     flexDirection: 'row',
@@ -217,11 +211,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 8,
     width: '100%',
-    minHeight: 64,
-    borderRadius: 16,
+    minHeight: DS_SIZES.listRowHeight,
+    borderRadius: dsRadius.listRow,
     borderWidth: 1,
-    borderColor: 'rgba(246, 192, 27, 0.16)',
-    backgroundColor: COLORS.Background2,
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     paddingVertical: 14,
     paddingHorizontal: 14,
     flexDirection: 'row',
@@ -230,17 +224,11 @@ const styles = StyleSheet.create({
     zIndex: 2,
     position: 'relative',
     ...WEB_HOVER_TRANSITION,
-    ...(Platform.OS === 'web'
-      ? ({
-          cursor: 'pointer',
-          boxShadow:
-            '0 10px 32px rgba(8, 12, 20, 0.35), inset 0 1px 0 rgba(246, 192, 27, 0.05)',
-        } as object)
-      : {}),
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : {}),
   },
   settingsRowActive: {
-    backgroundColor: 'rgba(100, 152, 202, 0.12)',
-    borderColor: 'rgba(246, 192, 27, 0.28)',
+    backgroundColor: DS_COLORS.pressDim,
+    borderColor: DS_COLORS.accent400,
   },
   settingsIconWrap: {
     width: 40,
@@ -248,9 +236,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(246, 192, 27, 0.12)',
+    backgroundColor: DS_COLORS.ground600,
     borderWidth: 1,
-    borderColor: 'rgba(246, 192, 27, 0.22)',
+    borderColor: DS_COLORS.ground600,
   },
   settingsTextCol: {
     flex: 1,
@@ -258,10 +246,10 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   settingsTitle: {
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
   },
   settingsHint: {
-    color: COLORS.SpbSky1,
+    color: DS_COLORS.ink100,
     lineHeight: 18,
   },
   legalFooter: {
@@ -270,7 +258,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingTop: 16,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(244, 244, 245, 0.1)',
+    borderTopColor: DS_COLORS.ground600,
     gap: 8,
     alignItems: 'center',
   },
@@ -279,21 +267,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: getColorOpacity(COLORS.Primary, 34),
-    backgroundColor: getColorOpacity(COLORS.Primary, 10),
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     ...(Platform.OS === 'web'
       ? ({ cursor: 'pointer', ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
   legalButtonActive: {
-    borderColor: getColorOpacity(COLORS.Primary, 58),
-    backgroundColor: getColorOpacity(COLORS.Primary, 18),
+    borderColor: DS_COLORS.accent400,
+    backgroundColor: DS_COLORS.pressDim,
   },
   legalButtonText: {
-    color: COLORS.Primary,
+    color: DS_COLORS.ink50,
   },
   legalCopy: {
-    color: 'rgba(216, 228, 247, 0.38)',
+    color: DS_COLORS.ink100,
   },
 });
 

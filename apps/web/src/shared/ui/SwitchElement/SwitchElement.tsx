@@ -2,7 +2,7 @@ import { ReactElement, ReactNode } from 'react';
 import { StyleProp, StyleSheet, TextStyle, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Switch, SwitchProps } from 'react-native-paper';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { Text, TEXT_TAGS } from '../Text';
 
 export type SwitchElementProps = SwitchProps & {
@@ -31,8 +31,8 @@ function SwitchElement({
       <Switch
         {...props}
         style={{}}
-        color={COLORS.Secondary}
-        thumbColor="#F5F5F5"
+        color={DS_COLORS.calm500}
+        thumbColor={DS_COLORS.ink50}
       />
     </View>
   );

@@ -4,6 +4,7 @@ interface ImportMetaEnv {
   readonly VITE_USE_MOCKS?: string;
   readonly VITE_DEV_QUICK_LOGIN?: string;
   readonly VITE_TELEGRAM_BOT_USERNAME?: string;
+  readonly VITE_TELEGRAM_MINI_APP_SHORT_NAME?: string;
   readonly VITEST?: boolean;
 }
 

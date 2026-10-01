@@ -146,7 +146,7 @@ function SpreadDescriptionChoice() {
           />
 
           <View style={spreadInnerStyles.glassPanel}>
-            <Text style={spreadInnerStyles.sectionLabel}>
+            <Text weight="bold" style={spreadInnerStyles.sectionLabel}>
               {t('spread:flow.positionsTitle')}
             </Text>
             <SpreadScheme hasRotation />
@@ -157,7 +157,7 @@ function SpreadDescriptionChoice() {
           </Text>
 
           <View style={spreadInnerStyles.glassPanel}>
-            <Text style={spreadInnerStyles.sectionLabel}>
+            <Text weight="bold" style={spreadInnerStyles.sectionLabel}>
               {t('spread:flow.questionSection')}
             </Text>
             <Question />
@@ -186,6 +186,9 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   wrapper: {
+    width: '100%',
+    maxWidth: 720,
+    alignSelf: 'center',
     paddingHorizontal: 16,
     gap: moderateScale(18),
   },

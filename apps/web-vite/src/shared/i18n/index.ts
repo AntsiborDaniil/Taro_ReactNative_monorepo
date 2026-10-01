@@ -72,6 +72,17 @@ function readTelegramLanguage(): AppLanguage | null {
   }
 }
 
+/** Язык из бота: `WEB_APP_URL?lang=ru|en` на кнопках web_app / Menu Button. */
+function readUrlLanguage(): AppLanguage | null {
+  try {
+    const raw = new URLSearchParams(window.location.search).get('lang');
+    if (raw === 'en' || raw === 'ru') return raw;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 function readSavedLanguage(): AppLanguage | null {
   try {
     const raw = window.localStorage.getItem(LANGUAGE_KEY);
@@ -82,13 +93,14 @@ function readSavedLanguage(): AppLanguage | null {
 }
 
 /**
- * Старт: ручной выбор из настроек → язык Telegram Mini App → сохранённый → ru.
- * В миниаппе без ручного выбора всегда берём language_code клиента Telegram.
+ * Старт: ручной выбор → ?lang= от бота → language_code Telegram → сохранённый → ru.
  */
 function resolveInitialLanguage(): AppLanguage {
   if (isLanguageManual()) {
     return readSavedLanguage() ?? 'ru';
   }
+  const fromUrl = readUrlLanguage();
+  if (fromUrl) return fromUrl;
   const fromTelegram = readTelegramLanguage();
   if (fromTelegram) return fromTelegram;
   return readSavedLanguage() ?? 'ru';
@@ -135,16 +147,17 @@ export async function changeLanguage(lng: AppLanguage): Promise<void> {
 }
 
 /**
- * Подтянуть язык из Telegram после загрузки bridge (script defer).
+ * Подтянуть язык после загрузки bridge (script defer).
+ * Приоритет как при старте: ?lang= от бота → language_code Telegram.
  * Не трогает ручной выбор пользователя.
  */
 export async function syncLanguageFromTelegram(): Promise<AppLanguage | null> {
   if (typeof window === 'undefined' || isLanguageManual()) return null;
-  const fromTelegram = readTelegramLanguage();
-  if (!fromTelegram) return null;
-  if (normalizeLanguage(i18next.language) === fromTelegram) return fromTelegram;
-  await applyLanguage(fromTelegram);
-  return fromTelegram;
+  const next = readUrlLanguage() ?? readTelegramLanguage();
+  if (!next) return null;
+  if (normalizeLanguage(i18next.language) === next) return next;
+  await applyLanguage(next);
+  return next;
 }
 
 export const i18nReady = initI18next();

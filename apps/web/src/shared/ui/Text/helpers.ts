@@ -8,34 +8,31 @@ import {
 import { TEXT_TAGS, TEXT_WEIGHT } from './constants';
 
 /**
- * On web we only load Regular / Medium / SemiBold / Bold (see appFonts.ts).
- * Map other weights to a loaded face so RN Web does not fall back to system junk.
+ * DS §06: Onest — lead/body/label/micro/button/chip. Один файл = одно начертание,
+ * без fontWeight в стилях (иначе браузер синтезирует жирность поверх реального шрифта).
+ * Зарегистрированы только Medium/SemiBold/Bold/ExtraBold (см. appFonts.ts) — более лёгкие
+ * и курсивные веса сведены к Medium.
  */
-const FONT_BY_WEIGHT: Record<
-  keyof typeof TEXT_WEIGHT,
-  { fontFamily: string; fontWeight: TextStyle['fontWeight'] }
-> =
-  Platform.OS === 'web'
-    ? {
-        regular: { fontFamily: 'Montserrat-Regular', fontWeight: '400' },
-        medium: { fontFamily: 'Montserrat-Medium', fontWeight: '500' },
-        semibold: { fontFamily: 'Montserrat-SemiBold', fontWeight: '600' },
-        bold: { fontFamily: 'Montserrat-Bold', fontWeight: '700' },
-        extraBold: { fontFamily: 'Montserrat-Bold', fontWeight: '700' },
-        light: { fontFamily: 'Montserrat-Regular', fontWeight: '400' },
-        thin: { fontFamily: 'Montserrat-Regular', fontWeight: '400' },
-        italic: { fontFamily: 'Montserrat-Regular', fontWeight: '400' },
-      }
-    : {
-        regular: { fontFamily: 'Montserrat-Regular', fontWeight: '400' },
-        medium: { fontFamily: 'Montserrat-Medium', fontWeight: '500' },
-        semibold: { fontFamily: 'Montserrat-SemiBold', fontWeight: '600' },
-        bold: { fontFamily: 'Montserrat-Bold', fontWeight: '700' },
-        extraBold: { fontFamily: 'Montserrat-ExtraBold', fontWeight: '800' },
-        light: { fontFamily: 'Montserrat-Light', fontWeight: '300' },
-        thin: { fontFamily: 'Montserrat-Thin', fontWeight: '200' },
-        italic: { fontFamily: 'Montserrat-Italic', fontWeight: '400' },
-      };
+const webFallback = (family: string) =>
+  Platform.OS === 'web' ? `'${family}', system-ui, sans-serif` : family;
+
+const FONT_BY_WEIGHT: Record<keyof typeof TEXT_WEIGHT, { fontFamily: string }> = {
+  regular: { fontFamily: webFallback('Onest-Medium') },
+  medium: { fontFamily: webFallback('Onest-Medium') },
+  semibold: { fontFamily: webFallback('Onest-SemiBold') },
+  bold: { fontFamily: webFallback('Onest-Bold') },
+  extraBold: { fontFamily: webFallback('Onest-ExtraBold') },
+  light: { fontFamily: webFallback('Onest-Medium') },
+  thin: { fontFamily: webFallback('Onest-Medium') },
+  italic: { fontFamily: webFallback('Onest-Medium') },
+};
+
+/** Заголовки категорий — Geologica (дисплей DS §06), а не Onest. */
+const CATEGORY_GEOLOGICA_FAMILY: Partial<Record<keyof typeof TEXT_TAGS, string>> = {
+  h1: webFallback('Geologica-Black'),
+  h2: webFallback('Geologica-ExtraBold'),
+  h3: webFallback('Geologica-ExtraBold'),
+};
 
 const DEFAULT_TEXT_WEIGHTS: Record<
   keyof typeof TEXT_TAGS,
@@ -68,12 +65,13 @@ export function getTextStyles({
 
   const resolvedWeight =
     weight ?? DEFAULT_TEXT_WEIGHTS[category ?? TEXT_TAGS.p1];
-  const font = FONT_BY_WEIGHT[resolvedWeight];
+  const geologicaFamily = category ? CATEGORY_GEOLOGICA_FAMILY[category] : undefined;
+  const fontFamily = geologicaFamily ?? FONT_BY_WEIGHT[resolvedWeight].fontFamily;
 
   textStyle = {
     ...textStyle,
-    fontFamily: font.fontFamily,
-    fontWeight: base.fontWeight ?? font.fontWeight,
+    fontFamily,
+    fontWeight: undefined,
   };
 
   const defaultSize = resolveCategoryPx(category!);

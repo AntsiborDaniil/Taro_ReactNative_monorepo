@@ -7,7 +7,8 @@ import {
   isSlowConnectionBannerDismissed,
 } from 'shared/lib/web/slowConnectionBannerDismiss';
 import { useSlowConnection } from 'shared/lib/web/useSlowConnection';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { Text, TEXT_TAGS } from '../Text';
 
 export function SlowConnectionBanner() {
@@ -57,13 +58,7 @@ const styles = StyleSheet.create({
     gap: 8,
     backgroundColor: COLORS.Background2,
     borderBottomWidth: 1,
-    borderBottomColor: getColorOpacity(COLORS.Accent, 45),
-    ...Platform.select({
-      web: {
-        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.28)',
-      },
-      default: {},
-    }),
+    borderBottomColor: DS_COLORS.ground600,
   },
   text: {
     flex: 1,
@@ -76,7 +71,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    backgroundColor: DS_COLORS.ground700,
   },
   closePressed: {
     opacity: 0.85,

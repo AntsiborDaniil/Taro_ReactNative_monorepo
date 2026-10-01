@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactElement } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactElement, type TouchEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -73,6 +73,8 @@ export default function ReadingResultPage(): ReactElement {
   const attempted = useRef(false);
   /** Фоновое сохранение после интерпретации — «Поделиться» ждёт именно его uid. */
   const persistPromise = useRef<Promise<TSpread | null> | null>(null);
+  /** Старт горизонтального свайпа по блоку разбора карты. */
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
   const [cardNsReady, setCardNsReady] = useState(false);
   const [activeCard, setActiveCard] = useState(0);
@@ -280,6 +282,27 @@ export default function ReadingResultPage(): ReactElement {
   const goToCard = (index: number) => {
     setActiveCard(Math.min(Math.max(index, 0), cards.length - 1));
   };
+  const handleDetailTouchStart = (event: TouchEvent<HTMLElement>) => {
+    if (!hasManyCards) return;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    swipeStart.current = { x: touch.clientX, y: touch.clientY };
+  };
+  const handleDetailTouchEnd = (event: TouchEvent<HTMLElement>) => {
+    if (!hasManyCards || !swipeStart.current) return;
+    const touch = event.changedTouches[0];
+    if (!touch) {
+      swipeStart.current = null;
+      return;
+    }
+    const dx = touch.clientX - swipeStart.current.x;
+    const dy = touch.clientY - swipeStart.current.y;
+    swipeStart.current = null;
+    // Только явный горизонтальный жест — вертикальный скролл текста не трогаем.
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    if (dx < 0) goToCard(activeCard + 1);
+    else goToCard(activeCard - 1);
+  };
   const handleCardsKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'ArrowLeft') {
       event.preventDefault();
@@ -379,8 +402,15 @@ export default function ReadingResultPage(): ReactElement {
           </div>
         ) : null}
 
-        {/* Разбор выбранной карты в её позиции. key — плавная смена панели. */}
-        <section key={`${current.id}-${activeCard}`} className={styles.detail} aria-live="polite">
+        {/* Разбор выбранной карты в её позиции. key — плавная смена панели.
+            При 2+ картах блок листается ещё и горизонтальным свайпом. */}
+        <section
+          key={`${current.id}-${activeCard}`}
+          className={styles.detail}
+          aria-live="polite"
+          onTouchStart={handleDetailTouchStart}
+          onTouchEnd={handleDetailTouchEnd}
+        >
           <div className={styles.detailHead}>
             <div className={styles.detailTitles}>
               {positionLabel(activeCard) ? (
@@ -436,17 +466,6 @@ export default function ReadingResultPage(): ReactElement {
             >
               {t('spread:aboutCard')}
             </Button>
-            {hasManyCards && activeCard < cards.length - 1 ? (
-              <Button
-                variant="quiet"
-                quietTone="accent"
-                icon={<ChevronRightIcon width={16} height={16} />}
-                iconPosition="end"
-                onClick={() => goToCard(activeCard + 1)}
-              >
-                {t('spread:flow.nextCard')}
-              </Button>
-            ) : null}
           </div>
         </section>
 
@@ -455,9 +474,6 @@ export default function ReadingResultPage(): ReactElement {
           <div className={styles.summaryHead}>
             <Text role="title" tone="ink50" as="h2">
               {t('spread:summaryTitle')}
-            </Text>
-            <Text role="micro" tone="ink100">
-              {t('spread:summaryHint')}
             </Text>
           </div>
 
@@ -493,13 +509,19 @@ export default function ReadingResultPage(): ReactElement {
           <div className={styles.actions}>
             <Button
               variant="quiet"
+              className={styles.actionBtn}
               icon={<ShareIcon width={18} height={18} />}
               loading={isSharing}
               onClick={handleShare}
             >
               {t('core:ai.copy.share')}
             </Button>
-            <Button variant="quiet" quietTone="neutral" onClick={() => navigate('/spreads')}>
+            <Button
+              variant="quiet"
+              quietTone="neutral"
+              className={styles.actionBtn}
+              onClick={() => navigate('/spreads')}
+            >
               {t('spread:newSpread')}
             </Button>
           </div>

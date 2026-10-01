@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { Layout, StyleService } from '@ui-kitten/components';
 import { useTranslation } from 'react-i18next';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { Text, TEXT_TAGS } from '../Text';
 
 type OverlayIconProps = {
@@ -56,8 +56,8 @@ function OverlayIcon({
 const styles = StyleService.create({
   blurOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#000000',
-    opacity: 0.3,
+    backgroundColor: DS_COLORS.ground900,
+    opacity: 0.55,
   },
   text: {
     marginTop: 8,
@@ -82,7 +82,7 @@ const styles = StyleService.create({
     alignItems: 'flex-end',
   },
   lockWrapper: {
-    backgroundColor: COLORS.SpbSky3,
+    backgroundColor: DS_COLORS.ground700,
     justifyContent: 'center',
     alignItems: 'center',
   },

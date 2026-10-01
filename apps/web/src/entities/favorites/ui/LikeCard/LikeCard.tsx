@@ -7,7 +7,7 @@ import { TSelectedTarotCard, TTarotCard } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { HeartIcon } from 'shared/icons';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { AnalyticAction, NavigationRoute, TabRoute } from 'shared/types';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { FavoritesContext } from '../../model';
@@ -61,9 +61,9 @@ function LikeCard({ card, onAdditionalPress }: LikeCardProps) {
         <HeartIcon
           width={40}
           height={40}
-          stroke={favoritesCardsIds?.[card.id] ? COLORS.Love : COLORS.SpbSky1}
+          stroke={favoritesCardsIds?.[card.id] ? DS_COLORS.accent400 : DS_COLORS.ink100}
           strokeWidth={favoritesCardsIds?.[card.id] ? 1 : 1.8}
-          fill={favoritesCardsIds?.[card.id] ? COLORS.Love : COLORS.Background}
+          fill={favoritesCardsIds?.[card.id] ? DS_COLORS.accent400 : 'transparent'}
         />
       </Pressable>
     </View>

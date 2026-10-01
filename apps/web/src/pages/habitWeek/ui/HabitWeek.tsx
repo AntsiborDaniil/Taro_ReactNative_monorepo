@@ -14,7 +14,7 @@ import {
 } from 'shared/lib';
 import { AsyncMemoryKey } from 'shared/lib/deviceMemory/keys';
 import { getValueForAsyncDeviceMemoryKey } from 'shared/lib/deviceMemory/workWithAsyncMemoryKeys';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { HabitType, NavigationRoute, TabRoute, THabit } from 'shared/types';
 import { NoContent, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 
@@ -171,13 +171,15 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 16,
     borderRadius: 16,
-    backgroundColor: COLORS.Background2,
+    borderWidth: 1,
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
   },
   bannerIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: COLORS.Background,
+    backgroundColor: DS_COLORS.ground800,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -186,10 +188,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   bannerTitle: {
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
   },
   bannerText: {
-    color: COLORS.SpbSky1,
+    color: DS_COLORS.ink100,
   },
 });
 

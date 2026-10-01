@@ -36,14 +36,14 @@ export function NavRail(): ReactElement {
   return (
     <nav
       className={`${styles.rail} ${collapsed ? styles.collapsed : styles.expanded}`}
-      aria-label="Основная навигация"
+      aria-label={t('nav.landmark')}
     >
       <div className={styles.toggleRow}>
         <button
           type="button"
           className={styles.toggleButton}
           onClick={() => setCollapsed((v) => !v)}
-          aria-label={collapsed ? 'Развернуть навигацию' : 'Свернуть навигацию'}
+          aria-label={collapsed ? t('nav.rail.expand') : t('nav.rail.collapse')}
           aria-pressed={collapsed}
         >
           {collapsed ? <ChevronRightIcon width={18} height={18} /> : <ChevronLeftIcon width={18} height={18} />}

@@ -28,8 +28,9 @@ export function getDevMockSession(): DevMockSession | null {
       createdAt: '2026-01-01T00:00:00.000Z',
     },
     tarotDaily: {
-      used: 1,
-      limit: 3,
+      used: 0,
+      // Как дефолт TAROT_DAILY_INTERPRET_LIMIT на сервере: 1 бесплатный расклад в UTC-сутки.
+      limit: 1,
       day: todayUtcDay(),
     },
     spreadCredits: 3,

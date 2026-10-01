@@ -3,7 +3,6 @@ import {
   Image,
   Linking,
   Platform,
-  Pressable,
   StyleSheet,
   useWindowDimensions,
   View,
@@ -11,9 +10,8 @@ import {
 import AppMetrica from '@appmetrica/react-native-analytics';
 import { useTranslation } from 'react-i18next';
 import { getImage } from 'shared/lib';
-import { WEB_HOVER_TRANSITION } from 'shared/lib';
-import { COLORS } from 'shared/themes';
-import { Text, TEXT_TAGS } from 'shared/ui';
+import { DS_COLORS } from 'shared/themes/ds';
+import { Button, Text, TEXT_TAGS } from 'shared/ui';
 
 type TarotErrorBoundaryProps = {
   title?: string;
@@ -61,43 +59,22 @@ export default function TarotErrorBoundary({
 
   return (
     <View style={styles.wrapper}>
-      <View style={styles.imageFrame}>
+      <View style={[styles.card, compact ? styles.cardCompact : null]}>
         <Image
           style={styles.image}
           resizeMode="contain"
           source={getImage(['core', 'errorBoundary'])}
         />
-      </View>
-      <View style={styles.overlayAction}>
-        <View style={styles.card}>
-          <Text category={TEXT_TAGS.h2} style={styles.cardTitle}>
-            {t('core:errorBoundary.title')}
-          </Text>
-          <Text
-            category={TEXT_TAGS.h4}
-            style={[
-              styles.cardDescription,
-              compact ? styles.cardDescriptionCompact : null,
-            ]}
-          >
-            Произошла техническая проблема. Мы уже получили отчёт и работаем над
-            исправлением.
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('core:button.prev')}
-            onPress={handleGoBack}
-            style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
-              styles.goBackButton,
-              Platform.OS === 'web' && hovered ? styles.goBackButtonHover : null,
-              pressed ? styles.goBackButtonPressed : null,
-            ]}
-          >
-            <Text category={TEXT_TAGS.h4} style={styles.goBackButtonText}>
-              {t('core:button.prev')}
-            </Text>
-          </Pressable>
-        </View>
+        <Text category={TEXT_TAGS.h2} style={styles.cardTitle}>
+          {t('core:errorBoundary.title')}
+        </Text>
+        <Text category={TEXT_TAGS.p1} style={styles.cardDescription}>
+          Произошла техническая проблема. Мы уже получили отчёт и работаем над
+          исправлением.
+        </Text>
+        <Button style={styles.goBackButton} onPress={handleGoBack}>
+          {t('core:button.prev')}
+        </Button>
       </View>
     </View>
   );
@@ -106,99 +83,44 @@ export default function TarotErrorBoundary({
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: COLORS.Background,
+    backgroundColor: DS_COLORS.ground900,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  imageFrame: {
-    width: '100%',
-    maxWidth: '100%',
-    height: '100%',
-    borderRadius: 0,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.22)',
-    backgroundColor: '#0C1421',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 16px 42px rgba(0, 0, 0, 0.4)',
-        } as object)
-      : {}),
+    paddingHorizontal: 20,
   },
   image: {
     width: '100%',
-    height: '100%',
+    maxWidth: 220,
+    height: 160,
+    alignSelf: 'center',
   },
-  overlayAction: {
-    position: 'absolute',
-    left: 20,
-    right: 20,
-    bottom: 34,
-    alignItems: 'center',
-  },
+  /** Пустое состояние DS: плашка ground800, одна action-кнопка. */
   card: {
     width: '100%',
-    maxWidth: 620,
+    maxWidth: 480,
     borderRadius: 20,
-    paddingVertical: 18,
-    paddingHorizontal: 20,
+    paddingVertical: 24,
+    paddingHorizontal: 24,
     gap: 12,
-    backgroundColor: 'rgba(9, 15, 24, 0.78)',
+    alignItems: 'center',
+    backgroundColor: DS_COLORS.ground800,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.24)',
-    ...(Platform.OS === 'web'
-      ? ({
-          backdropFilter: 'blur(6px)',
-          boxShadow: '0 14px 34px rgba(0, 0, 0, 0.38)',
-        } as object)
-      : {}),
+    borderColor: DS_COLORS.ground600,
+  },
+  cardCompact: {
+    paddingVertical: 20,
+    paddingHorizontal: 18,
   },
   cardTitle: {
-    textAlign: 'left',
-    color: COLORS.Content,
-    fontSize: 22,
-    lineHeight: 26,
+    textAlign: 'center',
+    color: DS_COLORS.ink50,
   },
   cardDescription: {
-    textAlign: 'left',
-    color: COLORS.SpbSky1,
-    fontSize: 22,
-    lineHeight: 26,
-    maxWidth: 560,
-  },
-  cardDescriptionCompact: {
-    fontSize: 22,
-    lineHeight: 26,
+    textAlign: 'center',
+    color: DS_COLORS.ink100,
   },
   goBackButton: {
-    alignSelf: 'flex-start',
-    minHeight: 46,
-    paddingHorizontal: 18,
-    borderRadius: 12,
-    backgroundColor: COLORS.Primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...(Platform.OS === 'web'
-      ? ({
-          cursor: 'pointer',
-          boxShadow: '0 8px 22px rgba(246, 192, 27, 0.32)',
-          ...WEB_HOVER_TRANSITION,
-        } as object)
-      : {}),
-  },
-  goBackButtonHover: {
-    backgroundColor: '#FFD24D',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 12px 26px rgba(246, 192, 27, 0.45)',
-        } as object)
-      : {}),
-  },
-  goBackButtonPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.98 }],
-  },
-  goBackButtonText: {
-    color: COLORS.Background,
+    width: '100%',
+    marginTop: 8,
   },
 });

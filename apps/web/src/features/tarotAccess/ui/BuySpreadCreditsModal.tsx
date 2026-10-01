@@ -1,17 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Linking,
-  Platform,
-  Pressable,
-  StyleSheet,
-  View,
-  useWindowDimensions,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { UserContext } from 'entities/user';
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CardsVoid, LightningBolt } from 'shared/icons';
 import {
   getLegalDocumentById,
@@ -26,9 +17,10 @@ import {
   markAwaitingLavaPayment,
   reachMetrikaGoal,
 } from 'shared/lib/web/yandexMetrika';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { Button } from 'shared/ui/Button';
+import { DsModalSheet } from 'shared/ui/DsModalSheet';
 import { Input } from 'shared/ui/Input';
 import { Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui/Text';
 import { isCheckoutEmail } from '../lib/isYandexCheckoutEmail';
@@ -65,9 +57,6 @@ function BuySpreadCreditsModal({
   const { t: tSpread } = useTranslation('spread');
   const { t: tCore } = useTranslation('core');
   const tCopy = copyNamespace === 'spread' ? tSpread : tSettings;
-  const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
-
   const { closeModal } = useData({ Context: ModalsContext });
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
@@ -162,65 +151,17 @@ function BuySpreadCreditsModal({
     }
   }, [credits, email, handleVibrationClick, tSpread]);
 
-  const stopSheetClose = useCallback(
-    (event?: { stopPropagation?: () => void }) => {
-      event?.stopPropagation?.();
-    },
-    []
-  );
-
-  const cardMaxW = Math.min(420, width - 32);
-
   return (
-    <View
-      style={[
-        styles.root,
-        {
-          paddingTop: insets.top + 12,
-          paddingBottom: insets.bottom + 12,
-        },
-      ]}
+    <DsModalSheet
+      onClose={handleClose}
+      closeAccessibilityLabel={tCore('stub.emptyResultsModal.closeBackdrop')}
+      maxWidth={420}
     >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={tCore('stub.emptyResultsModal.closeBackdrop')}
-        style={styles.backdrop}
-        onPress={handleClose}
-      />
-      <Pressable
-        accessible={false}
-        style={[styles.sheet, { maxWidth: cardMaxW }]}
-        onPress={stopSheetClose}
-        // RN Web: prevent click-through to backdrop (closes modal on Buy / validation).
-        {...(Platform.OS === 'web'
-          ? ({
-              onClick: (event: { stopPropagation?: () => void }) => {
-                event?.stopPropagation?.();
-              },
-            } as object)
-          : null)}
-      >
-        <LinearGradient
-          colors={[COLORS.Primary500, COLORS.Accent, COLORS.Secondary]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.rim}
-        />
         <View style={styles.inner}>
           <View style={styles.hero}>
-            <LinearGradient
-              colors={[
-                getColorOpacity(COLORS.Primary500, 28),
-                getColorOpacity(COLORS.Accent, 10),
-                'transparent',
-              ]}
-              start={{ x: 0.2, y: 0 }}
-              end={{ x: 0.9, y: 1 }}
-              style={styles.heroGlow}
-            />
             <View style={styles.iconCluster}>
               <View style={styles.boltBadge}>
-                <LightningBolt width={22} height={22} fill={COLORS.Background} />
+                <LightningBolt width={22} height={22} fill={DS_COLORS.ground900} />
               </View>
               <CardsVoid width={64} height={64} />
             </View>
@@ -303,48 +244,13 @@ function BuySpreadCreditsModal({
             </Text>
           </Pressable>
         </View>
-      </Pressable>
-    </View>
+    </DsModalSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: getColorOpacity(COLORS.Background, 78),
-  },
-  sheet: {
-    zIndex: 2,
-    width: '100%',
-    borderRadius: 28,
-    overflow: 'hidden',
-    ...Platform.select({
-      web: {
-        boxShadow:
-          '0 28px 56px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(246, 192, 27, 0.12)',
-      },
-      default: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 18 },
-        shadowOpacity: 0.45,
-        shadowRadius: 28,
-        elevation: 18,
-      },
-    }),
-  },
-  rim: {
-    padding: 1.5,
-    borderRadius: 28,
-  },
   inner: {
-    backgroundColor: COLORS.Background2,
-    borderRadius: 26.5,
+    backgroundColor: DS_COLORS.ground800,
     paddingHorizontal: 22,
     paddingTop: 20,
     paddingBottom: 22,
@@ -357,12 +263,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 4,
     marginBottom: 4,
-    overflow: 'hidden',
-    borderRadius: 20,
-  },
-  heroGlow: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 20,
   },
   iconCluster: {
     flexDirection: 'row',
@@ -374,21 +274,21 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 14,
-    backgroundColor: COLORS.Primary500,
+    backgroundColor: DS_COLORS.accent400,
     alignItems: 'center',
     justifyContent: 'center',
   },
   packLabel: {
-    color: COLORS.Content,
+    color: DS_COLORS.ink100,
     textAlign: 'center',
   },
   title: {
     textAlign: 'center',
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
   },
   subtitle: {
     textAlign: 'center',
-    color: getColorOpacity(COLORS.Content, 74),
+    color: DS_COLORS.ink100,
     lineHeight: 22,
     paddingHorizontal: 4,
   },
@@ -397,11 +297,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 999,
-    backgroundColor: getColorOpacity(COLORS.Accent, 14),
+    borderWidth: 1,
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
   },
   balance: {
     textAlign: 'center',
-    color: COLORS.Accent,
+    color: DS_COLORS.accent400,
   },
   emailWrap: {
     width: '100%',
@@ -409,7 +311,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   emailHint: {
-    color: getColorOpacity(COLORS.Content, 48),
+    color: DS_COLORS.ink100,
     paddingHorizontal: 2,
   },
   button: {
@@ -427,10 +329,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   legalNote: {
-    color: getColorOpacity(COLORS.Content, 44),
+    color: DS_COLORS.ink100,
   },
   legalLink: {
-    color: getColorOpacity(COLORS.Primary, 78),
+    color: DS_COLORS.accent400,
     textDecorationLine: 'underline',
     ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : {}),
   },
@@ -439,7 +341,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   laterText: {
-    color: getColorOpacity(COLORS.Content, 55),
+    color: DS_COLORS.ink100,
     textAlign: 'center',
   },
 });

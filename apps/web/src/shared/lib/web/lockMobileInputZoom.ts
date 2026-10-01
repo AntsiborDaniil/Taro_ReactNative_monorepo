@@ -1,70 +1,82 @@
 /**
- * Keep the app layout height fixed so the keyboard overlays content
- * instead of shrinking the UI. Also lock pinch-zoom on inputs.
+ * App height follows the user's screen via CSS viewport units (100dvh, fallback 100vh):
+ * the browser itself tracks window resize, mobile toolbars, Telegram expand, DevTools.
  *
- * Desktop / Telegram Desktop Mini App: height must grow after WebApp.expand(),
- * otherwise the UI stays cropped with empty space below.
+ * JS only freezes the height in px while a text field is focused, so the soft keyboard
+ * overlays content instead of shrinking the UI. Also locks pinch-zoom on inputs.
  */
 const VIEWPORT =
   'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content';
 
 const OVERLAY_STYLE_ID = 'tarot-keyboard-overlay-layout';
 
+/** While set on <html>, height is frozen to --tarot-app-height (keyboard open). */
+const KEYBOARD_LOCK_CLASS = 'tarot-keyboard-lock';
+
 const OVERLAY_CSS = `
+html, body, #root {
+  height: 100vh !important;
+  max-height: 100vh !important;
+}
+@supports (height: 100dvh) {
+  html, body, #root {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+  }
+}
+html.${KEYBOARD_LOCK_CLASS}, html.${KEYBOARD_LOCK_CLASS} body, html.${KEYBOARD_LOCK_CLASS} #root {
+  height: var(--tarot-app-height) !important;
+  max-height: var(--tarot-app-height) !important;
+}
 html, body {
-  height: var(--tarot-app-height, 100dvh) !important;
-  max-height: var(--tarot-app-height, 100dvh) !important;
   overflow: hidden !important;
 }
 #root {
-  height: var(--tarot-app-height, 100dvh) !important;
-  max-height: var(--tarot-app-height, 100dvh) !important;
   overflow: hidden;
 }
 `;
 
-/** Largest stable viewport height; ignore keyboard shrink. */
-let baselineHeight = 0;
-
-function readViewportHeight(): number {
-  if (typeof window === 'undefined') {
-    return 0;
+function isTextInput(el: Element | null): boolean {
+  if (!el) {
+    return false;
   }
-  // Prefer layout viewport for Mini App chrome; visualViewport shrinks with keyboard.
-  return Math.round(window.innerHeight);
-}
-
-function applyAppHeight(height: number): void {
-  if (typeof document === 'undefined' || height < 1) {
-    return;
-  }
-  document.documentElement.style.setProperty(
-    '--tarot-app-height',
-    `${height}px`
+  return (
+    el.tagName === 'INPUT' ||
+    el.tagName === 'TEXTAREA' ||
+    (el as HTMLElement).isContentEditable
   );
 }
 
-/**
- * Sync layout height. Grows when the window expands (TG Desktop expand).
- * Does not shrink for soft keyboard (keeps overlay behavior).
- */
-export function syncTarotAppHeight(options?: { reset?: boolean }): void {
-  if (typeof window === 'undefined') {
+function lockHeightForKeyboard(): void {
+  const root = document.documentElement;
+  if (root.classList.contains(KEYBOARD_LOCK_CLASS)) {
     return;
   }
-  const height = readViewportHeight();
+  // Freeze the current CSS-driven height before the keyboard can affect it.
+  const height = Math.round(root.getBoundingClientRect().height);
   if (height < 1) {
     return;
   }
-  if (options?.reset) {
-    baselineHeight = height;
-    applyAppHeight(height);
+  root.style.setProperty('--tarot-app-height', `${height}px`);
+  root.classList.add(KEYBOARD_LOCK_CLASS);
+}
+
+function unlockHeight(): void {
+  const root = document.documentElement;
+  root.classList.remove(KEYBOARD_LOCK_CLASS);
+  root.style.removeProperty('--tarot-app-height');
+}
+
+/**
+ * Re-sync after a viewport change (Telegram expand, orientation).
+ * Height is CSS-driven, so this only drops a stale keyboard lock.
+ */
+export function syncTarotAppHeight(): void {
+  if (typeof document === 'undefined') {
     return;
   }
-  // Allow tiny jitter down; otherwise only grow (expand / resize up).
-  if (baselineHeight < 1 || height >= baselineHeight - 24) {
-    baselineHeight = Math.max(baselineHeight, height);
-    applyAppHeight(baselineHeight);
+  if (!isTextInput(document.activeElement)) {
+    unlockHeight();
   }
 }
 
@@ -92,30 +104,29 @@ export function lockMobileInputZoom(): () => void {
   meta.setAttribute('content', VIEWPORT);
 
   ensureOverlayCss();
-  syncTarotAppHeight({ reset: true });
+  unlockHeight();
 
-  const onResize = () => {
-    syncTarotAppHeight();
+  const onFocusIn = (event: FocusEvent) => {
+    if (isTextInput(event.target as Element | null)) {
+      lockHeightForKeyboard();
+    }
+  };
+  // Focus may move straight to another input — check after it settles.
+  const onFocusOut = () => {
+    window.setTimeout(syncTarotAppHeight, 100);
   };
   const onOrientation = () => {
-    window.setTimeout(() => syncTarotAppHeight({ reset: true }), 250);
+    unlockHeight();
   };
 
-  window.addEventListener('resize', onResize);
+  document.addEventListener('focusin', onFocusIn);
+  document.addEventListener('focusout', onFocusOut);
   window.addEventListener('orientationchange', onOrientation);
-  window.visualViewport?.addEventListener('resize', onResize);
-
-  // Telegram Desktop Mini App expands shortly after ready().
-  const timers = [100, 400, 1000, 2000].map((ms) =>
-    window.setTimeout(() => syncTarotAppHeight(), ms)
-  );
 
   return () => {
-    window.removeEventListener('resize', onResize);
+    document.removeEventListener('focusin', onFocusIn);
+    document.removeEventListener('focusout', onFocusOut);
     window.removeEventListener('orientationchange', onOrientation);
-    window.visualViewport?.removeEventListener('resize', onResize);
-    for (const id of timers) {
-      window.clearTimeout(id);
-    }
+    unlockHeight();
   };
 }

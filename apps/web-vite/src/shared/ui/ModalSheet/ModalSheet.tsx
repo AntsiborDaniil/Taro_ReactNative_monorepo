@@ -10,6 +10,7 @@ import {
   type ReactNode,
   type TransitionEvent as ReactTransitionEvent,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { CloseIcon } from '../Icon';
 import styles from './ModalSheet.module.css';
@@ -49,7 +50,9 @@ function prefersReducedMotion(): boolean {
  * уезжает вниз (<768) или сжимается с затуханием (≥768). onClose — после
  * анимации (сразу, если prefers-reduced-motion).
  */
-export function ModalSheet({ open, onClose, children, title, maxWidth = 480, closeLabel = 'Закрыть' }: ModalSheetProps): ReactElement | null {
+export function ModalSheet({ open, onClose, children, title, maxWidth = 480, closeLabel }: ModalSheetProps): ReactElement | null {
+  const { t } = useTranslation();
+  const resolvedCloseLabel = closeLabel ?? t('core:a11y.close', { defaultValue: 'Close' });
   const sheetRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
@@ -213,7 +216,7 @@ export function ModalSheet({ open, onClose, children, title, maxWidth = 480, clo
           {shownTitle ? (
             <div className={styles.header}>
               <h2 className={styles.title}>{shownTitle}</h2>
-              <button type="button" className={styles.closeButton} onClick={requestClose} aria-label={closeLabel}>
+              <button type="button" className={styles.closeButton} onClick={requestClose} aria-label={resolvedCloseLabel}>
                 <CloseIcon width={20} height={20} />
               </button>
             </div>

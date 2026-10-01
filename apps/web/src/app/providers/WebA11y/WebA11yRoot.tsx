@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
+import { DS_COLORS } from 'shared/themes/ds';
 import { navigationRef } from '../../navigation/navigationRef';
 import { useWebPointerDragScroll } from 'shared/lib/web/useWebPointerDragScroll';
 import { useWebSwipeBack } from 'shared/lib/web/useWebSwipeBack';
@@ -81,7 +82,7 @@ input, textarea, select {
     cursor: grabbing !important;
   }
   *:focus-visible {
-    outline: 2px solid rgba(246, 192, 27, 0.95);
+    outline: 2px solid ${DS_COLORS.calm500};
     outline-offset: 2px;
   }
 }

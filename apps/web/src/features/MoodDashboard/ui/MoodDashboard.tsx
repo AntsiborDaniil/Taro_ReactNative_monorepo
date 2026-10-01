@@ -1,6 +1,5 @@
 import { ReactElement, useEffect, useRef, useState } from 'react';
 import {
-  Platform,
   Pressable,
   StyleSheet,
   TouchableOpacity,
@@ -14,10 +13,9 @@ import {
   getMonthDate,
   getMonthDayDate,
   getWeekDate,
-  WEB_HOVER_TRANSITION,
 } from 'shared/lib';
-import { COLORS } from 'shared/themes';
-import { AreaGraphs, EmptyResultsModal, Text } from 'shared/ui';
+import { DS_COLORS, dsWebTransition } from 'shared/themes/ds';
+import { AreaGraphs, EmptyResultsModal, Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import MoodProgress from './MoodProgress';
 
@@ -41,11 +39,12 @@ const CONFIG = {
   },
 };
 
+/** DS: единственные три роли для серий графика — accent/calm/alarm. */
 const DESIGN = {
   date: { color: 'transparent' },
-  mood: { color: '#2658B7' },
-  energy: { color: '#50A622' },
-  stress: { color: '#AC2224' },
+  mood: { color: DS_COLORS.accent400 },
+  energy: { color: DS_COLORS.calm500 },
+  stress: { color: DS_COLORS.alarm600 },
 };
 
 const GRAPH_KEYS = ['mood', 'energy', 'stress'] as const;
@@ -58,7 +57,6 @@ function MoodDashboard({
   const { t } = useTranslation('moodAndEnergy');
   const { t: tCore } = useTranslation('core');
   const [visible, setVisible] = useState(false);
-  const [dateHovered, setDateHovered] = useState(false);
 
   const { displayData, moodDataReady, setDateMode, dateMode } = useData({
     Context: MoodAndEnergyContext,
@@ -101,7 +99,9 @@ function MoodDashboard({
           styles.emptyStub,
         ]}
       >
-        <Text style={styles.emptyStubText}>{tCore('stub.emptyResults')}</Text>
+        <Text category={TEXT_TAGS.p2} style={styles.emptyStubText}>
+          {tCore('stub.emptyResults')}
+        </Text>
       </View>
     );
   }
@@ -116,81 +116,55 @@ function MoodDashboard({
       ]}
     >
       {!isWidget && (
-        <>
-          <View style={[styles.decorOrb, styles.decorOrbTop]} />
-          <View style={[styles.decorOrb, styles.decorOrbBottom]} />
-          <View style={styles.decorGrid} />
-        </>
-      )}
-      {!isWidget && (
         <View style={styles.header}>
           <View style={styles.headerTitleGroup}>
-            <Text style={styles.headerEyebrow}>{t('chart.eyebrow')}</Text>
-            <Text style={styles.headerTitle}>{t('chart.title')}</Text>
+            <Text category={TEXT_TAGS.label} style={styles.headerEyebrow}>
+              {t('chart.eyebrow')}
+            </Text>
+            <Text
+              category={TEXT_TAGS.h5}
+              weight={TEXT_WEIGHT.semibold}
+              style={styles.headerTitle}
+            >
+              {t('chart.title')}
+            </Text>
           </View>
           <View style={styles.dateActionWrapper}>
             <Pressable
-              style={({ pressed }) => [
+              style={({ pressed, ...rest }: { pressed: boolean; hovered?: boolean }) => [
                 styles.dateAction,
-                dateHovered && styles.dateActionHover,
+                rest.hovered && styles.dateActionHover,
                 pressed && styles.dateActionPressed,
               ]}
-              onHoverIn={() => setDateHovered(true)}
-              onHoverOut={() => setDateHovered(false)}
               onPress={() => setVisible((prevState) => !prevState)}
             >
-              <Text style={styles.dateActionText}>
+              <Text category={TEXT_TAGS.label} style={styles.dateActionText}>
                 {t(`datesPeriod.${dateMode}`)}
               </Text>
             </Pressable>
 
             {visible && (
               <View style={styles.dates}>
-                <TouchableOpacity
-                  style={styles.dateItem}
-                  onPress={selectDateMode(MoodDisplayMode.Week)}
-                >
-                  <Text
-                    style={[
-                      styles.dateItemText,
-                      dateMode === MoodDisplayMode.Week
-                        ? styles.activeDate
-                        : undefined,
-                    ]}
-                  >
-                    {t(`datesPeriod.${MoodDisplayMode.Week}`)}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.dateItem}
-                  onPress={selectDateMode(MoodDisplayMode.Month)}
-                >
-                  <Text
-                    style={[
-                      styles.dateItemText,
-                      dateMode === MoodDisplayMode.Month
-                        ? styles.activeDate
-                        : undefined,
-                    ]}
-                  >
-                    {t(`datesPeriod.${MoodDisplayMode.Month}`)}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.dateItem}
-                  onPress={selectDateMode(MoodDisplayMode.Year)}
-                >
-                  <Text
-                    style={[
-                      styles.dateItemText,
-                      dateMode === MoodDisplayMode.Year
-                        ? styles.activeDate
-                        : undefined,
-                    ]}
-                  >
-                    {t(`datesPeriod.${MoodDisplayMode.Year}`)}
-                  </Text>
-                </TouchableOpacity>
+                {[MoodDisplayMode.Week, MoodDisplayMode.Month, MoodDisplayMode.Year].map(
+                  (mode) => (
+                    <TouchableOpacity
+                      key={mode}
+                      style={styles.dateItem}
+                      onPress={selectDateMode(mode)}
+                    >
+                      <Text
+                        category={TEXT_TAGS.label}
+                        weight={dateMode === mode ? TEXT_WEIGHT.bold : undefined}
+                        style={[
+                          styles.dateItemText,
+                          dateMode === mode && styles.activeDate,
+                        ]}
+                      >
+                        {t(`datesPeriod.${mode}`)}
+                      </Text>
+                    </TouchableOpacity>
+                  )
+                )}
               </View>
             )}
           </View>
@@ -198,7 +172,6 @@ function MoodDashboard({
       )}
       {!isWidget && (
         <View style={styles.graphCard}>
-          <View style={styles.graphGlow} />
           <AreaGraphs
             data={displayData ?? []}
             yAxisKeys={[...GRAPH_KEYS]}
@@ -221,7 +194,9 @@ function MoodDashboard({
                   { backgroundColor: DESIGN[key].color },
                 ]}
               />
-              <Text style={styles.legendLabel}>{t(`name.${key}`)}</Text>
+              <Text category={TEXT_TAGS.label} style={styles.legendLabel}>
+                {t(`name.${key}`)}
+              </Text>
             </View>
           ))}
         </View>
@@ -237,9 +212,9 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
     alignSelf: 'stretch',
     alignItems: 'stretch',
-    backgroundColor: COLORS.Background,
+    backgroundColor: DS_COLORS.ground700,
     borderWidth: 1,
-    borderColor: 'rgba(132, 176, 230, 0.16)',
+    borderColor: DS_COLORS.ground600,
     borderRadius: 16,
     paddingTop: 10,
     paddingBottom: 10,
@@ -254,12 +229,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     borderRadius: 18,
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow:
-            '0 0 0 1px rgba(132, 176, 230, 0.08), 0 12px 28px rgba(0, 0, 0, 0.2)',
-        } as object)
-      : {}),
   },
   emptyStub: {
     minHeight: 120,
@@ -269,11 +238,8 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
   },
   emptyStubText: {
-    color: COLORS.Content,
-    fontSize: 16,
+    color: DS_COLORS.ink100,
     textAlign: 'center',
-    opacity: 0.85,
-    ...(Platform.OS === 'web' ? ({ lineHeight: 22 } as object) : {}),
   },
   header: {
     justifyContent: 'space-between',
@@ -283,21 +249,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 14,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(132, 176, 230, 0.14)',
+    borderBottomColor: DS_COLORS.ground600,
   },
   headerTitleGroup: {
     gap: 2,
   },
   headerEyebrow: {
-    color: 'rgba(191, 170, 255, 0.9)',
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 1.1,
+    color: DS_COLORS.accent400,
   },
   headerTitle: {
-    color: '#F3F6FF',
-    fontSize: 18,
-    fontWeight: '700',
+    color: DS_COLORS.ink50,
   },
   dateActionWrapper: {
     position: 'relative',
@@ -310,27 +271,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(132, 176, 230, 0.28)',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    ...WEB_HOVER_TRANSITION,
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
+    ...dsWebTransition,
   },
   dateActionText: {
-    color: COLORS.Content,
-    fontSize: 15,
-    fontWeight: '600',
-    ...(Platform.OS === 'web' ? ({ lineHeight: 20 } as object) : {}),
+    color: DS_COLORS.ink50,
   },
-  dateActionHover:
-    Platform.OS === 'web'
-      ? ({
-          backgroundColor: 'rgba(255, 255, 255, 0.06)',
-        } as object)
-      : {},
+  dateActionHover: {
+    borderColor: DS_COLORS.accent400,
+  },
   dateActionPressed: {
     opacity: 0.85,
   },
   dates: {
-    backgroundColor: COLORS.Background2,
+    backgroundColor: DS_COLORS.ground800,
     padding: 10,
     position: 'absolute',
     gap: 6,
@@ -339,12 +294,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     zIndex: 100,
     borderWidth: 1,
-    borderColor: 'rgba(132, 176, 230, 0.26)',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 10px 24px rgba(0, 0, 0, 0.22)',
-        } as object)
-      : {}),
+    borderColor: DS_COLORS.ground600,
   },
   dateItem: {
     paddingVertical: 6,
@@ -352,18 +302,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   dateItemText: {
-    color: COLORS.Content,
-    fontSize: 14,
-    fontWeight: '500',
+    color: DS_COLORS.ink100,
   },
   activeDate: {
-    color: COLORS.Primary,
-    fontWeight: '700',
-    ...(Platform.OS === 'web'
-      ? ({
-          textDecorationLine: 'underline',
-        } as object)
-      : {}),
+    color: DS_COLORS.accent400,
   },
   graphCard: {
     marginTop: 4,
@@ -372,24 +314,10 @@ const styles = StyleSheet.create({
     paddingTop: 6,
     paddingBottom: 4,
     borderWidth: 1,
-    borderColor: 'rgba(132, 176, 230, 0.14)',
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
     overflow: 'hidden',
     position: 'relative',
-  },
-  graphGlow: {
-    position: 'absolute',
-    width: 220,
-    height: 120,
-    borderRadius: 999,
-    right: -40,
-    top: -35,
-    backgroundColor: 'rgba(246, 192, 27, 0.12)',
-    ...(Platform.OS === 'web'
-      ? ({
-          filter: 'blur(20px)',
-        } as object)
-      : {}),
   },
   legend: {
     flexDirection: 'row',
@@ -412,54 +340,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   legendLabel: {
-    color: 'rgba(216, 228, 247, 0.78)',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  decorOrb: {
-    position: 'absolute',
-    borderRadius: 999,
-    zIndex: 0,
-  },
-  decorOrbTop: {
-    width: 170,
-    height: 170,
-    top: -95,
-    right: -46,
-    backgroundColor: 'rgba(246, 192, 27, 0.16)',
-    ...(Platform.OS === 'web'
-      ? ({
-          filter: 'blur(16px)',
-        } as object)
-      : {}),
-  },
-  decorOrbBottom: {
-    width: 150,
-    height: 150,
-    bottom: -92,
-    left: -54,
-    backgroundColor: 'rgba(47, 186, 216, 0.14)',
-    ...(Platform.OS === 'web'
-      ? ({
-          filter: 'blur(14px)',
-        } as object)
-      : {}),
-  },
-  decorGrid: {
-    position: 'absolute',
-    right: 20,
-    bottom: 22,
-    width: 84,
-    height: 84,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(246, 192, 27, 0.16)',
-    backgroundColor: 'rgba(246, 192, 27, 0.03)',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.02)',
-        } as object)
-      : {}),
+    color: DS_COLORS.ink100,
   },
 });
 

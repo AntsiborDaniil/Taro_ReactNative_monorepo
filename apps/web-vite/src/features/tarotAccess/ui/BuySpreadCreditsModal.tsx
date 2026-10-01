@@ -37,6 +37,8 @@ export function BuySpreadCreditsModal({ onClose, copyNamespace = 'settings' }: B
 
   const user = useAppSelector((state) => state.user.user);
   const spreadCredits = useAppSelector((state) => state.user.spreadCredits);
+  /** Лимит берём из ответа API (tarotDaily), чтобы копия не расходилась с TAROT_DAILY_INTERPRET_LIMIT. */
+  const dailyLimit = useAppSelector((state) => state.user.tarotDaily?.limit ?? 1);
   const [lavaCheckout, { isLoading }] = useLavaCheckoutMutation();
 
   const suggestedEmail = useMemo(() => {
@@ -94,7 +96,7 @@ export function BuySpreadCreditsModal({ onClose, copyNamespace = 'settings' }: B
         {tCopy(titleKey)}
       </Text>
       <Text role="body" tone="ink100" className={styles.subtitle}>
-        {tCopy(bodyKey)}
+        {tCopy(bodyKey, { limit: dailyLimit })}
       </Text>
 
       {spreadCredits > 0 ? (

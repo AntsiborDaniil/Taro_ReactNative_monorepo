@@ -1,12 +1,4 @@
-import {
-  Image,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Image, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { ApplicationConfigContext } from 'entities/ApplicationConfig';
 import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
@@ -14,7 +6,7 @@ import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
 import { GetIcon, QuitIcon } from 'shared/icons';
 import { getImage, WEB_HOVER_TRANSITION } from 'shared/lib';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { DS_COLORS, dsWebTransition } from 'shared/themes/ds';
 import {
   HabitType,
   NavigationRoute,
@@ -52,19 +44,10 @@ function HabitChoose() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.heroStage}>
-          <View style={styles.heroGlow} />
           <Image
             style={styles.image}
             resizeMode="contain"
             source={getImage(['core', 'paidGirl'])}
-          />
-          <LinearGradient
-            colors={[
-              'transparent',
-              getColorOpacity(COLORS.Background, 55),
-              COLORS.Background,
-            ]}
-            style={styles.heroFade}
           />
         </View>
 
@@ -92,28 +75,16 @@ function HabitChoose() {
             const { hovered, pressed } = state;
             return [
               styles.choiceCard,
-              styles.choiceCardBuild,
-              hovered && styles.choiceCardBuildHovered,
+              hovered && styles.choiceCardHovered,
               pressed && styles.choiceCardPressed,
             ];
           }}
         >
-          <LinearGradient
-            colors={[
-              'rgba(246, 192, 27, 0.16)',
-              'rgba(47, 186, 216, 0.06)',
-              'transparent',
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.cardWash}
-          />
-          <View style={[styles.cardAccent, styles.cardAccentBuild]} />
           <View style={styles.choiceHeader}>
-            <Text style={[styles.caption, styles.captionBuild]} category={TEXT_TAGS.label}>
+            <Text style={styles.caption} category={TEXT_TAGS.label}>
               {t('habits:choose.badge.build')}
             </Text>
-            <View style={[styles.iconWrapper, styles.iconWrapperBuild]}>
+            <View style={styles.iconWrapper}>
               <GetIcon style={styles.icon} />
             </View>
           </View>
@@ -133,28 +104,16 @@ function HabitChoose() {
             const { hovered, pressed } = state;
             return [
               styles.choiceCard,
-              styles.choiceCardQuit,
-              hovered && styles.choiceCardQuitHovered,
+              hovered && styles.choiceCardHovered,
               pressed && styles.choiceCardPressed,
             ];
           }}
         >
-          <LinearGradient
-            colors={[
-              'rgba(255, 99, 127, 0.14)',
-              'rgba(211, 159, 19, 0.05)',
-              'transparent',
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.cardWash}
-          />
-          <View style={[styles.cardAccent, styles.cardAccentQuit]} />
           <View style={styles.choiceHeader}>
-            <Text style={[styles.caption, styles.captionQuit]} category={TEXT_TAGS.label}>
+            <Text style={styles.caption} category={TEXT_TAGS.label}>
               {t('habits:choose.badge.quit')}
             </Text>
-            <View style={[styles.iconWrapper, styles.iconWrapperQuit]}>
+            <View style={styles.iconWrapper}>
               <QuitIcon style={styles.icon} />
             </View>
           </View>
@@ -187,17 +146,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     overflow: 'hidden',
     borderRadius: 20,
-  },
-  heroGlow: {
-    position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 999,
-    top: 10,
-    backgroundColor: getColorOpacity(COLORS.Primary500, 12),
-    ...(Platform.OS === 'web'
-      ? ({ filter: 'blur(28px)' } as object)
-      : {}),
+    backgroundColor: DS_COLORS.ground800,
   },
   image: {
     height: 240,
@@ -205,76 +154,44 @@ const styles = StyleSheet.create({
     maxWidth: 280,
     marginBottom: -28,
   },
-  heroFade: {
-    ...StyleSheet.absoluteFillObject,
-    top: '45%',
-  },
   copyBlock: {
     gap: 6,
     marginBottom: 4,
     paddingHorizontal: 2,
   },
   eyebrow: {
-    color: COLORS.Primary500,
+    color: DS_COLORS.accent400,
     letterSpacing: 1.4,
     textTransform: 'uppercase',
   },
   pageTitle: {
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
     letterSpacing: 0.3,
   },
   pageSubtitle: {
-    color: getColorOpacity(COLORS.Content, 68),
+    color: DS_COLORS.ink100,
     lineHeight: 22,
   },
   choiceCard: {
-    backgroundColor: 'rgba(22, 28, 38, 0.92)',
-    borderColor: getColorOpacity(COLORS.Primary500, 14),
+    backgroundColor: DS_COLORS.ground700,
+    borderColor: DS_COLORS.ground600,
     borderWidth: 1,
     borderRadius: 20,
     padding: 18,
     gap: 10,
     overflow: 'hidden',
+    ...dsWebTransition,
     ...(Platform.OS === 'web'
-      ? ({
-          cursor: 'pointer',
-          boxShadow: '0 14px 32px rgba(8, 12, 20, 0.35)',
-          ...WEB_HOVER_TRANSITION,
-        } as object)
+      ? ({ cursor: 'pointer', ...WEB_HOVER_TRANSITION } as object)
       : {}),
   },
-  choiceCardBuild: {
-    borderColor: 'rgba(246, 192, 27, 0.28)',
+  choiceCardHovered: {
+    borderColor: DS_COLORS.accent400,
   },
-  choiceCardQuit: {
-    borderColor: 'rgba(255, 99, 127, 0.28)',
-  },
-  choiceCardBuildHovered: {
-    borderColor: 'rgba(246, 192, 27, 0.55)',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow:
-            '0 18px 36px rgba(8, 12, 20, 0.42), 0 0 28px rgba(246, 192, 27, 0.12)',
-          transform: [{ translateY: -2 }],
-        } as object)
-      : {}),
-  },
-  choiceCardQuitHovered: {
-    borderColor: 'rgba(255, 99, 127, 0.5)',
-    ...(Platform.OS === 'web'
-      ? ({
-          boxShadow:
-            '0 18px 36px rgba(8, 12, 20, 0.42), 0 0 28px rgba(255, 99, 127, 0.12)',
-          transform: [{ translateY: -2 }],
-        } as object)
-      : {}),
-  },
-  choiceCardPressed: {
-    opacity: 0.96,
-  },
-  cardWash: {
-    ...StyleSheet.absoluteFillObject,
-  },
+  choiceCardPressed: Platform.select({
+    web: { transform: [{ translateY: 1 }] } as object,
+    default: { opacity: 0.96 },
+  }),
   choiceHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -283,20 +200,15 @@ const styles = StyleSheet.create({
   caption: {
     letterSpacing: 1.1,
     textTransform: 'uppercase',
-  },
-  captionBuild: {
-    color: COLORS.Primary300,
-  },
-  captionQuit: {
-    color: COLORS.Danger400,
+    color: DS_COLORS.ink100,
   },
   text: {
     textAlign: 'left',
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
     letterSpacing: 0.2,
   },
   cardDescription: {
-    color: getColorOpacity(COLORS.Content, 68),
+    color: DS_COLORS.ink100,
     lineHeight: 22,
   },
   icon: {
@@ -310,29 +222,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-  },
-  iconWrapperBuild: {
-    borderColor: getColorOpacity(COLORS.Primary500, 45),
-    backgroundColor: getColorOpacity(COLORS.Primary500, 12),
-  },
-  iconWrapperQuit: {
-    borderColor: getColorOpacity(COLORS.Danger500, 42),
-    backgroundColor: getColorOpacity(COLORS.Danger500, 12),
-  },
-  cardAccent: {
-    position: 'absolute',
-    width: 72,
-    height: 3,
-    left: 18,
-    top: 0,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-  },
-  cardAccentBuild: {
-    backgroundColor: COLORS.Primary500,
-  },
-  cardAccentQuit: {
-    backgroundColor: COLORS.Danger500,
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground800,
   },
 });
 

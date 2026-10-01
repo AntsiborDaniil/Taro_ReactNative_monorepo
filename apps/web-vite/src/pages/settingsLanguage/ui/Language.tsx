@@ -9,9 +9,9 @@ import ruFlag from '@legacy-icons/Ru.svg';
 import enFlag from '@legacy-icons/En.svg';
 import styles from './Language.module.css';
 
-const LANGUAGES: { title: string; value: AppLanguage; flag: string }[] = [
-  { title: 'Русский', value: 'ru', flag: ruFlag },
-  { title: 'English', value: 'en', flag: enFlag },
+const LANGUAGES: { labelKey: string; value: AppLanguage; flag: string }[] = [
+  { labelKey: 'settings:language.options.ru', value: 'ru', flag: ruFlag },
+  { labelKey: 'settings:language.options.en', value: 'en', flag: enFlag },
 ];
 
 /**
@@ -47,7 +47,7 @@ export default function LanguagePage(): ReactElement {
             >
               <span className={styles.itemLeft}>
                 <SmartImage className={styles.flag} src={language.flag} />
-                <span>{language.title}</span>
+                <span>{t(language.labelKey)}</span>
               </span>
               {selected ? <CheckIcon width={22} height={22} className={styles.check} /> : null}
             </button>

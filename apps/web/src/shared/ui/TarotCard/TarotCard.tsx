@@ -15,6 +15,7 @@ import { useData } from 'shared/DataProvider';
 import { Checked, LockIcon } from 'shared/icons';
 import { getImage } from 'shared/lib';
 import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { OverlayIcon } from '../OverlayIcon';
 
 type TarotCardProps = {
@@ -74,7 +75,7 @@ function TarotCard({
 
   const animatedBorderColor = borderColorAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [COLORS.Content, COLORS.Accent],
+    outputRange: [DS_COLORS.ground600, DS_COLORS.accent400],
   });
 
   const hasExplicitSize =
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   iconWrapper: {
-    backgroundColor: COLORS.Accent,
+    backgroundColor: DS_COLORS.accent400,
   },
 });
 

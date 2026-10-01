@@ -24,13 +24,6 @@
   }
 }
 
-/* <900px — FabNav перекрывает низ страницы. */
-@media (max-width: 899px) {
-  .column {
-    padding-bottom: 104px;
-  }
-}
-
 .question {
   display: flex;
   flex-direction: column;
@@ -190,6 +183,8 @@
   border: var(--ds-size-hairline) solid var(--ds-ground-600);
   background: var(--ds-ground-800);
   animation: panelIn var(--ds-dur-block) var(--ds-ease) both;
+  /* touch-action: pan-y — вертикальный скролл текста ок, горизонталь ловим сами. */
+  touch-action: pan-y;
 }
 
 @keyframes panelIn {
@@ -315,9 +310,15 @@
 
 .actions {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
   gap: var(--ds-space-12);
+}
+
+.actionBtn {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

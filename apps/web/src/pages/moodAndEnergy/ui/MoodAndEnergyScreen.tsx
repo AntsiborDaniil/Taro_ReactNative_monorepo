@@ -6,7 +6,7 @@ import { Header } from 'features/header';
 import { MoodDashboard, MoodProgress } from 'features/MoodDashboard';
 import type { TMoodItem } from 'shared/api';
 import { useData } from 'shared/DataProvider';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { ScreenLayout, Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 import { InputSlider } from 'shared/ui/Slider/Slider';
 
@@ -17,12 +17,7 @@ export type MoodAndEnergyScreenProps = {};
 
 const METRICS: Array<{
   key: keyof Pick<TMoodItem, 'mood' | 'energy' | 'stress'>;
-  color: string;
-}> = [
-  { key: 'mood', color: '#2658B7' },
-  { key: 'energy', color: '#50A622' },
-  { key: 'stress', color: '#AC2224' },
-];
+}> = [{ key: 'mood' }, { key: 'energy' }, { key: 'stress' }];
 
 const SCALE_MIN = 0;
 const SCALE_MAX = 10;
@@ -93,7 +88,6 @@ function MoodAndEnergyScreen(_props: MoodAndEnergyScreenProps): ReactElement {
                   key={metric.key}
                   label={t(`name.${metric.key}`)}
                   hint={t(`hint.${metric.key}`)}
-                  color={metric.color}
                   value={todayValues?.[metric.key] ?? SCALE_MIN}
                   unset={todayValues?.[metric.key] == null}
                   minValue={SCALE_MIN}
@@ -148,14 +142,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   introEyebrow: {
-    color: getColorOpacity(COLORS.Primary, 82),
+    color: DS_COLORS.accent400,
     letterSpacing: 1.1,
   },
   introTitle: {
-    color: COLORS.Content,
+    color: DS_COLORS.ink50,
   },
   introBody: {
-    color: getColorOpacity(COLORS.Content, 64),
+    color: DS_COLORS.ink100,
     lineHeight: 20,
     maxWidth: 560,
   },

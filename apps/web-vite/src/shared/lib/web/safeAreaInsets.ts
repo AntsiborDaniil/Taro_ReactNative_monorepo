@@ -3,7 +3,7 @@ import { readTelegramSafeAreaInsets } from './telegramWebApp';
 /**
  * Пробрасывает safe-area (CSS env() + Telegram WebApp.safeAreaInset) в CSS-переменные
  * --safe-top/--safe-right/--safe-bottom/--safe-left на :root. Используется в AppShell/
- * FabNav/Header для отступов под чёлку/жестовую полосу и Telegram Mini App safe area.
+ * BottomTabBar/Header для отступов под чёлку/жестовую полосу и Telegram Mini App safe area.
  */
 function readCssEnvInset(side: 'top' | 'right' | 'bottom' | 'left'): number {
   if (typeof document === 'undefined' || !document.body) return 0;

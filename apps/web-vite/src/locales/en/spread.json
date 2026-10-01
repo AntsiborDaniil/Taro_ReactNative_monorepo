@@ -32,7 +32,7 @@
   "limit.body": "Become a Tarot Practitioner or wait for a new day.",
 
   "dailyLimit.title": "Daily spread limit reached",
-  "dailyLimit.body": "You get up to 3 free AI spreads per day. Buy a +3 pack or come back tomorrow. After payment, charges usually appear within ~5 minutes.",
+  "dailyLimit.body": "Free AI spreads per day: {{limit}}. Buy a +3 pack or come back tomorrow. After payment, charges usually appear within ~5 minutes.",
   "dailyLimit.emailLabel": "Email for payment",
   "dailyLimit.emailPlaceholder": "name@yandex.ru",
   "dailyLimit.emailHint": "Payment only with a Yandex email (@yandex.ru, @ya.ru, etc.). The receipt will be sent here.",
@@ -194,7 +194,7 @@
   "newSpread": "New spread",
 
   "flow.cardCounter": "Card {{current}} of {{total}}",
-  "flow.cardNavHint": "Use the arrows — every card has its own reading",
+  "flow.cardNavHint": "Use arrows or swipe — every card has its own reading",
   "flow.nextCard": "Next card",
 
   "summaryTitle": "General overview",

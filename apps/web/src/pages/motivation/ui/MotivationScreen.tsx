@@ -21,7 +21,7 @@ import TarotMeanings from 'features/TarotCardReadings/ui/TarotMeanings/TarotMean
 import { useNativeNavigation } from 'shared/hooks';
 import { LeafIcon, ReverseIcon } from 'shared/icons';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { NavigationRoute, TabRoute } from 'shared/types';
 import { TarotCardDirection } from '../../../shared/api';
 
@@ -137,18 +137,8 @@ function MoticationScreen(
                     maxWidth: '100%',
                     alignSelf: 'center',
                     ...(Platform.OS === 'web'
-                      ? ({
-                          boxShadow: '0 12px 40px rgba(0,0,0,0.35)',
-                          cursor: 'pointer',
-                          ...WEB_HOVER_TRANSITION,
-                        } as object)
-                      : {
-                          shadowColor: '#000',
-                          shadowOffset: { width: 0, height: 8 },
-                          shadowOpacity: 0.35,
-                          shadowRadius: 16,
-                          elevation: 12,
-                        }),
+                      ? ({ cursor: 'pointer', ...WEB_HOVER_TRANSITION } as object)
+                      : {}),
                   }}
                   cardId={card.id}
                   direction={card.direction}
@@ -159,7 +149,7 @@ function MoticationScreen(
             <View style={styles.titleBlock}>
               <View style={styles.titleContainer} onLayout={handleTitleLayout}>
                 <LeafIcon
-                  fill={COLORS.Primary}
+                  fill={DS_COLORS.accent400}
                   width={28}
                   height={28}
                   style={styles.leftLeaf}
@@ -167,7 +157,7 @@ function MoticationScreen(
                 <Text category={TEXT_TAGS.h2} style={styles.title}>
                   {resultedTitle}
                 </Text>
-                <LeafIcon fill={COLORS.Primary} width={28} height={28} />
+                <LeafIcon fill={DS_COLORS.accent400} width={28} height={28} />
                 <LikeCard
                   card={card}
                   onAdditionalPress={async () => await handleVibrationClick?.()}
@@ -214,7 +204,7 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
     alignSelf: 'stretch',
     zIndex: 2,
-    backgroundColor: COLORS.Background,
+    backgroundColor: DS_COLORS.ground900,
   },
   scroll: {
     flex: 1,
@@ -247,10 +237,10 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     overflow: 'visible',
   },
-  cardPressablePressed: {
-    opacity: 0.92,
-    transform: [{ scale: 0.985 }],
-  },
+  cardPressablePressed: Platform.select({
+    web: { transform: [{ translateY: 1 }] } as object,
+    default: { opacity: 0.92 },
+  }),
   leftLeaf: {
     transform: [{ scaleX: -1 }],
   },

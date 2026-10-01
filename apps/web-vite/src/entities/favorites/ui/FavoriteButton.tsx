@@ -59,7 +59,7 @@ export function FavoriteButton({ cardId, cardName, className, size = 24 }: Favor
       className={[styles.button, isLiked ? styles.active : '', className].filter(Boolean).join(' ')}
       onClick={handleClick}
       aria-pressed={isLiked}
-      aria-label={isLiked ? t('core:card.unlike', { defaultValue: 'Убрать из избранного' }) : t('core:card.like', { defaultValue: 'В избранное' })}
+      aria-label={isLiked ? t('core:card.unlike', { defaultValue: 'Remove from favorites' }) : t('core:card.like', { defaultValue: 'Add to favorites' })}
     >
       <HeartIcon width={size} height={size} className={styles.icon} />
     </button>

@@ -16,17 +16,14 @@ import Animated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
-import Carousel, {
-  ICarouselInstance,
-  Pagination,
-} from 'react-native-reanimated-carousel';
+import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { PurchasesPackage } from 'react-native-purchases';
 import { useData } from 'shared/DataProvider';
 import { CrossIcon } from 'shared/icons';
 import { AsyncMemoryKey, getImage, isTablet } from 'shared/lib';
 import { COLORS } from 'shared/themes';
-import { Button, Text, TEXT_TAGS } from 'shared/ui';
+import { Button, ProgressLines, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
 import { PaymentContext } from '../../payment';
 
@@ -76,6 +73,7 @@ function HelloScreen() {
 
   const [isButtonVisible, setIsButtonVisible] = useState<boolean>(false);
   const [isLastScreen, setIsLastScreen] = useState<boolean>(false);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   const { t } = useTranslation('hello');
   const { t: tCore } = useTranslation('core');
@@ -99,8 +97,10 @@ function HelloScreen() {
 
   const handleProgressChange = (_: number, progressValue: number) => {
     progress.value = progressValue;
+    const rounded = Math.round(progressValue);
+    setCurrentIndex((prev) => (prev === rounded ? prev : rounded));
     // Проверяем, находится ли пользователь на последнем слайде
-    if (Math.round(progressValue) === HELLO_SCREENS.length - 1) {
+    if (rounded === HELLO_SCREENS.length - 1) {
       setIsLastScreen(true);
     }
   };
@@ -200,28 +200,12 @@ function HelloScreen() {
                   })}
                 </Text>
               </View>
-              <Pagination.Basic
-                progress={progress}
-                data={HELLO_SCREENS}
-                dotStyle={{
-                  height: 8,
-                  width: 8,
-                  borderRadius: 6,
-                  backgroundColor: COLORS.SpbSky3,
-                }}
-                activeDotStyle={{
-                  overflow: 'hidden',
-                  borderRadius: 6,
-                  backgroundColor: COLORS.Primary,
-                }}
-                containerStyle={{
-                  gap: 8,
-                  paddingHorizontal: 16,
-                  paddingBottom: 16,
-                }}
-                horizontal
-                // onPress={onPressPagination}
-              />
+              <View style={styles.progressWrap}>
+                <ProgressLines
+                  linesCount={HELLO_SCREENS.length}
+                  completedLinesCount={currentIndex + 1}
+                />
+              </View>
 
               {isLoading ? (
                 <ActivityIndicator
@@ -281,6 +265,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   titleText: { textAlign: 'center' },
+  progressWrap: {
+    width: '100%',
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
   button: {
     marginTop: 16,
     width: '100%',

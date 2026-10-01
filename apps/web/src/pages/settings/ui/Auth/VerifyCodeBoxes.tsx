@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 
 const CODE_LENGTH = 6;
 
@@ -142,14 +143,15 @@ const styles = StyleSheet.create({
     height: BOX_SIZE,
     borderRadius: 10,
     borderWidth: 1.5,
-    borderColor: 'rgba(128, 174, 226, 0.45)',
-    backgroundColor: 'rgba(12, 22, 42, 0.65)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  /** Заполненная цифра — кант accent400 (см. DS §правила выбора). */
   boxFilled: {
     borderColor: COLORS.Primary,
-    backgroundColor: 'rgba(102, 154, 211, 0.18)',
+    backgroundColor: DS_COLORS.ground600,
   },
   boxDisabled: {
     opacity: 0.55,

@@ -3,7 +3,10 @@ import type { ComponentType } from 'react';
 export type ModalComponentProps = { onClose: () => void } & Record<string, unknown>;
 
 export type ModalRegistryEntry = {
+  /** Готовый заголовок листа. Для языка интерфейса лучше titleKey. */
   title?: string;
+  /** Ключ i18n (с неймспейсом), например settings:credits.buy.sheetTitle. */
+  titleKey?: string;
   Component: ComponentType<ModalComponentProps>;
 };
 

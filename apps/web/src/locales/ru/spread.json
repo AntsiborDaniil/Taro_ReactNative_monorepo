@@ -32,7 +32,7 @@
   "limit.body": "Станьте Практиком Таро или дождитесь нового дня.",
 
   "dailyLimit.title": "Дневной лимит раскладов исчерпан",
-  "dailyLimit.body": "Бесплатно — до 3 AI-раскладов в сутки. Можно докупить пакет +3 расклада или вернуться завтра. После оплаты заряды обычно появляются в течение ~5 минут.",
+  "dailyLimit.body": "Бесплатных AI-раскладов в сутки: 1. Можно докупить пакет +3 расклада или вернуться завтра. После оплаты заряды обычно появляются в течение ~5 минут.",
   "dailyLimit.emailLabel": "Email для оплаты",
   "dailyLimit.emailPlaceholder": "name@yandex.ru",
   "dailyLimit.emailHint": "Оплата только с почтой Яндекса (@yandex.ru, @ya.ru и др.). Чек придёт на этот адрес.",
@@ -189,5 +189,13 @@
 
   "reverseCard": "Перевернутая карта",
 
-  "summaryTitle": "Общий разбор расклада"
+  "summaryTitle": "Общий разбор расклада",
+
+  "catalog.count_one": "{{count}} карта",
+  "catalog.count_few": "{{count}} карты",
+  "catalog.count_many": "{{count}} карт",
+  "catalog.count_other": "{{count}} карты",
+  "catalog.locked": "Заблокировано",
+  "catalog.empty.title": "Расклады не найдены",
+  "catalog.empty.action": "К популярным раскладам"
 }

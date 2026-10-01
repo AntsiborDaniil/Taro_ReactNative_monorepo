@@ -6,7 +6,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 
 export type RadioProps = {
   checked?: boolean;
@@ -21,7 +21,7 @@ function Radio({ checked }: RadioProps): ReactElement {
     const borderColor = interpolateColor(
       colorProgress.value,
       [0, 1],
-      [COLORS.SpbSky3, COLORS.Primary]
+      [DS_COLORS.ground600, DS_COLORS.accent400]
     );
     return { borderColor };
   });
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   checkedCircle: {
-    backgroundColor: COLORS.Primary,
+    backgroundColor: DS_COLORS.accent400,
     width: '100%',
     height: '100%',
     borderRadius: 20,

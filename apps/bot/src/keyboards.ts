@@ -1,54 +1,79 @@
 import { InlineKeyboard, Keyboard } from 'grammy';
 import { config } from './config';
-import { CHANNEL_HANDLE, CHANNEL_URL, type FaqTopicId } from './messages';
-
-const OPEN_APP_LABEL = '🔮 Открыть Mindful Tarot';
-export const BTN_CHANNEL = '📣 Канал';
-export const BTN_FAQ = '❓ FAQ';
-export const BTN_SUPPORT = '💬 Поддержка';
-export const BTN_HELP = 'ℹ️ Помощь';
+import type { BotLang } from './lang';
+import { webAppUrlWithLang } from './lang';
+import {
+  BTN_LABELS,
+  CHANNEL_HANDLE,
+  CHANNEL_URL,
+  channelLinkLabel,
+  channelOpenLabel,
+  faqButtonLabels,
+  openAppLabel,
+  openSharedReadingLabel,
+  type FaqTopicId,
+} from './messages';
+import { buildSharedReadingWebAppUrl } from './sharedReading';
 
 export { CHANNEL_URL, CHANNEL_HANDLE };
 
-export function openMiniAppInlineKeyboard(): InlineKeyboard {
+export function openMiniAppInlineKeyboard(lang: BotLang): InlineKeyboard {
   return new InlineKeyboard()
-    .webApp(OPEN_APP_LABEL, config.webAppUrl)
+    .webApp(openAppLabel[lang], webAppUrlWithLang(config.webAppUrl, lang))
     .row()
-    .url(`Канал ${CHANNEL_HANDLE}`, CHANNEL_URL);
+    .url(channelLinkLabel[lang], CHANNEL_URL);
+}
+
+/**
+ * Кнопка открытия Mini App сразу на расшаренном раскладе — запасной путь, когда
+ * ссылка `t.me/<bot>?startapp=r_…` открыла чат бота вместо приложения.
+ */
+export function openSharedReadingInlineKeyboard(
+  readingUid: string,
+  lang: BotLang,
+): InlineKeyboard {
+  return new InlineKeyboard()
+    .webApp(
+      openSharedReadingLabel[lang],
+      buildSharedReadingWebAppUrl(readingUid, lang),
+    )
+    .row()
+    .url(channelLinkLabel[lang], CHANNEL_URL);
 }
 
 /** Persistent reply keyboard: quick access to main actions / commands. */
-export function mainReplyKeyboard(): Keyboard {
+export function mainReplyKeyboard(lang: BotLang): Keyboard {
   return new Keyboard()
-    .text(BTN_CHANNEL)
-    .text(BTN_FAQ)
+    .text(BTN_LABELS.channel[lang])
+    .text(BTN_LABELS.faq[lang])
     .row()
-    .text(BTN_SUPPORT)
-    .text(BTN_HELP)
+    .text(BTN_LABELS.support[lang])
+    .text(BTN_LABELS.help[lang])
     .resized()
     .persistent();
 }
 
-export function channelInlineKeyboard(): InlineKeyboard {
+export function channelInlineKeyboard(lang: BotLang): InlineKeyboard {
   return new InlineKeyboard()
-    .url(`Открыть ${CHANNEL_HANDLE}`, CHANNEL_URL)
+    .url(channelOpenLabel[lang], CHANNEL_URL)
     .row()
-    .webApp(OPEN_APP_LABEL, config.webAppUrl);
+    .webApp(openAppLabel[lang], webAppUrlWithLang(config.webAppUrl, lang));
 }
 
-export function faqInlineKeyboard(): InlineKeyboard {
+export function faqInlineKeyboard(lang: BotLang): InlineKeyboard {
+  const labels = faqButtonLabels[lang];
   return new InlineKeyboard()
-    .text('Как купить заряды', 'faq:pay')
+    .text(labels.pay, 'faq:pay')
     .row()
-    .text('Как проходит оплата', 'faq:how')
+    .text(labels.how, 'faq:how')
     .row()
-    .text('Заряды и лимит', 'faq:credits')
+    .text(labels.credits, 'faq:credits')
     .row()
-    .text('Правила сервиса', 'faq:rules')
+    .text(labels.rules, 'faq:rules')
     .row()
-    .text('Не пришли заряды', 'faq:delayed')
+    .text(labels.delayed, 'faq:delayed')
     .row()
-    .webApp(OPEN_APP_LABEL, config.webAppUrl);
+    .webApp(openAppLabel[lang], webAppUrlWithLang(config.webAppUrl, lang));
 }
 
 export function isFaqTopicId(value: string): value is FaqTopicId {

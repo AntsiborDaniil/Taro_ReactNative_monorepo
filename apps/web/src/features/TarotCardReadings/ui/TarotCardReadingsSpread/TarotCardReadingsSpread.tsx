@@ -272,7 +272,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                 {card.direction === TarotCardDirection.Reversed && (
                   <View style={spreadInnerStyles.reversedChip}>
                     <ReverseIcon width={18} height={18} />
-                    <Text style={spreadInnerStyles.reversedChipText}>
+                    <Text weight="semibold" style={spreadInnerStyles.reversedChipText}>
                       {t('spread:reverseCard')}
                     </Text>
                   </View>
@@ -355,7 +355,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                 <SafeAreaView style={styles.content}>
                   <View style={styles.contentInner}>
                     <View style={styles.paddingWrapper}>
-                      <Text style={spreadInnerStyles.readingPositionLabel}>
+                      <Text weight="semibold" style={spreadInnerStyles.readingPositionLabel}>
                         {t('spread:flow.step.read')}
                       </Text>
                       <Text
@@ -461,7 +461,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                   >
                     {!!spread?.cardsOrder?.length && (
                       <View>
-                        <Text style={spreadInnerStyles.readingPositionLabel}>
+                        <Text weight="semibold" style={spreadInnerStyles.readingPositionLabel}>
                           {`${t('core:card')} ${index - (hasSummary ? 1 : 0) + 1}`}
                         </Text>
                         <Text
@@ -577,7 +577,7 @@ function TarotCardReadingsSpread({ cardIndex }: Props) {
                       {card.direction === TarotCardDirection.Reversed && (
                         <View style={spreadInnerStyles.reversedChip}>
                           <ReverseIcon width={18} height={18} />
-                          <Text style={spreadInnerStyles.reversedChipText}>
+                          <Text weight="semibold" style={spreadInnerStyles.reversedChipText}>
                             {t('spread:reverseCard')}
                           </Text>
                         </View>
@@ -754,23 +754,6 @@ const styles = StyleSheet.create({
   readingCard: {
     maxWidth: '100%',
     flexShrink: 1,
-  },
-  readingCardDaySuggest: {
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.75)',
-    borderRadius: 16,
-    ...({
-      boxShadow: '0 18px 34px rgba(0,0,0,0.42)',
-    } as object),
-  },
-  summaryContainer: {
-    backgroundColor: COLORS.Primary,
-    padding: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-    gap: 8,
-    position: 'relative',
-    overflow: 'hidden',
   },
   chevron: {
     flexShrink: 0,

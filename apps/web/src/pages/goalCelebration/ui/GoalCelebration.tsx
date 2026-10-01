@@ -15,7 +15,7 @@ import {
   getDateISO,
   saveAsyncDeviceMemoryKey,
 } from 'shared/lib';
-import { COLORS } from 'shared/themes';
+import { DS_COLORS } from 'shared/themes/ds';
 import { HabitType, NavigationRoute, TabRoute } from 'shared/types';
 import { Button, ScreenLayout, Text, TEXT_TAGS, TEXT_WEIGHT } from 'shared/ui';
 
@@ -75,9 +75,8 @@ function GoalCelebration() {
       <Header showBackButton title={t('achievements:header')} />
       <View style={styles.wrapper}>
         <View style={styles.card}>
-          <View style={styles.ribbon} />
           <View style={styles.iconWrapper}>
-            <Star width={64} height={64} />
+            <Star width={64} height={64} fill={DS_COLORS.accent400} />
           </View>
           <Text
             category={TEXT_TAGS.h2}
@@ -114,7 +113,9 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
-    backgroundColor: COLORS.Background2,
+    backgroundColor: DS_COLORS.ground800,
+    borderWidth: 1,
+    borderColor: DS_COLORS.ground600,
     borderRadius: 24,
     padding: 24,
     alignItems: 'center',
@@ -123,41 +124,31 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
-  ribbon: {
-    position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 220,
-    backgroundColor: COLORS.Primary200,
-    opacity: 0.15,
-    top: -40,
-    right: -60,
-  },
   iconWrapper: {
     width: 112,
     height: 112,
     borderRadius: 56,
-    backgroundColor: COLORS.Primary600,
+    backgroundColor: DS_COLORS.ground700,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 4,
-    borderColor: COLORS.Primary200,
-    boxShadow: `0 12px 24px ${COLORS.Primary}80`,
+    borderWidth: 1,
+    borderColor: DS_COLORS.accent400,
   },
   title: {
     textAlign: 'center',
+    color: DS_COLORS.ink50,
   },
   badge: {
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: COLORS.Primary200,
-    color: COLORS.Background,
+    backgroundColor: DS_COLORS.ground700,
+    color: DS_COLORS.accent400,
     textAlign: 'center',
   },
   description: {
     textAlign: 'center',
-    color: 'rgba(255,255,255,0.74)',
+    color: DS_COLORS.ink100,
     lineHeight: 24,
   },
   button: {

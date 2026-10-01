@@ -27,14 +27,10 @@ import {
   LightningBolt,
   ReverseIcon,
 } from 'shared/icons';
-import {
-  AsyncMemorySettingKey,
-  isTablet,
-  moderateScale,
-  WEB_HOVER_TRANSITION,
-} from 'shared/lib';
+import { AsyncMemorySettingKey, isTablet, moderateScale } from 'shared/lib';
 import { isTelegramMiniApp } from 'shared/lib/web/telegramWebApp';
-import { COLORS, SETTINGS_TYPOGRAPHY } from 'shared/themes';
+import { SETTINGS_TYPOGRAPHY } from 'shared/themes';
+import { DS_COLORS, DS_SIZES, DS_SPACE, dsRadius, dsWebTransition } from 'shared/themes/ds';
 import { AnalyticAction, NavigationRoute, PressableWebState } from 'shared/types';
 import { ScreenLayout, SwitchElement, Text, TEXT_TAGS } from 'shared/ui';
 import { ModalsContext } from 'shared/ui/ModalsProvider';
@@ -227,7 +223,7 @@ function Settings() {
                   <LightningBolt
                     width={isTablet ? 28 : 22}
                     height={isTablet ? 28 : 22}
-                    fill={COLORS.Primary500}
+                    fill={DS_COLORS.accent400}
                   />
                 </View>
                 <View style={webStyles.rowTextCol}>
@@ -350,7 +346,7 @@ function Settings() {
                   <BookIcon
                     width={isTablet ? 28 : 22}
                     height={isTablet ? 28 : 22}
-                    fill={COLORS.Primary500}
+                    fill={DS_COLORS.accent400}
                   />
                 </View>
                 <View style={webStyles.rowTextCol}>
@@ -463,59 +459,54 @@ function createWebStyles() {
     sectionLabel: {
       marginTop: 16,
       marginBottom: 6,
-      color: COLORS.Primary,
+      color: DS_COLORS.accent400,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
     },
     reversedSwitchWrap: {
-      paddingVertical: 20,
-      paddingHorizontal: 18,
+      minHeight: DS_SIZES.listRowHeight,
+      paddingVertical: DS_SPACE.l,
+      paddingHorizontal: DS_SPACE.l,
       width: '100%',
     },
+    /** Группа строк списка DS: ground700, кант ground600, радиус r18. */
     card: {
       width: '100%',
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: 'rgba(246, 192, 27, 0.16)',
-      backgroundColor: COLORS.Background2,
-      paddingVertical: 8,
-      paddingHorizontal: 8,
-      ...(Platform.OS === 'web'
-        ? ({
-            boxShadow:
-              '0 10px 32px rgba(8, 12, 20, 0.35), inset 0 1px 0 rgba(246, 192, 27, 0.05)',
-          } as object)
-        : {}),
+      overflow: 'hidden',
+      borderRadius: dsRadius.listRow,
+      borderWidth: DS_SIZES.hairline,
+      borderColor: DS_COLORS.ground600,
+      backgroundColor: DS_COLORS.ground700,
     },
+    /** Вложенный разделитель между строками одной группы. */
     dividerInCard: {
-      height: StyleSheet.hairlineWidth,
-      backgroundColor: 'rgba(244,244,245,0.12)',
-      marginHorizontal: 8,
+      height: DS_SIZES.hairline,
+      backgroundColor: DS_COLORS.ground600,
+      marginHorizontal: DS_SPACE.l,
     },
     buyRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginTop: 4,
-      paddingVertical: 16,
-      paddingHorizontal: 10,
+      minHeight: DS_SIZES.listRowHeight,
+      paddingHorizontal: DS_SPACE.l,
       ...(Platform.OS === 'web'
-        ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
+        ? ({ cursor: 'pointer' as const, ...dsWebTransition } as object)
         : {}),
     },
+    /** Строка списка DS: h64, иконка слева, шеврон справа (см. card для радиуса группы). */
     row: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingVertical: 12,
-      paddingHorizontal: 10,
-      borderRadius: 12,
+      minHeight: DS_SIZES.listRowHeight,
+      paddingHorizontal: DS_SPACE.l,
       ...(Platform.OS === 'web'
-        ? ({ cursor: 'pointer' as const, ...WEB_HOVER_TRANSITION } as object)
+        ? ({ cursor: 'pointer' as const, ...dsWebTransition } as object)
         : {}),
     },
     rowActive: {
-      backgroundColor: 'rgba(100, 152, 202, 0.12)',
+      backgroundColor: DS_COLORS.pressDim,
     },
     rowTextCol: {
       flex: 1,
@@ -523,60 +514,11 @@ function createWebStyles() {
       gap: 4,
     },
     rowHint: {
-      color: COLORS.SpbSky1,
+      color: DS_COLORS.ink100,
       lineHeight: 18,
     },
     legalSpacer: {
       height: 24,
-    },
-    modalBackdrop: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.55)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 24,
-    },
-    modalCard: {
-      width: '100%',
-      maxWidth: 400,
-      borderRadius: 28,
-      padding: 28,
-      backgroundColor: COLORS.Background2,
-      borderWidth: 1,
-      borderColor: 'rgba(246, 192, 27, 0.22)',
-      gap: 14,
-    },
-    modalHeader: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      justifyContent: 'space-between',
-      gap: 12,
-    },
-    modalTitle: {
-      flex: 1,
-      color: COLORS.Content,
-    },
-    modalSubtitle: {
-      color: COLORS.SpbSky1,
-      lineHeight: 20,
-    },
-    modalButtons: {
-      gap: 14,
-      marginTop: 8,
-      paddingVertical: 20,
-      paddingHorizontal: 16,
-    },
-    storeButton: {
-      width: '100%',
-    },
-    storeButtonSecondary: {
-      width: '100%',
-      backgroundColor: 'transparent',
-      borderWidth: 1,
-      borderColor: COLORS.Primary,
-    },
-    storeButtonOutlineText: {
-      color: COLORS.Primary,
     },
   });
 }

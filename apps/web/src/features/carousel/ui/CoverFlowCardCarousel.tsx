@@ -17,6 +17,7 @@ import { Easing } from 'react-native-reanimated';
 import { useData } from 'shared/DataProvider';
 import { ChevronLeftIcon } from 'shared/icons';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
+import { DS_COLORS } from 'shared/themes/ds';
 import SlideItem from './SlideItem';
 
 const CAROUSEL_DATA = [...Array(7)];
@@ -258,8 +259,8 @@ const styles = StyleSheet.create({
     height: ARROW_SIZE,
     borderRadius: ARROW_SIZE / 2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.28)',
-    backgroundColor: 'rgba(12,19,33,0.72)',
+    borderColor: DS_COLORS.ground600,
+    backgroundColor: DS_COLORS.ground700,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',
@@ -268,7 +269,6 @@ const styles = StyleSheet.create({
     zIndex: 12,
     ...({
       cursor: 'pointer',
-      boxShadow: '0 8px 16px rgba(0,0,0,0.32)',
       ...WEB_HOVER_TRANSITION,
     } as object),
     ...Platform.select({

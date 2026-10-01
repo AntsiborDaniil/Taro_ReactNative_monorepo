@@ -8,7 +8,7 @@ import { Header } from 'features/header';
 import { TSpread } from 'shared/api';
 import { useData } from 'shared/DataProvider';
 import { useNativeNavigation } from 'shared/hooks';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { DS_COLORS, dsRadius } from 'shared/themes/ds';
 import { NavigationRoute } from 'shared/types';
 import { HistoryListSkeleton, NoContent, ScreenLayout, Text, TEXT_TAGS } from 'shared/ui';
 import { useSpreadsHistory } from '../model';
@@ -138,14 +138,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   historyItem: {
-    backgroundColor: getColorOpacity(COLORS.Secondary, 48),
-    borderRadius: 16,
+    backgroundColor: DS_COLORS.ground700,
+    borderWidth: 1,
+    borderColor: DS_COLORS.ground600,
+    borderRadius: dsRadius.listRow,
     padding: 14,
     marginBottom: 4,
   },
   historyItem_top: { justifyContent: 'space-between', flexDirection: 'row' },
   question: {
-    color: COLORS.SpbSky1,
+    color: DS_COLORS.ink100,
     marginTop: 6,
   },
 });

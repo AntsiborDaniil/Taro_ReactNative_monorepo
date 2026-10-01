@@ -73,7 +73,7 @@ supabase db push
 Set secrets in Dashboard → Edge Functions → Secrets:
 
 - `OPENAI_API_KEY`
-- `TAROT_DAILY_INTERPRET_LIMIT` (optional, default 10)
+- `TAROT_DAILY_INTERPRET_LIMIT` (optional, default 1)
 
 `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are injected automatically in Edge Functions.
 

@@ -9,7 +9,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { Layout, StyleService } from '@ui-kitten/components';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { ImagePosition, TextPosition, TileCardProps } from 'shared/types';
 import { OverlayIcon } from '../OverlayIcon';
@@ -17,6 +16,7 @@ import { Text, TEXT_TAGS } from '../Text';
 import { LockIcon } from '../../icons';
 import { WEB_HOVER_TRANSITION } from 'shared/lib';
 import { COLORS, getColorOpacity } from '../../themes';
+import { DS_COLORS } from '../../themes/ds';
 
 // Иконка замка для заблокированного состояния
 
@@ -98,12 +98,6 @@ function TileCard({
               {textPosition === TextPosition.Inner &&
                 (typeof children === 'string' ? (
                   <View style={[styles.textView, textViewStyles]}>
-                    {!!gradient && (
-                      <LinearGradient
-                        colors={gradient}
-                        style={StyleSheet.absoluteFill}
-                      />
-                    )}
                     <Text
                       style={[styles.text, textStyles]}
                       category={TEXT_TAGS.h4}
@@ -116,19 +110,11 @@ function TileCard({
                   children
                 ))}
               {!!topRightBadge && (
-                <LinearGradient
-                  colors={[
-                    getColorOpacity(COLORS.Primary, 22),
-                    getColorOpacity(COLORS.Secondary, 28),
-                  ]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.topRightBadge}
-                >
+                <View style={styles.topRightBadge}>
                   <Text category={TEXT_TAGS.label} style={styles.topRightBadgeText}>
                     {topRightBadge}
                   </Text>
-                </LinearGradient>
+                </View>
               )}
             </ImageBackground>
           ) : (
@@ -138,12 +124,6 @@ function TileCard({
                 imageOnly && styles.cornerInnerImageOnly,
               ]}
             >
-              {!!gradient && (
-                <LinearGradient
-                  colors={gradient}
-                  style={StyleSheet.absoluteFill}
-                />
-              )}
               <Image
                 source={imageSource}
                 resizeMode="contain"
@@ -264,17 +244,10 @@ function TileCard({
 
 // Темированные стили с UI Kitten
 const styles = StyleService.create({
-  containerSurface:
-    Platform.OS === 'web'
-      ? ({
-          boxShadow: '0 6px 22px rgba(0, 0, 0, 0.32)',
-          borderWidth: 1,
-          borderColor: 'rgba(255, 255, 255, 0.07)',
-        } as object)
-      : {
-          borderWidth: StyleSheet.hairlineWidth,
-          borderColor: 'rgba(255, 255, 255, 0.08)',
-        },
+  containerSurface: {
+    borderWidth: 1,
+    borderColor: DS_COLORS.ground600,
+  },
   cornerInner: {
     width: '100%',
     height: '100%',
@@ -303,17 +276,11 @@ const styles = StyleService.create({
   cornerTitleText: {
     color: COLORS.Content,
     textAlign: 'left',
-    textShadowColor: 'rgba(0, 0, 0, 0.35)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 6,
   },
   cornerSubtitleText: {
     marginTop: 6,
-    color: 'rgba(232, 239, 252, 0.85)',
+    color: DS_COLORS.ink100,
     textAlign: 'left',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 5,
   },
   textView: {
     maxWidth: '80%',
@@ -384,8 +351,8 @@ const styles = StyleService.create({
   },
   blurOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#000000',
-    opacity: 0.3,
+    backgroundColor: DS_COLORS.ground900,
+    opacity: 0.55,
   },
   lockOverlay: {
     flex: 1,
@@ -395,7 +362,7 @@ const styles = StyleService.create({
     ...StyleSheet.absoluteFillObject,
   },
   lockWrapper: {
-    backgroundColor: COLORS.SpbSky3,
+    backgroundColor: DS_COLORS.ground700,
     justifyContent: 'center',
     alignItems: 'center',
     width: 50,
@@ -415,7 +382,7 @@ const styles = StyleService.create({
     paddingHorizontal: 4,
     fontSize: 17,
     lineHeight: 22,
-    color: 'rgba(216, 228, 247, 0.78)',
+    color: DS_COLORS.ink100,
     letterSpacing: 0.15,
   },
   webPressable: {

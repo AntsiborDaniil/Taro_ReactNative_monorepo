@@ -1,12 +1,11 @@
 import { ReactElement, useEffect } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { COLORS, getColorOpacity } from 'shared/themes';
+import { DS_COLORS, DS_MOTION } from 'shared/themes/ds';
 import { Radio } from '../Radio';
 import { Text, TEXT_TAGS } from '../Text';
 
@@ -25,32 +24,25 @@ function RadioCard({
   badgeContent,
   title,
 }: RadioCardProps): ReactElement {
-  const opacityProgress = useSharedValue(checked ? 1 : 0);
+  const fillProgress = useSharedValue(checked ? 1 : 0);
 
-  const animatedGradient = useAnimatedStyle(() => {
+  const animatedFill = useAnimatedStyle(() => {
     return {
-      opacity: withTiming(opacityProgress.value, { duration: 300 }),
+      opacity: withTiming(fillProgress.value, { duration: DS_MOTION.state }),
     };
   });
 
   useEffect(() => {
-    opacityProgress.value = withTiming(checked ? 1 : 0, { duration: 300 });
-  }, [checked, opacityProgress]);
+    fillProgress.value = withTiming(checked ? 1 : 0, { duration: DS_MOTION.state });
+  }, [checked, fillProgress]);
 
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={1} style={styles.card}>
-      <Animated.View style={[styles.gradientWrapper, animatedGradient]}>
-        <LinearGradient
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 3 }}
-          colors={[
-            COLORS.Background2,
-            checked ? getColorOpacity(COLORS.Primary, 5) : COLORS.Background2,
-          ]}
-          style={styles.gradientInner}
-          locations={[0.4, 1]}
-        />
-      </Animated.View>
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={1}
+      style={[styles.card, checked && styles.cardChecked]}
+    >
+      <Animated.View style={[styles.fill, animatedFill]} />
       <View style={styles.inner}>
         <Radio checked={checked} />
         <View style={styles.texts}>
@@ -74,25 +66,23 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 16,
     borderStyle: 'solid',
-    borderColor: COLORS.Content,
+    borderColor: DS_COLORS.ground600,
     borderWidth: 1,
+    backgroundColor: DS_COLORS.ground700,
     position: 'relative',
+    overflow: 'hidden',
   },
-  gradientWrapper: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    borderRadius: 16,
+  cardChecked: {
+    borderColor: DS_COLORS.accent400,
+  },
+  fill: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: DS_COLORS.ground600,
   },
   inner: {
     padding: 16,
     flexDirection: 'row',
     gap: 16,
-  },
-  gradientInner: {
-    borderRadius: 16,
-    width: '100%',
-    height: '100%',
   },
   badge: {
     position: 'absolute',
@@ -100,16 +90,15 @@ const styles = StyleSheet.create({
     top: 0,
     borderTopRightRadius: 16,
     borderBottomLeftRadius: 16,
-    backgroundColor: COLORS.Primary,
+    backgroundColor: DS_COLORS.accent400,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 4,
     borderWidth: 1,
-    borderColor: COLORS.Primary,
+    borderColor: DS_COLORS.accent400,
   },
   badgeText: {
-    color: COLORS.Background,
-    fontWeight: 'semibold',
+    color: DS_COLORS.onAction,
     fontSize: 22,
   },
   texts: {
