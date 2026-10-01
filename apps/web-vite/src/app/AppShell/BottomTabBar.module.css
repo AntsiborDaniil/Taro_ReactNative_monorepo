@@ -1,18 +1,32 @@
 .bar {
+  /* Плавающая капсула как Telegram tapbar: отступ от краёв + glass. */
+  --tab-bar-side: max(var(--safe-left), var(--ds-space-16));
+  --tab-bar-side-end: max(var(--safe-right), var(--ds-space-16));
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: var(--tab-bar-side);
+  right: var(--tab-bar-side-end);
+  bottom: calc(var(--safe-bottom) + var(--bottom-nav-float-gap));
   z-index: 40;
   display: flex;
   align-items: stretch;
-  height: calc(var(--bottom-nav-height) + var(--safe-bottom));
-  padding-bottom: var(--safe-bottom);
-  padding-left: var(--safe-left);
-  padding-right: var(--safe-right);
+  height: var(--bottom-nav-height);
+  padding: var(--ds-space-4);
   box-sizing: border-box;
-  background: var(--ds-ground-800);
-  border-top: var(--ds-size-hairline) solid var(--ds-ground-600);
+  border-radius: 9999px;
+  border: var(--ds-size-hairline) solid
+    color-mix(in srgb, var(--ds-ink-50) 14%, transparent);
+  background: color-mix(in srgb, var(--ds-ground-800) 62%, transparent);
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  box-shadow:
+    0 10px 28px color-mix(in srgb, var(--ds-ground-900) 45%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--ds-ink-50) 10%, transparent);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .bar {
+    background: color-mix(in srgb, var(--ds-ground-800) 92%, transparent);
+  }
 }
 
 @media (min-width: 900px) {
@@ -21,10 +35,35 @@
   }
 }
 
+.indicator {
+  position: absolute;
+  top: var(--ds-space-4);
+  bottom: var(--ds-space-4);
+  left: 0;
+  z-index: 0;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--ds-ink-50) 14%, transparent);
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, width;
+}
+
+.indicator[data-visible='1'] {
+  opacity: 1;
+}
+
+.indicatorAnimate {
+  transition:
+    transform var(--ds-dur-block) var(--ds-ease),
+    width var(--ds-dur-block) var(--ds-ease),
+    opacity var(--ds-dur-feedback) var(--ds-ease);
+}
+
 .item {
+  position: relative;
+  z-index: 1;
   flex: 1 1 0;
   min-width: 0;
-  height: var(--bottom-nav-height);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -32,19 +71,26 @@
   gap: 2px;
   padding: 0 var(--ds-space-4);
   border: none;
+  border-radius: 9999px;
   background: transparent;
   color: var(--ds-ink-100);
   cursor: pointer;
-  transition: color var(--ds-dur-state) var(--ds-ease);
+  transition:
+    color var(--ds-dur-state) var(--ds-ease),
+    transform var(--ds-dur-feedback) var(--ds-ease);
 }
 
 .item:hover {
   color: var(--ds-ink-50);
 }
 
+.item:active {
+  transform: scale(0.96);
+}
+
 .item:focus-visible {
   outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
-  outline-offset: -2px;
+  outline-offset: 1px;
 }
 
 .itemActive,
@@ -56,6 +102,11 @@
   width: 24px;
   height: 24px;
   flex: 0 0 auto;
+  transition: transform var(--ds-dur-state) var(--ds-ease);
+}
+
+.itemActive .icon {
+  transform: scale(1.08);
 }
 
 .label {
@@ -70,7 +121,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .item {
+  .indicatorAnimate,
+  .item,
+  .icon {
     transition: none;
+  }
+
+  .item:active,
+  .itemActive .icon {
+    transform: none;
   }
 }

@@ -2,8 +2,9 @@
   display: flex;
   min-height: 100dvh;
   width: 100%;
-  /* Высота ряда иконок нижней панели (<900px). Safe-area добавляется отдельно. */
-  --bottom-nav-height: 56px;
+  /* Высота плавающей капсулы вкладок (<900px). Float-gap — зазор над safe-area. */
+  --bottom-nav-height: 58px;
+  --bottom-nav-float-gap: 12px;
 }
 
 .content {
@@ -13,9 +14,11 @@
   /* Telegram Mini App safe-area (шапки/нижний отступ страниц) — см.
      shared/lib/web/telegramWebApp.ts (readTelegramSafeAreaInsets). Вне
      Telegram --safe-* падают на env(safe-area-inset-*)/0px — без изменений.
-     Снизу ещё высота BottomTabBar, чтобы контент не уезжал под панель. */
+     Снизу: высота BottomTabBar + зазор плавающей капсулы + safe-area. */
   padding-top: var(--safe-top);
-  padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom));
+  padding-bottom: calc(
+    var(--bottom-nav-height) + var(--bottom-nav-float-gap) + var(--safe-bottom)
+  );
   box-sizing: border-box;
 }
 
