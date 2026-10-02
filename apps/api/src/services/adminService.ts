@@ -1,6 +1,6 @@
 import { getSupabaseAdmin } from '../lib/supabase';
 import { filterString, isSupervisorRole } from '../lib/adminAuth';
-import { getTelegramBotToken } from '../lib/env';
+import { sendTelegramMessage } from '../lib/telegramNotify';
 
 const USER_SORT = new Set([
   'created_at',
@@ -28,12 +28,68 @@ export type AdminListResult<T> = {
   total: number;
 };
 
+type AdminFollowUp = { q: string; a: string; createdAt?: string };
+
 function sortField(requested: string, allowed: Set<string>, fallback: string): string {
   return allowed.has(requested) ? requested : fallback;
 }
 
 function sanitizeSearch(value: string): string {
   return value.replace(/[,()%\\]/g, ' ').trim().slice(0, 80);
+}
+
+/** Уточнения из spreads.payload.followUps — то же правило, что у клиента (q/a, max 3). */
+function normalizeFollowUps(value: unknown): AdminFollowUp[] {
+  if (!Array.isArray(value)) return [];
+  const result: AdminFollowUp[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== 'object') continue;
+    const { q, a, createdAt } = item as Record<string, unknown>;
+    if (typeof q !== 'string' || typeof a !== 'string' || !q.trim() || !a.trim()) continue;
+    result.push(typeof createdAt === 'string' ? { q, a, createdAt } : { q, a });
+    if (result.length >= 3) break;
+  }
+  return result;
+}
+
+function cardsPreviewFromPayload(payload: Record<string, unknown>): string {
+  const cards = Array.isArray(payload.selectedCards) ? payload.selectedCards : [];
+  return cards
+    .map((card) => {
+      if (!card || typeof card !== 'object') return null;
+      const row = card as Record<string, unknown>;
+      const name =
+        typeof row.name === 'string' && row.name.trim()
+          ? row.name.trim()
+          : typeof row.id === 'string'
+            ? row.id
+            : null;
+      if (!name) return null;
+      const reversed = row.direction === 'reversed' || row.direction === 'Перевернутая';
+      return reversed ? `${name} (перев.)` : name;
+    })
+    .filter((v): v is string => Boolean(v))
+    .join(', ');
+}
+
+/** Производные поля для списка/карточки расклада в админке. */
+function enrichAdminSpread(row: Record<string, unknown>): Record<string, unknown> {
+  const payload =
+    row.payload && typeof row.payload === 'object' && !Array.isArray(row.payload)
+      ? (row.payload as Record<string, unknown>)
+      : {};
+  const followUps = normalizeFollowUps(payload.followUps);
+  const interpretation =
+    typeof row.interpretation === 'string' ? row.interpretation.trim() : '';
+  const question = typeof row.question === 'string' ? row.question.trim() : '';
+  return {
+    ...row,
+    follow_ups: followUps,
+    follow_ups_count: followUps.length,
+    cards_preview: cardsPreviewFromPayload(payload),
+    has_interpretation: interpretation.length > 0,
+    question_preview: question.length > 120 ? `${question.slice(0, 119).trimEnd()}…` : question,
+  };
 }
 
 export async function adminGetProfileRole(userId: string): Promise<string | null> {
@@ -208,6 +264,7 @@ export async function listAdminSpreads(input: {
   const category = filterString(input.filter, 'category');
   const spreadKey = filterString(input.filter, 'spread_key');
   const userId = filterString(input.filter, 'user_id');
+  const hasFollowUps = input.filter.has_follow_ups;
 
   let query = admin.from('spreads').select('*', { count: 'exact' });
   if (category) {
@@ -219,9 +276,13 @@ export async function listAdminSpreads(input: {
   if (userId) {
     query = query.eq('user_id', userId);
   }
+  // jsonb: есть непустой массив followUps (уточнения к раскладу).
+  if (hasFollowUps === true || hasFollowUps === 'true') {
+    query = query.not('payload->followUps', 'eq', '[]').not('payload->followUps', 'is', null);
+  }
   if (q) {
     query = query.or(
-      `name.ilike.%${q}%,question.ilike.%${q}%,interpretation.ilike.%${q}%,spread_key.ilike.%${q}%`
+      `name.ilike.%${q}%,question.ilike.%${q}%,interpretation.ilike.%${q}%,spread_key.ilike.%${q}%,payload::text.ilike.%${q}%`
     );
   }
 
@@ -233,7 +294,10 @@ export async function listAdminSpreads(input: {
   if (error) {
     throw error;
   }
-  return { rows: (data ?? []) as Record<string, unknown>[], total: count ?? 0 };
+  return {
+    rows: ((data ?? []) as Record<string, unknown>[]).map(enrichAdminSpread),
+    total: count ?? 0,
+  };
 }
 
 export async function getAdminSpread(id: string): Promise<Record<string, unknown> | null> {
@@ -245,7 +309,10 @@ export async function getAdminSpread(id: string): Promise<Record<string, unknown
   if (error) {
     throw error;
   }
-  return data as Record<string, unknown> | null;
+  if (!data) {
+    return null;
+  }
+  return enrichAdminSpread(data as Record<string, unknown>);
 }
 
 export async function updateAdminSpread(
@@ -275,7 +342,10 @@ export async function updateAdminSpread(
   if (error) {
     throw error;
   }
-  return data as Record<string, unknown> | null;
+  if (!data) {
+    return null;
+  }
+  return enrichAdminSpread(data as Record<string, unknown>);
 }
 
 export async function deleteAdminSpread(id: string): Promise<boolean> {
@@ -449,18 +519,18 @@ export async function replyAdminTicket(
     const question =
       typeof ticket.message === 'string' ? ticket.message : '';
     try {
-      await sendTelegramMessage(
-        telegramId,
-        buildSupportReplyHtml(text, question),
-        'HTML'
-      );
+      await sendTelegramMessage({
+        chatId: telegramId,
+        text: buildSupportReplyHtml(text, question),
+        parseMode: 'HTML',
+      });
     } catch (error) {
       console.error('[admin] telegram reply failed:', error);
       try {
-        await sendTelegramMessage(
-          telegramId,
-          buildSupportReplyPlain(text, question)
-        );
+        await sendTelegramMessage({
+          chatId: telegramId,
+          text: buildSupportReplyPlain(text, question),
+        });
       } catch (fallbackError) {
         console.error('[admin] telegram reply fallback failed:', fallbackError);
       }
@@ -587,26 +657,4 @@ function buildSupportReplyPlain(replyText: string, question: string): string {
   blocks.push(SUPPORT_REPLY_FOOTER);
 
   return clampTelegramText(blocks.join('\n\n'));
-}
-
-async function sendTelegramMessage(
-  chatId: number,
-  text: string,
-  parseMode?: 'HTML'
-): Promise<void> {
-  const token = getTelegramBotToken();
-  const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text,
-      ...(parseMode ? { parse_mode: parseMode } : {}),
-      link_preview_options: { is_disabled: true },
-    }),
-  });
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`TELEGRAM_SEND_FAILED: ${response.status} ${body}`);
-  }
 }

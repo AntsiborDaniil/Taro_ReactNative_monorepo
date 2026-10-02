@@ -8,8 +8,15 @@ export type LavaCheckoutResponse = {
 /** POST /api/payments/lava/checkout — см. apps/api/src/routes/lavaPayments.ts (требует авторизацию). */
 export const paymentsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    lavaCheckout: build.mutation<LavaCheckoutResponse, { email: string }>({
-      query: (body) => ({ url: '/api/payments/lava/checkout', method: 'POST', body }),
+    lavaCheckout: build.mutation<
+      LavaCheckoutResponse,
+      { email: string; returnPath?: string }
+    >({
+      query: (body) => ({
+        url: '/api/payments/lava/checkout',
+        method: 'POST',
+        body,
+      }),
     }),
   }),
 });

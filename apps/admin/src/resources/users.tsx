@@ -12,15 +12,21 @@ import {
   SelectInput,
   Show,
   SimpleForm,
+  SimpleList,
   SimpleShowLayout,
   TextField,
   TextInput,
   TopToolbar,
   usePermissions,
+  useRecordContext,
+  Button,
 } from 'react-admin';
+import { Link as RouterLink } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import StyleIcon from '@mui/icons-material/Style';
 import { adminHeaders, getApiBase } from '../auth';
+import { useIsMobile } from '../components/useIsMobile';
 
 const roleChoices = [
   { id: 'user', name: 'user' },
@@ -98,13 +104,13 @@ function AcquisitionSummary() {
   }
 
   return (
-    <Box sx={{ mb: 2, p: 1.5, bgcolor: 'background.paper', borderRadius: 1 }}>
+    <Box sx={{ mb: 2, p: { xs: 1.25, sm: 1.5 }, bgcolor: 'background.paper', borderRadius: 1 }}>
       <Typography variant="subtitle1" sx={{ mb: 1 }}>
         Источники входа (бот start=…) — всего лидов: {stats.total}
       </Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: 1.5, sm: 2 } }}>
         {stats.rows.map((row) => (
-          <Box key={row.source} sx={{ minWidth: 120 }}>
+          <Box key={row.source} sx={{ minWidth: 100 }}>
             <Typography variant="caption" color="text.secondary">
               {row.label}
             </Typography>
@@ -117,26 +123,41 @@ function AcquisitionSummary() {
 }
 
 export function UserList() {
+  const isMobile = useIsMobile();
+
   return (
     <Box>
       <AcquisitionSummary />
-      <List filters={userFilters} sort={{ field: 'created_at', order: 'DESC' }}>
-        <Datagrid rowClick="edit" bulkActionButtons={false}>
-          <TextField source="email" label="Email" />
-          <TextField source="name" label="Имя" />
-          <TextField source="telegram_id" label="Telegram ID" />
-          <SelectField
-            source="acquisition_source"
-            label="Источник"
-            choices={acquisitionChoices}
-            emptyText="—"
+      <List filters={userFilters} sort={{ field: 'created_at', order: 'DESC' }} perPage={25}>
+        {isMobile ? (
+          <SimpleList
+            primaryText={(record) => record.name || record.email || record.telegram_id || record.id}
+            secondaryText={(record) =>
+              `${record.email || '—'} · ${record.role} · ${record.spread_credits ?? 0} зар.`
+            }
+            tertiaryText={(record) =>
+              record.created_at ? new Date(record.created_at).toLocaleString('ru-RU') : ''
+            }
+            linkType="show"
           />
-          <DateField source="acquisition_at" label="Источник с" showTime emptyText="—" />
-          <SelectField source="role" choices={roleChoices} label="Роль" />
-          <NumberField source="spread_credits" label="Заряды" />
-          <DateField source="created_at" label="Создан" showTime />
-          <EditButton />
-        </Datagrid>
+        ) : (
+          <Datagrid rowClick="show" bulkActionButtons={false}>
+            <TextField source="email" label="Email" emptyText="—" />
+            <TextField source="name" label="Имя" emptyText="—" />
+            <TextField source="telegram_id" label="Telegram ID" emptyText="—" />
+            <SelectField
+              source="acquisition_source"
+              label="Источник"
+              choices={acquisitionChoices}
+              emptyText="—"
+            />
+            <DateField source="acquisition_at" label="Источник с" showTime emptyText="—" />
+            <SelectField source="role" choices={roleChoices} label="Роль" />
+            <NumberField source="spread_credits" label="Заряды" />
+            <DateField source="created_at" label="Создан" showTime />
+            <EditButton />
+          </Datagrid>
+        )}
       </List>
     </Box>
   );
@@ -150,14 +171,27 @@ function UserShowActions() {
   );
 }
 
+function UserSpreadsLink() {
+  const record = useRecordContext();
+  if (!record?.id) return null;
+  return (
+    <Button
+      component={RouterLink}
+      to={`/spreads?filter=${encodeURIComponent(JSON.stringify({ user_id: record.id }))}`}
+      label="Расклады пользователя"
+      startIcon={<StyleIcon />}
+    />
+  );
+}
+
 export function UserShow() {
   return (
     <Show actions={<UserShowActions />}>
       <SimpleShowLayout>
-        <TextField source="id" />
+        <TextField source="id" label="ID" />
         <TextField source="email" emptyText="—" />
         <TextField source="name" emptyText="—" />
-        <TextField source="telegram_id" emptyText="—" />
+        <TextField source="telegram_id" emptyText="—" label="Telegram ID" />
         <SelectField
           source="acquisition_source"
           label="Источник"
@@ -165,11 +199,13 @@ export function UserShow() {
           emptyText="—"
         />
         <DateField source="acquisition_at" label="Источник зафиксирован" showTime emptyText="—" />
-        <TextField source="role" />
+        <TextField source="role" label="Роль" />
         <NumberField source="spread_credits" label="Заряды" />
-        <NumberField source="spreads_count" label="Раскладов" />
-        <NumberField source="daily_used" label="Дневных слотов сегодня" />
-        <DateField source="created_at" showTime />
+        <NumberField source="spreads_count" label="Всего раскладов" />
+        <NumberField source="daily_used" label="Дневных слотов (последний день)" />
+        <TextField source="daily_day" label="День учёта лимита" emptyText="—" />
+        <DateField source="created_at" showTime label="Создан" />
+        <UserSpreadsLink />
       </SimpleShowLayout>
     </Show>
   );
@@ -182,8 +218,8 @@ export function UserEdit() {
       <SimpleForm>
         <TextInput source="id" disabled />
         <TextInput source="email" disabled />
-        <TextInput source="name" />
-        <TextInput source="telegram_id" disabled />
+        <TextInput source="name" label="Имя" />
+        <TextInput source="telegram_id" disabled label="Telegram ID" />
         <SelectInput
           source="acquisition_source"
           label="Источник"

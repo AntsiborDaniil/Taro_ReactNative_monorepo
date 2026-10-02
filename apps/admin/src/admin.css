@@ -1,0 +1,83 @@
+/* Адаптив react-admin: таблицы, фильтры, длинные тексты */
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.RaLayout-content {
+  padding: 8px !important;
+}
+
+@media (min-width: 900px) {
+  .RaLayout-content {
+    padding: 16px !important;
+  }
+}
+
+.RaDatagrid-tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+.RaList-main,
+.RaShow-main,
+.RaEdit-main {
+  width: 100%;
+  max-width: 100%;
+}
+
+.RaSimpleShowLayout-stack,
+.RaSimpleForm-stack {
+  width: 100%;
+}
+
+.RaFilterForm-form {
+  flex-wrap: wrap !important;
+  gap: 8px;
+}
+
+.RaList-actions {
+  flex-wrap: wrap !important;
+  gap: 8px;
+}
+
+.RaSidebar-fixed {
+  z-index: 1200;
+}
+
+@media (max-width: 899px) {
+  .RaAppBar-toolbar {
+    min-height: 48px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .RaList-actions .MuiToolbar-root {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .RaShow-card,
+  .RaEdit-card,
+  .RaList-content {
+    margin: 0 !important;
+  }
+
+  .MuiTableCell-root {
+    padding: 8px !important;
+  }
+}
+
+/* Длинные ID / email не раздувают макет */
+.RaDatagrid-rowCell,
+.RaSimpleShowLayout-row {
+  word-break: break-word;
+}

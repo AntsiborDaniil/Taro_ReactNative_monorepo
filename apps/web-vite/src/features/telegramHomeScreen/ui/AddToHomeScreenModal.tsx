@@ -6,6 +6,7 @@ import {
   onTelegramHomeScreenAdded,
   requestTelegramAddToHomeScreen,
 } from '@shared/lib/web/telegramWebApp';
+import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { readHomeScreenPromptState, writeHomeScreenPromptState } from '../lib/promptStorage';
 import styles from './AddToHomeScreenModal.module.css';
 
@@ -21,6 +22,7 @@ export function AddToHomeScreenModal({ onClose }: ModalComponentProps): ReactEle
   useEffect(() => {
     return onTelegramHomeScreenAdded(() => {
       writeHomeScreenPromptState('added');
+      reachMetrikaGoal(MetrikaGoal.addHomeScreenAccepted);
       toast.success(t('homeScreen.added'));
       onClose();
     });
@@ -31,6 +33,7 @@ export function AddToHomeScreenModal({ onClose }: ModalComponentProps): ReactEle
     return () => {
       if (readHomeScreenPromptState() === null) {
         writeHomeScreenPromptState('dismissed');
+        reachMetrikaGoal(MetrikaGoal.addHomeScreenDismissed, { source: 'sheet_close' });
       }
     };
   }, []);
@@ -47,6 +50,7 @@ export function AddToHomeScreenModal({ onClose }: ModalComponentProps): ReactEle
 
   const handleDismiss = () => {
     writeHomeScreenPromptState('dismissed');
+    reachMetrikaGoal(MetrikaGoal.addHomeScreenDismissed, { source: 'later' });
     onClose();
   };
 

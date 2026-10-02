@@ -9,10 +9,14 @@ import {
   SelectInput,
   Show,
   SimpleForm,
+  SimpleList,
   SimpleShowLayout,
   TextField,
   TextInput,
+  WrapperField,
 } from 'react-admin';
+import { LongTextField } from '../components/LongTextField';
+import { useIsMobile } from '../components/useIsMobile';
 
 const statusChoices = [
   { id: 'open', name: 'open' },
@@ -28,20 +32,43 @@ const ticketFilters = [
 ];
 
 export function TicketList() {
+  const isMobile = useIsMobile();
+
   return (
     <List
       filters={ticketFilters}
       sort={{ field: 'created_at', order: 'DESC' }}
       title="Поддержка"
+      perPage={25}
     >
-      <Datagrid rowClick="show">
-        <SelectField source="status" choices={statusChoices} />
-        <NumberField source="telegram_id" label="Telegram ID" />
-        <TextField source="username" />
-        <TextField source="display_name" label="Имя" />
-        <TextField source="message" label="Вопрос" />
-        <DateField source="created_at" showTime />
-      </Datagrid>
+      {isMobile ? (
+        <SimpleList
+          primaryText={(record) => record.display_name || record.username || String(record.telegram_id)}
+          secondaryText={(record) => {
+            const msg = typeof record.message === 'string' ? record.message : '';
+            const short = msg.length > 90 ? `${msg.slice(0, 89)}…` : msg;
+            return `${record.status} · ${short}`;
+          }}
+          tertiaryText={(record) =>
+            record.created_at ? new Date(record.created_at).toLocaleString('ru-RU') : ''
+          }
+          linkType="show"
+          rowSx={(record) =>
+            record.status === 'open'
+              ? { borderLeft: '3px solid', borderColor: 'warning.main' }
+              : {}
+          }
+        />
+      ) : (
+        <Datagrid rowClick="show" bulkActionButtons={false}>
+          <SelectField source="status" choices={statusChoices} label="Статус" />
+          <NumberField source="telegram_id" label="Telegram ID" />
+          <TextField source="username" emptyText="—" />
+          <TextField source="display_name" label="Имя" emptyText="—" />
+          <TextField source="message" label="Вопрос" />
+          <DateField source="created_at" showTime label="Создан" />
+        </Datagrid>
+      )}
     </List>
   );
 }
@@ -51,19 +78,23 @@ export function TicketShow() {
     <Show>
       <SimpleShowLayout>
         <TextField source="id" />
-        <SelectField source="status" choices={statusChoices} />
-        <NumberField source="telegram_id" />
-        <TextField source="username" />
-        <TextField source="display_name" />
-        <ReferenceField source="user_id" reference="users" label="Профиль" link="edit" />
-        <TextField source="profile_email" label="Email профиля" />
-        <TextField source="profile_name" label="Имя профиля" />
-        <TextField source="profile_role" label="Роль" />
-        <NumberField source="profile_credits" label="Заряды" />
-        <TextField source="message" label="Вопрос" />
-        <TextField source="admin_reply" label="Ответ" />
-        <DateField source="created_at" showTime />
-        <DateField source="updated_at" showTime />
+        <SelectField source="status" choices={statusChoices} label="Статус" />
+        <NumberField source="telegram_id" label="Telegram ID" />
+        <TextField source="username" emptyText="—" />
+        <TextField source="display_name" label="Имя" emptyText="—" />
+        <ReferenceField source="user_id" reference="users" label="Профиль" link="show" />
+        <TextField source="profile_email" label="Email профиля" emptyText="—" />
+        <TextField source="profile_name" label="Имя профиля" emptyText="—" />
+        <TextField source="profile_role" label="Роль" emptyText="—" />
+        <NumberField source="profile_credits" label="Заряды" emptyText="—" />
+        <WrapperField label="Вопрос">
+          <LongTextField source="message" />
+        </WrapperField>
+        <WrapperField label="Ответ">
+          <LongTextField source="admin_reply" emptyText="Ещё нет ответа" />
+        </WrapperField>
+        <DateField source="created_at" showTime label="Создан" />
+        <DateField source="updated_at" showTime label="Обновлён" />
       </SimpleShowLayout>
     </Show>
   );
@@ -75,8 +106,8 @@ export function TicketEdit() {
       <SimpleForm>
         <TextInput source="id" disabled />
         <TextInput source="telegram_id" disabled />
-        <TextInput source="message" multiline disabled />
-        <SelectInput source="status" choices={statusChoices} />
+        <TextInput source="message" multiline rows={4} disabled label="Вопрос" />
+        <SelectInput source="status" choices={statusChoices} label="Статус" />
         <TextInput
           source="admin_reply"
           label="Ответ пользователю (уйдёт в бот)"

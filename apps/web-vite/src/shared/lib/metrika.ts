@@ -16,6 +16,16 @@ export const MetrikaGoal = {
   paymentSuccess: 'payment_success',
   miniappOpen: 'miniapp_open',
   authTelegram: 'auth_telegram',
+  shareClick: 'share_click',
+  shareSuccess: 'share_success',
+  shareOpen: 'share_open',
+  followUpOpen: 'follow_up_open',
+  followUpSubmit: 'follow_up_submit',
+  followUpSuccess: 'follow_up_success',
+  followUpCapReached: 'follow_up_cap_reached',
+  addHomeScreenShown: 'add_home_screen_shown',
+  addHomeScreenAccepted: 'add_home_screen_accepted',
+  addHomeScreenDismissed: 'add_home_screen_dismissed',
 } as const;
 
 type MetrikaGoalId = (typeof MetrikaGoal)[keyof typeof MetrikaGoal];

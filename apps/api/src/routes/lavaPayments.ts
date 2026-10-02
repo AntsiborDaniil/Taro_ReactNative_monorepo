@@ -1,12 +1,15 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import { timingSafeEqual } from 'node:crypto';
 import { resolveAuthedUser } from '../lib/authRequest';
 import {
   getLavaWebhookSecret,
+  getTelegramBotToken,
   isLavaPaymentsConfigured,
 } from '../lib/env';
 import {
   createLavaCheckoutForUser,
   fulfillLavaPaymentSuccess,
+  getLatestPaidReturnForTelegram,
   isValidCheckoutEmail,
   type LavaWebhookPayload,
 } from '../services/lavaPaymentsService';
@@ -19,11 +22,35 @@ function readWebhookApiKey(request: {
   return value?.trim() || null;
 }
 
+function secretsMatch(provided: string, expected: string): boolean {
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) {
+    return false;
+  }
+  return timingSafeEqual(a, b);
+}
+
+function assertBotSecret(request: {
+  headers: Record<string, string | string[] | undefined>;
+}): boolean {
+  const header = request.headers['x-support-secret'];
+  const provided = Array.isArray(header) ? header[0] : header;
+  if (!provided) {
+    return false;
+  }
+  try {
+    return secretsMatch(provided, getTelegramBotToken());
+  } catch {
+    return false;
+  }
+}
+
 export const lavaPaymentsRoute = async (
   fastify: FastifyInstance,
   _opts: FastifyPluginOptions
 ) => {
-  fastify.post<{ Body: { email?: string } }>(
+  fastify.post<{ Body: { email?: string; returnPath?: string } }>(
     '/payments/lava/checkout',
     {
       schema: {
@@ -32,6 +59,7 @@ export const lavaPaymentsRoute = async (
           required: ['email'],
           properties: {
             email: { type: 'string', minLength: 3 },
+            returnPath: { type: 'string', maxLength: 200 },
           },
         },
       },
@@ -65,6 +93,7 @@ export const lavaPaymentsRoute = async (
         const checkout = await createLavaCheckoutForUser({
           userId: user.id,
           email,
+          returnPath: request.body?.returnPath,
         });
         return reply.send({
           paymentUrl: checkout.paymentUrl,
@@ -104,6 +133,35 @@ export const lavaPaymentsRoute = async (
             ? lavaMessage
             : `Lava error: ${lavaMessage}`,
         });
+      }
+    }
+  );
+
+  /** Bot: путь возврата после lava_success + текущий баланс кредитов. */
+  fastify.get<{ Querystring: { telegramId?: string } }>(
+    '/internal/payments/latest-return',
+    async (request, reply) => {
+      if (!assertBotSecret(request)) {
+        return reply.status(401).send({ message: 'Unauthorized' });
+      }
+
+      const telegramId = Number(request.query?.telegramId);
+      if (!Number.isFinite(telegramId) || telegramId <= 0) {
+        return reply.status(400).send({ message: 'Invalid telegramId' });
+      }
+
+      try {
+        const latest = await getLatestPaidReturnForTelegram(telegramId);
+        if (!latest) {
+          return reply.send({ returnPath: null, spreadCredits: null });
+        }
+        return reply.send({
+          returnPath: latest.returnPath,
+          spreadCredits: latest.spreadCredits,
+        });
+      } catch (error) {
+        request.log.error(error);
+        return reply.status(500).send({ message: 'latest-return failed' });
       }
     }
   );

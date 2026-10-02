@@ -87,10 +87,44 @@ export const sharedReadingText: Record<BotLang, string> = {
 Tap the button below to open it in the app.`,
 };
 
-export const lavaPaymentSuccessText: Record<BotLang, string> = {
-  ru: `Оплата прошла. Заряды (+3) зачисляются автоматически — обычно это занимает около 5 минут. Открой приложение и обнови баланс, если ещё не видно.`,
+/** Ежедневный nudge: бесплатный слот снова доступен (не заходили сегодня). */
+/** Бесплатный слот обновился, платных зарядов нет (dailyFreeAvailableText в API = DAILY_FREE_RENEWED). */
+export const dailyFreeAvailableText: Record<BotLang, string> = {
+  ru: `Погадаем сегодня?
 
-  en: `Payment successful. Credits (+3) are added automatically — usually within about 5 minutes. Open the app and refresh the balance if you don’t see them yet.`,
+Бесплатный расклад снова доступен — дневной заряд обновился. Загляни в приложение.`,
+
+  en: `Shall we do a reading today?
+
+Your free daily spread is back — the free slot has refreshed. Open the app.`,
+};
+
+/** Есть платные заряды — мягкий хук без про бесплатный слот. */
+export const dailyEngageText: Record<BotLang, string> = {
+  ru: `Погадаем сегодня?
+
+Открой Mindful Tarot — карты уже ждут.`,
+
+  en: `Shall we do a reading today?
+
+Open Mindful Tarot — the cards are waiting.`,
+};
+
+/** Одноразовый broadcast после деплоя: бесплатные дневные расклады доступны. */
+export const dailyFreeBroadcastText: Record<BotLang, string> = {
+  ru: `Погадаем сегодня?
+
+В Mindful Tarot каждый день есть бесплатный расклад с толкованием — заряд уже обновился.`,
+
+  en: `Shall we do a reading today?
+
+Mindful Tarot gives you a free reading every day — your free slot is ready.`,
+};
+
+export const lavaPaymentSuccessText: Record<BotLang, string> = {
+  ru: `Оплата прошла успешно. Заряды уже на балансе — можно вернуться в приложение.`,
+
+  en: `Payment successful. Credits are already on your balance — you can return to the app.`,
 };
 
 export const lavaPaymentFailedText: Record<BotLang, string> = {
@@ -329,6 +363,12 @@ export const faqButtonLabels: Record<
 export const openAppLabel: Record<BotLang, string> = {
   ru: '🔮 Открыть Mindful Tarot',
   en: '🔮 Open Mindful Tarot',
+};
+
+/** Кнопка возврата на страницу, с которой начали оплату. */
+export const returnToAppLabel: Record<BotLang, string> = {
+  ru: 'Вернуться в приложение',
+  en: 'Return to the app',
 };
 
 export const openSharedReadingLabel: Record<BotLang, string> = {

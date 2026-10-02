@@ -29,4 +29,6 @@ export const config = {
     'https://taro-reactnative-monorepo.onrender.com'
   ).replace(/\/$/, ''),
   port: parsePort(process.env.PORT, 8080),
+  /** Один раз после деплоя: broadcast «бесплатные расклады доступны». Потом убрать. */
+  broadcastDailyFreeOnce: process.env.BROADCAST_DAILY_FREE_ONCE === '1',
 } as const;

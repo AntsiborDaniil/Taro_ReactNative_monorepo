@@ -2,7 +2,9 @@ import { useMemoryBackend } from '../lib/devMode';
 import * as memory from '../dev/memoryBackend';
 import { getSupabaseAdmin } from '../lib/supabase';
 import { getLavaCreditsPerPurchase } from '../lib/env';
+import { sanitizeReturnPath } from '../lib/telegramNotify';
 import { createLavaOneTimeInvoice } from './lavaClient';
+import { notifyLavaPaymentSuccess } from './paymentNotifyService';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const YANDEX_EMAIL_RE =
@@ -16,11 +18,14 @@ export function isValidCheckoutEmail(email: string): boolean {
 export async function createLavaCheckoutForUser(input: {
   userId: string;
   email: string;
+  returnPath?: string | null;
 }): Promise<{ paymentUrl: string; invoiceId: string }> {
   const email = input.email.trim().toLowerCase();
   if (!isValidCheckoutEmail(email)) {
     throw new Error('INVALID_EMAIL');
   }
+
+  const returnPath = sanitizeReturnPath(input.returnPath);
 
   const invoice = await createLavaOneTimeInvoice({
     email,
@@ -35,6 +40,7 @@ export async function createLavaCheckoutForUser(input: {
       userId: input.userId,
       credits,
       email,
+      returnPath,
     });
     return { paymentUrl: invoice.paymentUrl, invoiceId: invoice.id };
   }
@@ -46,6 +52,7 @@ export async function createLavaCheckoutForUser(input: {
     credits,
     email,
     status: 'pending',
+    return_path: returnPath,
   });
 
   if (error) {
@@ -74,6 +81,48 @@ function readEventType(payload: LavaWebhookPayload): string {
     .toLowerCase();
 }
 
+/** Soft-fail: ошибка notify не должна ронять webhook. */
+async function tryNotifyAfterPayment(input: {
+  userId: string;
+  creditsAdded: number;
+  spreadCredits?: number;
+  returnPath?: string | null;
+}): Promise<void> {
+  try {
+    let telegramId: number | null = null;
+
+    if (useMemoryBackend()) {
+      telegramId = memory.memoryGetTelegramId(input.userId);
+    } else {
+      const admin = getSupabaseAdmin();
+      const { data: profile } = await admin
+        .from('profiles')
+        .select('telegram_id')
+        .eq('id', input.userId)
+        .maybeSingle();
+      const raw = profile?.telegram_id;
+      if (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) {
+        telegramId = raw;
+      } else if (typeof raw === 'string' && /^\d+$/.test(raw)) {
+        telegramId = Number(raw);
+      }
+    }
+
+    if (!telegramId || input.spreadCredits == null) {
+      return;
+    }
+
+    await notifyLavaPaymentSuccess({
+      telegramId,
+      creditsAdded: input.creditsAdded,
+      spreadCredits: input.spreadCredits,
+      returnPath: input.returnPath,
+    });
+  } catch (error) {
+    console.error('[lava] payment telegram notify failed', error);
+  }
+}
+
 export async function fulfillLavaPaymentSuccess(
   payload: LavaWebhookPayload
 ): Promise<{ handled: boolean; spreadCredits?: number; alreadyApplied?: boolean }> {
@@ -98,6 +147,14 @@ export async function fulfillLavaPaymentSuccess(
       credits,
       email,
     });
+    if (!result.alreadyApplied) {
+      await tryNotifyAfterPayment({
+        userId: result.userId,
+        creditsAdded: result.creditsAdded,
+        spreadCredits: result.spreadCredits,
+        returnPath: result.returnPath,
+      });
+    }
     return {
       handled: true,
       spreadCredits: result.spreadCredits,
@@ -110,7 +167,7 @@ export async function fulfillLavaPaymentSuccess(
   // Prefer user from pending checkout; fall back to utm_content
   const { data: checkout } = await admin
     .from('lava_checkouts')
-    .select('user_id, status')
+    .select('user_id, status, return_path, credits')
     .eq('invoice_id', invoiceId)
     .maybeSingle();
 
@@ -118,6 +175,11 @@ export async function fulfillLavaPaymentSuccess(
   if (!userId) {
     throw new Error('UNKNOWN_BUYER');
   }
+
+  const creditsAdded =
+    typeof checkout?.credits === 'number' && checkout.credits > 0
+      ? checkout.credits
+      : credits;
 
   const { data, error } = await admin.rpc('add_spread_credits_for_invoice', {
     p_invoice_id: invoiceId,
@@ -132,10 +194,65 @@ export async function fulfillLavaPaymentSuccess(
   }
 
   const row = Array.isArray(data) ? data[0] : data;
+  const alreadyApplied = Boolean(row?.already_applied);
+  const spreadCredits =
+    typeof row?.spread_credits === 'number' ? row.spread_credits : undefined;
+
+  if (!alreadyApplied) {
+    await tryNotifyAfterPayment({
+      userId,
+      creditsAdded,
+      spreadCredits,
+      returnPath: sanitizeReturnPath(checkout?.return_path),
+    });
+  }
+
   return {
     handled: true,
+    spreadCredits,
+    alreadyApplied,
+  };
+}
+
+/** Для бота: последний paid checkout + баланс по telegram_id. */
+export async function getLatestPaidReturnForTelegram(
+  telegramId: number
+): Promise<{ returnPath: string | null; spreadCredits: number } | null> {
+  if (!Number.isFinite(telegramId) || telegramId <= 0) {
+    return null;
+  }
+
+  if (useMemoryBackend()) {
+    return memory.memoryGetLatestPaidReturnForTelegram(telegramId);
+  }
+
+  const admin = getSupabaseAdmin();
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('id, spread_credits')
+    .eq('telegram_id', telegramId)
+    .maybeSingle();
+
+  if (!profile?.id) {
+    return null;
+  }
+
+  const { data: checkout } = await admin
+    .from('lava_checkouts')
+    .select('return_path')
+    .eq('user_id', profile.id)
+    .eq('status', 'paid')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!checkout) {
+    return null;
+  }
+
+  return {
+    returnPath: sanitizeReturnPath(checkout.return_path),
     spreadCredits:
-      typeof row?.spread_credits === 'number' ? row.spread_credits : undefined,
-    alreadyApplied: Boolean(row?.already_applied),
+      typeof profile.spread_credits === 'number' ? profile.spread_credits : 0,
   };
 }

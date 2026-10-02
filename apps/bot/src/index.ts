@@ -8,6 +8,7 @@ import {
 import { parseSharedReadingStartPayload } from './sharedReading';
 import {
   openMiniAppInlineKeyboard,
+  openReturnPathInlineKeyboard,
   openSharedReadingInlineKeyboard,
   mainReplyKeyboard,
   channelInlineKeyboard,
@@ -35,7 +36,12 @@ import {
   welcomeText,
   CHANNEL_URL,
 } from './messages';
+import { fetchLatestPaymentReturn } from './paymentReturn';
 import { ingestSupportTicket } from './support';
+import {
+  triggerBroadcastDailyFreeOnce,
+  triggerDailyFreeNudges,
+} from './dailyFreeNudge';
 
 const bot = new Bot(config.botToken);
 
@@ -146,7 +152,25 @@ bot.command('start', async (ctx) => {
   await configureUserMenuButton(ctx, lang);
 
   if (payload === 'lava_success') {
-    await ctx.reply(lavaPaymentSuccessText[lang], { reply_markup: replyMarkup });
+    let successMarkup = openMiniAppInlineKeyboard(lang);
+    let text = lavaPaymentSuccessText[lang];
+    try {
+      if (ctx.from?.id) {
+        const latest = await fetchLatestPaymentReturn(ctx.from.id);
+        if (latest?.returnPath) {
+          successMarkup = openReturnPathInlineKeyboard(latest.returnPath, lang);
+        }
+        if (latest?.spreadCredits != null) {
+          text =
+            lang === 'ru'
+              ? `Оплата прошла успешно. Баланс: ${latest.spreadCredits} — можно вернуться в приложение.`
+              : `Payment successful. Balance: ${latest.spreadCredits} — you can return to the app.`;
+        }
+      }
+    } catch (error) {
+      console.error('[bot] latest-return failed', error);
+    }
+    await ctx.reply(text, { reply_markup: successMarkup });
     return;
   }
   if (payload === 'lava_failed') {
@@ -294,6 +318,32 @@ async function main(): Promise<void> {
   } catch (error) {
     console.warn('[bot] menu/commands setup failed, continuing:', error);
   }
+
+  if (config.broadcastDailyFreeOnce) {
+    try {
+      const result = await triggerBroadcastDailyFreeOnce();
+      console.log('[bot] broadcast daily-free:', result);
+    } catch (error) {
+      console.error('[bot] broadcast daily-free failed:', error);
+    }
+  }
+
+  const runDailyFreeJob = async (): Promise<void> => {
+    try {
+      const result = await triggerDailyFreeNudges();
+      console.log('[bot] daily-free nudges:', result);
+    } catch (error) {
+      console.error('[bot] daily-free nudges failed:', error);
+    }
+  };
+
+  // Первый прогон ~30с после старта, далее каждый час.
+  setTimeout(() => {
+    void runDailyFreeJob();
+  }, 30_000);
+  setInterval(() => {
+    void runDailyFreeJob();
+  }, 60 * 60 * 1000);
 
   bot.catch((err) => {
     console.error('[bot] unhandled error:', err);

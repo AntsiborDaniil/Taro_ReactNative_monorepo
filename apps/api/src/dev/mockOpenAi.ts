@@ -27,6 +27,11 @@ export async function mockGenerateInterpretation(
     key.includes('daysuggest') ||
     input.spread_type.toLowerCase().includes('совет дня') ||
     input.spread_type.toLowerCase().includes('daily advice');
+  const isYesNo =
+    key.includes('yesno') ||
+    key.includes('yes_no') ||
+    input.spread_type.toLowerCase().includes('да/нет') ||
+    input.spread_type.toLowerCase().includes('yes/no');
   const card = input.positions[0]
     ? `${input.positions[0].card} (${input.positions[0].direction})`
     : '—';
@@ -49,6 +54,23 @@ export async function mockGenerateInterpretation(
   const cards = input.positions
     .map((p) => `${p.label}: ${p.card} (${p.direction})`)
     .join(', ');
+
+  if (isYesNo) {
+    if (langIsRu(input.language)) {
+      return {
+        interpretation:
+          `[DEV MOCK] По вопросу «${input.question || '—'}» карта ${card} скорее поддерживает движение вперёд, чем торможение. ` +
+          `В раскладе (${cards || 'нет'}) видно, где уже достаточно ясности для шага.\n\n` +
+          `Ответ: Скорее да.`,
+      };
+    }
+    return {
+      interpretation:
+        `[DEV MOCK] On “${input.question || '—'}”, card ${card} leans toward moving forward rather than holding back. ` +
+        `In the spread (${cards || 'none'}) there is already enough clarity for a step.\n\n` +
+        `Answer: Likely yes.`,
+    };
+  }
 
   if (langIsRu(input.language)) {
     return {

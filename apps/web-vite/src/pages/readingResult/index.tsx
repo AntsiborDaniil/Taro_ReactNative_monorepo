@@ -169,6 +169,17 @@ export default function ReadingResultPage(): ReactElement {
   const followUps = useMemo(() => normalizeFollowUps(spread?.followUps), [spread?.followUps]);
   const followUpLeft = FOLLOW_UP_MAX - followUps.length;
   const canAsk = isAuthenticated && !openedAsShared && followUpLeft > 0;
+  const followUpOpenTrackedFor = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!spread || !interpretation || !canAsk) return;
+    if (followUpOpenTrackedFor.current === spread.id) return;
+    followUpOpenTrackedFor.current = spread.id;
+    reachMetrikaGoal(MetrikaGoal.followUpOpen, {
+      spreadId: spread.id,
+      left: followUpLeft,
+    });
+  }, [spread, interpretation, canAsk, followUpLeft]);
 
   useEffect(() => {
     if (!spread) navigate('/spreads', { replace: true });
@@ -180,6 +191,7 @@ export default function ReadingResultPage(): ReactElement {
     setActiveCard(0);
     setActiveFollowUp(0);
     setFollowUpQuestion('');
+    followUpOpenTrackedFor.current = null;
   }, [spread?.id]);
 
   /** Облачная запись (POST/PATCH /api/spreads) — только она даёт uid для ссылки. */
@@ -273,6 +285,11 @@ export default function ReadingResultPage(): ReactElement {
       return;
     }
 
+    reachMetrikaGoal(MetrikaGoal.followUpSubmit, {
+      spreadId: spread.id,
+      index: followUps.length + 1,
+    });
+
     const body = getAIRequestBody({ spread, t, language: i18n.language });
     if (!body) return;
 
@@ -310,6 +327,13 @@ export default function ReadingResultPage(): ReactElement {
     setFollowUpQuestion('');
     const left = typeof result.spreadCredits === 'number' ? result.spreadCredits : Math.max(spreadCredits - 1, 0);
     toast.success(t('spread:followUp.receipt', { count: left }));
+    reachMetrikaGoal(MetrikaGoal.followUpSuccess, {
+      spreadId: spread.id,
+      count: nextFollowUps.length,
+    });
+    if (nextFollowUps.length >= FOLLOW_UP_MAX) {
+      reachMetrikaGoal(MetrikaGoal.followUpCapReached, { spreadId: spread.id });
+    }
 
     // Дожидаемся сохранения толкования (иначе создадим дубль) и пишем уточнения;
     // при провале — тост (ответ на экране есть, но шаринг/история без него).
@@ -356,6 +380,7 @@ export default function ReadingResultPage(): ReactElement {
   const handleShare = async () => {
     if (!spread || !interpretation || isSharing) return;
     track(AnalyticAction.ClickShareSpread, { spread: spread.name });
+    reachMetrikaGoal(MetrikaGoal.shareClick, { spreadId: spread.id });
     setIsSharing(true);
 
     try {
@@ -375,6 +400,7 @@ export default function ReadingResultPage(): ReactElement {
       if (isTelegramMiniApp() && typeof tgShare === 'function') {
         try {
           tgShare(url, title);
+          reachMetrikaGoal(MetrikaGoal.shareSuccess, { spreadId: spread.id, channel: 'telegram' });
           return;
         } catch {
           // fallback ниже
@@ -384,6 +410,7 @@ export default function ReadingResultPage(): ReactElement {
       if (typeof navigator.share === 'function') {
         try {
           await navigator.share({ url, title });
+          reachMetrikaGoal(MetrikaGoal.shareSuccess, { spreadId: spread.id, channel: 'native' });
           return;
         } catch {
           // отменено или не поддержано — копируем ссылку
@@ -393,6 +420,7 @@ export default function ReadingResultPage(): ReactElement {
       const copied = await copyTextToClipboard(url);
       if (copied) {
         toast.success(t('core:ai.copy.shareSuccess'));
+        reachMetrikaGoal(MetrikaGoal.shareSuccess, { spreadId: spread.id, channel: 'clipboard' });
       } else {
         toast.error(t('core:ai.copy.fail'));
       }

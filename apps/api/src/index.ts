@@ -25,6 +25,7 @@ import { settingsRoute } from './routes/settings';
 import { lavaPaymentsRoute } from './routes/lavaPayments';
 import { adminRoute } from './routes/admin';
 import { internalSupportRoute } from './routes/internalSupport';
+import { internalNotifyRoute } from './routes/internalNotify';
 
 dotenv.config();
 
@@ -126,6 +127,7 @@ async function bootstrap(): Promise<void> {
   await fastify.register(lavaPaymentsRoute, { prefix: '/api' });
   await fastify.register(adminRoute, { prefix: '/api' });
   await fastify.register(internalSupportRoute, { prefix: '/api' });
+  await fastify.register(internalNotifyRoute, { prefix: '/api' });
 
   const address = await fastify.listen({
     port: process.env.PORT ? Number(process.env.PORT) : 3002,

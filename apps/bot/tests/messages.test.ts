@@ -14,6 +14,9 @@ import {
   lavaPaymentSuccessText,
   matchesReplyBtn,
   sharedReadingText,
+  dailyFreeAvailableText,
+  dailyFreeBroadcastText,
+  dailyEngageText,
   supportAcceptedText,
   supportFailedText,
   supportPromptText,
@@ -53,6 +56,9 @@ const PLAIN_RECORDS = {
   lavaPaymentFailedText,
   lavaPaymentCancelledText,
   sharedReadingText,
+  dailyFreeAvailableText,
+  dailyFreeBroadcastText,
+  dailyEngageText,
 };
 
 /** Все плоские тексты обоих языков для лимитов. */
@@ -293,8 +299,10 @@ describe('FAQ', () => {
 });
 
 describe('платёжные уведомления', () => {
-  it.each(LANGS)('успех.%s сообщает о начислении зарядов', (lang) => {
-    expect(lavaPaymentSuccessText[lang]).toMatch(/\+\d/);
+  it.each(LANGS)('успех.%s сообщает об успешной оплате', (lang) => {
+    expect(lavaPaymentSuccessText[lang].toLowerCase()).toMatch(
+      /успеш|success|баланс|balance/,
+    );
   });
 
   it.each(allLocalized(lavaPaymentFailedText))(
@@ -308,6 +316,32 @@ describe('платёжные уведомления', () => {
     'отмена.%s предлагает купить снова из приложения',
     (_lang, text) => {
       expect(text.toLowerCase()).toMatch(/app|приложени/);
+    },
+  );
+});
+
+describe('daily-free уведомления', () => {
+  it.each(allLocalized(dailyFreeAvailableText))(
+    'nudge free.%s — погадаем + обновление бесплатного заряда',
+    (_lang, text) => {
+      expect(text.toLowerCase()).toMatch(/погадаем|shall we/);
+      expect(text.toLowerCase()).toMatch(/бесплатн|free|обновил|refresh/);
+    },
+  );
+
+  it.each(allLocalized(dailyEngageText))(
+    'nudge paid.%s — только погадаем, без про бесплатный слот',
+    (_lang, text) => {
+      expect(text.toLowerCase()).toMatch(/погадаем|shall we/);
+      expect(text.toLowerCase()).not.toMatch(/бесплатн|free slot|daily slot/);
+    },
+  );
+
+  it.each(allLocalized(dailyFreeBroadcastText))(
+    'broadcast.%s — погадаем + бесплатный заряд',
+    (_lang, text) => {
+      expect(text.toLowerCase()).toMatch(/погадаем|shall we/);
+      expect(text.toLowerCase()).toMatch(/бесплатн|free/);
     },
   );
 });

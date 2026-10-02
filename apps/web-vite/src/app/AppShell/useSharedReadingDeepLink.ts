@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { openSharedSpread, useLazyGetSharedSpreadQuery } from '@entities/spread';
 import { useAppDispatch } from '@shared/lib/store';
+import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { useToast } from '@shared/ui';
 import { clearIncomingSharedReadingFromUrl, waitForIncomingSharedReadingId } from '@shared/lib/sharedReadingLink';
 
@@ -41,6 +42,7 @@ export function useSharedReadingDeepLink(): void {
           return;
         }
         dispatch(openSharedSpread(shared));
+        reachMetrikaGoal(MetrikaGoal.shareOpen, { readingId });
         navigate('/reading/result');
       } catch {
         toast.error(t('core:ai.copy.shareOpenFailed'));

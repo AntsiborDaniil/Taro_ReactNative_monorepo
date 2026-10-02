@@ -56,8 +56,14 @@ const lavaCheckoutsByInvoice = new Map<
     credits: number;
     email: string;
     status: 'pending' | 'paid' | 'failed';
+    returnPath: string | null;
+    paidAt?: number;
   }
 >();
+
+/** telegram_id → userId для memory (после TG-логина). */
+const userIdByTelegramId = new Map<number, string>();
+const telegramIdByUserId = new Map<string, number>();
 
 function hashPassword(password: string): string {
   return createHash('sha256').update(`taro-dev:${password}`).digest('hex');
@@ -264,7 +270,13 @@ export function memorySignInWithTelegram(input: {
     });
     logAuthSignupComplete(email, user.id);
   }
+  userIdByTelegramId.set(input.telegramId, user.id);
+  telegramIdByUserId.set(user.id, input.telegramId);
   return issueSession(user);
+}
+
+export function memoryGetTelegramId(userId: string): number | null {
+  return telegramIdByUserId.get(userId) ?? null;
 }
 
 export function memorySignIn(input: {
@@ -371,12 +383,14 @@ export function memoryCreateLavaCheckout(input: {
   userId: string;
   credits: number;
   email: string;
+  returnPath?: string | null;
 }): void {
   lavaCheckoutsByInvoice.set(input.invoiceId, {
     userId: input.userId,
     credits: input.credits,
     email: input.email,
     status: 'pending',
+    returnPath: input.returnPath ?? null,
   });
 }
 
@@ -385,25 +399,43 @@ export function memoryFulfillLavaCheckout(input: {
   userId?: string | null;
   credits: number;
   email?: string;
-}): { ok: true; spreadCredits: number; alreadyApplied: boolean } {
+}): {
+  ok: true;
+  spreadCredits: number;
+  alreadyApplied: boolean;
+  userId: string;
+  creditsAdded: number;
+  returnPath: string | null;
+} {
   const existing = lavaCheckoutsByInvoice.get(input.invoiceId);
   if (existing?.status === 'paid') {
     return {
       ok: true,
       spreadCredits: memoryGetSpreadCredits(existing.userId),
       alreadyApplied: true,
+      userId: existing.userId,
+      creditsAdded: existing.credits,
+      returnPath: existing.returnPath,
     };
   }
 
   if (existing?.status === 'pending') {
     existing.status = 'paid';
+    existing.paidAt = Date.now();
     if (input.email) {
       existing.email = input.email;
     }
     const next =
       (spreadCreditsByUser.get(existing.userId) ?? 0) + existing.credits;
     spreadCreditsByUser.set(existing.userId, next);
-    return { ok: true, spreadCredits: next, alreadyApplied: false };
+    return {
+      ok: true,
+      spreadCredits: next,
+      alreadyApplied: false,
+      userId: existing.userId,
+      creditsAdded: existing.credits,
+      returnPath: existing.returnPath,
+    };
   }
 
   const userId = input.userId?.trim();
@@ -416,10 +448,42 @@ export function memoryFulfillLavaCheckout(input: {
     credits: input.credits,
     email: input.email ?? '',
     status: 'paid',
+    returnPath: null,
+    paidAt: Date.now(),
   });
   const next = (spreadCreditsByUser.get(userId) ?? 0) + input.credits;
   spreadCreditsByUser.set(userId, next);
-  return { ok: true, spreadCredits: next, alreadyApplied: false };
+  return {
+    ok: true,
+    spreadCredits: next,
+    alreadyApplied: false,
+    userId,
+    creditsAdded: input.credits,
+    returnPath: null,
+  };
+}
+
+/** Последний оплаченный checkout пользователя по telegram_id (для bot ?start=lava_success). */
+export function memoryGetLatestPaidReturnForTelegram(telegramId: number): {
+  returnPath: string | null;
+  spreadCredits: number;
+} | null {
+  const userId = userIdByTelegramId.get(telegramId);
+  if (!userId) return null;
+
+  let latest: { returnPath: string | null; paidAt: number } | null = null;
+  for (const checkout of lavaCheckoutsByInvoice.values()) {
+    if (checkout.userId !== userId || checkout.status !== 'paid') continue;
+    const paidAt = checkout.paidAt ?? 0;
+    if (!latest || paidAt >= latest.paidAt) {
+      latest = { returnPath: checkout.returnPath, paidAt };
+    }
+  }
+  if (!latest) return null;
+  return {
+    returnPath: latest.returnPath,
+    spreadCredits: memoryGetSpreadCredits(userId),
+  };
 }
 
 export function memoryListSpreads(

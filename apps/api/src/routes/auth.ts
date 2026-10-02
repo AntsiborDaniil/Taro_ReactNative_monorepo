@@ -34,6 +34,7 @@ import {
   getSpreadCredits,
   getTarotDailyUsage,
 } from '../services/tarotDailyUsageService';
+import { touchLastSeen } from '../services/dailyFreeNotifyService';
 
 function isWeakPasswordError(
   error: unknown
@@ -486,6 +487,11 @@ export const authRoute = async (
         message: 'Invalid token',
       });
     }
+
+    // Не блокируем ответ: last_seen для daily-free nudge.
+    void touchLastSeen(user.id).catch((error) => {
+      request.log.warn({ err: error }, 'touchLastSeen failed');
+    });
 
     const [tarotDaily, spreadCredits] = await Promise.all([
       getTarotDailyUsage(user.id),

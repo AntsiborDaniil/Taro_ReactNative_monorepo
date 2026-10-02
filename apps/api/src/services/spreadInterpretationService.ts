@@ -72,6 +72,27 @@ export type InterpretSpreadInput = TarotSpreadInput & {
   spread_key?: string;
 };
 
+/** Да/Нет: тот же тон, но в финале — однозначный вердикт. */
+const yesNoSystemPrompt = `
+Ты таролог Mindful Tarot. Расклад «Да / Нет». Тон — спокойное наблюдение, не эзотерическая вода.
+
+ЗАДАЧА: ответить на вопрос клиента через карту(ы) и в конце дать чёткий вердикт.
+
+ФОРМАТ (строго):
+1) 1–2 коротких абзаца: что видно по картам относительно вопроса (без перечисления карт «как в учебнике»).
+2) Последняя строка ответа — обязательно одна из фраз (на языке ответа клиента):
+   - «Ответ: Да.»
+   - «Ответ: Нет.»
+   - «Ответ: Скорее да.»
+   - «Ответ: Скорее нет.»
+   Для English: "Answer: Yes." / "Answer: No." / "Answer: Likely yes." / "Answer: Likely no."
+
+ОБЪЁМ: 80–140 слов до финальной строки. Единый текст без списков, эмодзи и заголовков.
+
+НЕЛЬЗЯ: уходить от вердикта («карты не дают ответа»), общие пожелания, медицина/юриспруденция/финансы.
+Учитывай перевёрнутые карты как смещение смысла, не как автоматическое «Нет».
+`;
+
 function isDayAdvice(input: InterpretSpreadInput): boolean {
   const key = (input.spread_key ?? '').toLowerCase();
   if (key === 'simple_daysuggest' || key.includes('daysuggest') || key.includes('day_advice')) {
@@ -83,6 +104,27 @@ function isDayAdvice(input: InterpretSpreadInput): boolean {
     type.includes('совет дня') ||
     type.includes('daily advice') ||
     type.includes('day advice')
+  );
+}
+
+function isYesNoSpread(input: InterpretSpreadInput): boolean {
+  const key = (input.spread_key ?? '').toLowerCase();
+  if (
+    key === 'simple_yesno' ||
+    key.includes('yesno') ||
+    key.includes('yes_no') ||
+    key.includes('данет')
+  ) {
+    return true;
+  }
+  const type = input.spread_type.trim().toLowerCase();
+  return (
+    type.includes('да/нет') ||
+    type.includes('да — нет') ||
+    type.includes('да-нет') ||
+    type.includes('yes/no') ||
+    type.includes('yes or no') ||
+    type.includes('yes-no')
   );
 }
 
@@ -112,7 +154,12 @@ export async function generateInterpretation(
   }
 
   const dayAdvice = isDayAdvice(input);
-  const system = dayAdvice ? dayAdviceSystemPrompt : spreadSystemPrompt;
+  const yesNo = !dayAdvice && isYesNoSpread(input);
+  const system = dayAdvice
+    ? dayAdviceSystemPrompt
+    : yesNo
+      ? yesNoSystemPrompt
+      : spreadSystemPrompt;
 
   const content = dayAdvice
     ? `
@@ -122,7 +169,22 @@ export async function generateInterpretation(
 
 Напиши ровно два абзаца по правилам system.
 `
-    : `
+    : yesNo
+      ? `
+Режим: Да / Нет.
+ВОПРОС КЛИЕНТА: "${question.trim() || '(вопрос не задан — сформулируй вердикт по посланию карт)'}"
+
+Тип расклада: ${spread_type}
+${spread_key ? `Ключ расклада: ${spread_key}` : ''}
+
+Карты:
+${formatPositions(positions)}
+
+Язык ответа: ${language}
+
+Дай краткий разбор и заверши обязательной строкой «Ответ: …» по правилам system.
+`
+      : `
 ВОПРОС КЛИЕНТА: "${question.trim() || '(вопрос не задан — ответь на главное послание расклада без общих пожеланий)'}"
 
 Тип расклада: ${spread_type}
@@ -143,8 +205,8 @@ ${formatPositions(positions)}
         { role: 'system', content: system },
         { role: 'user', content },
       ],
-      temperature: dayAdvice ? 0.55 : 0.6,
-      max_tokens: dayAdvice ? 280 : 480,
+      temperature: dayAdvice ? 0.55 : yesNo ? 0.5 : 0.6,
+      max_tokens: dayAdvice ? 280 : yesNo ? 360 : 480,
     });
 
     return {

@@ -3,6 +3,7 @@ import {
   isTelegramMiniApp,
   supportsAddToHomeScreen,
 } from '@shared/lib/web/telegramWebApp';
+import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { readHomeScreenPromptState, writeHomeScreenPromptState } from './promptStorage';
 
 const OFFER_DELAY_MS = 1400;
@@ -30,6 +31,7 @@ export async function maybeOfferAddToHomeScreen(openModal: () => void): Promise<
 
   window.setTimeout(() => {
     if (readHomeScreenPromptState() !== null) return;
+    reachMetrikaGoal(MetrikaGoal.addHomeScreenShown);
     openModal();
   }, OFFER_DELAY_MS);
 }

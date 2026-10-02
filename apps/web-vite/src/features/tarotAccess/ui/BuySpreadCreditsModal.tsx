@@ -72,7 +72,14 @@ export function BuySpreadCreditsModal({
     }
 
     try {
-      const result = await lavaCheckout({ email: trimmed }).unwrap();
+      const returnPath =
+        typeof window !== 'undefined'
+          ? `${window.location.pathname}${window.location.search || ''}`
+          : undefined;
+      const result = await lavaCheckout({
+        email: trimmed,
+        ...(returnPath ? { returnPath } : {}),
+      }).unwrap();
       if (!result.paymentUrl) {
         setError(tSpread('dailyLimit.buyFailed'));
         return;

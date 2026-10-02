@@ -6,6 +6,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import StyleIcon from '@mui/icons-material/Style';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import { LoginPage } from './LoginPage';
+import { Dashboard } from './Dashboard';
 import { dataProvider } from './dataProvider';
 import {
   adminSignIn,
@@ -17,6 +18,7 @@ import { UserEdit, UserList, UserShow } from './resources/users';
 import { SpreadEdit, SpreadList, SpreadShow } from './resources/spreads';
 import { TicketEdit, TicketList, TicketShow } from './resources/tickets';
 import { PaymentList, PaymentShow } from './resources/payments';
+import './admin.css';
 
 /** Subpath on the public site; must match Vite `base` without trailing slash. */
 const ADMIN_BASENAME = '/admin';
@@ -86,6 +88,7 @@ export function App() {
         theme={theme}
         darkTheme={theme}
         loginPage={LoginPage}
+        dashboard={Dashboard}
         dataProvider={dataProvider}
         authProvider={authProvider}
         title="Mindful Tarot Admin"

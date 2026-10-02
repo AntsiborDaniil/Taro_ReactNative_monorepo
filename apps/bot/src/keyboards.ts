@@ -11,15 +11,48 @@ import {
   faqButtonLabels,
   openAppLabel,
   openSharedReadingLabel,
+  returnToAppLabel,
   type FaqTopicId,
 } from './messages';
 import { buildSharedReadingWebAppUrl } from './sharedReading';
 
 export { CHANNEL_URL, CHANNEL_HANDLE };
 
+/** WEB_APP_URL + внутренний путь Mini App + ?lang=. */
+function webAppUrlWithReturnPath(
+  path: string | null | undefined,
+  lang: BotLang,
+): string {
+  const base = new URL(config.webAppUrl);
+  const raw = (path || '/spreads').trim();
+  const safe =
+    raw.startsWith('/') && !raw.startsWith('//') && !raw.includes('://')
+      ? raw
+      : '/spreads';
+  const [pathnamePart, search = ''] = safe.split('?');
+  base.pathname = pathnamePart || '/';
+  if (search) {
+    const extra = new URLSearchParams(search);
+    extra.forEach((v, k) => base.searchParams.set(k, v));
+  }
+  base.searchParams.set('lang', lang);
+  return base.toString();
+}
+
 export function openMiniAppInlineKeyboard(lang: BotLang): InlineKeyboard {
   return new InlineKeyboard()
     .webApp(openAppLabel[lang], webAppUrlWithLang(config.webAppUrl, lang))
+    .row()
+    .url(channelLinkLabel[lang], CHANNEL_URL);
+}
+
+/** Открыть Mini App на том же пути, откуда пользователь ушёл на оплату. */
+export function openReturnPathInlineKeyboard(
+  path: string | null | undefined,
+  lang: BotLang,
+): InlineKeyboard {
+  return new InlineKeyboard()
+    .webApp(returnToAppLabel[lang], webAppUrlWithReturnPath(path, lang))
     .row()
     .url(channelLinkLabel[lang], CHANNEL_URL);
 }
