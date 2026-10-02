@@ -1,5 +1,22 @@
 import { SpreadsCategory } from '@legacy-data';
-import type { SpreadName, TSpread } from '@legacy-data';
+import type { SpreadName, TSpread, TSpreadFollowUp } from '@legacy-data';
+
+/** Максимум уточнений на один расклад (совпадает с лимитом в readingResult). */
+export const FOLLOW_UP_MAX = 3;
+
+/** payload — opaque jsonb: чистим мусор и режем до FOLLOW_UP_MAX. */
+export function normalizeFollowUps(value: unknown): TSpreadFollowUp[] {
+  if (!Array.isArray(value)) return [];
+  const result: TSpreadFollowUp[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== 'object') continue;
+    const { q, a, createdAt } = item as Record<string, unknown>;
+    if (typeof q !== 'string' || typeof a !== 'string' || !q.trim() || !a.trim()) continue;
+    result.push(typeof createdAt === 'string' ? { q, a, createdAt } : { q, a });
+    if (result.length >= FOLLOW_UP_MAX) break;
+  }
+  return result;
+}
 
 /** Перенос apps/web/src/shared/api/cloud/spreadMapping.ts (1-в-1, без RN-типов). */
 export const CLOUD_SPREAD_PACK_KEY = 'cloud';
@@ -47,6 +64,7 @@ export function spreadToCloudBody(spread: TSpread): CreateSpreadBody {
       cardsOrder: spread.cardsOrder,
       horizontalPosition: spread.horizontalPosition,
       availableSubscriptions: spread.availableSubscriptions,
+      followUps: normalizeFollowUps(spread.followUps),
     },
   };
 }
@@ -71,6 +89,7 @@ export function cloudRecordToSpread(record: CloudSpreadRecord): TSpread {
     packKey: CLOUD_SPREAD_PACK_KEY,
     question: record.question ?? undefined,
     interpretation: record.interpretation ?? undefined,
+    followUps: normalizeFollowUps(payload.followUps),
   };
 }
 

@@ -205,6 +205,8 @@
 
   "followUp.sectionTitle": "Уточнения",
   "followUp.youAsked": "Вы спросили",
+  "followUp.authorAsked": "Автор спросил",
+  "followUp.readOnlyHint": "Уточнения может задавать только автор расклада",
   "followUp.title": "Ещё вопрос",
   "followUp.placeholder": "Что ещё хочется понять?",
   "followUp.cta": "Спросить",
@@ -214,6 +216,7 @@
   "followUp.empty": "Напишите вопрос",
   "followUp.needCredits": "Нужен 1 заряд",
   "followUp.receipt": "Списан 1 заряд · осталось {{count}}",
+  "followUp.saveFailed": "Ответ получен, но не сохранился. Попробуйте ещё раз позже.",
 
   "catalog.count_one": "{{count}} карта",
   "catalog.count_few": "{{count}} карты",

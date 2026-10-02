@@ -88,6 +88,13 @@ export type TSpreadCardsOrder = {
   meaning: string;
 };
 
+/** Уточнение к раскладу (хранится в spreads.payload.followUps, максимум 3). */
+export type TSpreadFollowUp = {
+  q: string;
+  a: string;
+  createdAt?: string;
+};
+
 export type TSpread = {
   name: string;
   id: SpreadName;
@@ -106,6 +113,8 @@ export type TSpread = {
   packKey?: string;
   question?: string;
   interpretation?: string;
+  /** Уточнения автора; читают все (шаренная ссылка), добавляет только владелец. */
+  followUps?: TSpreadFollowUp[];
 };
 
 export type TSpreadCategory = {

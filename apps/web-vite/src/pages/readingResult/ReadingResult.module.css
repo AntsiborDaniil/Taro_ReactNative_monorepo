@@ -185,9 +185,18 @@
   padding: 0;
   border: none;
   background: transparent;
-  animation: panelIn var(--ds-dur-block) var(--ds-ease) both;
   /* touch-action: pan-y — вертикальный скролл текста ок, горизонталь ловим сами. */
   touch-action: pan-y;
+  /* Контент меняется на месте — браузер не должен «якориться» на сменившемся узле. */
+  overflow-anchor: none;
+}
+
+/* Содержимое выбранной карты: ремаунт по карте даёт только fade, без смены контейнера. */
+.detailBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+  animation: panelIn var(--ds-dur-block) var(--ds-ease) both;
 }
 
 @keyframes panelIn {
@@ -309,10 +318,64 @@
   margin: 0;
 }
 
-.thread {
+/* ---- карусель уточнений: один ответ за раз ---- */
+
+.followUpCarousel {
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-12);
+}
+
+.followUpSlide {
+  /* pan-y — вертикальный скролл ок, горизонтальный свайп ловим сами. */
+  touch-action: pan-y;
+}
+
+/* Стрелки — только на широких экранах, на узких вместо них точки. */
+.followUpArrows {
+  display: none;
+}
+
+.followUpDots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-4);
+}
+
+/* Точка 8px, зона нажатия 24px — через padding + background-clip. */
+.dot {
+  box-sizing: content-box;
+  width: 8px;
+  height: 8px;
+  padding: var(--ds-space-8);
+  border: none;
+  border-radius: 50%;
+  background: var(--ds-ground-600);
+  background-clip: content-box;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--ds-dur-state) var(--ds-ease);
+}
+
+.dotActive {
+  background: var(--ds-accent-400);
+  background-clip: content-box;
+}
+
+.dot:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--ds-size-focus-ring-width) var(--ds-calm-500);
+}
+
+@media (min-width: 900px) {
+  .followUpArrows {
+    display: flex;
+  }
+
+  .followUpDots {
+    display: none;
+  }
 }
 
 .followUpItem {
@@ -392,7 +455,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .cardItem,
-  .detail,
+  .detailBody,
+  .followUpItem,
   .paragraph {
     animation: none;
   }

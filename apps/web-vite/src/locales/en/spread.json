@@ -205,6 +205,8 @@
 
   "followUp.sectionTitle": "Follow-ups",
   "followUp.youAsked": "You asked",
+  "followUp.authorAsked": "The author asked",
+  "followUp.readOnlyHint": "Only the reading’s author can ask follow-ups",
   "followUp.title": "Another question",
   "followUp.placeholder": "What else would you like to understand?",
   "followUp.cta": "Ask",
@@ -214,6 +216,7 @@
   "followUp.empty": "Write a question",
   "followUp.needCredits": "You need 1 charge",
   "followUp.receipt": "1 charge used · {{count}} left",
+  "followUp.saveFailed": "Got the answer, but it didn’t save. Try again later.",
 
   "catalog.count_one": "{{count}} card",
   "catalog.count_few": "{{count}} cards",

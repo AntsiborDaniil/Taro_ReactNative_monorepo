@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { TSelectedTarotCard } from '@legacy-data';
+import type { TSelectedTarotCard, TSpreadFollowUp } from '@legacy-data';
 import type { TSpread } from './catalog';
 
 export type SpreadFlowStatus = 'choosing' | 'interpreting' | 'done' | 'error';
@@ -10,6 +10,8 @@ export type SpreadState = {
   question: string;
   status: SpreadFlowStatus;
   errorCode: string | null;
+  /** Расклад открыт по шаренной ссылке — читатель видит уточнения, но не может задавать новые. */
+  openedAsShared: boolean;
 };
 
 const initialState: SpreadState = {
@@ -17,6 +19,7 @@ const initialState: SpreadState = {
   question: '',
   status: 'choosing',
   errorCode: null,
+  openedAsShared: false,
 };
 
 const spreadSlice = createSlice({
@@ -34,6 +37,7 @@ const spreadSlice = createSlice({
       state.question = '';
       state.status = 'choosing';
       state.errorCode = null;
+      state.openedAsShared = false;
     },
     setQuestion(state, action: PayloadAction<string>) {
       state.question = action.payload;
@@ -86,12 +90,27 @@ const spreadSlice = createSlice({
       state.question = action.payload.question ?? '';
       state.status = action.payload.interpretation ? 'done' : 'choosing';
       state.errorCode = null;
+      state.openedAsShared = false;
+    },
+    /** Открыть чужой расклад по шаренной ссылке: уточнения только для чтения. */
+    openSharedSpread(state, action: PayloadAction<TSpread>) {
+      state.selectedSpread = action.payload;
+      state.question = action.payload.question ?? '';
+      state.status = action.payload.interpretation ? 'done' : 'choosing';
+      state.errorCode = null;
+      state.openedAsShared = true;
+    },
+    /** Обновить список уточнений выбранного расклада (после ответа AI и сохранения). */
+    setFollowUps(state, action: PayloadAction<TSpreadFollowUp[]>) {
+      if (!state.selectedSpread) return;
+      state.selectedSpread.followUps = action.payload;
     },
     clearSpread(state) {
       state.selectedSpread = null;
       state.question = '';
       state.status = 'choosing';
       state.errorCode = null;
+      state.openedAsShared = false;
     },
   },
 });
@@ -107,6 +126,8 @@ export const {
   setError,
   setSpreadMeta,
   openSavedSpread,
+  openSharedSpread,
+  setFollowUps,
   clearSpread,
 } = spreadSlice.actions;
 export const spreadReducer = spreadSlice.reducer;

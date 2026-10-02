@@ -4,8 +4,11 @@ import { useTranslation } from 'react-i18next';
 import {
   getAIRequestBody,
   isCloudSpread,
+  normalizeFollowUps,
   saveSpreadLocally,
   setError,
+  FOLLOW_UP_MAX,
+  setFollowUps,
   setInterpretation,
   setSpreadMeta,
   setStatus,
@@ -15,6 +18,7 @@ import {
   useInterpretSpreadMutation,
   useUpdateSpreadHistoryMutation,
   type InterpretErrorBody,
+  type InterpretResponse,
   type TSpread,
 } from '@entities/spread';
 import { FavoriteButton } from '@entities/favorites';
@@ -42,14 +46,70 @@ import {
 } from '@shared/ui';
 import styles from './ReadingResult.module.css';
 
-const FOLLOW_UP_MAX = 3;
-
 /** Абзацы ответа AI: пустая строка — граница абзаца. */
 function toParagraphs(text: string): string[] {
   return text
     .split(/\n{2,}/)
     .map((part) => part.trim())
     .filter(Boolean);
+}
+
+/** Минимальная дельта горизонтального свайпа, px. */
+const SWIPE_THRESHOLD = 48;
+
+/**
+ * Обработчики явного горизонтального свайпа (вертикальный скролл не трогаем).
+ * Никакого preventDefault/фокуса: страница остаётся на месте.
+ */
+function createSwipeHandlers(
+  startRef: { current: { x: number; y: number } | null },
+  enabled: boolean,
+  onSwipe: (direction: 1 | -1) => void,
+) {
+  return {
+    onTouchStart: (event: TouchEvent<HTMLElement>) => {
+      if (!enabled) return;
+      const touch = event.changedTouches[0];
+      if (!touch) return;
+      startRef.current = { x: touch.clientX, y: touch.clientY };
+    },
+    onTouchEnd: (event: TouchEvent<HTMLElement>) => {
+      const start = startRef.current;
+      startRef.current = null;
+      if (!enabled || !start) return;
+      const touch = event.changedTouches[0];
+      if (!touch) return;
+      const dx = touch.clientX - start.x;
+      const dy = touch.clientY - start.y;
+      if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+      onSwipe(dx < 0 ? 1 : -1);
+    },
+    onTouchCancel: () => {
+      startRef.current = null;
+    },
+  };
+}
+
+/**
+ * Панель, чья высота зависит от контента (разбор карты, ответ AI), не должна
+ * «схлопываться» при переключении: страница становится короче, браузер
+ * подрезает scrollTop и вьюпорт улетает вверх. Держим максимальную высоту
+ * просмотренных панелей как min-height до смены расклада.
+ */
+function useHeightLock(resetKey: unknown) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [minHeight, setMinHeight] = useState(0);
+
+  useEffect(() => {
+    setMinHeight(0);
+  }, [resetKey]);
+
+  const lock = () => {
+    const height = ref.current?.offsetHeight ?? 0;
+    if (height > 0) setMinHeight((prev) => Math.max(prev, height));
+  };
+
+  return { ref, minHeight: minHeight || undefined, lock };
 }
 
 /**
@@ -63,6 +123,8 @@ export default function ReadingResultPage(): ReactElement {
   const toast = useToast();
 
   const spread = useAppSelector((state) => state.spread.selectedSpread);
+  /** Открыт по шаренной ссылке: уточнения читаем, задавать новые нельзя. */
+  const openedAsShared = useAppSelector((state) => state.spread.openedAsShared);
   const status = useAppSelector((state) => state.spread.status);
   const errorCode = useAppSelector((state) => state.spread.errorCode);
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
@@ -78,12 +140,16 @@ export default function ReadingResultPage(): ReactElement {
   const persistPromise = useRef<Promise<TSpread | null> | null>(null);
   /** Старт горизонтального свайпа по блоку разбора карты. */
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  /** Старт свайпа по карусели уточнений. */
+  const followUpSwipeStart = useRef<{ x: number; y: number } | null>(null);
 
   const [cardNsReady, setCardNsReady] = useState(false);
   const [activeCard, setActiveCard] = useState(0);
+  const [activeFollowUp, setActiveFollowUp] = useState(0);
   const [isSharing, setIsSharing] = useState(false);
   const [followUpQuestion, setFollowUpQuestion] = useState('');
-  const [followUps, setFollowUps] = useState<Array<{ q: string; a: string }>>([]);
+  const detailLock = useHeightLock(spread?.id);
+  const followUpLock = useHeightLock(spread?.id);
 
   useEffect(() => {
     let alive = true;
@@ -99,7 +165,10 @@ export default function ReadingResultPage(): ReactElement {
   const isComplete = Boolean(spread) && cards.length >= (spread?.cardsCount ?? 0) && cards.length > 0;
   const interpretation = spread?.interpretation?.trim() ?? '';
   const paragraphs = useMemo(() => toParagraphs(interpretation), [interpretation]);
+  /** Уточнения живут в раскладе (и в spreads.payload.followUps) — читают все, добавляет только автор. */
+  const followUps = useMemo(() => normalizeFollowUps(spread?.followUps), [spread?.followUps]);
   const followUpLeft = FOLLOW_UP_MAX - followUps.length;
+  const canAsk = isAuthenticated && !openedAsShared && followUpLeft > 0;
 
   useEffect(() => {
     if (!spread) navigate('/spreads', { replace: true });
@@ -109,7 +178,7 @@ export default function ReadingResultPage(): ReactElement {
   // Другой расклад (история, ссылка) — читаем снова с первой карты.
   useEffect(() => {
     setActiveCard(0);
-    setFollowUps([]);
+    setActiveFollowUp(0);
     setFollowUpQuestion('');
   }, [spread?.id]);
 
@@ -191,7 +260,8 @@ export default function ReadingResultPage(): ReactElement {
   }, [isComplete, interpretation, cardNsReady, sessionLoading]);
 
   const handleFollowUp = async () => {
-    if (!spread || !interpretation || isFollowUpLoading || followUpLeft <= 0) return;
+    // Задавать уточнения может только автор (не читатель шаренной ссылки).
+    if (!spread || !interpretation || isFollowUpLoading || !canAsk) return;
     const question = followUpQuestion.trim();
     if (!question) {
       toast.info(t('spread:followUp.empty'));
@@ -206,18 +276,15 @@ export default function ReadingResultPage(): ReactElement {
     const body = getAIRequestBody({ spread, t, language: i18n.language });
     if (!body) return;
 
+    let result: InterpretResponse;
     try {
-      const result = await followUpSpread({
+      result = await followUpSpread({
         ...body,
         previous_interpretation: [interpretation, ...followUps.map((item) => `Q: ${item.q}\nA: ${item.a}`)].join(
           '\n\n',
         ),
         follow_up_question: question,
       }).unwrap();
-      setFollowUps((prev) => [...prev, { q: question, a: result.interpretation }]);
-      setFollowUpQuestion('');
-      const left = typeof result.spreadCredits === 'number' ? result.spreadCredits : Math.max(spreadCredits - 1, 0);
-      toast.success(t('spread:followUp.receipt', { count: left }));
     } catch (err) {
       const rtkError = err as { status?: number; data?: InterpretErrorBody };
       if (rtkError.status === 401) {
@@ -230,6 +297,39 @@ export default function ReadingResultPage(): ReactElement {
         return;
       }
       toast.error(t('core:ai.error1'));
+      return;
+    }
+
+    // Заряд уже списан — ответ показываем сразу и сохраняем в расклад (payload.followUps).
+    const nextFollowUps = normalizeFollowUps([
+      ...followUps,
+      { q: question, a: result.interpretation, createdAt: new Date().toISOString() },
+    ]);
+    dispatch(setFollowUps(nextFollowUps));
+    setActiveFollowUp(Math.max(nextFollowUps.length - 1, 0));
+    setFollowUpQuestion('');
+    const left = typeof result.spreadCredits === 'number' ? result.spreadCredits : Math.max(spreadCredits - 1, 0);
+    toast.success(t('spread:followUp.receipt', { count: left }));
+
+    // Дожидаемся сохранения толкования (иначе создадим дубль) и пишем уточнения;
+    // при провале — тост (ответ на экране есть, но шаринг/история без него).
+    const previousPersist = persistPromise.current;
+    const nextPersist = (async (): Promise<TSpread | null> => {
+      const pending = previousPersist ? await previousPersist.catch(() => null) : null;
+      const base: TSpread = pending
+        ? { ...spread, uid: pending.uid, date: pending.date, packKey: pending.packKey }
+        : spread;
+      const withFollowUps: TSpread = { ...base, interpretation, followUps: nextFollowUps };
+      let saved = await persistSpreadToHistory(withFollowUps);
+      if (!saved) {
+        saved = await persistSpreadToHistory(withFollowUps);
+      }
+      return saved;
+    })();
+    persistPromise.current = nextPersist;
+    const saved = await nextPersist;
+    if (!saved) {
+      toast.error(t('spread:followUp.saveFailed'));
     }
   };
 
@@ -333,29 +433,27 @@ export default function ReadingResultPage(): ReactElement {
   const current = cards[Math.min(activeCard, cards.length - 1)];
   const hasManyCards = cards.length > 1;
   const goToCard = (index: number) => {
-    setActiveCard(Math.min(Math.max(index, 0), cards.length - 1));
+    const next = Math.min(Math.max(index, 0), cards.length - 1);
+    if (next === activeCard) return;
+    // Фиксируем высоту уходящей панели, чтобы страница не укорачивалась и не прыгала.
+    detailLock.lock();
+    setActiveCard(next);
   };
-  const handleDetailTouchStart = (event: TouchEvent<HTMLElement>) => {
-    if (!hasManyCards) return;
-    const touch = event.changedTouches[0];
-    if (!touch) return;
-    swipeStart.current = { x: touch.clientX, y: touch.clientY };
+  // Только явный горизонтальный жест — вертикальный скролл текста не трогаем.
+  const detailSwipe = createSwipeHandlers(swipeStart, hasManyCards, (direction) => goToCard(activeCard + direction));
+
+  const hasManyFollowUps = followUps.length > 1;
+  const currentFollowUpIndex = Math.min(activeFollowUp, Math.max(followUps.length - 1, 0));
+  const currentFollowUp = followUps[currentFollowUpIndex];
+  const goToFollowUp = (index: number) => {
+    const next = Math.min(Math.max(index, 0), followUps.length - 1);
+    if (next === currentFollowUpIndex) return;
+    followUpLock.lock();
+    setActiveFollowUp(next);
   };
-  const handleDetailTouchEnd = (event: TouchEvent<HTMLElement>) => {
-    if (!hasManyCards || !swipeStart.current) return;
-    const touch = event.changedTouches[0];
-    if (!touch) {
-      swipeStart.current = null;
-      return;
-    }
-    const dx = touch.clientX - swipeStart.current.x;
-    const dy = touch.clientY - swipeStart.current.y;
-    swipeStart.current = null;
-    // Только явный горизонтальный жест — вертикальный скролл текста не трогаем.
-    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
-    if (dx < 0) goToCard(activeCard + 1);
-    else goToCard(activeCard - 1);
-  };
+  const followUpSwipe = createSwipeHandlers(followUpSwipeStart, hasManyFollowUps, (direction) =>
+    goToFollowUp(currentFollowUpIndex + direction),
+  );
   const handleCardsKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'ArrowLeft') {
       event.preventDefault();
@@ -411,7 +509,7 @@ export default function ReadingResultPage(): ReactElement {
               aria-selected={index === activeCard}
               className={[styles.cardItem, index === activeCard ? styles.cardItemActive : ''].join(' ')}
               style={{ animationDelay: `${index * 120}ms` }}
-              onClick={() => setActiveCard(index)}
+              onClick={() => goToCard(index)}
             >
               <span className={styles.cardFace}>
                 <TarotCardFace cardId={card.id} direction={card.direction} />
@@ -458,31 +556,90 @@ export default function ReadingResultPage(): ReactElement {
         </section>
 
         {/* 3. Уточнения — отдельный блок: сначала ответы, потом поле */}
-        {interpretation && isAuthenticated ? (
+        {/* Тред видят все (в т.ч. по шаренной ссылке), форму — только автор. */}
+        {interpretation && (followUps.length > 0 || canAsk) ? (
           <section className={styles.followUp}>
             <Text role="title" tone="ink50" as="h2" className={styles.sectionTitle}>
               {t('spread:followUp.sectionTitle')}
             </Text>
 
-            {followUps.length > 0 ? (
-              <div className={styles.thread}>
-                {followUps.map((item, index) => (
-                  <div key={`${item.q}-${index}`} className={styles.followUpItem}>
+            {currentFollowUp ? (
+              <div className={styles.followUpCarousel}>
+                {/* Десктоп: стрелки + счётчик (как в разборе по картам). */}
+                {hasManyFollowUps ? (
+                  <div className={[styles.cardNav, styles.followUpArrows].join(' ')}>
+                    <button
+                      type="button"
+                      className={styles.navButton}
+                      onClick={() => goToFollowUp(currentFollowUpIndex - 1)}
+                      disabled={currentFollowUpIndex === 0}
+                      aria-label={t('core:button.prev')}
+                    >
+                      <ChevronLeftIcon width={20} height={20} />
+                    </button>
+                    <Text role="micro" tone="ink100" className={styles.navCounter}>
+                      {t('spread:flow.cardCounter', {
+                        current: currentFollowUpIndex + 1,
+                        total: followUps.length,
+                      })}
+                    </Text>
+                    <button
+                      type="button"
+                      className={styles.navButton}
+                      onClick={() => goToFollowUp(currentFollowUpIndex + 1)}
+                      disabled={currentFollowUpIndex === followUps.length - 1}
+                      aria-label={t('core:button.next')}
+                    >
+                      <ChevronRightIcon width={20} height={20} />
+                    </button>
+                  </div>
+                ) : null}
+
+                {/* Контейнер стабилен и держит min-height — как и у разбора карт. */}
+                <div
+                  ref={followUpLock.ref}
+                  className={styles.followUpSlide}
+                  style={{ minHeight: followUpLock.minHeight }}
+                  aria-live="polite"
+                  {...followUpSwipe}
+                >
+                  <div key={currentFollowUpIndex} className={styles.followUpItem}>
                     <Text role="micro" tone="ink100">
-                      {t('spread:followUp.youAsked')}
+                      {openedAsShared ? t('spread:followUp.authorAsked') : t('spread:followUp.youAsked')}
                     </Text>
                     <Text role="body" tone="ink50" className={styles.followUpQuestion}>
-                      {item.q}
+                      {currentFollowUp.q}
                     </Text>
                     <Text role="body" tone="ink50" className={styles.paragraph}>
-                      {item.a}
+                      {currentFollowUp.a}
                     </Text>
                   </div>
-                ))}
+                </div>
+
+                {/* Мобильный: точки (на десктопе скрыты). */}
+                {hasManyFollowUps ? (
+                  <div className={styles.followUpDots} role="tablist">
+                    {followUps.map((_, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        role="tab"
+                        aria-selected={index === currentFollowUpIndex}
+                        aria-label={t('spread:flow.cardCounter', { current: index + 1, total: followUps.length })}
+                        className={[styles.dot, index === currentFollowUpIndex ? styles.dotActive : ''].join(' ')}
+                        onClick={() => goToFollowUp(index)}
+                      />
+                    ))}
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
-            {followUpLeft > 0 ? (
+            {openedAsShared ? (
+              <Text role="micro" tone="ink100">
+                {t('spread:followUp.readOnlyHint')}
+              </Text>
+            ) : canAsk ? (
               <div className={styles.ask}>
                 <Textarea
                   label={t('spread:followUp.title')}
@@ -506,11 +663,11 @@ export default function ReadingResultPage(): ReactElement {
                   </Text>
                 </div>
               </div>
-            ) : (
+            ) : followUpLeft <= 0 ? (
               <Text role="micro" tone="ink100">
                 {t('spread:followUp.capReached')}
               </Text>
-            )}
+            ) : null}
           </section>
         ) : null}
 
@@ -547,13 +704,15 @@ export default function ReadingResultPage(): ReactElement {
             ) : null}
           </div>
 
+          {/* Контейнер стабилен (без key) и держит min-height: смена карты меняет только содержимое. */}
           <div
-            key={`${current.id}-${activeCard}`}
+            ref={detailLock.ref}
             className={styles.detail}
+            style={{ minHeight: detailLock.minHeight }}
             aria-live="polite"
-            onTouchStart={handleDetailTouchStart}
-            onTouchEnd={handleDetailTouchEnd}
+            {...detailSwipe}
           >
+            <div key={activeCard} className={styles.detailBody}>
             <div className={styles.detailHead}>
               <div className={styles.detailTitles}>
                 {positionLabel(activeCard) ? (
@@ -609,6 +768,7 @@ export default function ReadingResultPage(): ReactElement {
               >
                 {t('spread:aboutCard')}
               </Button>
+            </div>
             </div>
           </div>
         </section>

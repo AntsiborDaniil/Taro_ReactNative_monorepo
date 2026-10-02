@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { openSavedSpread, useLazyGetSharedSpreadQuery } from '@entities/spread';
+import { openSharedSpread, useLazyGetSharedSpreadQuery } from '@entities/spread';
 import { useAppDispatch } from '@shared/lib/store';
 import { useToast } from '@shared/ui';
 import { clearIncomingSharedReadingFromUrl, waitForIncomingSharedReadingId } from '@shared/lib/sharedReadingLink';
@@ -40,7 +40,7 @@ export function useSharedReadingDeepLink(): void {
           toast.error(t('core:ai.copy.shareOpenFailed'));
           return;
         }
-        dispatch(openSavedSpread(shared));
+        dispatch(openSharedSpread(shared));
         navigate('/reading/result');
       } catch {
         toast.error(t('core:ai.copy.shareOpenFailed'));
