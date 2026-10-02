@@ -12,7 +12,10 @@
   "dayCard.a11y": "Card of the day, {{date}}. Draw a card",
 
   "allSpreads": "All spreads",
+  "buyCredits.cta": "Buy +3 spreads",
   "spreadCardsCount_one": "{{count}} card",
+  "spreadCardsCount_few": "{{count}} cards",
+  "spreadCardsCount_many": "{{count}} cards",
   "spreadCardsCount_other": "{{count}} cards",
   "spreadCard.a11y": "{{name}}, {{cards}}",
   "quickLinks.a11yHint": "Opens in the library"

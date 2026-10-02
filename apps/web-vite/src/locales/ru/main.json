@@ -12,6 +12,7 @@
   "dayCard.a11y": "Карта дня, {{date}}. Вытянуть карту",
 
   "allSpreads": "Все расклады",
+  "buyCredits.cta": "Купить +3 расклада",
   "spreadCardsCount_one": "{{count}} карта",
   "spreadCardsCount_few": "{{count}} карты",
   "spreadCardsCount_many": "{{count}} карт",

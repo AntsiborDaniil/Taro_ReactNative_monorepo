@@ -117,40 +117,29 @@ export async function tryConsumeTarotDailySlot(
   };
 }
 
-/** Daily free slot first; then paid spread_credits. */
-export async function tryConsumeSpreadSlot(
+/** Только paid spread_credits — без дневного слота (follow-up и др. AI-SKU). */
+export async function tryConsumeSpreadCreditOnly(
   userId: string
 ): Promise<SpreadSlotResult> {
-  const daily = await tryConsumeTarotDailySlot(userId);
-  if (daily.ok) {
-    const spreadCredits = await getSpreadCredits(userId);
-    return {
-      ok: true,
-      used: daily.used,
-      limit: daily.limit,
-      day: daily.day,
-      source: 'daily',
-      spreadCredits,
-    };
-  }
+  const usage = await loadTarotDailyUsage(userId);
 
   if (useMemoryBackend()) {
     const credit = memory.memoryConsumeSpreadCredit(userId);
     if (credit.ok) {
       return {
         ok: true,
-        used: daily.used,
-        limit: daily.limit,
-        day: daily.day,
+        used: usage.used,
+        limit: usage.limit,
+        day: usage.day,
         source: 'credit',
         spreadCredits: credit.spreadCredits,
       };
     }
     return {
       ok: false,
-      used: daily.used,
-      limit: daily.limit,
-      day: daily.day,
+      used: usage.used,
+      limit: usage.limit,
+      day: usage.day,
       spreadCredits: credit.spreadCredits,
     };
   }
@@ -172,11 +161,49 @@ export async function tryConsumeSpreadSlot(
   if (ok) {
     return {
       ok: true,
+      used: usage.used,
+      limit: usage.limit,
+      day: usage.day,
+      source: 'credit',
+      spreadCredits,
+    };
+  }
+
+  return {
+    ok: false,
+    used: usage.used,
+    limit: usage.limit,
+    day: usage.day,
+    spreadCredits,
+  };
+}
+
+/** Daily free slot first; then paid spread_credits. */
+export async function tryConsumeSpreadSlot(
+  userId: string
+): Promise<SpreadSlotResult> {
+  const daily = await tryConsumeTarotDailySlot(userId);
+  if (daily.ok) {
+    const spreadCredits = await getSpreadCredits(userId);
+    return {
+      ok: true,
+      used: daily.used,
+      limit: daily.limit,
+      day: daily.day,
+      source: 'daily',
+      spreadCredits,
+    };
+  }
+
+  const credit = await tryConsumeSpreadCreditOnly(userId);
+  if (credit.ok) {
+    return {
+      ok: true,
       used: daily.used,
       limit: daily.limit,
       day: daily.day,
       source: 'credit',
-      spreadCredits,
+      spreadCredits: credit.spreadCredits,
     };
   }
 
@@ -185,7 +212,7 @@ export async function tryConsumeSpreadSlot(
     used: daily.used,
     limit: daily.limit,
     day: daily.day,
-    spreadCredits,
+    spreadCredits: credit.spreadCredits,
   };
 }
 

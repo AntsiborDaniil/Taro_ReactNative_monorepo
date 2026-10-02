@@ -32,8 +32,8 @@ export default function DeckStylePage(): ReactElement {
 
   return (
     <div className={styles.page}>
-      <Header title={t('settings:deck.style')} />
       <div className={styles.column}>
+        <Header title={t('settings:deck.style')} />
         {DECK_STYLES.map((option) => {
           const selected = option.id === current;
           return (

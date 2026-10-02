@@ -81,7 +81,7 @@ export default function MotivationPage(): ReactElement {
     if (motivation || attempted.current || !cardNsReady || !requestState?.key) return;
     if (isWebAuthPending(sessionLoading)) return;
     if (shouldPromptWebSignIn(isAuthenticated, sessionLoading)) {
-      toast.info(t('core:ai.errorProvider', { defaultValue: 'Interpretation service is temporarily unavailable.' }));
+      toast.info(t('core:ai.errorProvider'));
       setFailed(true);
       return;
     }
@@ -113,11 +113,11 @@ export default function MotivationPage(): ReactElement {
       })
       .catch((err: { status?: number; data?: GenerateMotivationErrorBody }) => {
         if (err.status === 401) {
-          toast.info(t('core:ai.errorProvider', { defaultValue: 'Interpretation service is temporarily unavailable.' }));
+          toast.info(t('core:ai.errorProvider'));
         } else if (err.status === 429) {
           dispatch(openModal({ id: 'daily-limit' }));
         } else {
-          toast.error(t('core:ai.error1', { defaultValue: 'The mists of fate have veiled the Tarot cards.' }));
+          toast.error(t('core:ai.error1'));
         }
         setFailed(true);
       });
@@ -143,8 +143,8 @@ export default function MotivationPage(): ReactElement {
         <div className={styles.column}>
           <Header title="" />
           <EmptyState
-            title={failed ? t('core:ai.error1', { defaultValue: 'The mists of fate have veiled the Tarot cards.' }) : t('core:stub.missingData.title')}
-            action={<Button onClick={() => navigate('/mood')}>{t('core:stub.missingData.button', { defaultValue: 'Go to spreads' })}</Button>}
+            title={failed ? t('core:ai.error1') : t('core:stub.missingData.title')}
+            action={<Button onClick={() => navigate('/mood')}>{t('core:stub.missingData.button')}</Button>}
           />
         </div>
       </div>

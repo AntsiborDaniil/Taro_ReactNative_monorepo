@@ -120,23 +120,26 @@
 /* ---- переключение карт (стрелки по бокам + счётчик) ---- */
 
 .cardNav {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--ds-space-12);
+  min-height: 40px;
 }
 
 .navButton {
+  position: relative;
+  z-index: 1;
   flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border-radius: 50%;
   border: var(--ds-size-hairline) solid var(--ds-ground-600);
-  background: var(--ds-ground-800);
+  background: var(--ds-ground-700);
   color: var(--ds-ink-50);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -164,12 +167,13 @@
 }
 
 .navCounter {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--ds-space-4);
-  min-width: 0;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
   text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 /* ---- разбор выбранной карты ---- */
@@ -178,10 +182,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-12);
-  padding: var(--ds-space-24);
-  border-radius: var(--ds-radius-list-row);
-  border: var(--ds-size-hairline) solid var(--ds-ground-600);
-  background: var(--ds-ground-800);
+  padding: 0;
+  border: none;
+  background: transparent;
   animation: panelIn var(--ds-dur-block) var(--ds-ease) both;
   /* touch-action: pan-y — вертикальный скролл текста ок, горизонталь ловим сами. */
   touch-action: pan-y;
@@ -266,9 +269,33 @@
   align-self: flex-start;
 }
 
-/* ---- общий разбор AI ---- */
+/* ---- общий разбор ---- */
 
 .summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-16);
+  padding: var(--ds-space-24);
+  border-radius: var(--ds-radius-list-row);
+  border: var(--ds-size-hairline) solid color-mix(in srgb, var(--ds-accent-400) 45%, var(--ds-ground-600));
+  border-left: var(--ds-size-edge-width) solid var(--ds-accent-400);
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--ds-accent-400) 10%, transparent) 0%,
+      transparent 42%
+    ),
+    var(--ds-ground-700);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ds-accent-400) 12%, transparent);
+}
+
+.summaryTitle {
+  margin: 0;
+  color: var(--ds-accent-400);
+}
+
+.followUp,
+.meanings {
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-16);
@@ -278,14 +305,56 @@
   background: var(--ds-ground-800);
 }
 
-.summaryHead {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-4);
+.sectionTitle {
+  margin: 0;
 }
 
-.summary h2 {
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+}
+
+.followUpItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+  padding: var(--ds-space-16);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-700);
+}
+
+.followUpQuestion {
   margin: 0;
+  font-weight: 600;
+}
+
+.ask {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+}
+
+.askActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-8);
+}
+
+.askCta {
+  width: min(100%, 280px);
+}
+
+.askCap {
+  margin: 0;
+  text-align: center;
+}
+
+.meaningsHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
 }
 
 .paragraphs {

@@ -21,6 +21,11 @@ export type InterpretErrorBody = {
   spreadCredits?: number;
 };
 
+export type FollowUpInput = TarotSpreadInput & {
+  previous_interpretation: string;
+  follow_up_question: string;
+};
+
 /**
  * POST /api/interpret — требует авторизацию (401 без сессии, см.
  * apps/api/src/routes/interpret.ts) и тратит дневной лимит/кредит расклада
@@ -32,6 +37,11 @@ export const spreadApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     interpretSpread: build.mutation<InterpretResponse, TarotSpreadInput>({
       query: (body) => ({ url: '/api/interpret', method: 'POST', body }),
+      invalidatesTags: ['User'],
+    }),
+    /** POST /api/interpret/follow-up — всегда 1 заряд (не дневной слот). */
+    followUpSpread: build.mutation<InterpretResponse, FollowUpInput>({
+      query: (body) => ({ url: '/api/interpret/follow-up', method: 'POST', body }),
       invalidatesTags: ['User'],
     }),
     /** GET /api/spreads?limit&offset — история (пункт 1), требует сессию. */
@@ -71,6 +81,7 @@ export const spreadApi = baseApi.injectEndpoints({
 
 export const {
   useInterpretSpreadMutation,
+  useFollowUpSpreadMutation,
   useListSpreadsHistoryQuery,
   useCreateSpreadHistoryMutation,
   useUpdateSpreadHistoryMutation,

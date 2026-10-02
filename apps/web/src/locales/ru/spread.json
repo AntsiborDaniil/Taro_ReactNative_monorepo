@@ -39,7 +39,7 @@
   "dailyLimit.emailInvalid": "Укажите почту Яндекса: @yandex.ru, @ya.ru, @yandex.com и т.п.",
   "dailyLimit.lavaRejected": "Ошибка Lava: не удалось создать оплату. Проверьте email и попробуйте снова.",
   "dailyLimit.packBadge": "+3 расклада",
-  "dailyLimit.price": "50 ₽",
+  "dailyLimit.price": "99 ₽",
   "dailyLimit.buyCta": "Купить +3 расклада",
   "dailyLimit.buyLoading": "Открываем оплату…",
   "dailyLimit.buyFailed": "Не удалось создать оплату. Попробуйте ещё раз.",

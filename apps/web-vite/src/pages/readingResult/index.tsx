@@ -11,6 +11,7 @@ import {
   setStatus,
   TarotCardFace,
   useCreateSpreadHistoryMutation,
+  useFollowUpSpreadMutation,
   useInterpretSpreadMutation,
   useUpdateSpreadHistoryMutation,
   type InterpretErrorBody,
@@ -36,9 +37,12 @@ import {
   openModal,
   ShareIcon,
   Text,
+  Textarea,
   useToast,
 } from '@shared/ui';
 import styles from './ReadingResult.module.css';
+
+const FOLLOW_UP_MAX = 3;
 
 /** Абзацы ответа AI: пустая строка — граница абзаца. */
 function toParagraphs(text: string): string[] {
@@ -49,12 +53,8 @@ function toParagraphs(text: string): string[] {
 }
 
 /**
- * Страница толкования расклада. Карты раскрываются по очереди (переворот), клик по
- * карте или стрелки «назад/вперёд» открывают её разбор в позиции: направление,
- * ключевые слова, значение и совет (ключи card.json из getTarotCardReadings).
- * Ниже — общий разбор от AI (POST /api/interpret запускается сам при первом
- * открытии), «Поделиться» и «Новый расклад». Сохранение в историю — как раньше
- * на /reading.
+ * Страница толкования расклада.
+ * Семантика: карты → общий разбор → уточнения → разбор по картам.
  */
 export default function ReadingResultPage(): ReactElement {
   const { t, i18n } = useTranslation();
@@ -67,8 +67,10 @@ export default function ReadingResultPage(): ReactElement {
   const errorCode = useAppSelector((state) => state.spread.errorCode);
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
   const sessionLoading = useAppSelector((state) => state.user.sessionLoading);
+  const spreadCredits = useAppSelector((state) => state.user.spreadCredits ?? 0);
 
   const [interpretSpread, { isLoading: isInterpreting }] = useInterpretSpreadMutation();
+  const [followUpSpread, { isLoading: isFollowUpLoading }] = useFollowUpSpreadMutation();
   const [createSpreadHistory] = useCreateSpreadHistoryMutation();
   const [updateSpreadHistory] = useUpdateSpreadHistoryMutation();
   const attempted = useRef(false);
@@ -80,6 +82,8 @@ export default function ReadingResultPage(): ReactElement {
   const [cardNsReady, setCardNsReady] = useState(false);
   const [activeCard, setActiveCard] = useState(0);
   const [isSharing, setIsSharing] = useState(false);
+  const [followUpQuestion, setFollowUpQuestion] = useState('');
+  const [followUps, setFollowUps] = useState<Array<{ q: string; a: string }>>([]);
 
   useEffect(() => {
     let alive = true;
@@ -95,6 +99,7 @@ export default function ReadingResultPage(): ReactElement {
   const isComplete = Boolean(spread) && cards.length >= (spread?.cardsCount ?? 0) && cards.length > 0;
   const interpretation = spread?.interpretation?.trim() ?? '';
   const paragraphs = useMemo(() => toParagraphs(interpretation), [interpretation]);
+  const followUpLeft = FOLLOW_UP_MAX - followUps.length;
 
   useEffect(() => {
     if (!spread) navigate('/spreads', { replace: true });
@@ -104,6 +109,8 @@ export default function ReadingResultPage(): ReactElement {
   // Другой расклад (история, ссылка) — читаем снова с первой карты.
   useEffect(() => {
     setActiveCard(0);
+    setFollowUps([]);
+    setFollowUpQuestion('');
   }, [spread?.id]);
 
   /** Облачная запись (POST/PATCH /api/spreads) — только она даёт uid для ссылки. */
@@ -182,6 +189,49 @@ export default function ReadingResultPage(): ReactElement {
     void handleInterpret();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isComplete, interpretation, cardNsReady, sessionLoading]);
+
+  const handleFollowUp = async () => {
+    if (!spread || !interpretation || isFollowUpLoading || followUpLeft <= 0) return;
+    const question = followUpQuestion.trim();
+    if (!question) {
+      toast.info(t('spread:followUp.empty'));
+      return;
+    }
+    if (spreadCredits <= 0) {
+      toast.info(t('spread:followUp.needCredits'));
+      dispatch(openModal({ id: 'buy-credits' }));
+      return;
+    }
+
+    const body = getAIRequestBody({ spread, t, language: i18n.language });
+    if (!body) return;
+
+    try {
+      const result = await followUpSpread({
+        ...body,
+        previous_interpretation: [interpretation, ...followUps.map((item) => `Q: ${item.q}\nA: ${item.a}`)].join(
+          '\n\n',
+        ),
+        follow_up_question: question,
+      }).unwrap();
+      setFollowUps((prev) => [...prev, { q: question, a: result.interpretation }]);
+      setFollowUpQuestion('');
+      const left = typeof result.spreadCredits === 'number' ? result.spreadCredits : Math.max(spreadCredits - 1, 0);
+      toast.success(t('spread:followUp.receipt', { count: left }));
+    } catch (err) {
+      const rtkError = err as { status?: number; data?: InterpretErrorBody };
+      if (rtkError.status === 401) {
+        toast.info(t('core:ai.errorProvider'));
+        return;
+      }
+      if (rtkError.status === 429) {
+        toast.info(t('spread:followUp.needCredits'));
+        dispatch(openModal({ id: 'buy-credits' }));
+        return;
+      }
+      toast.error(t('core:ai.error1'));
+    }
+  };
 
   /**
    * Ссылка живёт только у облачной записи. Сохранение после интерпретации —
@@ -346,7 +396,7 @@ export default function ReadingResultPage(): ReactElement {
           </div>
         ) : null}
 
-        {/* Карты расклада: раскрываются по очереди, выбранная — с гранью accent-400. */}
+        {/* 1. Карты расклада */}
         <div
           className={styles.cards}
           role="tablist"
@@ -373,112 +423,11 @@ export default function ReadingResultPage(): ReactElement {
           ))}
         </div>
 
-        {/* Боковые стрелки: в раскладе несколько карт, и каждую читают по очереди. */}
-        {hasManyCards ? (
-          <div className={styles.cardNav}>
-            <button
-              type="button"
-              className={styles.navButton}
-              onClick={() => goToCard(activeCard - 1)}
-              disabled={activeCard === 0}
-              aria-label={t('core:button.prev')}
-            >
-              <ChevronLeftIcon width={20} height={20} />
-            </button>
-            <div className={styles.navCounter}>
-              <Text role="label" tone="accent">
-                {t('spread:flow.cardCounter', { current: activeCard + 1, total: cards.length })}
-              </Text>
-              <Text role="micro" tone="ink100">
-                {t('spread:flow.cardNavHint')}
-              </Text>
-            </div>
-            <button
-              type="button"
-              className={styles.navButton}
-              onClick={() => goToCard(activeCard + 1)}
-              disabled={activeCard === cards.length - 1}
-              aria-label={t('core:button.next')}
-            >
-              <ChevronRightIcon width={20} height={20} />
-            </button>
-          </div>
-        ) : null}
-
-        {/* Разбор выбранной карты в её позиции. key — плавная смена панели.
-            При 2+ картах блок листается ещё и горизонтальным свайпом. */}
-        <section
-          key={`${current.id}-${activeCard}`}
-          className={styles.detail}
-          aria-live="polite"
-          onTouchStart={handleDetailTouchStart}
-          onTouchEnd={handleDetailTouchEnd}
-        >
-          <div className={styles.detailHead}>
-            <div className={styles.detailTitles}>
-              {positionLabel(activeCard) ? (
-                <Text role="label" tone="accent">
-                  {positionLabel(activeCard)}
-                </Text>
-              ) : null}
-              <Text role="title" tone="ink50" as="h2">
-                {t(current.name)}
-              </Text>
-            </div>
-            <FavoriteButton cardId={current.id} cardName={t(current.name)} size={20} />
-          </div>
-
-          <div className={styles.chips}>
-            <span className={reversed ? styles.chipReversed : styles.chip}>
-              {reversed ? t('spread:reverseCard') : t('spread:uprightCard')}
-            </span>
-          </div>
-
-          {cardNsReady ? (
-            <>
-              {keywords ? (
-                <Text role="micro" tone="ink100" className={styles.keywords}>
-                  {keywords}
-                </Text>
-              ) : null}
-              {meaning ? (
-                <Text role="body" tone="ink50">
-                  {meaning}
-                </Text>
-              ) : null}
-              {advice ? (
-                <div className={styles.advice}>
-                  <Text role="label" tone="accent">
-                    {t('spread:adviceTitle')}
-                  </Text>
-                  <Text role="body" tone="ink50">
-                    {advice}
-                  </Text>
-                </div>
-              ) : null}
-            </>
-          ) : null}
-
-          <div className={styles.detailFooter}>
-            <Button
-              variant="link"
-              className={styles.cardLink}
-              icon={<ChevronRightIcon width={16} height={16} />}
-              iconPosition="end"
-              onClick={() => navigate(`/card/${current.id}`)}
-            >
-              {t('spread:aboutCard')}
-            </Button>
-          </div>
-        </section>
-
-        {/* Общий разбор от AI — отдельный блок с кантом, чтобы его не приняли за разбор карты. */}
+        {/* 2. Общий разбор — только текст, без лишних подсказок */}
         <section className={styles.summary}>
-          <div className={styles.summaryHead}>
-            <Text role="title" tone="ink50" as="h2">
-              {t('spread:summaryTitle')}
-            </Text>
-          </div>
+          <Text role="title" tone="accent" as="h2" className={styles.summaryTitle}>
+            {t('spread:summaryTitle')}
+          </Text>
 
           {isLoading ? (
             <AILoader />
@@ -506,6 +455,162 @@ export default function ReadingResultPage(): ReactElement {
               </Button>
             </div>
           ) : null}
+        </section>
+
+        {/* 3. Уточнения — отдельный блок: сначала ответы, потом поле */}
+        {interpretation && isAuthenticated ? (
+          <section className={styles.followUp}>
+            <Text role="title" tone="ink50" as="h2" className={styles.sectionTitle}>
+              {t('spread:followUp.sectionTitle')}
+            </Text>
+
+            {followUps.length > 0 ? (
+              <div className={styles.thread}>
+                {followUps.map((item, index) => (
+                  <div key={`${item.q}-${index}`} className={styles.followUpItem}>
+                    <Text role="micro" tone="ink100">
+                      {t('spread:followUp.youAsked')}
+                    </Text>
+                    <Text role="body" tone="ink50" className={styles.followUpQuestion}>
+                      {item.q}
+                    </Text>
+                    <Text role="body" tone="ink50" className={styles.paragraph}>
+                      {item.a}
+                    </Text>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {followUpLeft > 0 ? (
+              <div className={styles.ask}>
+                <Textarea
+                  label={t('spread:followUp.title')}
+                  value={followUpQuestion}
+                  onChange={(event) => setFollowUpQuestion(event.target.value)}
+                  placeholder={t('spread:followUp.placeholder')}
+                  disabled={isFollowUpLoading}
+                  rows={2}
+                />
+                <div className={styles.askActions}>
+                  <Button
+                    variant="action"
+                    className={styles.askCta}
+                    loading={isFollowUpLoading}
+                    onClick={handleFollowUp}
+                  >
+                    {isFollowUpLoading ? t('spread:followUp.ctaBusy') : t('spread:followUp.cta')}
+                  </Button>
+                  <Text role="micro" tone="ink100" className={styles.askCap}>
+                    {t('spread:followUp.cap', { left: followUpLeft, max: FOLLOW_UP_MAX })}
+                  </Text>
+                </div>
+              </div>
+            ) : (
+              <Text role="micro" tone="ink100">
+                {t('spread:followUp.capReached')}
+              </Text>
+            )}
+          </section>
+        ) : null}
+
+        {/* 4. Разбор по картам — счётчик в шапке, свайп по панели */}
+        <section className={styles.meanings}>
+          <div className={styles.meaningsHead}>
+            <Text role="title" tone="ink50" as="h2" className={styles.sectionTitle}>
+              {t('spread:cardsMeaningTitle')}
+            </Text>
+            {hasManyCards ? (
+              <div className={styles.cardNav}>
+                <button
+                  type="button"
+                  className={styles.navButton}
+                  onClick={() => goToCard(activeCard - 1)}
+                  disabled={activeCard === 0}
+                  aria-label={t('core:button.prev')}
+                >
+                  <ChevronLeftIcon width={20} height={20} />
+                </button>
+                <Text role="micro" tone="ink100" className={styles.navCounter}>
+                  {t('spread:flow.cardCounter', { current: activeCard + 1, total: cards.length })}
+                </Text>
+                <button
+                  type="button"
+                  className={styles.navButton}
+                  onClick={() => goToCard(activeCard + 1)}
+                  disabled={activeCard === cards.length - 1}
+                  aria-label={t('core:button.next')}
+                >
+                  <ChevronRightIcon width={20} height={20} />
+                </button>
+              </div>
+            ) : null}
+          </div>
+
+          <div
+            key={`${current.id}-${activeCard}`}
+            className={styles.detail}
+            aria-live="polite"
+            onTouchStart={handleDetailTouchStart}
+            onTouchEnd={handleDetailTouchEnd}
+          >
+            <div className={styles.detailHead}>
+              <div className={styles.detailTitles}>
+                {positionLabel(activeCard) ? (
+                  <Text role="label" tone="accent">
+                    {positionLabel(activeCard)}
+                  </Text>
+                ) : null}
+                <Text role="title" tone="ink50" as="h2">
+                  {t(current.name)}
+                </Text>
+              </div>
+              <FavoriteButton cardId={current.id} cardName={t(current.name)} size={20} />
+            </div>
+
+            <div className={styles.chips}>
+              <span className={reversed ? styles.chipReversed : styles.chip}>
+                {reversed ? t('spread:reverseCard') : t('spread:uprightCard')}
+              </span>
+            </div>
+
+            {cardNsReady ? (
+              <>
+                {keywords ? (
+                  <Text role="micro" tone="ink100" className={styles.keywords}>
+                    {keywords}
+                  </Text>
+                ) : null}
+                {meaning ? (
+                  <Text role="body" tone="ink50">
+                    {meaning}
+                  </Text>
+                ) : null}
+                {advice ? (
+                  <div className={styles.advice}>
+                    <Text role="label" tone="accent">
+                      {t('spread:adviceTitle')}
+                    </Text>
+                    <Text role="body" tone="ink50">
+                      {advice}
+                    </Text>
+                  </div>
+                ) : null}
+              </>
+            ) : null}
+
+            <div className={styles.detailFooter}>
+              <Button
+                variant="link"
+                className={styles.cardLink}
+                icon={<ChevronRightIcon width={16} height={16} />}
+                iconPosition="end"
+                onClick={() => navigate(`/card/${current.id}`)}
+              >
+                {t('spread:aboutCard')}
+              </Button>
+            </div>
+          </div>
         </section>
 
         {interpretation ? (

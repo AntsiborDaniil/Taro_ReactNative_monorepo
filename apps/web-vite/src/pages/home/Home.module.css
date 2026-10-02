@@ -139,6 +139,19 @@
 
 .spreads {
   grid-area: spreads;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+/* Компактная CTA под каруселью: ниже стандартной 52px, но ≥ min-touch. */
+.buyCredits {
+  height: 40px;
+  border-radius: 20px;
+  padding: 0 var(--ds-space-16);
+  font-size: var(--ds-font-micro-size);
+  line-height: var(--ds-font-micro-line-height);
+  letter-spacing: var(--ds-font-micro-letter-spacing);
 }
 
 .habits {

@@ -52,7 +52,7 @@ function prefersReducedMotion(): boolean {
  */
 export function ModalSheet({ open, onClose, children, title, maxWidth = 480, closeLabel }: ModalSheetProps): ReactElement | null {
   const { t } = useTranslation();
-  const resolvedCloseLabel = closeLabel ?? t('core:a11y.close', { defaultValue: 'Close' });
+  const resolvedCloseLabel = closeLabel ?? t('core:a11y.close');
   const sheetRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);

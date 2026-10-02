@@ -272,8 +272,8 @@ export default function Auth(): ReactElement {
 
   return (
     <div className={styles.page}>
-      <Header title={t('settings:account')} />
       <div className={styles.column}>
+        <Header title={t('settings:account')} />
         {sessionLoading ? (
           <div className={styles.card}>
             <div className={styles.loadingRow}>

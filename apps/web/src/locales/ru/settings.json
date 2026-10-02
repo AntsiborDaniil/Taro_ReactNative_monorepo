@@ -163,6 +163,7 @@
   "legal.contacts.body": "Напишите в поддержку — отвечаем по будням, обычно в течение рабочего дня.",
   "legal.contacts.email": "Написать на почту",
   "legal.contacts.telegram": "Поддержка в Telegram",
+  "legal.contacts.entityLine": "{{legalStatus}} {{legalName}} · ИНН {{inn}}",
   "legal.otherDocs": "Другие документы",
-  "legal.languageNote": "Документы опубликованы на русском языке — юридическую силу имеет русская редакция."
+  "legal.languageNote": "Для удобства показан английский перевод. Юридическую силу имеет русская редакция документов."
 }

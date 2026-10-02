@@ -35,7 +35,7 @@ export default function FavoritesPage(): ReactElement {
   return (
     <div className={styles.page}>
       <div className={styles.column}>
-        <Header title={t('core:page.favorite', { defaultValue: 'Favorite cards' })} />
+        <Header title={t('core:page.favorite')} />
 
         {isLoading || !cardNsReady ? (
           <div className={styles.grid}>
@@ -45,7 +45,7 @@ export default function FavoritesPage(): ReactElement {
           </div>
         ) : cardIds.length === 0 ? (
           <EmptyState
-            title={t('core:favoriteCards.noCards', { defaultValue: "You haven't added any cards to your favorites yet" })}
+            title={t('core:favoriteCards.noCards')}
           />
         ) : (
           <div className={styles.grid}>

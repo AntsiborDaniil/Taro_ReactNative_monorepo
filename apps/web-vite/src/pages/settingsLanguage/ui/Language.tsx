@@ -33,8 +33,8 @@ export default function LanguagePage(): ReactElement {
 
   return (
     <div className={styles.page}>
-      <Header title={t('settings:language')} />
       <div className={styles.column}>
+        <Header title={t('settings:language')} />
         {LANGUAGES.map((language) => {
           const selected = language.value === i18n.language;
           return (

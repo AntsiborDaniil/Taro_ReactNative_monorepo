@@ -90,8 +90,8 @@ export default function SettingsPage(): ReactElement {
   }, [t, toast]);
 
   const themeOptions: { value: ThemePreference; label: string }[] = [
-    { value: 'dark', label: t('settings:theme.dark', { defaultValue: 'Dark' }) },
-    { value: 'light', label: t('settings:theme.light', { defaultValue: 'Light' }) },
+    { value: 'dark', label: t('settings:theme.dark') },
+    { value: 'light', label: t('settings:theme.light') },
   ];
 
   const handleReversedChange = (checked: boolean) => {
@@ -119,8 +119,9 @@ export default function SettingsPage(): ReactElement {
 
   return (
     <div className={styles.page}>
-      <Header title={t('settings:settings')} />
+      {/* Header внутри .column — как на /spreads и /library: тот же горизонтальный gutter. */}
       <div className={styles.column}>
+        <Header title={t('settings:settings')} />
         <section className={styles.section}>
           <Text role="label" as="h2" className={styles.sectionTitle}>
             {t('settings:section.game')}
@@ -155,10 +156,10 @@ export default function SettingsPage(): ReactElement {
               <div className={styles.themeHead}>
                 <ThemeIcon width={22} height={22} className={styles.themeIcon} />
                 <Text role="body" tone="ink50">
-                  {t('settings:theme.title', { defaultValue: 'Theme' })}
+                  {t('settings:theme.title')}
                 </Text>
               </div>
-              <div className={styles.themeOptions} role="radiogroup" aria-label={t('settings:theme.title', { defaultValue: 'Theme' })}>
+              <div className={styles.themeOptions} role="radiogroup" aria-label={t('settings:theme.title')}>
                 {themeOptions.map((option) => (
                   <Chip
                     key={option.value}

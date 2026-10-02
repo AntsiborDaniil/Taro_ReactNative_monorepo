@@ -7,7 +7,7 @@ import { Header } from 'features/header';
 import {
   fillLegalPlaceholders,
   getLegalDocumentByRoute,
-  LEGAL_DOCUMENTS,
+  getLegalDocuments,
   LEGAL_UPDATED_AT,
   type LegalBlock,
 } from 'shared/config/legal';
@@ -73,12 +73,12 @@ function Block({ block }: { block: LegalBlock }) {
 }
 
 function LegalDocument() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const route = useRoute();
   const navigation = useNativeNavigation();
   const { sceneContentWidth } = useTabRailLayout();
 
-  const document = getLegalDocumentByRoute(route.name);
+  const document = getLegalDocumentByRoute(route.name, i18n.language);
   const contentMax = Math.min(720, Math.max(300, sceneContentWidth - 32));
 
   if (!document) {
@@ -89,7 +89,7 @@ function LegalDocument() {
     );
   }
 
-  const otherDocuments = LEGAL_DOCUMENTS.filter(
+  const otherDocuments = getLegalDocuments(i18n.language).filter(
     (item) => item.id !== document.id
   );
 
@@ -118,6 +118,12 @@ function LegalDocument() {
               </Text>
             </View>
           </View>
+
+          {i18n.language !== 'ru' && (
+            <Text category={TEXT_TAGS.label} style={styles.languageNote}>
+              {t('settings:legal.languageNote')}
+            </Text>
+          )}
 
           {document.sections.map((section) => (
             <View key={section.title} style={styles.section}>
@@ -219,6 +225,11 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: DS_COLORS.ink100,
+  },
+  languageNote: {
+    color: DS_COLORS.ink100,
+    lineHeight: 17,
+    paddingHorizontal: 4,
   },
   section: {
     borderRadius: 16,

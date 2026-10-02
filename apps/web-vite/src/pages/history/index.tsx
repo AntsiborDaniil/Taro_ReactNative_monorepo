@@ -125,7 +125,7 @@ export default function HistoryPage(): ReactElement {
 
             {canLoadMore ? (
               <Button variant="quiet" className={styles.loadMore} loading={isFetching} onClick={handleLoadMore}>
-                {t('core:button.loadMore', { defaultValue: 'Show more' })}
+                {t('core:button.loadMore')}
               </Button>
             ) : null}
           </>

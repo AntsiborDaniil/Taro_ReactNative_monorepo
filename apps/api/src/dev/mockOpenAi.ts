@@ -18,9 +18,33 @@ function langIsRu(language: string): boolean {
 
 /** Mock interpret with delay so fullscreen AI loader UI can be reviewed locally. */
 export async function mockGenerateInterpretation(
-  input: TarotSpreadInput
+  input: TarotSpreadInput & { spread_key?: string }
 ): Promise<TarotInterpretationOutput> {
   await delay(MOCK_DELAY_MS);
+
+  const key = (input.spread_key ?? '').toLowerCase();
+  const isDay =
+    key.includes('daysuggest') ||
+    input.spread_type.toLowerCase().includes('совет дня') ||
+    input.spread_type.toLowerCase().includes('daily advice');
+  const card = input.positions[0]
+    ? `${input.positions[0].card} (${input.positions[0].direction})`
+    : '—';
+
+  if (isDay) {
+    if (langIsRu(input.language)) {
+      return {
+        interpretation:
+          `[DEV MOCK] Сегодня карта ${card} предлагает заметить, где вы действуете на автомате и где можно замедлиться.\n\n` +
+          `До вечера сделайте один маленький жест в эту сторону — и вечером отметьте, что изменилось в ощущении дня.`,
+      };
+    }
+    return {
+      interpretation:
+        `[DEV MOCK] Today’s card ${card} invites you to notice where you run on autopilot and where you can slow down.\n\n` +
+        `Before evening, take one small action in that direction — then note what shifted in how the day felt.`,
+    };
+  }
 
   const cards = input.positions
     .map((p) => `${p.label}: ${p.card} (${p.direction})`)
@@ -29,19 +53,17 @@ export async function mockGenerateInterpretation(
   if (langIsRu(input.language)) {
     return {
       interpretation:
-        `[DEV MOCK] Вопрос: «${input.question || '—'}». ` +
-        `Расклад «${input.spread_type}» с картами (${cards || 'нет карт'}) ` +
-        `говорит о внимании к текущему моменту и мягком следующем шаге. ` +
-        `Это заглушка OpenAI для локального UI — реальный текст появится с OPENAI_API_KEY.`,
+        `[DEV MOCK] По вопросу «${input.question || '—'}» расклад показывает конкретное напряжение, а не общий фон. ` +
+        `Карты (${cards || 'нет'}) связывают ситуацию в одну линию: где вы уже видите правду и где ещё избегаете шага.\n\n` +
+        `Сегодня имеет смысл сделать один ясный шаг в сторону того, что уже понятно — без ожидания идеального момента.`,
     };
   }
 
   return {
     interpretation:
-      `[DEV MOCK] Question: "${input.question || '—'}". ` +
-      `Spread "${input.spread_type}" with cards (${cards || 'none'}) ` +
-      `points to presence and a gentle next step. ` +
-      `This is an OpenAI stub for local UI — set OPENAI_API_KEY for real text.`,
+      `[DEV MOCK] On “${input.question || '—'}”, the spread points to a concrete tension, not a vague vibe. ` +
+      `Cards (${cards || 'none'}) form one line: where you already see the truth and where you still avoid a step.\n\n` +
+      `Today, take one clear action toward what you already understand — without waiting for a perfect moment.`,
   };
 }
 
@@ -87,5 +109,33 @@ export async function mockGenerateHabits(
     interpretation:
       `[DEV MOCK] Card ${card} supports habits "${good}" ` +
       `and gently points to releasing "${bad}". Start with one small action today.`,
+  };
+}
+
+export async function mockGenerateFollowUp(input: {
+  language: string;
+  follow_up_question: string;
+  spread_type?: string;
+  question?: string;
+  previous_interpretation?: string;
+  positions?: unknown;
+  spread_key?: string;
+}): Promise<TarotInterpretationOutput> {
+  await delay(Math.min(MOCK_DELAY_MS, 1200));
+
+  if (langIsRu(input.language)) {
+    return {
+      interpretation:
+        `[DEV MOCK] Уточнение «${input.follow_up_question || '—'}»: ` +
+        `карты подсказывают мягкий следующий шаг и внимание к ощущениям прямо сейчас. ` +
+        `Это короткая заглушка follow-up для локального UI.`,
+    };
+  }
+
+  return {
+    interpretation:
+      `[DEV MOCK] Follow-up "${input.follow_up_question || '—'}": ` +
+      `the cards point to a gentle next step and presence with what you feel now. ` +
+      `This is a short follow-up stub for local UI.`,
   };
 }

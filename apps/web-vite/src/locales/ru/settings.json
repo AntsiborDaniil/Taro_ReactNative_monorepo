@@ -32,10 +32,12 @@
   "credits.buy.row": "Купить +3 расклада",
   "credits.buy.rowHint": "Заряды после дневного лимита. Сейчас: {{count}}",
   "credits.buy.title": "Пакет +3 расклада",
-  "credits.buy.sheetTitle": "Пополнение зарядов",
-  "credits.limit.sheetTitle": "Лимит раскладов",
-  "credits.buy.body": "После оплаты в баланс добавятся 3 заряда (обычно до 5 минут). Они тратятся, когда дневной лимит уже исчерпан.",
-  "credits.buy.balance": "Сейчас у вас зарядов: {{count}}",
+  "credits.buy.sheetTitle": "Купить +3",
+  "credits.limit.sheetTitle": "Лимит на сегодня",
+  "credits.buy.modalLead": "+3 заряда на баланс · {{price}}. Тратятся, когда бесплатный лимит на сегодня уже использован.",
+  "credits.buy.modalBalance": "Сейчас на балансе: {{count}}",
+  "credits.buy.body": "После оплаты на баланс придут 3 заряда. Тратятся, когда дневной лимит уже использован.",
+  "credits.buy.balance": "Сейчас зарядов: {{count}}",
   "credits.badge.a11yDaily": "Осталось бесплатных раскладов сегодня: {{count}}. Нажмите, чтобы пополнить заряды",
   "credits.badge.a11yCredits": "Заряды раскладов: {{count}}. Нажмите, чтобы пополнить",
   "credits.badge.a11yUnlimited": "Безлимитные расклады",
@@ -176,6 +178,7 @@
   "legal.contacts.body": "Напишите в поддержку — отвечаем по будням, обычно в течение рабочего дня.",
   "legal.contacts.email": "Написать на почту",
   "legal.contacts.telegram": "Поддержка в Telegram",
+  "legal.contacts.entityLine": "{{legalStatus}} {{legalName}} · ИНН {{inn}}",
   "legal.otherDocs": "Другие документы",
-  "legal.languageNote": "Документы опубликованы на русском языке — юридическую силу имеет русская редакция."
+  "legal.languageNote": "Для удобства показан английский перевод. Юридическую силу имеет русская редакция документов."
 }

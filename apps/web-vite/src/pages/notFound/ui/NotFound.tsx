@@ -16,11 +16,11 @@ export default function NotFoundPage(): ReactElement {
   return (
     <StatusScreen
       image={getImage(['core', 'notFound'])}
-      title={t('core:notFound.title', { defaultValue: 'Page not found' })}
-      description={t('core:notFound.description', { defaultValue: 'This page does not exist or has been moved.' })}
+      title={t('core:notFound.title')}
+      description={t('core:notFound.description')}
       action={
         <Button variant="action" fullWidth onClick={() => navigate('/')}>
-          {t('core:notFound.home', { defaultValue: 'Go home' })}
+          {t('core:notFound.home')}
         </Button>
       }
     />

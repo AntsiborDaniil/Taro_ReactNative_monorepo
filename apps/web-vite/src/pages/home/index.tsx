@@ -2,6 +2,9 @@ import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FAVORITE_SPREADS } from '@entities/spread';
 import { DeferredMount } from '@shared/lib/DeferredMount';
+import { useAppDispatch, useAppSelector } from '@shared/lib/store';
+import { AnalyticAction, track } from '@shared/lib/analytics';
+import { Button, LightningIcon, openModal } from '@shared/ui';
 import { HabitWidget } from '@widgets/habitWidget';
 import { MoodDashboard } from '@features/moodDashboard';
 import { DayAdvice } from './ui/DayAdvice';
@@ -21,6 +24,13 @@ import styles from './Home.module.css';
  */
 export default function HomePage(): ReactElement {
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
+
+  const handleBuyCredits = () => {
+    track(AnalyticAction.ClickSettingsSegment, { segment: 'credits.buy.home' });
+    dispatch(openModal({ id: 'buy-credits' }));
+  };
 
   return (
     <div className={styles.root}>
@@ -55,6 +65,18 @@ export default function HomePage(): ReactElement {
             <DeferredMount delayMs={160} fallback={<SpreadsSkeleton />}>
               <TarotSpreadsCarousel title={t('main:popularSpreads')} spreads={FAVORITE_SPREADS} />
             </DeferredMount>
+            {isAuthenticated ? (
+              <Button
+                variant="quiet"
+                quietTone="accent"
+                fullWidth
+                className={styles.buyCredits}
+                icon={<LightningIcon width={18} height={18} />}
+                onClick={handleBuyCredits}
+              >
+                {t('main:buyCredits.cta')}
+              </Button>
+            ) : null}
           </div>
         </div>
       </div>

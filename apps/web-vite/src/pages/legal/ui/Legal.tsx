@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   fillLegalPlaceholders,
+  getLegalDocuments,
   hasEntityField,
-  LEGAL_DOCUMENTS,
   LEGAL_ENTITY,
   LEGAL_UPDATED_AT,
 } from '@legacy-legal';
@@ -14,16 +14,18 @@ import styles from './Legal.module.css';
 /**
  * Перенос apps/web/src/pages/legal/ui/Legal.tsx (только логика/данные —
  * @legacy-legal, RN-разметка заменена на DS-карточки). Колонка max 720.
+ * Список документов зависит от языка интерфейса (ru/en).
  */
 export default function LegalPage(): ReactElement {
   const { t, i18n } = useTranslation();
+  const documents = getLegalDocuments(i18n.language);
   const email = LEGAL_ENTITY.email?.trim();
   const supportBot = LEGAL_ENTITY.supportBot?.trim();
 
   return (
     <div className={styles.page}>
-      <Header title={t('settings:legal.title')} />
       <div className={styles.column}>
+        <Header title={t('settings:legal.title')} />
         <div className={styles.hero}>
           <Text role="label" as="span" className={styles.eyebrow}>
             {t('settings:legal.eyebrow')}
@@ -49,7 +51,7 @@ export default function LegalPage(): ReactElement {
         </div>
 
         <div className={styles.list}>
-          {LEGAL_DOCUMENTS.map((document, index) => (
+          {documents.map((document, index) => (
             <Link key={document.id} to={`/documents/${document.id}`} className={styles.docRow}>
               <span className={styles.docIndex}>
                 <Text role="label" as="span">
@@ -99,7 +101,7 @@ export default function LegalPage(): ReactElement {
           </div>
           {hasEntityField('legalName') ? (
             <Text role="micro" tone="ink100">
-              {fillLegalPlaceholders('{{legalStatus}} {{legalName}} · ИНН {{inn}}')}
+              {fillLegalPlaceholders(t('settings:legal.contacts.entityLine'))}
             </Text>
           ) : null}
         </div>

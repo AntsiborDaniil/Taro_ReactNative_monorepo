@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Header } from 'features/header';
 import {
   fillLegalPlaceholders,
+  getLegalDocuments,
   hasEntityField,
-  LEGAL_DOCUMENTS,
   LEGAL_ENTITY,
   LEGAL_UPDATED_AT,
 } from 'shared/config/legal';
@@ -21,6 +21,7 @@ function Legal() {
   const { t, i18n } = useTranslation();
   const navigation = useNativeNavigation();
   const { sceneContentWidth } = useTabRailLayout();
+  const documents = getLegalDocuments(i18n.language);
 
   const contentMax = Math.min(720, Math.max(300, sceneContentWidth - 32));
 
@@ -72,7 +73,7 @@ function Legal() {
           </View>
 
           <View style={styles.list}>
-            {LEGAL_DOCUMENTS.map((document, index) => (
+            {documents.map((document, index) => (
               <Pressable
                 key={document.id}
                 accessibilityRole="button"
@@ -170,9 +171,7 @@ function Legal() {
             </View>
             {hasEntityField('legalName') && (
               <Text category={TEXT_TAGS.label} style={styles.contactMeta}>
-                {fillLegalPlaceholders(
-                  '{{legalStatus}} {{legalName}} · ИНН {{inn}}'
-                )}
+                {fillLegalPlaceholders(t('settings:legal.contacts.entityLine'))}
               </Text>
             )}
           </View>

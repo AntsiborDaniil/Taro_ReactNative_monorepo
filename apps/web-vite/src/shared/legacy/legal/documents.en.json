@@ -1,0 +1,944 @@
+{
+  "documents": [
+    {
+      "id": "terms",
+      "route": "TermsOfUse",
+      "slug": "polzovatelskoe-soglashenie",
+      "title": "Terms of Use",
+      "short": "Rules for using the service, age limits, and a notice about the nature of the content.",
+      "sections": [
+        {
+          "title": "1. General provisions",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "These Terms of Use (the “Agreement”) set out the conditions for using the {{brand}} service (the “Service”) and are entered into between the Service administration (the “Administration”) and any legally capable individual who uses the Service (the “User”)."
+            },
+            {
+              "type": "p",
+              "requires": [
+                "legalName"
+              ],
+              "text": "Service Administration: {{legalStatus}} {{legalName}}, TIN {{inn}}."
+            },
+            {
+              "type": "p",
+              "text": "The Service is available as a Telegram mini app and as a web app at {{site}}."
+            },
+            {
+              "type": "note",
+              "text": "By starting to use the Service, you fully and unconditionally accept the Agreement. If you disagree with any term, stop using the Service."
+            },
+            {
+              "type": "p",
+              "text": "Current version of the Agreement: {{updatedAt}}. The latest text is always available in Documents."
+            }
+          ]
+        },
+        {
+          "title": "2. Definitions",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Service — the {{brand}} software suite: Tarot spreads with interpretation, card of the day, card meanings, favorites, history, mood journal, habits, and other features.",
+                "Account — the User’s data in the Service, accessible via Telegram authorization or a code sent to email.",
+                "Charge — an internal unit that grants one interpretation generation beyond the free daily limit.",
+                "Interpretation — text automatically produced by a language model at the User’s request.",
+                "Service Content — texts, images, interfaces, the card meanings database, source code, and other intellectual property."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "3. Who may use the Service",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "The Service is intended for persons aged 18 or older.",
+                "The User confirms they have the legal capacity required to enter into this Agreement.",
+                "Use of the Service must not violate the laws of the User’s country of residence.",
+                "The Administration may restrict access if there are reasonable doubts that these conditions are met."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "4. Nature of the Service and important notice",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "The Service is for entertainment and informational purposes. Tarot cards and generated texts are a tool for self-reflection, not a source of reliable information about the past, present, or future."
+            },
+            {
+              "type": "list",
+              "items": [
+                "The Service is not medical care, psychotherapy, psychological, or psychiatric help.",
+                "The Service is not legal, tax, financial, or investment advice.",
+                "The Service does not guarantee that any events will or will not occur and does not predict the future.",
+                "The User makes all decisions independently and is responsible for them."
+              ]
+            },
+            {
+              "type": "note",
+              "text": "If you are in crisis or having thoughts of harming yourself or others, contact a doctor or emergency psychological support. The Service does not replace professional help."
+            }
+          ]
+        },
+        {
+          "title": "5. Account",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Authorization happens automatically via Telegram or with a one-time code sent to the email address you provide.",
+                "The User is responsible for keeping access to their Telegram account, email, and device secure.",
+                "All actions performed under the Account are deemed performed by the User.",
+                "Report unauthorized access to Service support: {{supportBot}}.",
+                "The Administration may restrict or delete an Account for breach of the Agreement."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "6. How the Service works",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Core features (card meanings, favorites, mood journal, habits) are free.",
+                "AI interpretations are available within a free daily limit; as of this revision, the limit is 3 generations per day.",
+                "Beyond the free limit, generations use charges purchased under the Public Offer.",
+                "A charge is deducted when the generation request is sent, whether or not the User likes the resulting text.",
+                "The free limit, feature set, and package prices may change; changes are not retroactive for charges already purchased.",
+                "Some data (including the mood journal and habits) may be stored on the device and lost if browser data is cleared or the app is removed."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "7. Use of artificial intelligence",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Interpretations are produced automatically by a language model based on the chosen spread, drawn cards, and the question entered by the User."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Texts are created by an algorithm and are not required to be reviewed by a human; they may contain inaccuracies, contradictions, or fabricated claims.",
+                "A repeated request with the same inputs may produce a different result.",
+                "Do not enter third parties’ personal data, legally protected secrets, or health data in requests unless you intend to share them.",
+                "Responsibility for using the resulting text rests with the User."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "8. Intellectual property",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Service Content belongs to the Administration or is used under lawful grounds.",
+                "The User receives a simple (non-exclusive) license to use the Service for personal non-commercial purposes for as long as they use the Service.",
+                "Copying, distributing, decompiling the Service, or scraping its content is prohibited.",
+                "The User may use obtained interpretations personally, including sharing them while retaining attribution to the Service."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "9. Prohibited actions",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "The User must not:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Bypass daily limits, the charge system, or payment by any technical means.",
+                "Create multiple accounts to obtain extra free generations.",
+                "Use automated data collection, load testing, or interfere with the Service.",
+                "Submit unlawful material, insults, calls to violence, or other prohibited content in requests.",
+                "Impersonate another person or use the Service to mislead third parties, including offering “magical services” in the Service’s name."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "10. Paid features",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Purchase of charges, pricing, payment procedure, and the moment the service is rendered are governed by the Public Offer. Refunds are governed by “Refunds and Payment Cancellation”."
+            }
+          ]
+        },
+        {
+          "title": "11. Limitation of liability",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "The Service is provided “as is.” The Administration does not guarantee uninterrupted or error-free operation.",
+                "The Administration is not liable for decisions made by the User based on obtained texts, or for any lost profits.",
+                "The Administration is not liable for failures of Telegram, payment services, AI providers, or other third parties.",
+                "The Administration’s aggregate liability is limited to the amount actually paid by the User for paid features in the three months preceding the event.",
+                "Limitations do not apply where consumer protection law does not allow them."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "12. Suspension and termination of access",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "The Administration may suspend access for breach of the Agreement, attempts to bypass payment, or actions that threaten Service availability.",
+                "The User may stop using the Service at any time and request Account deletion via support: {{supportBot}}.",
+                "Unused charges are not compensated upon voluntary Account deletion unless required by law."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "13. Changes to the terms",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "The Administration may amend the Agreement. A new version takes effect when published in the Service unless another date is stated. Continued use means acceptance of the new version."
+            }
+          ]
+        },
+        {
+          "title": "14. Governing law and disputes",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "The laws of the Russian Federation apply to the parties’ relationship.",
+                "Before going to court, the parties follow a claim procedure: a claim is sent via Service support ({{supportBot}}) and reviewed within 30 calendar days.",
+                "Consumer disputes are handled under the Russian Federation Law “On Protection of Consumer Rights.”"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "15. Contacts",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Telegram support: {{supportBot}}",
+                "Service channel: {{channel}}",
+                "Website: {{site}}"
+              ]
+            },
+            {
+              "type": "p",
+              "requires": [
+                "email"
+              ],
+              "text": "Email: {{email}}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "privacy",
+      "route": "PrivacyPolicy",
+      "slug": "politika-konfidencialnosti",
+      "title": "Privacy Policy",
+      "short": "What data is collected, why, who it is shared with, and how to delete it.",
+      "sections": [
+        {
+          "title": "1. General provisions",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "This Policy describes what personal data is processed in the {{brand}} service, for what purposes, and on what legal basis. It is prepared to comply with Federal Law No. 152-FZ of 27.07.2006 “On Personal Data.”"
+            },
+            {
+              "type": "p",
+              "text": "The personal data operator is the administration of {{brand}}. You can contact the Operator via Telegram support: {{supportBot}}."
+            },
+            {
+              "type": "p",
+              "requires": [
+                "legalName"
+              ],
+              "text": "Operator: {{legalStatus}} {{legalName}}, TIN {{inn}}, address: {{address}}."
+            },
+            {
+              "type": "p",
+              "requires": [
+                "email"
+              ],
+              "text": "Operator email: {{email}}."
+            },
+            {
+              "type": "note",
+              "text": "By using the Service, you confirm that you have read this Policy and agree to data processing on the terms described."
+            }
+          ]
+        },
+        {
+          "title": "2. What data is processed",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Telegram data provided by the messenger when the mini app launches: numeric ID, name, username, interface language, Premium flag, profile photo (if available).",
+                "Email address — when signing in with a code and when paying (the payment service sends the receipt there).",
+                "Service usage data: chosen spreads, drawn cards, question text, generated interpretations, favorite cards, history, habit marks, and mood scores.",
+                "Payment details: fact, amount, date and status of payment, order ID. Bank card details are not transferred to or processed by the Operator.",
+                "Technical data: IP address, device and browser type, app version, error logs, analytics identifiers."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "The Operator does not intentionally collect special categories of personal data (health, beliefs, etc.). If the User includes such information in a question, it is processed solely to generate a response."
+            }
+          ]
+        },
+        {
+          "title": "3. Purposes and legal bases",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Providing Service features and performing the contract with the User — Art. 6(1)(5) of 152-FZ.",
+                "User identification and account protection — performance of the contract.",
+                "Accepting payments, tracking charges, sending receipts — performance of the contract and cash-register law requirements.",
+                "User support and handling requests — performance of the contract and the Operator’s legitimate interest.",
+                "Improving Service quality and product analytics in anonymized or aggregated form — User consent and the Operator’s legitimate interest.",
+                "Compliance with legal requirements — a duty imposed by law."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "4. Who data is shared with",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "The Operator does not sell personal data. Data is shared only with service providers to the extent needed to run the Service:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Telegram — authorization, notifications, and mini app operation.",
+                "Payment service {{paymentProvider}} — accepting payments, fiscalization, and sending receipts.",
+                "Language model provider (OpenAI) — generating interpretations from the request and spread.",
+                "Cloud infrastructure and database providers (including Supabase, Vercel) — storage and processing.",
+                "Analytics systems (Yandex Metrica, AppMetrica) — anonymized usage statistics.",
+                "Government authorities — upon a reasoned request where required by law."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Cross-border transfer",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Some of these providers are located outside the Russian Federation. Transferring data to their servers is a cross-border personal data transfer and is done only to the minimum extent needed to provide the service, in line with Art. 12 of 152-FZ."
+            },
+            {
+              "type": "p",
+              "text": "If you do not want your request text to leave the territory of the Russian Federation, do not use AI-based features."
+            }
+          ]
+        },
+        {
+          "title": "6. Retention periods",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Account data and usage history — for the period of Service use and 12 months after last activity.",
+                "Payment records and fiscal documents — for periods required by law (at least 5 years).",
+                "Support requests — 12 months from the date the request is closed.",
+                "Data stored on the device is deleted when app or browser data is cleared."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "7. Data protection",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Data between the app and the server is transmitted over HTTPS.",
+                "Database access is restricted and granted on a least-privilege basis.",
+                "Organizational and technical measures under Art. 18.1 and 19 of 152-FZ are applied.",
+                "Absolute security of data transmission over the Internet cannot be guaranteed."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "8. Rights of the data subject",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Obtain information about processing of their data and a copy of it.",
+                "Request correction, blocking, or destruction of incomplete, inaccurate, or unlawfully obtained data.",
+                "Withdraw consent to data processing.",
+                "Appeal the Operator’s actions to Roskomnadzor or in court."
+              ]
+            },
+            {
+              "type": "p",
+              "text": "To exercise these rights, send a request via Telegram support: {{supportBot}}. Response time is 30 calendar days. After consent withdrawal or Account deletion, some Service features may become unavailable."
+            }
+          ]
+        },
+        {
+          "title": "9. Cookies and local storage",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "The web version uses cookies and browser local storage to keep the session, language, deck style, and UI settings, and to collect anonymized statistics. Disabling cookies may break authorization and some features."
+            }
+          ]
+        },
+        {
+          "title": "10. Minors",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "The Service is not intended for persons under 18 and does not knowingly collect their data. If you learn that a minor has submitted data, contact support ({{supportBot}}) — the data will be deleted."
+            }
+          ]
+        },
+        {
+          "title": "11. Changes to the Policy",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "The Operator may amend the Policy. The current version is published in the Service with a date. Current version: {{updatedAt}}."
+            }
+          ]
+        },
+        {
+          "title": "12. Contacts",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Operator: administration of {{brand}}",
+                "Telegram support: {{supportBot}}",
+                "Website: {{site}}"
+              ]
+            },
+            {
+              "type": "fields",
+              "requires": [
+                "legalName"
+              ],
+              "fields": [
+                {
+                  "label": "Operator",
+                  "value": "{{legalStatus}} {{legalName}}"
+                },
+                {
+                  "label": "TIN",
+                  "value": "{{inn}}"
+                },
+                {
+                  "label": "Address",
+                  "value": "{{address}}"
+                }
+              ]
+            },
+            {
+              "type": "p",
+              "requires": [
+                "email"
+              ],
+              "text": "Email: {{email}}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "offer",
+      "route": "PublicOffer",
+      "slug": "publichnaya-oferta",
+      "title": "Public Offer",
+      "short": "Contract for purchasing charges: price, payment procedure, and when the service is rendered.",
+      "sections": [
+        {
+          "title": "1. General provisions",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "This document is a public offer by the administration of {{brand}} (the “Provider”) under Art. 437 of the Civil Code of the Russian Federation and contains a proposal to enter into a paid services agreement on the terms below."
+            },
+            {
+              "type": "p",
+              "requires": [
+                "legalName"
+              ],
+              "text": "Provider: {{legalStatus}} {{legalName}}, TIN {{inn}}."
+            },
+            {
+              "type": "note",
+              "text": "Acceptance of the offer is payment for the selected package. From the moment of payment, the contract is deemed concluded on these terms."
+            },
+            {
+              "type": "p",
+              "text": "Revision dated {{updatedAt}}. Service website: {{site}}."
+            }
+          ]
+        },
+        {
+          "title": "2. Subject of the agreement",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "The Provider grants the Customer access to paid {{brand}} features — generating Tarot spread interpretations with AI beyond the free daily limit."
+            },
+            {
+              "type": "list",
+              "items": [
+                "The access unit is a charge: one charge equals one interpretation generation.",
+                "Charges are recorded on the Customer’s account and are not cash, e-money, or a payment instrument.",
+                "Charges cannot be transferred to other users or exchanged for money, except refunds under “Refunds and Payment Cancellation.”"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "3. Price and payment",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Package price is shown in the Service UI when ordering. As of this revision, the “+3 spreads” package costs 99 ₽.",
+                "Payment is made in a single installment, in Russian rubles, via {{paymentProvider}}.",
+                "The Customer provides an email address to which the payment service sends the fiscal receipt.",
+                "The Provider does not receive or store the Customer’s bank card details.",
+                "The Provider may change package prices; paid orders keep the price in effect at payment time."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "4. When the service is rendered",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "After payment confirmation, charges are credited automatically, usually within 5 minutes.",
+                "The service is deemed properly rendered when the Customer receives the generated interpretation for which a charge was deducted.",
+                "A charge is deducted when the generation request is sent. Interpretation content is probabilistic and is not a quality criterion.",
+                "If charges do not appear within 24 hours after successful payment, the Customer should contact support."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "5. Charge validity",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Purchased charges remain valid until used and do not expire by calendar period while the Customer’s account is active."
+            }
+          ]
+        },
+        {
+          "title": "6. Rights and obligations",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "The Provider must credit charges, keep paid features working, and handle Customer requests.",
+                "The Provider may perform maintenance and temporarily limit access, notifying when technically possible.",
+                "The Customer must provide accurate payment details and comply with the Terms of Use.",
+                "The Customer may view their charge balance in the Service UI."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "7. Refunds",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Refund terms are set out in “Refunds and Payment Cancellation,” which is an integral part of this offer."
+            }
+          ]
+        },
+        {
+          "title": "8. Liability and force majeure",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "The parties are liable under the laws of the Russian Federation.",
+                "The Provider’s liability is limited to the value of paid and undelivered services.",
+                "The parties are released from liability for force majeure, including network outages, payment system failures, acts of authorities, and infrastructure provider limits."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "9. Term and changes to the offer",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "The offer is open-ended until withdrawn by the Provider. The Provider may change the terms; changes apply to orders placed after the new version is published."
+            }
+          ]
+        },
+        {
+          "title": "10. Dispute resolution",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "The parties seek pre-trial settlement: a claim is sent via Service support ({{supportBot}}) and reviewed within 30 calendar days. If no agreement is reached, the dispute is heard by a court under Russian law, and for consumers — also under the Law “On Protection of Consumer Rights.”"
+            }
+          ]
+        },
+        {
+          "title": "11. Provider contacts",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Telegram support: {{supportBot}}",
+                "Service channel: {{channel}}",
+                "Website: {{site}}"
+              ]
+            },
+            {
+              "type": "p",
+              "requires": [
+                "email"
+              ],
+              "text": "Email: {{email}}"
+            }
+          ]
+        },
+        {
+          "title": "12. Provider details",
+          "requires": [
+            "legalName"
+          ],
+          "blocks": [
+            {
+              "type": "fields",
+              "fields": [
+                {
+                  "label": "Provider",
+                  "value": "{{legalStatus}} {{legalName}}"
+                },
+                {
+                  "label": "TIN",
+                  "value": "{{inn}}"
+                },
+                {
+                  "label": "OGRNIP/OGRN",
+                  "value": "{{ogrn}}"
+                },
+                {
+                  "label": "Address",
+                  "value": "{{address}}"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "refund",
+      "route": "RefundPolicy",
+      "slug": "vozvrat-i-otmena-platezhej",
+      "title": "Refunds and Payment Cancellation",
+      "short": "When you can get a refund for charges, how to apply, and timelines.",
+      "sections": [
+        {
+          "title": "1. General provisions",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "This document sets the refund procedure for money paid for {{brand}} charges and applies together with the Public Offer and Russian Federation Law No. 2300-I of 07.02.1992 “On Protection of Consumer Rights.”"
+            }
+          ]
+        },
+        {
+          "title": "2. When a refund is possible",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Payment succeeded but charges were not credited within 24 hours and support could not credit them.",
+                "A double or erroneous charge for the same order occurred.",
+                "Paid features were unavailable due to the Provider’s fault and charges were not used.",
+                "The Customer cancelled before using charges — the cost of unused charges is refundable."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "3. When a refund is not made",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Charges were used: the service is deemed rendered when the interpretation is provided.",
+                "The Customer disagrees with the interpretation, card reading, or advice — this is not a service defect, as the Service is entertainment.",
+                "Access was limited for breach of the Terms of Use, including attempts to bypass limits or payment.",
+                "The Customer gave an incorrect email and did not ask to correct it."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "4. How to request a refund",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Send a request via Telegram support: {{supportBot}}. Include:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "the email used at payment;",
+                "payment date, amount, and order or receipt number if available;",
+                "the reason for the refund and the desired outcome."
+              ]
+            },
+            {
+              "type": "p",
+              "requires": [
+                "email"
+              ],
+              "text": "You may also email: {{email}}."
+            }
+          ]
+        },
+        {
+          "title": "5. Timelines",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Requests are reviewed within 10 calendar days of receipt.",
+                "If approved, funds are returned by the same method used for payment.",
+                "Crediting time depends on the bank and payment service and is usually 3 to 10 business days."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "6. Contacts",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Telegram support: {{supportBot}}",
+                "Website: {{site}}"
+              ]
+            },
+            {
+              "type": "p",
+              "requires": [
+                "email"
+              ],
+              "text": "Email: {{email}}"
+            },
+            {
+              "type": "p",
+              "requires": [
+                "legalName"
+              ],
+              "text": "Provider: {{legalStatus}} {{legalName}}, TIN {{inn}}."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "consent",
+      "route": "PersonalDataConsent",
+      "slug": "soglasie-na-obrabotku-personalnyh-dannyh",
+      "title": "Consent to Personal Data Processing",
+      "short": "The consent given when using the service, and how to withdraw it.",
+      "sections": [
+        {
+          "title": "1. Who the consent is given to",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "By using {{brand}}, signing in, or purchasing charges, the User freely, of their own will and in their own interest, consents to the service administration (the “Operator”) processing their personal data."
+            },
+            {
+              "type": "p",
+              "requires": [
+                "legalName"
+              ],
+              "text": "Operator: {{legalStatus}} {{legalName}}, TIN {{inn}}, address: {{address}}."
+            }
+          ]
+        },
+        {
+          "title": "2. Data list",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "Telegram account ID, name, username, and interface language;",
+                "email address;",
+                "Service usage data: spreads, request texts, interpretations, favorites, history, habit marks, and mood scores;",
+                "payment data: amount, date, status, order ID;",
+                "technical data: IP address, device and browser info, error logs."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "3. Processing purposes",
+          "blocks": [
+            {
+              "type": "list",
+              "items": [
+                "providing Service features and performing the contract;",
+                "accepting payments, tracking charges, and sending fiscal receipts;",
+                "user support and handling requests;",
+                "security and abuse prevention;",
+                "improving Service quality using anonymized statistics."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "4. Actions with data",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Consent covers collection, recording, systematization, accumulation, storage, updating, extraction, use, transfer (provision, access), including cross-border transfer, anonymization, blocking, deletion, and destruction of personal data — with or without automation."
+            }
+          ]
+        },
+        {
+          "title": "5. Transfer to third parties",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Consent covers sharing data with providers listed in the Privacy Policy: Telegram, payment service {{paymentProvider}}, language model provider (OpenAI), cloud infrastructure providers (including Supabase, Vercel), and analytics systems (Yandex Metrica, AppMetrica)."
+            }
+          ]
+        },
+        {
+          "title": "6. Term and withdrawal",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Consent is valid from the day it is given until withdrawn. Withdrawal is sent in free form via Telegram support ({{supportBot}}) with account details. After withdrawal, the Operator stops processing and deletes data, except records that must be kept by law (including accounting and fiscal documents)."
+            },
+            {
+              "type": "p",
+              "requires": [
+                "email"
+              ],
+              "text": "Withdrawal may also be emailed to: {{email}}."
+            },
+            {
+              "type": "note",
+              "text": "After consent is withdrawn, Service features that require personal data processing become unavailable."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "requisites",
+      "route": "Requisites",
+      "requires": [
+        "legalName"
+      ],
+      "slug": "rekvizity-i-kontakty",
+      "title": "Details and Contacts",
+      "short": "Who provides the services, how to reach support, and where to send claims.",
+      "sections": [
+        {
+          "title": "Provider",
+          "blocks": [
+            {
+              "type": "fields",
+              "fields": [
+                {
+                  "label": "Name",
+                  "value": "{{legalStatus}} {{legalName}}"
+                },
+                {
+                  "label": "TIN",
+                  "value": "{{inn}}"
+                },
+                {
+                  "label": "OGRNIP/OGRN",
+                  "value": "{{ogrn}}"
+                },
+                {
+                  "label": "Address",
+                  "value": "{{address}}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Contact",
+          "blocks": [
+            {
+              "type": "fields",
+              "fields": [
+                {
+                  "label": "Email",
+                  "value": "{{email}}"
+                },
+                {
+                  "label": "Telegram support",
+                  "value": "{{supportBot}}"
+                },
+                {
+                  "label": "Service channel",
+                  "value": "{{channel}}"
+                },
+                {
+                  "label": "Website",
+                  "value": "{{site}}"
+                }
+              ]
+            },
+            {
+              "type": "p",
+              "text": "Support replies on business days, usually within one working day. Claims are reviewed within 30 calendar days of receipt."
+            }
+          ]
+        },
+        {
+          "title": "Payments",
+          "blocks": [
+            {
+              "type": "p",
+              "text": "Payments are accepted via {{paymentProvider}}. The fiscal receipt is sent to the email provided at checkout. Bank card details are not transferred to the Provider."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

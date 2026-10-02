@@ -7,6 +7,7 @@ import {
   STARTUP_I18N_NAMESPACES,
   type AppLanguage,
 } from './namespaces';
+import { syncDocumentMeta } from './syncDocumentMeta';
 
 const LANGUAGE_KEY = 'language';
 const LANGUAGE_MANUAL_KEY = 'languageManual';
@@ -109,6 +110,7 @@ function resolveInitialLanguage(): AppLanguage {
 async function applyLanguage(lng: AppLanguage): Promise<void> {
   await Promise.all(STARTUP_I18N_NAMESPACES.map((ns) => loadNamespace(lng, ns)));
   await i18next.changeLanguage(lng);
+  await syncDocumentMeta(lng);
   try {
     window.localStorage.setItem(LANGUAGE_KEY, lng);
   } catch {
@@ -132,6 +134,11 @@ async function initI18next() {
   });
 
   await Promise.all(STARTUP_I18N_NAMESPACES.map((ns) => loadNamespace(lng, ns)));
+  await syncDocumentMeta(lng);
+
+  i18next.on('languageChanged', (nextLng) => {
+    void syncDocumentMeta(normalizeLanguage(nextLng));
+  });
 
   return i18next;
 }

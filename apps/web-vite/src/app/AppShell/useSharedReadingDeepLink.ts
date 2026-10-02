@@ -37,13 +37,13 @@ export function useSharedReadingDeepLink(): void {
       try {
         const shared = await fetchShared(readingId).unwrap();
         if (!shared?.interpretation) {
-          toast.error(t('core:ai.copy.shareOpenFailed', { defaultValue: 'Не удалось открыть расклад по ссылке' }));
+          toast.error(t('core:ai.copy.shareOpenFailed'));
           return;
         }
         dispatch(openSavedSpread(shared));
         navigate('/reading/result');
       } catch {
-        toast.error(t('core:ai.copy.shareOpenFailed', { defaultValue: 'Не удалось открыть расклад по ссылке' }));
+        toast.error(t('core:ai.copy.shareOpenFailed'));
       }
     })();
     // Запуск строго один раз за жизнь SPA: toast/t пересоздаются на каждый рендер.

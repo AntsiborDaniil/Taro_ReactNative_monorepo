@@ -32,7 +32,7 @@ export default function ErrorBoundaryPage(): ReactElement {
       description={t('core:errorBoundary.description')}
       action={
         <Button variant="action" fullWidth onClick={handleGoHome}>
-          {t('core:errorBoundary.goHome', { defaultValue: 'Go home' })}
+          {t('core:errorBoundary.goHome')}
         </Button>
       }
     />

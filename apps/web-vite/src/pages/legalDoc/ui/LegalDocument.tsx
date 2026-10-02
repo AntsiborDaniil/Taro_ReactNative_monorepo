@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   fillLegalPlaceholders,
   getLegalDocumentById,
-  LEGAL_DOCUMENTS,
+  getLegalDocuments,
   LEGAL_UPDATED_AT,
   type LegalBlock,
 } from '@legacy-legal';
@@ -55,28 +55,30 @@ function Block({ block }: { block: LegalBlock }): ReactElement {
 }
 
 /**
- * Перенос apps/web/src/pages/legal/ui/LegalDocument.tsx — `route.name` (RN
- * navigation) заменён на react-router `:docId` (= LegalDocument.id).
+ * Документ на языке интерфейса. Статические /legal/*.html остаются на русском
+ * (юридически значимая редакция для оплаты).
  */
 export default function LegalDocumentPage(): ReactElement {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { docId } = useParams<{ docId: string }>();
-  const document = docId ? getLegalDocumentById(docId) : undefined;
+  const document = docId ? getLegalDocumentById(docId, i18n.language) : undefined;
 
   if (!document) {
     return (
       <div className={styles.page}>
-        <Header title={t('settings:legal.title')} />
+        <div className={styles.column}>
+          <Header title={t('settings:legal.title')} />
+        </div>
       </div>
     );
   }
 
-  const otherDocuments = LEGAL_DOCUMENTS.filter((item) => item.id !== document.id);
+  const otherDocuments = getLegalDocuments(i18n.language).filter((item) => item.id !== document.id);
 
   return (
     <div className={styles.page}>
-      <Header title={document.title} />
       <div className={styles.column}>
+        <Header title={document.title} />
         <div className={styles.hero}>
           <Text role="title" as="h2">
             {document.title}
@@ -90,6 +92,12 @@ export default function LegalDocumentPage(): ReactElement {
             </Text>
           </span>
         </div>
+
+        {i18n.language !== 'ru' ? (
+          <Text role="micro" tone="ink100" className={styles.languageNote}>
+            {t('settings:legal.languageNote')}
+          </Text>
+        ) : null}
 
         {document.sections.map((section) => (
           <div key={section.title} className={styles.section}>

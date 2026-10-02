@@ -163,6 +163,7 @@
   "legal.contacts.body": "Message support — we reply on business days, usually within one working day.",
   "legal.contacts.email": "Send an email",
   "legal.contacts.telegram": "Support in Telegram",
+  "legal.contacts.entityLine": "{{legalStatus}} {{legalName}} · TIN {{inn}}",
   "legal.otherDocs": "Other documents",
-  "legal.languageNote": "The documents are published in Russian — the Russian version is the legally binding one."
+  "legal.languageNote": "An English translation is shown for convenience. The Russian edition is the legally binding version."
 }

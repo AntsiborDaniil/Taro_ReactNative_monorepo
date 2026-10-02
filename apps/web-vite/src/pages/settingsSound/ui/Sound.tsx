@@ -22,8 +22,8 @@ export default function SoundPage(): ReactElement {
 
   return (
     <div className={styles.page}>
-      <Header title={t('settings:sound.web')} />
       <div className={styles.column}>
+        <Header title={t('settings:sound.web')} />
         <Text role="micro" tone="ink100" className={styles.hint}>
           {t('settings:sound.web.hint')}
         </Text>

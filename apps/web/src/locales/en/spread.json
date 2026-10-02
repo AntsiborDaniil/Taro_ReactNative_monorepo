@@ -39,7 +39,7 @@
   "dailyLimit.emailInvalid": "Use a Yandex email: @yandex.ru, @ya.ru, @yandex.com, etc.",
   "dailyLimit.lavaRejected": "Lava error: could not create payment. Check the email and try again.",
   "dailyLimit.packBadge": "+3 spreads",
-  "dailyLimit.price": "50 ₽",
+  "dailyLimit.price": "99 ₽",
   "dailyLimit.buyCta": "Buy +3 spreads",
   "dailyLimit.buyLoading": "Opening checkout…",
   "dailyLimit.buyFailed": "Could not start checkout. Try again.",

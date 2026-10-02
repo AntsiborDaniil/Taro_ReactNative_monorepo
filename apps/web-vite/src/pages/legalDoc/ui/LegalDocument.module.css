@@ -42,6 +42,11 @@
   background: var(--ds-ground-700);
 }
 
+.languageNote {
+  line-height: 1.45;
+  padding: 0 2px;
+}
+
 .section {
   display: flex;
   flex-direction: column;

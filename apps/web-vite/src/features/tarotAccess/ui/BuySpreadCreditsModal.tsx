@@ -10,35 +10,43 @@ import { isCheckoutEmail } from '../lib/isCheckoutEmail';
 import { useLavaCheckoutMutation } from '../model/paymentsApi';
 import styles from './BuySpreadCreditsModal.module.css';
 
-/** Оферта и возврат рядом с оплатой — требование платёжного провайдера. Статические страницы /legal/<slug>.html. */
-const LEGAL_CONSENT_DOCS = ['offer', 'refund']
-  .map((id) => getLegalDocumentById(id))
-  .filter((document): document is NonNullable<typeof document> => Boolean(document));
+/** Оферта и возврат рядом с оплатой — требование платёжного провайдера. */
+const LEGAL_CONSENT_DOC_IDS = ['offer', 'refund'] as const;
 
 const SYNTHETIC_TG_EMAIL_RE = /^tg\d+@telegram\.mindful\.app$/i;
 
 export type BuySpreadCreditsModalProps = ModalComponentProps & {
-  /** 'spread' — копия дневного лимита (совпадает с DailyTarotLimitModal), 'settings' — обычная покупка. */
+  /** 'spread' — из модалки дневного лимита, 'settings' — из настроек. */
   copyNamespace?: 'settings' | 'spread';
 };
 
 /**
- * Перенос логики apps/web/src/features/tarotAccess/ui/BuySpreadCreditsModal.tsx
- * (без UI Kitten/RN): email → POST /api/payments/lava/checkout → открыть
- * paymentUrl в новой вкладке. Lava принимает только Яндекс-почту (историческое
- * ограничение) — валидация 1-в-1 со старым кодом.
+ * Покупка +3 зарядов: email → Lava checkout → внешняя ссылка.
  */
-export function BuySpreadCreditsModal({ onClose, copyNamespace = 'settings' }: BuySpreadCreditsModalProps): ReactElement {
-  const { t: tSettings } = useTranslation('settings');
+export function BuySpreadCreditsModal({
+  onClose,
+  copyNamespace = 'settings',
+}: BuySpreadCreditsModalProps): ReactElement {
+  const { t: tSettings, i18n } = useTranslation('settings');
   const { t: tSpread } = useTranslation('spread');
-  const tCopy = copyNamespace === 'spread' ? tSpread : tSettings;
-  const titleKey = copyNamespace === 'spread' ? 'dailyLimit.title' : 'credits.buy.title';
-  const bodyKey = copyNamespace === 'spread' ? 'dailyLimit.body' : 'credits.buy.body';
+  const price = tSpread('dailyLimit.price');
+  const dailyLimit = useAppSelector((state) => state.user.tarotDaily?.limit ?? 1);
+
+  const lead =
+    copyNamespace === 'spread'
+      ? tSpread('dailyLimit.modalLead', { limit: dailyLimit, price })
+      : tSettings('credits.buy.modalLead', { price });
+
+  const consentDocs = useMemo(
+    () =>
+      LEGAL_CONSENT_DOC_IDS.map((id) => getLegalDocumentById(id, i18n.language)).filter(
+        (document): document is NonNullable<typeof document> => Boolean(document),
+      ),
+    [i18n.language],
+  );
 
   const user = useAppSelector((state) => state.user.user);
   const spreadCredits = useAppSelector((state) => state.user.spreadCredits);
-  /** Лимит берём из ответа API (tarotDaily), чтобы копия не расходилась с TAROT_DAILY_INTERPRET_LIMIT. */
-  const dailyLimit = useAppSelector((state) => state.user.tarotDaily?.limit ?? 1);
   const [lavaCheckout, { isLoading }] = useLavaCheckoutMutation();
 
   const suggestedEmail = useMemo(() => {
@@ -74,7 +82,6 @@ export function BuySpreadCreditsModal({ onClose, copyNamespace = 'settings' }: B
       if (!opened) {
         setError(tSpread('dailyLimit.buyFailed'));
       }
-      // Модалку намеренно не закрываем — оплата открывается в новой вкладке.
     } catch (err) {
       const rtkError = err as { status?: number; data?: { code?: string; message?: string } };
       const code = rtkError.data?.code;
@@ -92,19 +99,14 @@ export function BuySpreadCreditsModal({ onClose, copyNamespace = 'settings' }: B
 
   return (
     <div className={styles.inner}>
-      <Text role="title" as="h3" tone="ink50" className={styles.title}>
-        {tCopy(titleKey)}
-      </Text>
-      <Text role="body" tone="ink100" className={styles.subtitle}>
-        {tCopy(bodyKey, { limit: dailyLimit })}
+      <Text role="body" tone="ink100" className={styles.lead}>
+        {lead}
       </Text>
 
       {spreadCredits > 0 ? (
-        <div className={styles.balanceChip}>
-          <Text role="body" tone="accent">
-            {tSettings('credits.buy.balance', { count: spreadCredits })}
-          </Text>
-        </div>
+        <Text role="micro" tone="ink100" className={styles.balance}>
+          {tSettings('credits.buy.modalBalance', { count: spreadCredits })}
+        </Text>
       ) : null}
 
       <div className={styles.emailWrap}>
@@ -122,7 +124,7 @@ export function BuySpreadCreditsModal({ onClose, copyNamespace = 'settings' }: B
           disabled={isLoading}
           error={error ?? undefined}
         />
-        <Text role="micro" tone="ink100">
+        <Text role="micro" tone="ink100" className={styles.hint}>
           {tSpread('dailyLimit.emailHint')}
         </Text>
       </div>
@@ -130,23 +132,24 @@ export function BuySpreadCreditsModal({ onClose, copyNamespace = 'settings' }: B
       <Button variant="action" fullWidth loading={isLoading} onClick={handleBuy}>
         {isLoading ? tSpread('dailyLimit.buyLoading') : tSpread('dailyLimit.buyCta')}
       </Button>
+
       <p className={styles.legalRow}>
-        <Text role="micro" tone="ink100">
-          {tSpread('dailyLimit.legalNote')}
-        </Text>{' '}
-        {LEGAL_CONSENT_DOCS.map((document) => (
-          <a
-            key={document.id}
-            className={styles.legalLink}
-            href={`/legal/${document.slug}.html`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {document.title}
-          </a>
+        {consentDocs.map((document, index) => (
+          <span key={document.id}>
+            {index > 0 ? <span className={styles.legalSep}>·</span> : null}
+            <a
+              className={styles.legalLink}
+              href={`/legal/${document.slug}.html`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {document.title}
+            </a>
+          </span>
         ))}
       </p>
-      <Button variant="quiet" fullWidth onClick={onClose} disabled={isLoading}>
+
+      <Button variant="link" className={styles.later} onClick={onClose} disabled={isLoading}>
         {tSpread('dailyLimit.later')}
       </Button>
     </div>

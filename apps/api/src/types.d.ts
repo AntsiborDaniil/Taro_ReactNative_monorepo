@@ -17,6 +17,8 @@ export type TarotSpreadInput = {
   spread_type: string;
   question: string;
   positions: TarotPosition[];
+  /** Каталожный id расклада (simple_daySuggest и т.п.), опционально. */
+  spread_key?: string;
 } & TDefaultInputParameters;
 
 export type TarotInterpretationOutput = {

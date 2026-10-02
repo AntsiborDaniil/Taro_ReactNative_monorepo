@@ -28,9 +28,7 @@ import { isCheckoutEmail } from '../lib/isYandexCheckoutEmail';
 const SYNTHETIC_TG_EMAIL_RE = /^tg\d+@telegram\.mindful\.app$/i;
 
 /** Документы, условия которых принимаются оплатой. */
-const LEGAL_CONSENT_DOCS = ['offer', 'refund']
-  .map((id) => getLegalDocumentById(id))
-  .filter((document): document is NonNullable<typeof document> => !!document);
+const LEGAL_CONSENT_DOC_IDS = ['offer', 'refund'] as const;
 
 function openLegalDocument(id: string): void {
   const url = getLegalDocumentUrl(id);
@@ -53,10 +51,17 @@ function BuySpreadCreditsModal({
   copyNamespace = 'settings',
   showBalance = true,
 }: BuySpreadCreditsModalProps) {
-  const { t: tSettings } = useTranslation('settings');
+  const { t: tSettings, i18n } = useTranslation('settings');
   const { t: tSpread } = useTranslation('spread');
   const { t: tCore } = useTranslation('core');
   const tCopy = copyNamespace === 'spread' ? tSpread : tSettings;
+  const consentDocs = useMemo(
+    () =>
+      LEGAL_CONSENT_DOC_IDS.map((id) => getLegalDocumentById(id, i18n.language)).filter(
+        (document): document is NonNullable<typeof document> => !!document
+      ),
+    [i18n.language]
+  );
   const { closeModal } = useData({ Context: ModalsContext });
   const { handleVibrationClick } = useData({
     Context: ApplicationConfigContext,
@@ -222,7 +227,7 @@ function BuySpreadCreditsModal({
             <Text category={TEXT_TAGS.label} style={styles.legalNote}>
               {tSpread('dailyLimit.legalNote')}
             </Text>
-            {LEGAL_CONSENT_DOCS.map((document) => (
+            {consentDocs.map((document) => (
               <Text
                 key={document.id}
                 category={TEXT_TAGS.label}

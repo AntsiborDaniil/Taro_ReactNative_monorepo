@@ -32,10 +32,12 @@
   "credits.buy.row": "Buy +3 spreads",
   "credits.buy.rowHint": "Charges after the daily limit. Now: {{count}}",
   "credits.buy.title": "+3 spreads pack",
-  "credits.buy.sheetTitle": "Top up charges",
-  "credits.limit.sheetTitle": "Spread limit",
-  "credits.buy.body": "After payment, 3 charges are added to your balance (usually within ~5 minutes). They are used when the daily free limit is already spent.",
-  "credits.buy.balance": "Your charges now: {{count}}",
+  "credits.buy.sheetTitle": "Buy +3",
+  "credits.limit.sheetTitle": "Today’s limit",
+  "credits.buy.modalLead": "+3 charges · {{price}}. Used when today’s free limit is already spent.",
+  "credits.buy.modalBalance": "Balance now: {{count}}",
+  "credits.buy.body": "After payment, 3 charges are added to your balance. They’re used when the daily free limit is already spent.",
+  "credits.buy.balance": "Charges now: {{count}}",
   "credits.badge.a11yDaily": "Free spreads left today: {{count}}. Tap to top up charges",
   "credits.badge.a11yCredits": "Spread charges: {{count}}. Tap to top up",
   "credits.badge.a11yUnlimited": "Unlimited spreads",
@@ -176,6 +178,7 @@
   "legal.contacts.body": "Message support — we reply on business days, usually within one working day.",
   "legal.contacts.email": "Send an email",
   "legal.contacts.telegram": "Support in Telegram",
+  "legal.contacts.entityLine": "{{legalStatus}} {{legalName}} · TIN {{inn}}",
   "legal.otherDocs": "Other documents",
-  "legal.languageNote": "The documents are published in Russian — the Russian version is the legally binding one."
+  "legal.languageNote": "An English translation is shown for convenience. The Russian edition is the legally binding version."
 }

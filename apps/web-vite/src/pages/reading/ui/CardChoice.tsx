@@ -364,7 +364,7 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
           className={`${styles.navButton} ${styles.navPrev}`}
           onClick={() => step(-1)}
           disabled={isComplete || activeIndex <= 0}
-          aria-label={t('core:button.prev', { defaultValue: 'Previous' })}
+          aria-label={t('core:button.prev')}
         >
           <ChevronLeftIcon width={22} height={22} />
         </button>
@@ -412,7 +412,7 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
           className={`${styles.navButton} ${styles.navNext}`}
           onClick={() => step(1)}
           disabled={isComplete || activeIndex >= lastIndex}
-          aria-label={t('core:button.next', { defaultValue: 'Next' })}
+          aria-label={t('core:button.next')}
         >
           <ChevronRightIcon width={22} height={22} />
         </button>

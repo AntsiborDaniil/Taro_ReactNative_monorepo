@@ -103,6 +103,16 @@ export const handlers = [
     });
   }),
 
+  http.post('*/api/interpret/follow-up', () => {
+    if (!sessionUser()) return unauthorized();
+    return HttpResponse.json({
+      interpretation:
+        'Карты говорят о внимании к чувствам и мягком следующем шаге. Короткий ответ по картам для локальной проверки.',
+      tarotDaily: { ...DEMO_QUOTA, used: 1 },
+      spreadCredits: Math.max(DEMO_CREDITS - 1, 0),
+    });
+  }),
+
   http.get('*/api/spreads/shared/:id', ({ params }) => {
     const spread = getSpreadById(String(params.id));
     if (!spread) return HttpResponse.json({ message: 'Not found' }, { status: 404 });

@@ -42,6 +42,11 @@
 
   "dayAdvice.title": "Daily Advice",
 
+  "boot.loading": "Loading",
+
+  "seo.documentTitle": "Mindful — Tarot online: spreads, card of the day, meanings",
+  "seo.metaDescription": "Online tarot: spreads, card of the day, card meanings, and reading history. Free in trial mode — sign in to save spreads and favorites.",
+
   "today": "Today",
   "yesterday": "Yesterday",
 
@@ -53,8 +58,6 @@
   "spreads.catalog.hintLocked": "Locked — included in subscription. Tap to learn more",
   "page.spreadsHistory": "Spread History",
   "page.favouriteCards": "Favorite Cards",
-  "page.habitCreate": "Create Habits",
-
   "library": "Library",
   "library.intro.lead": "Meanings, history, favorites.",
   "library.section.title": "Sections",
