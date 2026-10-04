@@ -46,14 +46,31 @@ export async function createLavaCheckoutForUser(input: {
   }
 
   const admin = getSupabaseAdmin();
-  const { error } = await admin.from('lava_checkouts').insert({
+  const row = {
     invoice_id: invoice.id,
     user_id: input.userId,
     credits,
     email,
-    status: 'pending',
+    status: 'pending' as const,
     return_path: returnPath,
-  });
+  };
+
+  let { error } = await admin.from('lava_checkouts').insert(row);
+
+  // Миграция ещё не применена: колонки return_path нет — сохраняем checkout без неё.
+  if (
+    error &&
+    (error.code === 'PGRST204' ||
+      /return_path/i.test(error.message || '') ||
+      /schema cache/i.test(error.message || ''))
+  ) {
+    console.warn(
+      '[lava] return_path unavailable in DB, inserting checkout without it:',
+      error.message
+    );
+    const { return_path: _omit, ...withoutPath } = row;
+    ({ error } = await admin.from('lava_checkouts').insert(withoutPath));
+  }
 
   if (error) {
     throw error;
