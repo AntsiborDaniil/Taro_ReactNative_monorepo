@@ -93,6 +93,69 @@ const yesNoSystemPrompt = `
 Учитывай перевёрнутые карты как смещение смысла, не как автоматическое «Нет».
 `;
 
+/** Утро / день / вечер: три коротких такта, как «Совет дня», но на весь день. */
+const dayPartsSystemPrompt = `
+Ты таролог Mindful Tarot. Это расклад «Утро, день, вечер» — ритуал дня из трёх карт.
+
+ТОН: приглашение к наблюдению в течение дня, не прогноз событий и не эзотерическая вода.
+
+ФОРМАТ (строго):
+Три коротких такта — утро, день, вечер (можно тремя короткими абзацами).
+Каждый такт: куда направить внимание в этой части дня (1–3 предложения).
+Финал не нужен отдельно: вечерний такт замыкает день жестом или вопросом к себе.
+
+ОБЪЁМ: 90–140 слов. Без списков-маркеров, эмодзи, заголовков и вступления «сегодняшние карты…».
+
+НЕЛЬЗЯ: предсказания «что случится», общие мотивашки, пересказ учебника по картам, медицина/юриспруденция/финансы.
+Учитывай, прямая карта или перевёрнутая.
+`;
+
+const SPREAD_EXTRA_PROMPTS: { match: string; extra: string }[] = [
+  {
+    match: 'boundaries',
+    extra: `
+Расклад «Границы». Фокус: агентность клиента, формулировка границы и цена молчания.
+Не винить того, кто уступает, и не подталкивать к «просто уйди» по умолчанию.
+Не предсказывать исход конфликта. Закончить конкретным словом или жестом границы на сегодня.
+`.trim(),
+  },
+  {
+    match: 'betweenus',
+    extra: `
+Расклад «Между нами». Смотри на динамику СЕЙЧАС, не на будущее брака и не на «вернётся ли».
+Не выноси вердикт «он любит / не любит». Один честный следующий шаг в финале.
+`.trim(),
+  },
+  {
+    match: 'stayorgo',
+    extra: `
+Расклад «Остаться или уйти». Вопрос — обычный текст о ситуации, не формула.
+Сам выдели два пути (остаться и уйти) из того, что написал человек.
+Сравни цены и то, кем человек становится на каждом пути.
+Заверши, какой путь ближе СЕГОДНЯ, не судьбой и не «правильным навсегда».
+`.trim(),
+  },
+  {
+    match: 'dayparts',
+    extra: `
+Не предсказывай события дня. Три такта — ритуал внимания: утро, день, вечер.
+`.trim(),
+  },
+  {
+    match: 'inmyhands',
+    extra: `
+Расклад «Что я могу контролировать». Жёстко раздели: что в руках клиента и что нет.
+Одна конкретная граница на сегодня. Не призывать контролировать других или исход.
+`.trim(),
+  },
+];
+
+function getSpreadExtraPrompt(spread_key?: string): string | undefined {
+  const key = (spread_key ?? '').toLowerCase();
+  if (!key) return undefined;
+  return SPREAD_EXTRA_PROMPTS.find((item) => key.includes(item.match))?.extra;
+}
+
 function isDayAdvice(input: InterpretSpreadInput): boolean {
   const key = (input.spread_key ?? '').toLowerCase();
   if (key === 'simple_daysuggest' || key.includes('daysuggest') || key.includes('day_advice')) {
@@ -128,6 +191,11 @@ function isYesNoSpread(input: InterpretSpreadInput): boolean {
   );
 }
 
+function isDayPartsSpread(input: InterpretSpreadInput): boolean {
+  const key = (input.spread_key ?? '').toLowerCase();
+  return key === 'simple_dayparts' || key.includes('dayparts');
+}
+
 function formatPositions(positions: TarotSpreadInput['positions']): string {
   return positions
     .map((p) => {
@@ -154,12 +222,17 @@ export async function generateInterpretation(
   }
 
   const dayAdvice = isDayAdvice(input);
-  const yesNo = !dayAdvice && isYesNoSpread(input);
-  const system = dayAdvice
+  const dayParts = !dayAdvice && isDayPartsSpread(input);
+  const yesNo = !dayAdvice && !dayParts && isYesNoSpread(input);
+  const extra = getSpreadExtraPrompt(spread_key);
+  const baseSystem = dayAdvice
     ? dayAdviceSystemPrompt
-    : yesNo
-      ? yesNoSystemPrompt
-      : spreadSystemPrompt;
+    : dayParts
+      ? dayPartsSystemPrompt
+      : yesNo
+        ? yesNoSystemPrompt
+        : spreadSystemPrompt;
+  const system = extra ? `${baseSystem}\n\n${extra}` : baseSystem;
 
   const content = dayAdvice
     ? `
@@ -168,6 +241,18 @@ export async function generateInterpretation(
 Язык ответа: ${language}
 
 Напиши ровно два абзаца по правилам system.
+`
+    : dayParts
+      ? `
+Режим: Утро, день, вечер (три карты — ритуал дня).
+${spread_key ? `Ключ расклада: ${spread_key}` : ''}
+
+Карты:
+${formatPositions(positions)}
+
+Язык ответа: ${language}
+
+Напиши три коротких такта (утро / день / вечер) по правилам system.
 `
     : yesNo
       ? `
@@ -205,8 +290,8 @@ ${formatPositions(positions)}
         { role: 'system', content: system },
         { role: 'user', content },
       ],
-      temperature: dayAdvice ? 0.55 : yesNo ? 0.5 : 0.6,
-      max_tokens: dayAdvice ? 280 : yesNo ? 360 : 480,
+      temperature: dayAdvice || dayParts ? 0.55 : yesNo ? 0.5 : 0.6,
+      max_tokens: dayAdvice ? 280 : dayParts ? 360 : yesNo ? 360 : 480,
     });
 
     return {

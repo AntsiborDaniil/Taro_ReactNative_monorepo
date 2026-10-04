@@ -24,6 +24,11 @@ export enum SpreadName {
   SelfDevelopment_ShadowSide = 'selfDevelopment_shadowSide',
   Choice_TwoPaths = 'choice_twoPaths',
   Choice_Crossroad = 'choice_crossroad',
+  Thematic_Boundaries = 'thematic_boundaries',
+  Thematic_BetweenUs = 'thematic_betweenUs',
+  Choice_StayOrGo = 'choice_stayOrGo',
+  Simple_DayParts = 'simple_dayParts',
+  SelfDevelopment_InMyHands = 'selfDevelopment_inMyHands',
 }
 
 export enum TarotCardDirection {
@@ -149,19 +154,19 @@ export type TTarotCardTexts = {
   SpreadName.Default - это дефолтное значение карты, которое не привязано ни к каком раскладу,
   то есть значение карты само по себе
   */
-  meaning: Record<TarotCardDirection, Record<SpreadName, string[]>>;
+  meaning: Record<TarotCardDirection, Partial<Record<SpreadName, string[]>>>;
   /*
   Идентично meaning по подходу, это совет или предостержение, что дает карта в определенном раскладе.
   Размер меньше чем у meaning и description. Одно или 2 предложения. advice - одна строка в массиве
   */
-  advice: Record<TarotCardDirection, Record<SpreadName, string[]>>;
+  advice: Record<TarotCardDirection, Partial<Record<SpreadName, string[]>>>;
   /*
   Ключевые слова, это что-то вроде чипсов\тегов, что должны быть массивом слов,
   где например в раскладе по любви это может быть ['страсть', 'открытость'], а в карьере
   ['риск', 'творчество']. Ключевых слов необходимо минимум 4 у каждого расклада.
 
   */
-  keywords: Record<TarotCardDirection, Record<SpreadName, string[]>>;
+  keywords: Record<TarotCardDirection, Partial<Record<SpreadName, string[]>>>;
   /*
   Описание Карты в завысимости от положения будет иметь одно значение.
   То есть у нас будет одно описание в зависимости от ориентации карты.

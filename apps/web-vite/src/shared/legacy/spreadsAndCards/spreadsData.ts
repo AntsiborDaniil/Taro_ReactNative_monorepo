@@ -34,6 +34,31 @@ export const simpleSpreads: Record<string, TSpread> = {
     ],
     cardsOrder: [],
   },
+  dayParts: {
+    name: 'spread:simple_dayParts.name',
+    description: 'spread:simple_dayParts.description',
+    id: SpreadName.Simple_DayParts,
+    category: SpreadsCategory.Simple,
+    img: '',
+    cardsCount: 3,
+    cardsPosition: [],
+    selectedCards: [],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
+    cardsOrder: [
+      {
+        meaning: 'simple_dayParts.сardMeaning.0',
+      },
+      {
+        meaning: 'simple_dayParts.сardMeaning.1',
+      },
+      {
+        meaning: 'simple_dayParts.сardMeaning.2',
+      },
+    ],
+  },
 };
 
 export const thematicSpreads: Record<string, TSpread> = {
@@ -145,6 +170,65 @@ export const thematicSpreads: Record<string, TSpread> = {
       },
       {
         meaning: 'thematic_love.сardMeaning.5',
+      },
+    ],
+  },
+  boundaries: {
+    name: 'spread:thematic_boundaries.name',
+    description: 'spread:thematic_boundaries.description',
+    id: SpreadName.Thematic_Boundaries,
+    category: SpreadsCategory.Thematic,
+    img: '',
+    cardsCount: 4,
+    cardsPosition: [],
+    selectedCards: [],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
+    cardsOrder: [
+      {
+        meaning: 'thematic_boundaries.сardMeaning.0',
+      },
+      {
+        meaning: 'thematic_boundaries.сardMeaning.1',
+      },
+      {
+        meaning: 'thematic_boundaries.сardMeaning.2',
+      },
+      {
+        meaning: 'thematic_boundaries.сardMeaning.3',
+      },
+    ],
+  },
+  betweenUs: {
+    name: 'spread:thematic_betweenUs.name',
+    description: 'spread:thematic_betweenUs.description',
+    id: SpreadName.Thematic_BetweenUs,
+    category: SpreadsCategory.Thematic,
+    img: '',
+    cardsCount: 5,
+    cardsPosition: [],
+    selectedCards: [],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
+    cardsOrder: [
+      {
+        meaning: 'thematic_betweenUs.сardMeaning.0',
+      },
+      {
+        meaning: 'thematic_betweenUs.сardMeaning.1',
+      },
+      {
+        meaning: 'thematic_betweenUs.сardMeaning.2',
+      },
+      {
+        meaning: 'thematic_betweenUs.сardMeaning.3',
+      },
+      {
+        meaning: 'thematic_betweenUs.сardMeaning.4',
       },
     ],
   },
@@ -361,6 +445,31 @@ export const selfDevelopmentSpreads: Record<string, TSpread> = {
       },
     ],
   },
+  inMyHands: {
+    name: 'spread:selfDevelopment_inMyHands.name',
+    description: 'spread:selfDevelopment_inMyHands.description',
+    id: SpreadName.SelfDevelopment_InMyHands,
+    category: SpreadsCategory.SelfDevelopment,
+    img: '',
+    cardsCount: 3,
+    cardsPosition: [],
+    selectedCards: [],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
+    cardsOrder: [
+      {
+        meaning: 'selfDevelopment_inMyHands.сardMeaning.0',
+      },
+      {
+        meaning: 'selfDevelopment_inMyHands.сardMeaning.1',
+      },
+      {
+        meaning: 'selfDevelopment_inMyHands.сardMeaning.2',
+      },
+    ],
+  },
 };
 
 export const choiceSpreads: Record<string, TSpread> = {
@@ -398,6 +507,40 @@ export const choiceSpreads: Record<string, TSpread> = {
       },
       {
         meaning: 'choice_twoPaths.сardMeaning.6',
+      },
+    ],
+  },
+  stayOrGo: {
+    name: 'spread:choice_stayOrGo.name',
+    description: 'spread:choice_stayOrGo.description',
+    id: SpreadName.Choice_StayOrGo,
+    category: SpreadsCategory.Choice,
+    img: '',
+    cardsCount: 6,
+    cardsPosition: [],
+    selectedCards: [],
+    availableSubscriptions: [
+      SubscriptionType.Freemium,
+      SubscriptionType.Practice,
+    ],
+    cardsOrder: [
+      {
+        meaning: 'choice_stayOrGo.сardMeaning.0',
+      },
+      {
+        meaning: 'choice_stayOrGo.сardMeaning.1',
+      },
+      {
+        meaning: 'choice_stayOrGo.сardMeaning.2',
+      },
+      {
+        meaning: 'choice_stayOrGo.сardMeaning.3',
+      },
+      {
+        meaning: 'choice_stayOrGo.сardMeaning.4',
+      },
+      {
+        meaning: 'choice_stayOrGo.сardMeaning.5',
       },
     ],
   },
@@ -458,20 +601,26 @@ export const spreadsData: TSpreadCategory[] = [
   {
     name: 'spread:simple.name.multiple',
     id: SpreadsCategory.Simple,
-    spreads: [simpleSpreads.yesNo, simpleSpreads.daySuggest],
+    spreads: [simpleSpreads.yesNo, simpleSpreads.daySuggest, simpleSpreads.dayParts],
   },
   {
     name: 'spread:selfDevelopment.name.multiple',
     id: SpreadsCategory.SelfDevelopment,
-    spreads: [selfDevelopmentSpreads.shadowSide, selfDevelopmentSpreads.mirror],
+    spreads: [
+      selfDevelopmentSpreads.shadowSide,
+      selfDevelopmentSpreads.inMyHands,
+      selfDevelopmentSpreads.mirror,
+    ],
   },
   {
     name: 'spread:thematic.name.multiple',
     id: SpreadsCategory.Thematic,
     spreads: [
       thematicSpreads.relationship,
-      thematicSpreads.careerFinance,
       thematicSpreads.love,
+      thematicSpreads.boundaries,
+      thematicSpreads.betweenUs,
+      thematicSpreads.careerFinance,
     ],
   },
   {
@@ -486,6 +635,6 @@ export const spreadsData: TSpreadCategory[] = [
   {
     name: 'spread:choice.name.multiple',
     id: SpreadsCategory.Choice,
-    spreads: [choiceSpreads.twoPaths, choiceSpreads.crossroad],
+    spreads: [choiceSpreads.twoPaths, choiceSpreads.stayOrGo, choiceSpreads.crossroad],
   },
 ];

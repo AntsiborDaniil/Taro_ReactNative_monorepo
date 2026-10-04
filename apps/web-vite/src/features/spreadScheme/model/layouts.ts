@@ -62,4 +62,11 @@ export const SPREAD_SCHEME_LAYOUTS: Partial<Record<SpreadName, SchemeBlock[]>> =
     { cells: [7, 6] },
   ],
   [SpreadName.SelfDevelopment_ShadowSide]: [{ cells: [0, 1] }, { cells: [2] }, { cells: [3, 4] }],
+  [SpreadName.Thematic_Boundaries]: [{ cells: [0, 1] }, { cells: [2, 3] }],
+  [SpreadName.Thematic_BetweenUs]: [{ cells: [0] }, { cells: [1, 2] }, { cells: [3, 4] }],
+  [SpreadName.Choice_StayOrGo]: [
+    { columns: [[{ cells: [0, 1, 2] }], [{ cells: [3, 4, 5] }]] },
+  ],
+  [SpreadName.Simple_DayParts]: [{ cells: [0, 1, 2] }],
+  [SpreadName.SelfDevelopment_InMyHands]: [{ cells: [0] }, { cells: [1, 2] }],
 };

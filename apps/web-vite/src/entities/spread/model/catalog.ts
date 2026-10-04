@@ -32,6 +32,8 @@ export const FAVORITE_SPREADS: TSpread[] = [
   simpleSpreads.yesNo,
   selfDevelopmentSpreads.shadowSide,
   thematicSpreads.relationship,
+  thematicSpreads.boundaries,
+  thematicSpreads.betweenUs,
   universalSpreads.celticCross,
   thematicSpreads.careerFinance,
   choiceSpreads.twoPaths,

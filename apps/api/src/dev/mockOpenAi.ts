@@ -72,6 +72,89 @@ export async function mockGenerateInterpretation(
     };
   }
 
+  if (key.includes('dayparts')) {
+    if (langIsRu(input.language)) {
+      return {
+        interpretation:
+          `[DEV MOCK] Утро: заметьте, где вы уже спешите, и дайте себе один спокойный жест перед делами.\n\n` +
+          `День: держите внимание на одном выборе, а не на всём списке сразу (${cards || 'нет'}).\n\n` +
+          `Вечер: отметьте, что удалось отпустить — без оценки «получился ли день».`,
+      };
+    }
+    return {
+      interpretation:
+        `[DEV MOCK] Morning: notice where you are already rushing, and give yourself one calm gesture before the tasks.\n\n` +
+        `Day: keep attention on one choice, not the whole list (${cards || 'none'}).\n\n` +
+        `Evening: note what you managed to release — without grading whether the day “worked”.`,
+    };
+  }
+
+  if (key.includes('boundaries')) {
+    if (langIsRu(input.language)) {
+      return {
+        interpretation:
+          `[DEV MOCK] По вопросу «${input.question || '—'}» расклад про границы: где вы уже сдаёте себя и чего хотите на самом деле. ` +
+          `Карты (${cards || 'нет'}) не зовут «просто уйти» — они показывают цену молчания и одно ясное слово на сегодня.`,
+      };
+    }
+    return {
+      interpretation:
+        `[DEV MOCK] On “${input.question || '—'}”, this is a boundaries reading: where you already give yourself away and what you actually want. ` +
+        `Cards (${cards || 'none'}) are not a “just leave” default — they show the cost of silence and one clear wording for today.`,
+    };
+  }
+
+  if (key.includes('betweenus')) {
+    if (langIsRu(input.language)) {
+      return {
+        interpretation:
+          `[DEV MOCK] По вопросу «${input.question || '—'}» видно динамику между вами сейчас, не прогноз союза. ` +
+          `Карты (${cards || 'нет'}) разделяют ваш вклад и вклад другого; вердикта «любит / не любит» нет.\n\n` +
+          `Честный шаг сегодня — назвать вслух одну вещь, которую вы до сих пор держали внутри.`,
+      };
+    }
+    return {
+      interpretation:
+        `[DEV MOCK] On “${input.question || '—'}”, the spread shows the dynamic between you now, not a forecast of the union. ` +
+        `Cards (${cards || 'none'}) split what you bring and what the other brings; there is no “they love you / they don’t” verdict.\n\n` +
+        `The honest step today is to name out loud one thing you have been holding in.`,
+    };
+  }
+
+  if (key.includes('stayorgo')) {
+    if (langIsRu(input.language)) {
+      return {
+        interpretation:
+          `[DEV MOCK] По вопросу «${input.question || '—'}» сравниваются два названных пути: цена остаться и цена уйти. ` +
+          `Карты (${cards || 'нет'}) показывают, кем вы становитесь на каждом, без «судьбы».\n\n` +
+          `Сегодня ближе тот путь, где вы меньше прячетесь от собственной ясности.`,
+      };
+    }
+    return {
+      interpretation:
+        `[DEV MOCK] On “${input.question || '—'}”, two named paths are compared: the cost of staying and the cost of leaving. ` +
+        `Cards (${cards || 'none'}) show who you become on each — not destiny.\n\n` +
+        `Today the more aligned path is the one where you hide less from your own clarity.`,
+    };
+  }
+
+  if (key.includes('inmyhands')) {
+    if (langIsRu(input.language)) {
+      return {
+        interpretation:
+          `[DEV MOCK] По вопросу «${input.question || '—'}» расклад делит: что в ваших руках и что нет. ` +
+          `Карты (${cards || 'нет'}) просят не тратить силу на чужое.\n\n` +
+          `Граница на сегодня — один отказ от того, что вам не принадлежит.`,
+      };
+    }
+    return {
+      interpretation:
+        `[DEV MOCK] On “${input.question || '—'}”, the spread splits what is in your hands and what is not. ` +
+        `Cards (${cards || 'none'}) ask you not to spend force on what isn’t yours.\n\n` +
+        `Today’s boundary is one refusal of what does not belong to you.`,
+    };
+  }
+
   if (langIsRu(input.language)) {
     return {
       interpretation:

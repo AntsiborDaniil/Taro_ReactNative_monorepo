@@ -19,7 +19,11 @@ function getRandomElementFromArray<T>(arr: T[]): T {
 }
 
 const RANDOM_CARD_KEYS = ['advice', 'description', 'meaning', 'keywords', 'yesNo'] as const;
-const SIMPLE_SPREADS = [SpreadName.Simple_YesNo, SpreadName.Simple_DaySuggest];
+const SIMPLE_SPREADS = [
+  SpreadName.Simple_YesNo,
+  SpreadName.Simple_DaySuggest,
+  SpreadName.Simple_DayParts,
+];
 
 export function getRandomCardId(selectedCardsIds: Record<string, boolean>): number {
   const allCards = Array.from({ length: 78 }, (_, i) => i);
@@ -62,11 +66,14 @@ export function getTarotCardReadings({
         return { ...acc, [currentValue as string]: directional };
       }
 
-      const bySpread = (directional as Record<string, unknown[]> | undefined)?.[spreadId ?? SpreadName.Default];
+      const bySpreadMap = directional as Record<string, unknown[]> | undefined;
+      const bySpread =
+        bySpreadMap?.[spreadId ?? SpreadName.Default] ?? bySpreadMap?.[SpreadName.Default];
       if (bySpread) {
         const isSimple = spreadId != null && SIMPLE_SPREADS.includes(spreadId);
         const selectedIndex = currentValue === 'advice' || isSimple ? 0 : index;
-        return { ...acc, [currentValue as string]: (bySpread[selectedIndex] as string) ?? '' };
+        const picked = (bySpread[selectedIndex] as string) ?? (bySpread[0] as string) ?? '';
+        return { ...acc, [currentValue as string]: picked };
       }
 
       return acc;

@@ -56,9 +56,9 @@ export default function SpreadDetailPage(): ReactElement {
     );
   }
 
-  // Вопрос обязателен для всех раскладов, кроме «Карты дня» — 1-в-1 apps/web
-  // checkErrors (`newErrors.question = spread.id !== SpreadName.Simple_DaySuggest`).
-  const requiresQuestion = spread.id !== SpreadName.Simple_DaySuggest;
+  // Вопрос не обязателен для «Совета дня» и «Утро, день, вечер».
+  const requiresQuestion =
+    spread.id !== SpreadName.Simple_DaySuggest && spread.id !== SpreadName.Simple_DayParts;
   const heroImage = getImage(['spreads', DECK_STYLE_FLAT, spread.id]);
   const positionLabels = (spread.cardsOrder ?? [])
     .map((item) => (item?.meaning ? t(`spread:${item.meaning}`) : ''))
@@ -118,7 +118,9 @@ export default function SpreadDetailPage(): ReactElement {
                 dispatch(setQuestion(event.target.value));
                 if (error) setError(false);
               }}
-              placeholder={t('spread:question.placeholder')}
+              placeholder={t(`spread:${spread.id}.questionPlaceholder`, {
+                defaultValue: t('spread:question.placeholder'),
+              })}
               error={error ? t('spread:question.error') : undefined}
               rows={3}
               maxLength={280}

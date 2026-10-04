@@ -1,4 +1,15 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactElement, type TouchEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type ReactElement,
+  type ReactNode,
+  type RefObject,
+  type TouchEvent,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -56,6 +67,10 @@ function toParagraphs(text: string): string[] {
 
 /** Минимальная дельта горизонтального свайпа, px. */
 const SWIPE_THRESHOLD = 48;
+/** Накопленный deltaX трекпада, после которого переключаем карту. */
+const WHEEL_THRESHOLD = 64;
+/** Пауза, чтобы один жест трекпада не перескочил сразу несколько карт. */
+const WHEEL_COOLDOWN_MS = 380;
 
 /**
  * Обработчики явного горизонтального свайпа (вертикальный скролл не трогаем).
@@ -88,6 +103,89 @@ function createSwipeHandlers(
       startRef.current = null;
     },
   };
+}
+
+/**
+ * Двухпальцевый свайп тачпада Mac — это wheel с deltaX, не touch.
+ * preventDefault нужен, иначе Chrome уводит «назад» по истории.
+ */
+function useHorizontalWheelSwipe(
+  targetRef: RefObject<HTMLElement | null>,
+  enabled: boolean,
+  onSwipe: (direction: 1 | -1) => void,
+) {
+  const onSwipeRef = useRef(onSwipe);
+  onSwipeRef.current = onSwipe;
+
+  useEffect(() => {
+    const el = targetRef.current;
+    if (!el || !enabled) return;
+
+    let acc = 0;
+    let locked = false;
+    let unlockTimer = 0;
+    let idleTimer = 0;
+
+    const onWheel = (event: WheelEvent) => {
+      const horizontal =
+        Math.abs(event.deltaX) > Math.abs(event.deltaY)
+          ? event.deltaX
+          : event.shiftKey
+            ? event.deltaY
+            : 0;
+      if (!horizontal) return;
+      event.preventDefault();
+      if (locked) return;
+      acc += horizontal;
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        acc = 0;
+      }, 180);
+      if (Math.abs(acc) < WHEEL_THRESHOLD) return;
+      const direction: 1 | -1 = acc > 0 ? 1 : -1;
+      acc = 0;
+      locked = true;
+      onSwipeRef.current(direction);
+      window.clearTimeout(unlockTimer);
+      unlockTimer = window.setTimeout(() => {
+        locked = false;
+      }, WHEEL_COOLDOWN_MS);
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      window.clearTimeout(unlockTimer);
+      window.clearTimeout(idleTimer);
+    };
+  }, [enabled, targetRef]);
+}
+
+/** Панель с touch-свайпом и горизонтальным жестом тачпада. */
+function SwipePanel({
+  enabled,
+  onSwipe,
+  lockRef,
+  className,
+  style,
+  children,
+}: {
+  enabled: boolean;
+  onSwipe: (direction: 1 | -1) => void;
+  lockRef: RefObject<HTMLDivElement | null>;
+  className?: string;
+  style?: CSSProperties;
+  children: ReactNode;
+}) {
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  useHorizontalWheelSwipe(lockRef, enabled, onSwipe);
+  const touch = createSwipeHandlers(swipeStart, enabled, onSwipe);
+
+  return (
+    <div ref={lockRef} className={className} style={style} aria-live="polite" {...touch}>
+      {children}
+    </div>
+  );
 }
 
 /**
@@ -138,11 +236,6 @@ export default function ReadingResultPage(): ReactElement {
   const attempted = useRef(false);
   /** Фоновое сохранение после интерпретации — «Поделиться» ждёт именно его uid. */
   const persistPromise = useRef<Promise<TSpread | null> | null>(null);
-  /** Старт горизонтального свайпа по блоку разбора карты. */
-  const swipeStart = useRef<{ x: number; y: number } | null>(null);
-  /** Старт свайпа по карусели уточнений. */
-  const followUpSwipeStart = useRef<{ x: number; y: number } | null>(null);
-
   const [cardNsReady, setCardNsReady] = useState(false);
   const [activeCard, setActiveCard] = useState(0);
   const [activeFollowUp, setActiveFollowUp] = useState(0);
@@ -467,9 +560,6 @@ export default function ReadingResultPage(): ReactElement {
     detailLock.lock();
     setActiveCard(next);
   };
-  // Только явный горизонтальный жест — вертикальный скролл текста не трогаем.
-  const detailSwipe = createSwipeHandlers(swipeStart, hasManyCards, (direction) => goToCard(activeCard + direction));
-
   const hasManyFollowUps = followUps.length > 1;
   const currentFollowUpIndex = Math.min(activeFollowUp, Math.max(followUps.length - 1, 0));
   const currentFollowUp = followUps[currentFollowUpIndex];
@@ -479,9 +569,6 @@ export default function ReadingResultPage(): ReactElement {
     followUpLock.lock();
     setActiveFollowUp(next);
   };
-  const followUpSwipe = createSwipeHandlers(followUpSwipeStart, hasManyFollowUps, (direction) =>
-    goToFollowUp(currentFollowUpIndex + direction),
-  );
   const handleCardsKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'ArrowLeft') {
       event.preventDefault();
@@ -624,12 +711,12 @@ export default function ReadingResultPage(): ReactElement {
                 ) : null}
 
                 {/* Контейнер стабилен и держит min-height — как и у разбора карт. */}
-                <div
-                  ref={followUpLock.ref}
+                <SwipePanel
+                  enabled={hasManyFollowUps}
+                  onSwipe={(direction) => goToFollowUp(currentFollowUpIndex + direction)}
+                  lockRef={followUpLock.ref}
                   className={styles.followUpSlide}
                   style={{ minHeight: followUpLock.minHeight }}
-                  aria-live="polite"
-                  {...followUpSwipe}
                 >
                   <div key={currentFollowUpIndex} className={styles.followUpItem}>
                     <Text role="micro" tone="ink100">
@@ -642,7 +729,7 @@ export default function ReadingResultPage(): ReactElement {
                       {currentFollowUp.a}
                     </Text>
                   </div>
-                </div>
+                </SwipePanel>
 
                 {/* Мобильный: точки (на десктопе скрыты). */}
                 {hasManyFollowUps ? (
@@ -733,12 +820,12 @@ export default function ReadingResultPage(): ReactElement {
           </div>
 
           {/* Контейнер стабилен (без key) и держит min-height: смена карты меняет только содержимое. */}
-          <div
-            ref={detailLock.ref}
+          <SwipePanel
+            enabled={hasManyCards}
+            onSwipe={(direction) => goToCard(activeCard + direction)}
+            lockRef={detailLock.ref}
             className={styles.detail}
             style={{ minHeight: detailLock.minHeight }}
-            aria-live="polite"
-            {...detailSwipe}
           >
             <div key={activeCard} className={styles.detailBody}>
             <div className={styles.detailHead}>
@@ -798,7 +885,7 @@ export default function ReadingResultPage(): ReactElement {
               </Button>
             </div>
             </div>
-          </div>
+          </SwipePanel>
         </section>
 
         {interpretation ? (

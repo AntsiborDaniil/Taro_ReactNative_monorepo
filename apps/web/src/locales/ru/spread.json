@@ -9,6 +9,11 @@
   "yesNo.description": "Сформулируй вопрос и выбери карту — получишь прямой ответ «да» или «нет».",
   "daySuggest.name": "Совет дня",
   "daySuggest.description": "Выбери карту — это совет на сегодняшний день.",
+  "simple_dayParts.name": "Утро, день, вечер",
+  "simple_dayParts.description": "Три карты — утро, день и вечер. Короткий ориентир на сегодня, без прогноза событий. Вопрос можно не писать.",
+  "simple_dayParts.сardMeaning.0": "Утро",
+  "simple_dayParts.сardMeaning.1": "День",
+  "simple_dayParts.сardMeaning.2": "Вечер",
 
   "simple.name.multiple": "Простые",
   "thematic.name.multiple": "Тематические",
@@ -89,6 +94,21 @@
   "thematic_love.сardMeaning.4": "Куда движутся отношения",
   "thematic_love.сardMeaning.5": "Итог, совет отношениям",
 
+  "thematic_boundaries.name": "Границы",
+  "thematic_boundaries.description": "Расклад \"Границы\" поможет понять, где ты уже уступаешь и чего хочешь на самом деле. Четыре карты покажут, что сказать или сделать — и чем обойдётся молчание.",
+  "thematic_boundaries.сardMeaning.0": "Где я уже уступаю",
+  "thematic_boundaries.сardMeaning.1": "Чего я хочу на самом деле",
+  "thematic_boundaries.сardMeaning.2": "Что сказать или сделать",
+  "thematic_boundaries.сardMeaning.3": "Чем обойдётся молчание",
+
+  "thematic_betweenUs.name": "Между нами",
+  "thematic_betweenUs.description": "Расклад \"Между нами\" поможет посмотреть на то, что происходит между вами сейчас — без прогноза на будущее. Он покажет, что ты вносишь, что вносит другой человек, что вы оба не замечаете и какой шаг сделать сегодня.",
+  "thematic_betweenUs.сardMeaning.0": "Что происходит сейчас",
+  "thematic_betweenUs.сardMeaning.1": "Что я вношу",
+  "thematic_betweenUs.сardMeaning.2": "Что вносит другой",
+  "thematic_betweenUs.сardMeaning.3": "Что мы не замечаем",
+  "thematic_betweenUs.сardMeaning.4": "Какой шаг сделать сегодня",
+
   "universal_celticCross.name": "Кельтский крест",
   "universal_celticCross.description": "Кельтский крест — классический и наиболее полный расклад Таро, который дает всестороннее понимание любой жизненной ситуации. Этот древний расклад из десяти карт раскрывает все аспекты вопроса: от глубинных истоков до итогового результата, показывая путь развития событий и скрытые влияния.",
   "universal_celticCross.сardMeaning.0": "Ситуация",
@@ -161,6 +181,12 @@
   "selfDevelopment_shadowSide.сardMeaning.3": "Что поможет мне подружиться со своей тенью",
   "selfDevelopment_shadowSide.сardMeaning.4": "Какие ресурсы способна открыть мне моя теневая сторона",
 
+  "selfDevelopment_inMyHands.name": "Что я могу контролировать",
+  "selfDevelopment_inMyHands.description": "Расклад \"Что я могу контролировать\" поможет отделить то, что в твоих руках, от того, на что ты не влияешь. Три карты подскажут, где поставить границу сегодня — без попытки управлять другими.",
+  "selfDevelopment_inMyHands.сardMeaning.0": "В моих руках",
+  "selfDevelopment_inMyHands.сardMeaning.1": "Не в моих руках",
+  "selfDevelopment_inMyHands.сardMeaning.2": "Где поставить границу сегодня",
+
   "choice_twoPaths.name": "Два пути",
   "choice_twoPaths.description": "Расклад \"Два пути\" создан специально для ситуаций, когда необходимо сделать важный выбор между двумя альтернативами. Этот расклад из семи карт поможет взвесить все \"за\" и \"против\" каждого варианта, показав возможные последствия обоих решений и указав на наиболее благоприятный исход.",
   "choice_twoPaths.сardMeaning.0": "Настоящее положение",
@@ -170,6 +196,15 @@
   "choice_twoPaths.сardMeaning.4": "Результат первого пути",
   "choice_twoPaths.сardMeaning.5": "Результат второго пути",
   "choice_twoPaths.сardMeaning.6": "Конечный результат",
+
+  "choice_stayOrGo.name": "Остаться или уйти",
+  "choice_stayOrGo.description": "Расклад \"Остаться или уйти\" поможет сравнить два варианта: что держит на месте, что отпускает и во что обойдётся каждый выбор. Карты не решают за тебя: они покажут, что ближе именно сегодня.",
+  "choice_stayOrGo.сardMeaning.0": "Остаться: что держит",
+  "choice_stayOrGo.сardMeaning.1": "Остаться: какая цена",
+  "choice_stayOrGo.сardMeaning.2": "Остаться: кем я стану",
+  "choice_stayOrGo.сardMeaning.3": "Уйти: что освобождает",
+  "choice_stayOrGo.сardMeaning.4": "Уйти: какая цена",
+  "choice_stayOrGo.сardMeaning.5": "Уйти: кем я стану",
 
   "choice_crossroad.name": "Перекресток",
   "choice_crossroad.description": "Расклад \"Перекресток\" предназначен для сложных жизненных ситуаций, когда перед вами открывается сразу несколько путей развития событий. Этот расклад из девяти карт поможет разобраться в многообразии вариантов, учесть все влияющие факторы и получить мудрый совет для принятия наиболее верного решения на жизненном перекрестке.",

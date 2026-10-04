@@ -187,6 +187,8 @@
   background: transparent;
   /* touch-action: pan-y — вертикальный скролл текста ок, горизонталь ловим сами. */
   touch-action: pan-y;
+  /* Двухпальцевый свайп тачпада не должен уводить Chrome «назад». */
+  overscroll-behavior-x: none;
   /* Контент меняется на месте — браузер не должен «якориться» на сменившемся узле. */
   overflow-anchor: none;
 }
@@ -329,6 +331,7 @@
 .followUpSlide {
   /* pan-y — вертикальный скролл ок, горизонтальный свайп ловим сами. */
   touch-action: pan-y;
+  overscroll-behavior-x: none;
 }
 
 /* Стрелки — только на широких экранах, на узких вместо них точки. */

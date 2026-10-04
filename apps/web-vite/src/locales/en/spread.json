@@ -9,6 +9,11 @@
   "yesNo.description": "Ask your question and pick a card — you will get a direct yes or no.",
   "daySuggest.name": "Daily Advice",
   "daySuggest.description": "Pick a card — this is your advice for today.",
+  "simple_dayParts.name": "Morning, Day, Evening",
+  "simple_dayParts.description": "Three cards — morning, day, and evening. A short compass for today, not a forecast. You can skip the question.",
+  "simple_dayParts.сardMeaning.0": "Morning",
+  "simple_dayParts.сardMeaning.1": "Day",
+  "simple_dayParts.сardMeaning.2": "Evening",
 
   "simple.name.multiple": "Simple",
   "thematic.name.multiple": "Thematic",
@@ -91,6 +96,21 @@
   "thematic_love.сardMeaning.4": "Where the relationship is heading",
   "thematic_love.сardMeaning.5": "Summary, advice for the relationship",
 
+  "thematic_boundaries.name": "Boundaries",
+  "thematic_boundaries.description": "The \"Boundaries\" spread helps you see where you already give in and what you actually want. Four cards show what to say or do — and what it costs if you stay silent.",
+  "thematic_boundaries.сardMeaning.0": "Where I already give in",
+  "thematic_boundaries.сardMeaning.1": "What I actually want",
+  "thematic_boundaries.сardMeaning.2": "What to say or do",
+  "thematic_boundaries.сardMeaning.3": "What silence costs",
+
+  "thematic_betweenUs.name": "Between Us",
+  "thematic_betweenUs.description": "The \"Between Us\" spread looks at what is happening between you right now — not at what might happen later. It shows what you bring, what the other person brings, what you both miss, and what to do today.",
+  "thematic_betweenUs.сardMeaning.0": "What is happening now",
+  "thematic_betweenUs.сardMeaning.1": "What I bring",
+  "thematic_betweenUs.сardMeaning.2": "What the other person brings",
+  "thematic_betweenUs.сardMeaning.3": "What we are missing",
+  "thematic_betweenUs.сardMeaning.4": "What to do today",
+
   "universal_celticCross.name": "Celtic Cross",
   "universal_celticCross.description": "Celtic Cross is a classic and most complete Tarot spread that provides comprehensive understanding of any life situation. This ancient ten-card spread reveals all aspects of the question: from deep origins to final result, showing the path of events development and hidden influences.",
   "universal_celticCross.сardMeaning.0": "Situation",
@@ -163,6 +183,12 @@
   "selfDevelopment_shadowSide.сardMeaning.3": "What will help me befriend my shadow",
   "selfDevelopment_shadowSide.сardMeaning.4": "What resources my shadow side can open for me",
 
+  "selfDevelopment_inMyHands.name": "What I Can Control",
+  "selfDevelopment_inMyHands.description": "The \"What I Can Control\" spread helps you separate what is in your hands from what you cannot change. Three cards suggest where to set a boundary today — not how to control other people.",
+  "selfDevelopment_inMyHands.сardMeaning.0": "In my hands",
+  "selfDevelopment_inMyHands.сardMeaning.1": "Not in my hands",
+  "selfDevelopment_inMyHands.сardMeaning.2": "Where to set a boundary today",
+
   "choice_twoPaths.name": "Two Paths",
   "choice_twoPaths.description": "The \"Two Paths\" spread is created specifically for situations when it's necessary to make an important choice between two alternatives. This seven-card spread will help weigh all \"pros\" and \"cons\" of each option, showing possible consequences of both decisions and pointing to the most favorable outcome.",
   "choice_twoPaths.сardMeaning.0": "Present position",
@@ -172,6 +198,15 @@
   "choice_twoPaths.сardMeaning.4": "Result of first path",
   "choice_twoPaths.сardMeaning.5": "Result of second path",
   "choice_twoPaths.сardMeaning.6": "Final result",
+
+  "choice_stayOrGo.name": "Stay or Go",
+  "choice_stayOrGo.description": "The \"Stay or Go\" spread helps you compare two options: what keeps you, what sets you free, and what each choice costs. The cards will not choose for you; they show which path fits today.",
+  "choice_stayOrGo.сardMeaning.0": "Stay: what keeps me",
+  "choice_stayOrGo.сardMeaning.1": "Stay: the cost",
+  "choice_stayOrGo.сardMeaning.2": "Stay: who I become",
+  "choice_stayOrGo.сardMeaning.3": "Leave: what frees me",
+  "choice_stayOrGo.сardMeaning.4": "Leave: the cost",
+  "choice_stayOrGo.сardMeaning.5": "Leave: who I become",
 
   "choice_crossroad.name": "Crossroad",
   "choice_crossroad.description": "The \"Crossroad\" spread is designed for complex life situations when several paths of events development open before you at once. This nine-card spread will help understand the variety of options, consider all influencing factors and receive wise advice for making the most correct decision at life's crossroad.",
