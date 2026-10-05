@@ -2,12 +2,13 @@ import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { resolveAuthedUser } from '../lib/authRequest';
 import { OpenAiProviderError } from '../lib/openaiErrors';
 import { generateMoodAndEnergyInterpretation } from '../services/moodAndEnergyMotivationService';
-import {
-  refundSpreadSlot,
-  tryConsumeSpreadSlot,
-} from '../services/tarotDailyUsageService';
 import { TMoodAndEnergyInput } from '../types';
 
+/**
+ * Чек-ин настроения + AI-карта. Не списывает дневной слот расклада и не
+ * тратит spread_credits — иначе утренний mood съедал единственную бесплатную
+ * интерпретацию (см. reports/Mindful Tarot growth features.md ★2).
+ */
 export const moodAndEnergyRoute = async (
   fastify: FastifyInstance,
   _opts: FastifyPluginOptions
@@ -45,15 +46,6 @@ export const moodAndEnergyRoute = async (
             type: 'object',
             properties: {
               interpretation: { type: 'string' },
-              tarotDaily: {
-                type: 'object',
-                properties: {
-                  used: { type: 'number' },
-                  limit: { type: 'number' },
-                  day: { type: 'string' },
-                },
-              },
-              spreadCredits: { type: 'number' },
             },
           },
         },
@@ -70,42 +62,15 @@ export const moodAndEnergyRoute = async (
 
       const { params, card, language } = request.body;
 
-      const slot = await tryConsumeSpreadSlot(user.id);
-      if (!slot.ok) {
-        return reply.status(429).send({
-          code: 'daily_limit_reached',
-          message: 'Daily tarot spread limit reached',
-          tarotDaily: {
-            used: slot.used,
-            limit: slot.limit,
-            day: slot.day,
-          },
-          spreadCredits: slot.spreadCredits,
-        });
-      }
-
       try {
         const interpretation = await generateMoodAndEnergyInterpretation({
           params,
           card,
           language,
         });
-        return reply.send({
-          ...interpretation,
-          tarotDaily: {
-            used: slot.used,
-            limit: slot.limit,
-            day: slot.day,
-          },
-          spreadCredits: slot.spreadCredits,
-        });
+        return reply.send(interpretation);
       } catch (error) {
         request.log.error(error);
-        try {
-          await refundSpreadSlot(user.id, slot.source);
-        } catch (refundError) {
-          request.log.error(refundError);
-        }
 
         if (error instanceof OpenAiProviderError) {
           return reply.status(error.httpStatus).send({

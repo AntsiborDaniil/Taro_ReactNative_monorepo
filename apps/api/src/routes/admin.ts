@@ -17,6 +17,10 @@ import {
   updateAdminUser,
 } from '../services/adminService';
 import { getAcquisitionSummary } from '../services/acquisitionService';
+import {
+  sendTelegramBroadcastAdmin,
+  sendTelegramNudgeToUserAdmin,
+} from '../services/dailyFreeNotifyService';
 
 function sendList(
   reply: FastifyReply,
@@ -231,5 +235,42 @@ export const adminRoute = async (
       return reply.status(404).send({ message: 'Payment not found' });
     }
     return reply.send({ ...row, id: row.invoice_id });
+  });
+
+  fastify.post<{
+    Body: { scope?: string; user_id?: string };
+  }>('/admin/notify/telegram', async (request, reply) => {
+    const actor = await requireAdmin(request, reply);
+    if (!actor) {
+      return;
+    }
+
+    const scope = request.body?.scope === 'all' ? 'all' : 'user';
+    const userId =
+      typeof request.body?.user_id === 'string' ? request.body.user_id.trim() : '';
+
+    if (scope === 'user') {
+      if (!userId) {
+        return reply.status(400).send({ message: 'user_id is required for scope=user' });
+      }
+      try {
+        const result = await sendTelegramNudgeToUserAdmin(userId);
+        if (!result.sent) {
+          return reply.status(400).send({ message: result.reason });
+        }
+        return reply.status(200).send({ scope: 'user', user_id: userId, sent: 1 });
+      } catch (error) {
+        request.log.error(error);
+        return reply.status(500).send({ message: 'Failed to send Telegram notify' });
+      }
+    }
+
+    try {
+      const result = await sendTelegramBroadcastAdmin();
+      return reply.status(200).send({ scope: 'all', ...result });
+    } catch (error) {
+      request.log.error(error);
+      return reply.status(500).send({ message: 'Failed to broadcast Telegram notify' });
+    }
   });
 };

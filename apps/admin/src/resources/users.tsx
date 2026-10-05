@@ -27,6 +27,7 @@ import Typography from '@mui/material/Typography';
 import StyleIcon from '@mui/icons-material/Style';
 import { adminHeaders, getApiBase } from '../auth';
 import { useIsMobile } from '../components/useIsMobile';
+import { TelegramUserNotifyButton } from '../components/TelegramNotifyButtons';
 
 const roleChoices = [
   { id: 'user', name: 'user' },
@@ -166,6 +167,7 @@ export function UserList() {
 function UserShowActions() {
   return (
     <TopToolbar>
+      <TelegramUserNotifyButton />
       <EditButton />
     </TopToolbar>
   );
@@ -205,7 +207,9 @@ export function UserShow() {
         <NumberField source="daily_used" label="Дневных слотов (последний день)" />
         <TextField source="daily_day" label="День учёта лимита" emptyText="—" />
         <DateField source="created_at" showTime label="Создан" />
+        <DateField source="last_seen_at" showTime label="Mini App (последний визит)" emptyText="—" />
         <UserSpreadsLink />
+        <TelegramUserNotifyButton />
       </SimpleShowLayout>
     </Show>
   );

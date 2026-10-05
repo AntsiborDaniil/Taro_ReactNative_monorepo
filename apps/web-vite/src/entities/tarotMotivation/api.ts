@@ -24,14 +24,12 @@ export type GenerateMotivationErrorBody = {
 /**
  * Перенос useMotivation().getAIMotivation на RTK Query — POST /api/motivation/:key
  * (1-в-1 getTarotAiApiBaseUrl() на web: тот же origin, значит тот же baseApi).
- * Тратит дневной лимит/кредит как /api/interpret (429 code:'daily_limit_reached'),
- * поэтому invalidatesTags:['User'] — обновляем квоту в бейдже после списания.
+ * Mood/habits не списывают дневной слот расклада (в отличие от /api/interpret).
  */
 export const motivationApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     generateMotivation: build.mutation<GenerateMotivationResponse, { key: MotivationKey; body: GenerateMotivationBody }>({
       query: ({ key, body }) => ({ url: `/api/motivation/${key}`, method: 'POST', body }),
-      invalidatesTags: ['User'],
     }),
   }),
 });

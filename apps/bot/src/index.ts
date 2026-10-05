@@ -110,10 +110,18 @@ async function configureUserMenuButton(
   }
 }
 
+const replyKeyboardHint: Record<BotLang, string> = {
+  ru: 'Быстрые кнопки внизу 👇',
+  en: 'Quick buttons below 👇',
+};
+
 async function sendWelcome(ctx: Context, lang: BotLang): Promise<void> {
   await configureUserMenuButton(ctx, lang);
   await ctx.reply(welcomeText[lang], {
     parse_mode: 'Markdown',
+    reply_markup: openMiniAppInlineKeyboard(lang),
+  });
+  await ctx.reply(replyKeyboardHint[lang], {
     reply_markup: mainReplyKeyboard(lang),
   });
 }
@@ -337,7 +345,7 @@ async function main(): Promise<void> {
     }
   };
 
-  // Первый прогон ~30с после старта, далее каждый час.
+  // Nudge: не заходили в Mini App ≥2 дней (МСK). Первый прогон ~30с, далее каждый час.
   setTimeout(() => {
     void runDailyFreeJob();
   }, 30_000);

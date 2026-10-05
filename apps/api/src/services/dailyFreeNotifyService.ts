@@ -95,6 +95,26 @@ export function startOfMoscowDayIso(day: string): string {
   return new Date(`${day}T00:00:00+03:00`).toISOString();
 }
 
+/** Календарная дата YYYY-MM-DD (MSK) со сдвигом на deltaDays. */
+export function moscowCalendarDayOffset(deltaDays: number, fromDay?: string): string {
+  const base = fromDay ?? moscowToday();
+  const anchor = new Date(`${base}T12:00:00+03:00`).getTime() + deltaDays * 86_400_000;
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: MOSCOW_TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date(anchor));
+}
+
+/**
+ * Порог last_seen для «не заходил 2 дня»: активности не было с начала вчерашних суток (МСК).
+ */
+export function inactivityLastSeenThresholdIso(referenceDay?: string): string {
+  const yesterday = moscowCalendarDayOffset(-1, referenceDay);
+  return startOfMoscowDayIso(yesterday);
+}
+
 function resolveLang(_row?: ProfileNudgeRow): NotifyLang {
   // На профиле языка нет — по умолчанию RU.
   return 'ru';
@@ -132,8 +152,28 @@ export async function touchLastSeen(userId: string): Promise<void> {
   }
 }
 
+function paidCreditsOf(row: ProfileNudgeRow): number {
+  return typeof row.spread_credits === 'number' && Number.isFinite(row.spread_credits)
+    ? Math.max(0, Math.floor(row.spread_credits))
+    : 0;
+}
+
+function nudgeTextForProfile(
+  row: ProfileNudgeRow,
+  usedToday: number,
+  limit: number,
+): string | null {
+  const paidCredits = paidCreditsOf(row);
+  const freeAvailable = usedToday < limit;
+  if (!freeAvailable && paidCredits <= 0) {
+    return null;
+  }
+  const lang = resolveLang(row);
+  return paidCredits > 0 ? DAILY_ENGAGE[lang] : DAILY_FREE_RENEWED[lang];
+}
+
 /**
- * Напоминания тем, кто не заходил сегодня (МСК):
+ * Напоминания тем, кто не заходил в Mini App ≥2 календарных дня (МСK):
  * — нет платных зарядов + бесплатный слот свободен → «заряд обновился» + погадаем;
  * — есть платные заряды → мягкое «погадаем сегодня?» (без про бесплатный слот);
  * — нет платных и слот уже потрачен → не шлём.
@@ -145,7 +185,7 @@ export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
 
   const today = moscowToday();
   const usageDay = utcToday();
-  const dayStartIso = startOfMoscowDayIso(today);
+  const inactivitySinceIso = inactivityLastSeenThresholdIso(today);
   const limit = getTarotDailyLimit();
   const admin = getSupabaseAdmin();
 
@@ -154,7 +194,7 @@ export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
     .select('id, telegram_id, daily_free_nudge_sent_on, last_seen_at, spread_credits')
     .not('telegram_id', 'is', null)
     .or(`daily_free_nudge_sent_on.is.null,daily_free_nudge_sent_on.lt.${today}`)
-    .or(`last_seen_at.is.null,last_seen_at.lt.${dayStartIso}`);
+    .or(`last_seen_at.is.null,last_seen_at.lt.${inactivitySinceIso}`);
 
   if (error) {
     throw error;
@@ -197,14 +237,8 @@ export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
 
   for (const row of candidates) {
     const used = usageByUser.get(row.id) ?? 0;
-    const paidCredits =
-      typeof row.spread_credits === 'number' && Number.isFinite(row.spread_credits)
-        ? Math.max(0, Math.floor(row.spread_credits))
-        : 0;
-    const freeAvailable = used < limit;
-
-    // Без платных и бесплатный слот уже съеден — нечего предлагать.
-    if (!freeAvailable && paidCredits <= 0) {
+    const text = nudgeTextForProfile(row, used, limit);
+    if (!text) {
       skipped += 1;
       continue;
     }
@@ -216,9 +250,6 @@ export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
     }
 
     const lang = resolveLang(row);
-    // Платные есть → только «погадаем»; иначе (бесплатный слот свободен) — про обновление заряда.
-    const text =
-      paidCredits > 0 ? DAILY_ENGAGE[lang] : DAILY_FREE_RENEWED[lang];
 
     try {
       await sendTelegramMessage({
@@ -327,4 +358,118 @@ export async function runBroadcastDailyFreeOnce(): Promise<BroadcastDailyFreeRes
   }
 
   return { alreadyDone: false, sent, failed };
+}
+
+export type AdminTelegramNotifyResult = {
+  sent: number;
+  skipped: number;
+  failed: number;
+};
+
+/** Ручная отправка nudge одному пользователю (из админки), без проверки last_seen. */
+export async function sendTelegramNudgeToUserAdmin(
+  userId: string,
+): Promise<{ sent: true } | { sent: false; reason: string }> {
+  if (useMemoryBackend()) {
+    return { sent: false, reason: 'Notify requires Supabase' };
+  }
+
+  const admin = getSupabaseAdmin();
+  const usageDay = utcToday();
+  const limit = getTarotDailyLimit();
+
+  const { data, error } = await admin
+    .from('profiles')
+    .select('id, telegram_id, daily_free_nudge_sent_on, last_seen_at, spread_credits')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  const row = data as ProfileNudgeRow | null;
+  if (!row) {
+    return { sent: false, reason: 'User not found' };
+  }
+
+  const chatId = Number(row.telegram_id);
+  if (!Number.isFinite(chatId) || chatId <= 0) {
+    return { sent: false, reason: 'No Telegram ID' };
+  }
+
+  const { data: usageRow, error: usageError } = await admin
+    .from('tarot_daily_usage')
+    .select('count')
+    .eq('user_id', userId)
+    .eq('day', usageDay)
+    .maybeSingle();
+
+  if (usageError) {
+    throw usageError;
+  }
+
+  const used =
+    typeof usageRow?.count === 'number' && Number.isFinite(usageRow.count)
+      ? usageRow.count
+      : 0;
+  const text = nudgeTextForProfile(row, used, limit);
+  if (!text) {
+    return { sent: false, reason: 'No free slot and no paid credits' };
+  }
+
+  const lang = resolveLang(row);
+  await sendTelegramMessage({
+    chatId,
+    text,
+    replyMarkup: webAppKeyboard(lang),
+  });
+
+  return { sent: true };
+}
+
+/** Ручная рассылка «бесплатный расклад» всем с telegram_id (из админки). */
+export async function sendTelegramBroadcastAdmin(): Promise<AdminTelegramNotifyResult> {
+  if (useMemoryBackend()) {
+    return { sent: 0, skipped: 0, failed: 0 };
+  }
+
+  const admin = getSupabaseAdmin();
+  const { data: profiles, error: profilesError } = await admin
+    .from('profiles')
+    .select('id, telegram_id')
+    .not('telegram_id', 'is', null);
+
+  if (profilesError) {
+    throw profilesError;
+  }
+
+  let sent = 0;
+  let failed = 0;
+  let skipped = 0;
+  const lang: NotifyLang = 'ru';
+
+  for (const row of profiles ?? []) {
+    const chatId = Number(row.telegram_id);
+    if (!Number.isFinite(chatId) || chatId <= 0) {
+      skipped += 1;
+      continue;
+    }
+
+    try {
+      await sendTelegramMessage({
+        chatId,
+        text: DAILY_FREE_BROADCAST[lang],
+        replyMarkup: webAppKeyboard(lang),
+      });
+      sent += 1;
+    } catch (sendError) {
+      failed += 1;
+      console.warn('[dailyFreeNotify] admin broadcast send failed:', sendError);
+    }
+
+    await sleep(FLOOD_DELAY_MS);
+  }
+
+  return { sent, skipped, failed };
 }

@@ -11,6 +11,7 @@ import StyleIcon from '@mui/icons-material/Style';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import { adminHeaders, getApiBase } from './auth';
+import { TelegramBroadcastButton } from './components/TelegramNotifyButtons';
 
 type AcquisitionStats = {
   total: number;
@@ -78,6 +79,10 @@ export function Dashboard() {
         Пользователи, расклады с уточнениями, поддержка и оплаты. На узком экране списки
         переключаются в карточки.
       </Typography>
+
+      <Box sx={{ mb: 2 }}>
+        <TelegramBroadcastButton />
+      </Box>
 
       {stats ? (
         <Card sx={{ mb: 2, bgcolor: 'background.paper' }}>
