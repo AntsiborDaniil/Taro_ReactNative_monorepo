@@ -345,7 +345,7 @@ async function main(): Promise<void> {
     }
   };
 
-  // Nudge: не заходили в Mini App ≥2 дней (МСK). Первый прогон ~30с, далее каждый час.
+  // Nudge: бесплатный слот снова доступен (UTC-сутки). Первый прогон ~30с, далее каждый час.
   setTimeout(() => {
     void runDailyFreeJob();
   }, 30_000);

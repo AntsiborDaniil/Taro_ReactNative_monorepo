@@ -87,8 +87,8 @@ export const sharedReadingText: Record<BotLang, string> = {
 Tap the button below to open it in the app.`,
 };
 
-/** Nudge в Telegram: не заходили в Mini App ≥2 календарных дня (МСК). */
-/** Бесплатный слот обновился, платных зарядов нет (dailyFreeAvailableText в API = DAILY_FREE_RENEWED). */
+/** Nudge в Telegram: бесплатный дневной слот снова доступен (UTC-сутки). */
+/** Бесплатный слот обновился (dailyFreeAvailableText в API = DAILY_FREE_RENEWED). */
 export const dailyFreeAvailableText: Record<BotLang, string> = {
   ru: `Погадаем сегодня?
 

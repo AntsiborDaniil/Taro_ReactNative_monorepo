@@ -27,7 +27,7 @@ async function postInternalNotify<T>(path: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-/** Вызов API: ежедневные nudge тем, кто не открывал приложение сегодня. */
+/** Вызов API: nudge тем, у кого сегодня снова доступен бесплатный слот. */
 export function triggerDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
   return postInternalNotify<DailyFreeNudgeResult>(
     '/api/internal/notify/daily-free',

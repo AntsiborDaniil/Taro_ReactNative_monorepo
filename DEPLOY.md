@@ -227,6 +227,6 @@ pnpm dev:web
 | `PORT` | health HTTP (по умолчанию 8080) |
 | `BROADCAST_DAILY_FREE_ONCE` | `1` — **один раз** после деплоя: broadcast всем с `telegram_id`, что бесплатные дневные расклады доступны. После успешного прогона убрать переменную и перезапустить. Идемпотентность: ключ `broadcast_daily_free_v1` в `bot_notify_state`. |
 
-Ежедневные nudge («бесплатный слот снова доступен») бот дергает сам: первый вызов ~30 с после старта, далее каждый час → `POST /api/internal/notify/daily-free` (заголовок `X-Support-Secret` = bot token). Отдельный cron на Timeweb не нужен.
+Ежедневные nudge («бесплатный слот снова доступен» после смены UTC-суток) бот дергает сам: первый вызов ~30 с после старта, далее каждый час → `POST /api/internal/notify/daily-free` (заголовок `X-Support-Secret` = bot token). Отдельный cron на Timeweb не нужен. Шлётся всем с `telegram_id`, у кого слот ещё не потрачен и кого ещё не пинговали в этот UTC-день.
 
 На API (Render) должен быть задан тот же `TELEGRAM_BOT_TOKEN` и `WEB_APP_URL` (для deep-link кнопок).

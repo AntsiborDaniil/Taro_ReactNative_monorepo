@@ -6,7 +6,6 @@ import {
   sendTelegramMessage,
 } from '../lib/telegramNotify';
 
-const MOSCOW_TZ = 'Europe/Moscow';
 const FLOOD_DELAY_MS = 45;
 const BROADCAST_STATE_KEY = 'broadcast_daily_free_v1';
 
@@ -75,44 +74,9 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** Календарная дата YYYY-MM-DD в Europe/Moscow. */
-export function moscowToday(): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: MOSCOW_TZ,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date());
-}
-
 /** День слота tarot_daily_usage — как в RPC consume/get (UTC). */
 export function utcToday(): string {
   return new Date().toISOString().slice(0, 10);
-}
-
-/** Начало московских суток (00:00 MSK) как ISO timestamptz. */
-export function startOfMoscowDayIso(day: string): string {
-  return new Date(`${day}T00:00:00+03:00`).toISOString();
-}
-
-/** Календарная дата YYYY-MM-DD (MSK) со сдвигом на deltaDays. */
-export function moscowCalendarDayOffset(deltaDays: number, fromDay?: string): string {
-  const base = fromDay ?? moscowToday();
-  const anchor = new Date(`${base}T12:00:00+03:00`).getTime() + deltaDays * 86_400_000;
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: MOSCOW_TZ,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date(anchor));
-}
-
-/**
- * Порог last_seen для «не заходил 2 дня»: активности не было с начала вчерашних суток (МСК).
- */
-export function inactivityLastSeenThresholdIso(referenceDay?: string): string {
-  const yesterday = moscowCalendarDayOffset(-1, referenceDay);
-  return startOfMoscowDayIso(yesterday);
 }
 
 function resolveLang(_row?: ProfileNudgeRow): NotifyLang {
@@ -173,19 +137,17 @@ function nudgeTextForProfile(
 }
 
 /**
- * Напоминания тем, кто не заходил в Mini App ≥2 календарных дня (МСK):
- * — нет платных зарядов + бесплатный слот свободен → «заряд обновился» + погадаем;
- * — есть платные заряды → мягкое «погадаем сегодня?» (без про бесплатный слот);
- * — нет платных и слот уже потрачен → не шлём.
+ * Как только бесплатный дневной слот снова доступен (новый UTC-день, used < limit):
+ * шлём в Telegram «заряд обновился» + кнопку Mini App.
+ * Не чаще 1 раза на UTC-сутки (`daily_free_nudge_sent_on` = день слота).
+ * Если слот уже потрачен — не шлём (платные заряды сами по себе автонудж не триггерят).
  */
 export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
   if (useMemoryBackend()) {
     return { sent: 0, skipped: 0, failed: 0 };
   }
 
-  const today = moscowToday();
   const usageDay = utcToday();
-  const inactivitySinceIso = inactivityLastSeenThresholdIso(today);
   const limit = getTarotDailyLimit();
   const admin = getSupabaseAdmin();
 
@@ -193,8 +155,9 @@ export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
     .from('profiles')
     .select('id, telegram_id, daily_free_nudge_sent_on, last_seen_at, spread_credits')
     .not('telegram_id', 'is', null)
-    .or(`daily_free_nudge_sent_on.is.null,daily_free_nudge_sent_on.lt.${today}`)
-    .or(`last_seen_at.is.null,last_seen_at.lt.${inactivitySinceIso}`);
+    .or(
+      `daily_free_nudge_sent_on.is.null,daily_free_nudge_sent_on.lt.${usageDay}`,
+    );
 
   if (error) {
     throw error;
@@ -212,7 +175,7 @@ export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
   const chunkSize = 200;
   for (let i = 0; i < userIds.length; i += chunkSize) {
     const chunk = userIds.slice(i, i + chunkSize);
-    // day в tarot_daily_usage — UTC (как consume_tarot_daily_slot_for_user), не МСК.
+    // day в tarot_daily_usage — UTC (как consume_tarot_daily_slot_for_user).
     const { data: usageRows, error: usageError } = await admin
       .from('tarot_daily_usage')
       .select('user_id, count')
@@ -237,8 +200,8 @@ export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
 
   for (const row of candidates) {
     const used = usageByUser.get(row.id) ?? 0;
-    const text = nudgeTextForProfile(row, used, limit);
-    if (!text) {
+    const freeAvailable = used < limit;
+    if (!freeAvailable) {
       skipped += 1;
       continue;
     }
@@ -250,6 +213,7 @@ export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
     }
 
     const lang = resolveLang(row);
+    const text = DAILY_FREE_RENEWED[lang];
 
     try {
       await sendTelegramMessage({
@@ -260,7 +224,7 @@ export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
 
       const { error: markError } = await admin
         .from('profiles')
-        .update({ daily_free_nudge_sent_on: today })
+        .update({ daily_free_nudge_sent_on: usageDay })
         .eq('id', row.id);
 
       if (markError) {
