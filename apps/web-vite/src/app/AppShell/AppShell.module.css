@@ -20,10 +20,25 @@
     var(--bottom-nav-height) + var(--bottom-nav-float-gap) + var(--safe-bottom)
   );
   box-sizing: border-box;
+  transition: padding-bottom var(--ds-dur-block) var(--ds-ease);
+}
+
+.contentNavHidden {
+  padding-bottom: var(--safe-bottom);
 }
 
 @media (min-width: 900px) {
   .content {
     padding-bottom: var(--safe-bottom);
+  }
+
+  .contentNavHidden {
+    padding-bottom: var(--safe-bottom);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content {
+    transition: none;
   }
 }

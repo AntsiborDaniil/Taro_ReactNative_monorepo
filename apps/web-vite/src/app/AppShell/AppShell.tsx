@@ -112,16 +112,24 @@ export function AppShell(): ReactElement {
     });
   }, [isError, isAuthenticated, refetch]);
 
+  const { pathname } = useLocation();
+  // Карусель выбора карт: таббар прячем с анимацией, чтобы не перекрывал CTA.
+  const hideBottomNav = pathname === '/reading' || pathname.startsWith('/reading/');
+
   return (
     <div className={styles.shell}>
       <NavRail />
-      <main className={styles.content}>
+      <main
+        className={
+          hideBottomNav ? `${styles.content} ${styles.contentNavHidden}` : styles.content
+        }
+      >
         {/* Код страницы грузится лениво — на медленной сети показываем скелет, навигация остаётся. */}
         <Suspense fallback={<PageSkeleton />}>
           <Outlet />
         </Suspense>
       </main>
-      <BottomTabBar />
+      <BottomTabBar hidden={hideBottomNav} />
       <ModalRoot />
       <Toaster />
     </div>

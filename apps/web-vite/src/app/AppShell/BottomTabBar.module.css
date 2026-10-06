@@ -21,6 +21,22 @@
   box-shadow:
     0 10px 28px color-mix(in srgb, var(--ds-ground-900) 45%, transparent),
     inset 0 1px 0 color-mix(in srgb, var(--ds-ink-50) 10%, transparent);
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+  transition:
+    transform var(--ds-dur-block) var(--ds-ease),
+    opacity var(--ds-dur-block) var(--ds-ease);
+}
+
+/* Карусель выбора карт /reading — таббар уезжает вниз. */
+.barHidden {
+  transform: translate3d(
+    0,
+    calc(100% + var(--safe-bottom) + var(--bottom-nav-float-gap) + 24px),
+    0
+  );
+  opacity: 0;
+  pointer-events: none;
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -121,6 +137,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .bar,
   .indicatorAnimate,
   .item,
   .icon {

@@ -18,12 +18,17 @@ type IndicatorBox = {
 
 const HIDDEN: IndicatorBox = { x: 0, width: 0, visible: false };
 
+type BottomTabBarProps = {
+  /** Скрыть с анимацией (карусель выбора карт на /reading). */
+  hidden?: boolean;
+};
+
 /**
  * Мобильная навигация <900px: плавающая стеклянная капсула как Telegram tapbar.
  * Активный пункт — pill-подложка, которая плавно скользит между вкладками.
  * На ≥900px скрыта, там NavRail.
  */
-export function BottomTabBar(): ReactElement {
+export function BottomTabBar({ hidden = false }: BottomTabBarProps): ReactElement {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -82,7 +87,13 @@ export function BottomTabBar(): ReactElement {
     : undefined;
 
   return (
-    <nav ref={barRef} className={styles.bar} aria-label={t('nav.landmark')}>
+    <nav
+      ref={barRef}
+      className={hidden ? `${styles.bar} ${styles.barHidden}` : styles.bar}
+      aria-label={t('nav.landmark')}
+      aria-hidden={hidden || undefined}
+      inert={hidden || undefined}
+    >
       <span
         className={
           animate
@@ -106,6 +117,7 @@ export function BottomTabBar(): ReactElement {
             className={active ? `${styles.item} ${styles.itemActive}` : styles.item}
             aria-current={active ? 'page' : undefined}
             aria-label={label}
+            tabIndex={hidden ? -1 : undefined}
             onClick={() => navigate(to)}
           >
             <Icon className={styles.icon} />

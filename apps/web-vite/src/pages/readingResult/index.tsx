@@ -17,16 +17,12 @@ import {
   isCloudSpread,
   normalizeFollowUps,
   saveSpreadLocally,
-  setError,
   FOLLOW_UP_MAX,
   setFollowUps,
-  setInterpretation,
   setSpreadMeta,
-  setStatus,
   TarotCardFace,
   useCreateSpreadHistoryMutation,
   useFollowUpSpreadMutation,
-  useInterpretSpreadMutation,
   useUpdateSpreadHistoryMutation,
   type InterpretErrorBody,
   type InterpretResponse,
@@ -38,14 +34,11 @@ import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { AnalyticAction, track } from '@shared/lib/analytics';
 import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { ensureI18nNamespaces } from '@shared/i18n';
-import { isWebAuthPending, shouldPromptWebSignIn } from '@shared/lib/webAuthGate';
-import { isRtkNetworkError, rtkErrorStatus } from '@shared/lib/rtkQueryError';
+import { isRtkNetworkError } from '@shared/lib/rtkQueryError';
 import { buildSharedReadingUrl, isShareableReadingUid } from '@shared/lib/sharedReadingLink';
 import { copyTextToClipboard } from '@shared/lib/web/copyTextToClipboard';
 import { isTelegramMiniApp } from '@shared/lib/web/telegramWebApp';
-import { maybeOfferAddToHomeScreen } from '@features/telegramHomeScreen';
 import {
-  AILoader,
   Button,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -224,19 +217,15 @@ export default function ReadingResultPage(): ReactElement {
   const spread = useAppSelector((state) => state.spread.selectedSpread);
   /** Открыт по шаренной ссылке: уточнения читаем, задавать новые нельзя. */
   const openedAsShared = useAppSelector((state) => state.spread.openedAsShared);
-  const status = useAppSelector((state) => state.spread.status);
-  const errorCode = useAppSelector((state) => state.spread.errorCode);
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
-  const sessionLoading = useAppSelector((state) => state.user.sessionLoading);
   const spreadCredits = useAppSelector((state) => state.user.spreadCredits ?? 0);
 
-  const [interpretSpread, { isLoading: isInterpreting }] = useInterpretSpreadMutation();
   const [followUpSpread, { isLoading: isFollowUpLoading }] = useFollowUpSpreadMutation();
   const [createSpreadHistory] = useCreateSpreadHistoryMutation();
   const [updateSpreadHistory] = useUpdateSpreadHistoryMutation();
-  const attempted = useRef(false);
   /** Фоновое сохранение после интерпретации — «Поделиться» ждёт именно его uid. */
   const persistPromise = useRef<Promise<TSpread | null> | null>(null);
+  const persistStartedFor = useRef<string | null>(null);
   const [cardNsReady, setCardNsReady] = useState(false);
   const [activeCard, setActiveCard] = useState(0);
   const [activeFollowUp, setActiveFollowUp] = useState(0);
@@ -276,9 +265,20 @@ export default function ReadingResultPage(): ReactElement {
   }, [spread, interpretation, canAsk, followUpLeft]);
 
   useEffect(() => {
-    if (!spread) navigate('/spreads', { replace: true });
-    else if (!isComplete) navigate('/reading', { replace: true });
-  }, [spread, isComplete, navigate]);
+    if (!spread) {
+      navigate('/spreads', { replace: true });
+      return;
+    }
+    if (!isComplete) {
+      navigate('/reading', { replace: true });
+      return;
+    }
+    // Толкование делается на /reading до перехода — без текста сюда не пускаем
+    // (нет зарядов / сеть / ошибка AI остаются на карусели с модалкой).
+    if (!interpretation) {
+      navigate('/reading', { replace: true });
+    }
+  }, [spread, isComplete, interpretation, navigate]);
 
   // Другой расклад (история, ссылка) — читаем снова с первой карты.
   useEffect(() => {
@@ -286,6 +286,8 @@ export default function ReadingResultPage(): ReactElement {
     setActiveFollowUp(0);
     setFollowUpQuestion('');
     followUpOpenTrackedFor.current = null;
+    persistStartedFor.current = null;
+    persistPromise.current = null;
   }, [spread?.id]);
 
   /** Облачная запись (POST/PATCH /api/spreads) — только она даёт uid для ссылки. */
@@ -310,68 +312,15 @@ export default function ReadingResultPage(): ReactElement {
     return saved;
   };
 
-  const handleInterpret = async () => {
-    if (!spread) return;
-    if (!cardNsReady) await ensureI18nNamespaces('card');
-    // Сессия ещё грузится — не помечаем attempted, эффект повторит запуск.
-    if (isWebAuthPending(sessionLoading)) return;
-
-    if (shouldPromptWebSignIn(isAuthenticated, sessionLoading)) {
-      toast.info(t('core:ai.errorProvider'));
-      dispatch(setError('auth_required'));
-      return;
-    }
-
-    const body = getAIRequestBody({ spread, t, language: i18n.language });
-    if (!body) {
-      // Без тела запроса толкования не будет — страница не должна «висеть» под AILoader.
-      dispatch(setError('failed'));
-      return;
-    }
-
-    attempted.current = true;
-    dispatch(setStatus('interpreting'));
-    track(AnalyticAction.ClickCompleteSpread, { spread: spread.name });
-
-    try {
-      const result = await interpretSpread(body).unwrap();
-      dispatch(setInterpretation(result.interpretation));
-      track(AnalyticAction.GetAIGeneration, { free: false });
-      reachMetrikaGoal(MetrikaGoal.aiGeneration, { spreadId: spread.id });
-      persistPromise.current = persistSpreadToHistory({ ...spread, interpretation: result.interpretation });
-      // После первой ценности в Mini App — один раз предложить ярлык на домашний экран.
-      void maybeOfferAddToHomeScreen(() => dispatch(openModal({ id: 'add-to-home-screen' })));
-    } catch (err) {
-      const status = rtkErrorStatus(err);
-      const rtkError = err as { status?: number | string; data?: InterpretErrorBody };
-      if (status === 401) {
-        toast.info(t('core:ai.errorProvider'));
-        dispatch(setError('auth_required'));
-        return;
-      }
-      if (status === 429) {
-        // Недостаток бесплатного слота / зарядов — модалка, не «тихий» пропуск.
-        dispatch(openModal({ id: 'daily-limit' }));
-        dispatch(setError('daily_limit'));
-        return;
-      }
-      if (isRtkNetworkError(err)) {
-        dispatch(openModal({ id: 'network-error' }));
-        dispatch(setError('network'));
-        return;
-      }
-      toast.error(t('core:ai.error1'));
-      dispatch(setError(rtkError.data?.code ?? 'failed'));
-    }
-  };
-
-  // Толкование запускается само при первом открытии страницы.
+  // Толкование уже получено на /reading — здесь только сохраняем в историю (для шаринга).
   useEffect(() => {
-    if (!isComplete || interpretation || !cardNsReady || attempted.current || errorCode) return;
-    if (isWebAuthPending(sessionLoading)) return;
-    void handleInterpret();
+    if (!spread || !interpretation || openedAsShared) return;
+    const key = `${spread.id}:${interpretation.length}`;
+    if (persistStartedFor.current === key) return;
+    persistStartedFor.current = key;
+    persistPromise.current = persistSpreadToHistory({ ...spread, interpretation });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isComplete, interpretation, cardNsReady, sessionLoading, errorCode]);
+  }, [spread?.id, interpretation, openedAsShared, isAuthenticated]);
 
   const handleFollowUp = async () => {
     // Задавать уточнения может только автор (не читатель шаренной ссылки).
@@ -535,31 +484,12 @@ export default function ReadingResultPage(): ReactElement {
     }
   };
 
-  if (!spread || !isComplete) {
+  if (!spread || !isComplete || !interpretation) {
     return (
       <div className={styles.page}>
         <div className={styles.column}>
           <Header title="" showBack />
         </div>
-      </div>
-    );
-  }
-
-  const isLoading = status === 'interpreting' || isInterpreting;
-  /**
-   * Толкования ещё нет и ошибки не было — ждём AI. Показываем только оверлей:
-   * иначе до старта запроса (загрузка namespace card, ожидание сессии) успевает
-   * мелькнуть «готовая» страница результата с пустым разбором.
-   */
-  const isAwaitingInterpretation = !interpretation && !errorCode;
-
-  if (isAwaitingInterpretation) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.column}>
-          <Header title={t(spread.name)} showBack />
-        </div>
-        <AILoader />
       </div>
     );
   }
@@ -655,39 +585,19 @@ export default function ReadingResultPage(): ReactElement {
             {t('spread:summaryTitle')}
           </Text>
 
-          {isLoading ? (
-            <AILoader />
-          ) : interpretation ? (
-            <div className={styles.paragraphs}>
-              {paragraphs.map((paragraph, index) => (
-                <Text
-                  key={index}
-                  role="body"
-                  tone="ink50"
-                  className={styles.paragraph}
-                  style={{ animationDelay: `${Math.min(index, 4) * 60}ms` }}
-                >
-                  {paragraph}
-                </Text>
-              ))}
-            </div>
-          ) : errorCode ? (
-            <div className={styles.error}>
-              <Text role="body" tone="ink100">
-                {t('core:ai.error1')}
-              </Text>
-              <Button
-                variant="action"
-                fullWidth
-                onClick={() => {
-                  attempted.current = false;
-                  void handleInterpret();
-                }}
+          <div className={styles.paragraphs}>
+            {paragraphs.map((paragraph, index) => (
+              <Text
+                key={index}
+                role="body"
+                tone="ink50"
+                className={styles.paragraph}
+                style={{ animationDelay: `${Math.min(index, 4) * 60}ms` }}
               >
-                {t('core:ai.retry')}
-              </Button>
-            </div>
-          ) : null}
+                {paragraph}
+              </Text>
+            ))}
+          </div>
         </section>
 
         {/* 3. Уточнения — отдельный блок: сначала ответы, потом поле */}
