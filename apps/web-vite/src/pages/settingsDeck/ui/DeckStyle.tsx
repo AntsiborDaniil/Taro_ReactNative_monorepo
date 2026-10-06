@@ -14,10 +14,8 @@ const DECK_STYLES: { id: DeckStyle; labelKey: string }[] = [
 
 /**
  * Перенос apps/web/src/pages/settings/ui/DeckStyle/DeckStyle.tsx — превью
- * карты #0 (Шут) в каждом стиле вместо CardsList (RN-компонент со своей
- * разметкой/лок-состоянием, не переносился). Выбор сразу влияет на
- * TarotCardFace по всему приложению (entities/spread/ui/TarotCardFace читает
- * state.settings напрямую).
+ * карты #0 (Шут) в каждом стиле. Выбор сразу влияет на TarotCardFace
+ * (читает state.settings). Header вне сетки превью; выбор — radiogroup.
  */
 export default function DeckStylePage(): ReactElement {
   const { t } = useTranslation();
@@ -34,26 +32,33 @@ export default function DeckStylePage(): ReactElement {
     <div className={styles.page}>
       <div className={styles.column}>
         <Header title={t('settings:deck.style')} />
-        {DECK_STYLES.map((option) => {
-          const selected = option.id === current;
-          return (
-            <button
-              key={option.id}
-              type="button"
-              className={[styles.item, selected ? styles.itemSelected : ''].filter(Boolean).join(' ')}
-              aria-pressed={selected}
-              onClick={() => handleSelect(option.id)}
-            >
-              <span className={styles.previewWrap}>
-                <TarotCardFace cardId="0" deckStyle={option.id} />
-                {selected ? <CheckIcon width={18} height={18} className={styles.check} /> : null}
-              </span>
-              <Text role="label" as="span" className={styles.label}>
-                {t(option.labelKey)}
-              </Text>
-            </button>
-          );
-        })}
+        <div
+          className={styles.grid}
+          role="radiogroup"
+          aria-label={t('settings:deck.style')}
+        >
+          {DECK_STYLES.map((option) => {
+            const selected = option.id === current;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                className={[styles.item, selected ? styles.itemSelected : ''].filter(Boolean).join(' ')}
+                onClick={() => handleSelect(option.id)}
+              >
+                <span className={styles.previewWrap}>
+                  <TarotCardFace cardId="0" deckStyle={option.id} />
+                  {selected ? <CheckIcon width={18} height={18} className={styles.check} /> : null}
+                </span>
+                <Text role="label" as="span" className={styles.label}>
+                  {t(option.labelKey)}
+                </Text>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
