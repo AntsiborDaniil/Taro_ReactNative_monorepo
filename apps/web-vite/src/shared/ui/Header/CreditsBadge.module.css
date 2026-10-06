@@ -16,6 +16,14 @@
   filter: brightness(1.08);
 }
 
+.rootLoading {
+  opacity: 0.72;
+}
+
+.rootLoading .countBadge {
+  letter-spacing: 0.04em;
+}
+
 .root:focus-visible {
   outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
   outline-offset: 2px;

@@ -69,6 +69,10 @@ const spreadSlice = createSlice({
     },
     setStatus(state, action: PayloadAction<SpreadFlowStatus>) {
       state.status = action.payload;
+      // Новый запрос толкования — убираем прошлую ошибку, иначе UI залипает на error.
+      if (action.payload === 'interpreting') {
+        state.errorCode = null;
+      }
     },
     setError(state, action: PayloadAction<string | null>) {
       state.status = 'error';

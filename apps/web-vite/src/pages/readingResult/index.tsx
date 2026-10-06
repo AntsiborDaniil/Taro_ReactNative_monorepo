@@ -39,6 +39,7 @@ import { AnalyticAction, track } from '@shared/lib/analytics';
 import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { ensureI18nNamespaces } from '@shared/i18n';
 import { isWebAuthPending, shouldPromptWebSignIn } from '@shared/lib/webAuthGate';
+import { isRtkNetworkError, rtkErrorStatus } from '@shared/lib/rtkQueryError';
 import { buildSharedReadingUrl, isShareableReadingUid } from '@shared/lib/sharedReadingLink';
 import { copyTextToClipboard } from '@shared/lib/web/copyTextToClipboard';
 import { isTelegramMiniApp } from '@shared/lib/web/telegramWebApp';
@@ -312,6 +313,7 @@ export default function ReadingResultPage(): ReactElement {
   const handleInterpret = async () => {
     if (!spread) return;
     if (!cardNsReady) await ensureI18nNamespaces('card');
+    // Сессия ещё грузится — не помечаем attempted, эффект повторит запуск.
     if (isWebAuthPending(sessionLoading)) return;
 
     if (shouldPromptWebSignIn(isAuthenticated, sessionLoading)) {
@@ -327,6 +329,7 @@ export default function ReadingResultPage(): ReactElement {
       return;
     }
 
+    attempted.current = true;
     dispatch(setStatus('interpreting'));
     track(AnalyticAction.ClickCompleteSpread, { spread: spread.name });
 
@@ -339,15 +342,22 @@ export default function ReadingResultPage(): ReactElement {
       // После первой ценности в Mini App — один раз предложить ярлык на домашний экран.
       void maybeOfferAddToHomeScreen(() => dispatch(openModal({ id: 'add-to-home-screen' })));
     } catch (err) {
-      const rtkError = err as { status?: number; data?: InterpretErrorBody };
-      if (rtkError.status === 401) {
+      const status = rtkErrorStatus(err);
+      const rtkError = err as { status?: number | string; data?: InterpretErrorBody };
+      if (status === 401) {
         toast.info(t('core:ai.errorProvider'));
         dispatch(setError('auth_required'));
         return;
       }
-      if (rtkError.status === 429) {
+      if (status === 429) {
+        // Недостаток бесплатного слота / зарядов — модалка, не «тихий» пропуск.
         dispatch(openModal({ id: 'daily-limit' }));
         dispatch(setError('daily_limit'));
+        return;
+      }
+      if (isRtkNetworkError(err)) {
+        dispatch(openModal({ id: 'network-error' }));
+        dispatch(setError('network'));
         return;
       }
       toast.error(t('core:ai.error1'));
@@ -357,12 +367,11 @@ export default function ReadingResultPage(): ReactElement {
 
   // Толкование запускается само при первом открытии страницы.
   useEffect(() => {
-    if (!isComplete || interpretation || !cardNsReady || attempted.current) return;
+    if (!isComplete || interpretation || !cardNsReady || attempted.current || errorCode) return;
     if (isWebAuthPending(sessionLoading)) return;
-    attempted.current = true;
     void handleInterpret();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isComplete, interpretation, cardNsReady, sessionLoading]);
+  }, [isComplete, interpretation, cardNsReady, sessionLoading, errorCode]);
 
   const handleFollowUp = async () => {
     // Задавать уточнения может только автор (не читатель шаренной ссылки).
@@ -404,6 +413,10 @@ export default function ReadingResultPage(): ReactElement {
       if (rtkError.status === 429) {
         toast.info(t('spread:followUp.needCredits'));
         dispatch(openModal({ id: 'buy-credits' }));
+        return;
+      }
+      if (isRtkNetworkError(err)) {
+        dispatch(openModal({ id: 'network-error' }));
         return;
       }
       toast.error(t('core:ai.error1'));
@@ -663,7 +676,14 @@ export default function ReadingResultPage(): ReactElement {
               <Text role="body" tone="ink100">
                 {t('core:ai.error1')}
               </Text>
-              <Button variant="action" fullWidth onClick={handleInterpret}>
+              <Button
+                variant="action"
+                fullWidth
+                onClick={() => {
+                  attempted.current = false;
+                  void handleInterpret();
+                }}
+              >
                 {t('core:ai.retry')}
               </Button>
             </div>

@@ -53,6 +53,22 @@ test('dev quick-login и повторный /me заполняют userSlice', a
   expect(user.sessionLoading).toBe(false);
 });
 
+test('сетевой сбой /me не разлогинивает и не обнуляет заряды', async () => {
+  await loginDemo();
+  await store.dispatch(userApi.endpoints.authMe.initiate(undefined, { forceRefetch: true })).unwrap();
+
+  server.use(http.get('*/api/auth/me', () => HttpResponse.error()));
+
+  const failed = store.dispatch(userApi.endpoints.authMe.initiate(undefined, { forceRefetch: true }));
+  await expect(failed.unwrap()).rejects.toBeTruthy();
+  failed.unsubscribe();
+
+  const user = store.getState().user;
+  expect(user.isAuthenticated).toBe(true);
+  expect(user.spreadCredits).toBe(3);
+  expect(user.sessionLoading).toBe(false);
+});
+
 test('интерпретация расклада возвращает текст', async () => {
   await loginDemo();
   const result = await store.dispatch(spreadApi.endpoints.interpretSpread.initiate(interpretBody)).unwrap();

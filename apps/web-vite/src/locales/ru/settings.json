@@ -40,6 +40,7 @@
   "credits.buy.balance": "Сейчас зарядов: {{count}}",
   "credits.badge.a11yDaily": "Осталось бесплатных раскладов сегодня: {{count}}. Нажмите, чтобы пополнить заряды",
   "credits.badge.a11yCredits": "Заряды раскладов: {{count}}. Нажмите, чтобы пополнить",
+  "credits.badge.a11yLoading": "Загрузка зарядов",
   "credits.badge.a11yUnlimited": "Безлимитные расклады",
   "credits.badge.a11y": "Заряды раскладов: {{count}}. Нажмите, чтобы пополнить",
 

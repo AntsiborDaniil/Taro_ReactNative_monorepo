@@ -15,6 +15,9 @@
   "ai.error2": "Let the stars align and try again.",
   "ai.errorProvider": "Interpretation service is temporarily unavailable.",
   "ai.retry": "Try again",
+  "ai.network.title": "No connection",
+  "ai.network.body": "Could not get the reading. Check your internet, then tap Retry on the screen.",
+  "ai.network.button": "Got it",
 
   "ai.copy.success": "Copied to clipboard",
   "ai.copy.shareSuccess": "Interpretation link copied",

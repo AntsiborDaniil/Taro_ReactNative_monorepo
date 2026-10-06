@@ -40,6 +40,7 @@
   "credits.buy.balance": "Charges now: {{count}}",
   "credits.badge.a11yDaily": "Free spreads left today: {{count}}. Tap to top up charges",
   "credits.badge.a11yCredits": "Spread charges: {{count}}. Tap to top up",
+  "credits.badge.a11yLoading": "Loading charges",
   "credits.badge.a11yUnlimited": "Unlimited spreads",
   "credits.badge.a11y": "Spread charges: {{count}}. Tap to top up",
 

@@ -23,20 +23,29 @@ export function CreditsBadge(): ReactElement | null {
   }
 
   const credits = spreadCredits ?? 0;
-  const dailyRemaining = tarotDaily != null ? Math.max(0, tarotDaily.limit - tarotDaily.used) : 0;
+  const quotaReady = tarotDaily != null;
+  const dailyRemaining = quotaReady ? Math.max(0, tarotDaily.limit - tarotDaily.used) : 0;
   const remaining = dailyRemaining + credits;
-  const countLabel = remaining > 99 ? '99+' : String(Math.max(0, Math.floor(remaining)));
-  const ariaLabel =
-    credits > 0
+  // Пока /me не отдал tarotDaily — не рисуем ложный «0».
+  const loading = !quotaReady;
+  const countLabel = loading
+    ? '…'
+    : remaining > 99
+      ? '99+'
+      : String(Math.max(0, Math.floor(remaining)));
+  const ariaLabel = loading
+    ? t('credits.badge.a11yLoading')
+    : credits > 0
       ? t('credits.badge.a11yCredits', { count: remaining })
       : t('credits.badge.a11yDaily', { count: remaining });
 
   return (
     <button
       type="button"
-      className={styles.root}
+      className={[styles.root, loading ? styles.rootLoading : ''].filter(Boolean).join(' ')}
       onClick={() => dispatch(openModal({ id: 'buy-credits' }))}
       aria-label={ariaLabel}
+      aria-busy={loading || undefined}
     >
       <LightningIcon width={20} height={20} className={styles.bolt} />
       <span className={`${styles.badge} ${styles.countBadge}`}>{countLabel}</span>

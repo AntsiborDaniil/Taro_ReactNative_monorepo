@@ -38,13 +38,18 @@ export function AppShell(): ReactElement {
   useScrollToTopOnNavigate();
   // Сессия cookie-based (tarot_session): грузим её один раз на верхнем уровне,
   // entities/user/model/userSlice заполняется через extraReducers по authMe.
-  const { isError, refetch } = useAuthMeQuery();
+  // refetchOnReconnect: после обрыва сети бейдж зарядов снова подтянет /me.
+  const { isError, refetch } = useAuthMeQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
   const quickLoginAttempted = useRef(false);
   const telegramAuthAttempted = useRef(false);
 
   // Метрика: оплата Lava прошла (возврат с ?lava=success или заряды выросли после чекаута).
   const spreadCredits = useAppSelector((state) => state.user.spreadCredits);
   const sessionLoading = useAppSelector((state) => state.user.sessionLoading);
+  const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
   useEffect(() => {
     if (!sessionLoading) trackMetrikaPaymentSuccessIfNeeded(spreadCredits ?? undefined);
   }, [spreadCredits, sessionLoading]);
@@ -82,7 +87,8 @@ export function AppShell(): ReactElement {
   // shared/lib/web/telegramWebApp.ts) — пробуем раньше dev quick-login, когда
   // бридж Telegram обнаружен.
   useEffect(() => {
-    if (!isError) return;
+    // Сеть/5xx на /me не должны запускать повторный telegram/dev login, если сессия уже есть.
+    if (!isError || isAuthenticated) return;
 
     if (isLikelyTelegramMiniApp() && !telegramAuthAttempted.current) {
       telegramAuthAttempted.current = true;
@@ -104,7 +110,7 @@ export function AppShell(): ReactElement {
     void tryDevQuickLogin().then((ok) => {
       if (ok) void refetch();
     });
-  }, [isError, refetch]);
+  }, [isError, isAuthenticated, refetch]);
 
   return (
     <div className={styles.shell}>
