@@ -1,6 +1,6 @@
 import { config } from './config';
 
-const TRACKED = new Set(['ig_bio', 'ig_stories', 'yt_shorts', 'other']);
+const TRACKED = new Set(['ig_bio', 'ig_stories', 'yt_shorts', 'tiktok', 'other']);
 
 export function isTrackedStartPayload(payload: string): boolean {
   return TRACKED.has(payload.trim().toLowerCase());

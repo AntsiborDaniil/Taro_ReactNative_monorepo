@@ -90,35 +90,31 @@ Tap the button below to open it in the app.`,
 /** Nudge в Telegram: бесплатный дневной слот снова доступен (UTC-сутки). */
 /** Бесплатный слот обновился (dailyFreeAvailableText в API = DAILY_FREE_RENEWED). */
 export const dailyFreeAvailableText: Record<BotLang, string> = {
-  ru: `Погадаем сегодня?
+  ru: `Какая карта отзовётся тебе сегодня?
 
-Бесплатный расклад снова доступен — дневной заряд обновился. Загляни в приложение.`,
+Карта дня уже ждёт, а ежедневный ⚡ обновился — хватит на расклад с твоим вопросом.`,
 
-  en: `Shall we do a reading today?
+  en: `Which card speaks to you today?
 
-Your free daily spread is back — the free slot has refreshed. Open the app.`,
+Your card of the day is waiting, and your daily ⚡ has refilled — enough for a reading with your own question.`,
 };
 
 /** Есть платные заряды — мягкий хук без про бесплатный слот. */
 export const dailyEngageText: Record<BotLang, string> = {
-  ru: `Погадаем сегодня?
+  ru: `Минута для себя? Одна карта — один вопрос на сегодня.`,
 
-Открой Mindful Tarot — карты уже ждут.`,
-
-  en: `Shall we do a reading today?
-
-Open Mindful Tarot — the cards are waiting.`,
+  en: `A minute for yourself? One card, one question for today.`,
 };
 
 /** Одноразовый broadcast после деплоя: бесплатные дневные расклады доступны. */
 export const dailyFreeBroadcastText: Record<BotLang, string> = {
-  ru: `Погадаем сегодня?
+  ru: `Что тебе важно заметить сегодня?
 
-В Mindful Tarot каждый день есть бесплатный расклад с толкованием — заряд уже обновился.`,
+Карта дня в Mindful Tarot уже ждёт, а ежедневный ⚡ обновился.`,
 
-  en: `Shall we do a reading today?
+  en: `What’s worth noticing today?
 
-Mindful Tarot gives you a free reading every day — your free slot is ready.`,
+Your card of the day in Mindful Tarot is waiting, and your daily ⚡ has refilled.`,
 };
 
 export const lavaPaymentSuccessText: Record<BotLang, string> = {

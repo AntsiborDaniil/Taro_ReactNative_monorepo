@@ -322,26 +322,28 @@ describe('платёжные уведомления', () => {
 
 describe('daily-free уведомления', () => {
   it.each(allLocalized(dailyFreeAvailableText))(
-    'nudge free.%s — погадаем + обновление бесплатного заряда',
+    'nudge free.%s — карта дня + обновившийся ⚡',
     (_lang, text) => {
-      expect(text.toLowerCase()).toMatch(/погадаем|shall we/);
-      expect(text.toLowerCase()).toMatch(/бесплатн|free|обновил|refresh/);
+      expect(text.toLowerCase()).toMatch(/карта дня|card of the day/);
+      expect(text).toContain('⚡');
+      expect(text.toLowerCase()).not.toMatch(/погадаем|shall we/);
     },
   );
 
   it.each(allLocalized(dailyEngageText))(
-    'nudge paid.%s — только погадаем, без про бесплатный слот',
+    'nudge paid.%s — мягкий хук, без про бесплатный слот',
     (_lang, text) => {
-      expect(text.toLowerCase()).toMatch(/погадаем|shall we/);
-      expect(text.toLowerCase()).not.toMatch(/бесплатн|free slot|daily slot/);
+      expect(text.toLowerCase()).toMatch(/карт[аыу]|card/);
+      expect(text.toLowerCase()).not.toMatch(/погадаем|shall we|бесплатн|free slot|daily slot/);
     },
   );
 
   it.each(allLocalized(dailyFreeBroadcastText))(
-    'broadcast.%s — погадаем + бесплатный заряд',
+    'broadcast.%s — карта дня + обновившийся ⚡',
     (_lang, text) => {
-      expect(text.toLowerCase()).toMatch(/погадаем|shall we/);
-      expect(text.toLowerCase()).toMatch(/бесплатн|free/);
+      expect(text.toLowerCase()).toMatch(/карта дня|card of the day/);
+      expect(text).toContain('⚡');
+      expect(text.toLowerCase()).not.toMatch(/погадаем|shall we/);
     },
   );
 });
