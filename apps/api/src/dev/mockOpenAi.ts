@@ -18,7 +18,7 @@ function langIsRu(language: string): boolean {
 
 /** Mock interpret with delay so fullscreen AI loader UI can be reviewed locally. */
 export async function mockGenerateInterpretation(
-  input: TarotSpreadInput & { spread_key?: string }
+  input: TarotSpreadInput & { spread_key?: string; mode?: 'deep' }
 ): Promise<TarotInterpretationOutput> {
   await delay(MOCK_DELAY_MS);
 
@@ -36,18 +36,34 @@ export async function mockGenerateInterpretation(
     ? `${input.positions[0].card} (${input.positions[0].direction})`
     : '—';
 
+  if (key === 'period_weekcard' || key === 'period_monthcard') {
+    const week = key === 'period_weekcard';
+    const ru = langIsRu(input.language);
+    return {
+      interpretation: ru
+        ? `[DEV MOCK] Карта ${card} задаёт тему ${week ? 'недели' : 'месяца'}: меньше спешки, больше внимания к тому, что уже работает.\n\n` +
+          `Сильнее всего это проявится в делах и в отношениях с близкими — замечай, где ты выбираешь по привычке.\n\n` +
+          `Намерение на ${week ? 'неделю' : 'месяц'}: делать одно дело за раз и доводить его до конца.`
+        : `[DEV MOCK] ${card} sets the theme of the ${week ? 'week' : 'month'}: less rush, more attention to what already works.\n\n` +
+          `It shows most at work and with people close to you — notice where you choose out of habit.\n\n` +
+          `Intention for the ${week ? 'week' : 'month'}: one thing at a time, carried through.`,
+    };
+  }
+
   if (isDay) {
     if (langIsRu(input.language)) {
       return {
         interpretation:
           `[DEV MOCK] Сегодня карта ${card} предлагает заметить, где вы действуете на автомате и где можно замедлиться.\n\n` +
-          `До вечера сделайте один маленький жест в эту сторону — и вечером отметьте, что изменилось в ощущении дня.`,
+          `Сильнее всего это звучит в делах и в общении: замечайте моменты, когда отвечаете по привычке, а не по выбору.\n\n` +
+          `Шаг на сегодня: до вечера сделайте один маленький жест в эту сторону — и вечером отметьте, что изменилось в ощущении дня.`,
       };
     }
     return {
       interpretation:
         `[DEV MOCK] Today’s card ${card} invites you to notice where you run on autopilot and where you can slow down.\n\n` +
-        `Before evening, take one small action in that direction — then note what shifted in how the day felt.`,
+        `It sounds strongest at work and in conversations: notice moments when you answer out of habit rather than choice.\n\n` +
+        `Today’s step: before evening, take one small action in that direction — then note what shifted in how the day felt.`,
     };
   }
 
@@ -69,6 +85,34 @@ export async function mockGenerateInterpretation(
         `[DEV MOCK] On “${input.question || '—'}”, card ${card} leans toward moving forward rather than holding back. ` +
         `In the spread (${cards || 'none'}) there is already enough clarity for a step.\n\n` +
         `Answer: Likely yes.`,
+    };
+  }
+
+  if (input.mode === 'deep') {
+    const ru = langIsRu(input.language);
+    const perCard = input.positions
+      .map((p) =>
+        ru
+          ? `Позиция «${p.label || '—'}» — ${p.card} (${p.direction}): здесь карта показывает, что именно в этой точке ситуации просит вашего внимания. Она не приговор, а подсветка того, что уже заметно.`
+          : `Position “${p.label || '—'}” — ${p.card} (${p.direction}): here the card shows what in this part of the situation asks for your attention. It is not a verdict, just a highlight of what is already visible.`
+      )
+      .join('\n\n');
+    return {
+      interpretation: ru
+        ? `[DEV MOCK · ГЛУБОКИЙ РАЗБОР] По вопросу «${input.question || '—'}» расклад отвечает: движение возможно, если перестать ждать идеального момента.\n\n` +
+          `${perCard}\n\n` +
+          `Связи. Первая и последняя карты спорят друг с другом: одна тянет вперёд, другая просит сперва признать усталость. Вторая связка усиливает тему выбора.\n\n` +
+          `Рисунок расклада. Баланс смещён к внутренним процессам: обстоятельства здесь вторичны, главное — ваше решение.\n\n` +
+          `Память. Похожая тема уже звучала в ваших прошлых раскладах — сейчас она возвращается с новой стороны.\n\n` +
+          `Вопросы к себе. Что я уже знаю, но откладываю? Чего я жду от других, что могу дать себе сам? Какой маленький шаг я готов сделать сегодня?\n\n` +
+          `Шаг на сегодня: запишите одним предложением, чего вы на самом деле хотите, и сделайте одно действие в эту сторону.`
+        : `[DEV MOCK · DEEP READING] On “${input.question || '—'}” the spread answers: movement is possible once you stop waiting for the perfect moment.\n\n` +
+          `${perCard}\n\n` +
+          `Connections. The first and last cards argue: one pulls forward, the other asks you to admit fatigue first. The second pair reinforces the theme of choice.\n\n` +
+          `Pattern. The balance leans to inner processes: circumstances are secondary, your decision is the main thing.\n\n` +
+          `Memory. A similar theme has come up in your past readings — now it returns from a new angle.\n\n` +
+          `Questions for yourself. What do I already know but keep postponing? What do I expect from others that I can give myself? What small step am I ready to take today?\n\n` +
+          `Today’s step: write in one sentence what you actually want, and take one action toward it.`,
     };
   }
 

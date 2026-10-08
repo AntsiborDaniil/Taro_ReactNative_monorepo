@@ -1,6 +1,6 @@
 import { getSupabaseAdmin } from '../lib/supabase';
 import { useMemoryBackend } from '../lib/devMode';
-import {
+import { ACQUISITION_SOURCE_LABELS,
   type AcquisitionSource,
   ACQUISITION_SOURCES,
   isAcquisitionSource,
@@ -170,12 +170,7 @@ export async function applyAcquisitionToProfile(input: {
 export async function getAcquisitionSummary(): Promise<
   Array<{ source: string; label: string; count: number }>
 > {
-  const labels: Record<string, string> = {
-    ig_bio: 'Instagram bio',
-    ig_stories: 'Instagram stories',
-    yt_shorts: 'YouTube Shorts',
-    other: 'Other',
-  };
+  const labels: Record<string, string> = ACQUISITION_SOURCE_LABELS;
 
   if (useMemoryBackend()) {
     const counts = new Map<string, number>();

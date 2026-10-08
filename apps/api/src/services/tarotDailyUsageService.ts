@@ -286,3 +286,82 @@ export async function isTarotDailyLimitReached(
   const credits = await getSpreadCredits(userId);
   return credits <= 0;
 }
+
+export type MultiSlotResult =
+  | {
+      ok: true;
+      used: number;
+      limit: number;
+      day: string;
+      /** Источники списания — нужны для возврата при сбое AI. */
+      sources: SpreadSlotSource[];
+      spreadCredits: number;
+    }
+  | {
+      ok: false;
+      used: number;
+      limit: number;
+      day: string;
+      spreadCredits: number;
+    };
+
+/**
+ * Списание n единиц (дневной слот + заряды) для «Глубокого разбора».
+ * НЕ атомарно: атомарного RPC списания n нет. Сначала проверяем суммарный баланс
+ * (при нехватке ничего не списываем), затем списываем по одной единице; если
+ * очередное списание неожиданно не удалось (гонка с параллельным запросом) —
+ * возвращаем уже списанные. Редкий сбой на самом возврате оставляет пользователя
+ * в плюсе/минусе на одну единицу — это логируется выше по стеку.
+ */
+export async function tryConsumeSpreadSlots(
+  userId: string,
+  count: number
+): Promise<MultiSlotResult> {
+  const usage = await loadTarotDailyUsage(userId);
+  const credits = await getSpreadCredits(userId);
+  const available = Math.max(0, usage.limit - usage.used) + Math.max(0, credits);
+  if (available < count) {
+    return {
+      ok: false,
+      used: usage.used,
+      limit: usage.limit,
+      day: usage.day,
+      spreadCredits: credits,
+    };
+  }
+
+  const sources: SpreadSlotSource[] = [];
+  let last: SpreadSlotResult | null = null;
+  for (let i = 0; i < count; i += 1) {
+    const slot = await tryConsumeSpreadSlot(userId);
+    if (!slot.ok) {
+      for (const source of sources) {
+        try {
+          await refundSpreadSlot(userId, source);
+        } catch {
+          // best effort: второй сбой возврата не должен маскировать исходный отказ
+        }
+      }
+      return {
+        ok: false,
+        used: slot.used,
+        limit: slot.limit,
+        day: slot.day,
+        spreadCredits: slot.spreadCredits,
+      };
+    }
+    sources.push(slot.source);
+    last = slot;
+  }
+
+  // last не null: count >= 1
+  const final = last as Extract<SpreadSlotResult, { ok: true }>;
+  return {
+    ok: true,
+    used: final.used,
+    limit: final.limit,
+    day: final.day,
+    sources,
+    spreadCredits: final.spreadCredits,
+  };
+}

@@ -20,6 +20,7 @@ import { getAcquisitionSummary } from '../services/acquisitionService';
 import {
   sendTelegramBroadcastAdmin,
   sendTelegramNudgeToUserAdmin,
+  getNotifyOverview,
 } from '../services/dailyFreeNotifyService';
 
 function sendList(
@@ -57,6 +58,20 @@ export const adminRoute = async (
     const rows = await getAcquisitionSummary();
     const total = rows.reduce((sum, row) => sum + row.count, 0);
     return reply.send({ total, rows });
+  });
+
+  // Сводка уведомлений бота: журнал запусков рассылок + сколько получили дневное сегодня.
+  fastify.get('/admin/notify-log', async (request, reply) => {
+    const actor = await requireAdmin(request, reply);
+    if (!actor) {
+      return;
+    }
+    try {
+      return reply.send(await getNotifyOverview());
+    } catch (error) {
+      request.log.error(error);
+      return reply.status(500).send({ message: 'Failed to load notify log' });
+    }
   });
 
   fastify.get('/admin/users', async (request, reply) => {

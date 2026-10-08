@@ -180,15 +180,70 @@ export async function getSpreadById(
   return data ? mapRow(data as SpreadRow) : null;
 }
 
+/** Расклады пользователя за последние N дней (для блока ПАМЯТЬ), новые сверху. */
+export async function listRecentSpreads(
+  userId: string,
+  days: number,
+  limit = 100
+): Promise<SpreadRecord[]> {
+  if (useMemoryBackend()) {
+    return memory.memoryListRecentSpreads(userId, days, limit);
+  }
+
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from('spreads')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map((row) => mapRow(row as SpreadRow));
+}
+
+/** Публичный вид шаренного расклада: без userId и личных данных. */
+export type PublicSharedSpread = Omit<SpreadRecord, 'userId' | 'question'> & {
+  question: string | null;
+};
+
+/**
+ * Очистка перед отдачей по публичной ссылке: убираем userId и служебные поля payload
+ * (memoryNote — личная «память»), вопрос — только если автор включил shareQuestion.
+ * Старые ссылки (без флага) продолжают открываться, просто без вопроса и уточнений.
+ */
+export function toPublicSharedSpread(record: SpreadRecord): PublicSharedSpread {
+  const { userId: _userId, ...rest } = record;
+  const payload = { ...(record.payload ?? {}) } as Record<string, unknown>;
+  const showQuestion = payload.shareQuestion === true;
+  delete payload.memoryNote;
+  delete payload.memoryStats;
+  delete payload.userId;
+  delete payload.email;
+  // Уточнения — тоже вопросы автора (и ответы, пересказывающие их): без согласия не отдаём.
+  if (!showQuestion) delete payload.followUps;
+  return {
+    ...rest,
+    question: showQuestion ? record.question : null,
+    payload,
+  };
+}
+
 /**
  * Public lookup for shared readings (interpretation page only).
  * Returns null when missing or when interpretation is empty.
  */
 export async function getSharedSpreadById(
   spreadId: string
-): Promise<SpreadRecord | null> {
+): Promise<PublicSharedSpread | null> {
   if (useMemoryBackend()) {
-    return memory.memoryGetSharedSpreadById(spreadId);
+    const found = memory.memoryGetSharedSpreadById(spreadId);
+    return found ? toPublicSharedSpread(found) : null;
   }
 
   const admin = getSupabaseAdmin();
@@ -211,5 +266,5 @@ export async function getSharedSpreadById(
     return null;
   }
 
-  return record;
+  return toPublicSharedSpread(record);
 }

@@ -496,6 +496,17 @@ export function memoryListSpreads(
   return list.slice(offset, offset + limit);
 }
 
+export function memoryListRecentSpreads(
+  userId: string,
+  days: number,
+  limit: number
+): SpreadRecord[] {
+  const since = Date.now() - days * 24 * 60 * 60 * 1000;
+  return (spreadsByUser.get(userId) ?? [])
+    .filter((s) => new Date(s.createdAt).getTime() >= since)
+    .slice(0, limit);
+}
+
 export function memoryCreateSpread(
   userId: string,
   input: {
@@ -642,4 +653,103 @@ export function memoryPatchUserSettings(
 ): UserSettingsRecord {
   const current = memoryGetUserSettings(userId);
   return memoryUpsertUserSettings(userId, { ...current.settings, ...patch });
+}
+
+// --- Цели недели: серверные отметки и награда (habitRewardService) ---------
+
+/** userId → Set("habitId|day") */
+const habitCheckinsByUser = new Map<string, Set<string>>();
+/** userId → Set(weekStart) */
+const habitWeekRewardsByUser = new Map<string, Set<string>>();
+
+function daysInWeek(userId: string, weekStart: string): number {
+  const start = new Date(`${weekStart}T00:00:00Z`).getTime();
+  const end = start + 7 * 24 * 60 * 60 * 1000;
+  const days = new Set<string>();
+  for (const key of habitCheckinsByUser.get(userId) ?? []) {
+    const day = key.split('|')[1];
+    const time = new Date(`${day}T00:00:00Z`).getTime();
+    if (time >= start && time < end) days.add(day);
+  }
+  return days.size;
+}
+
+export function memorySetHabitCheckin(userId: string, habitId: string, day: string, done: boolean): void {
+  let set = habitCheckinsByUser.get(userId);
+  if (!set) {
+    set = new Set();
+    habitCheckinsByUser.set(userId, set);
+  }
+  const key = `${habitId}|${day}`;
+  if (done) set.add(key);
+  else set.delete(key);
+}
+
+export function memoryGetHabitWeek(userId: string, weekStart: string): { daysWithCheckins: number; claimed: boolean } {
+  return {
+    daysWithCheckins: daysInWeek(userId, weekStart),
+    claimed: habitWeekRewardsByUser.get(userId)?.has(weekStart) ?? false,
+  };
+}
+
+export function memoryClaimHabitWeekReward(
+  userId: string,
+  weekStart: string,
+  requiredDays: number,
+  credits: number,
+): { status: 'granted' | 'already' | 'not_enough_days'; spreadCredits: number; daysWithCheckins: number } {
+  const days = daysInWeek(userId, weekStart);
+  const claimed = habitWeekRewardsByUser.get(userId) ?? new Set<string>();
+  if (claimed.has(weekStart)) {
+    return { status: 'already', spreadCredits: memoryGetSpreadCredits(userId), daysWithCheckins: days };
+  }
+  if (days < requiredDays) {
+    return { status: 'not_enough_days', spreadCredits: memoryGetSpreadCredits(userId), daysWithCheckins: days };
+  }
+  claimed.add(weekStart);
+  habitWeekRewardsByUser.set(userId, claimed);
+  const next = memoryGetSpreadCredits(userId) + credits;
+  spreadCreditsByUser.set(userId, next);
+  return { status: 'granted', spreadCredits: next, daysWithCheckins: days };
+}
+
+// --- Бесплатные карты периода (freePeriodCardService) ------------------------
+
+type MemoryFreeCard = { payload: unknown | null; createdAt: number };
+/** `${userId}|${kind}|${periodStart}` → карта */
+const freePeriodCards = new Map<string, MemoryFreeCard>();
+
+export function memoryClaimFreePeriodCard(
+  userId: string,
+  kind: string,
+  periodStart: string,
+  staleMs: number,
+): { ok: true; periodStart: string } | { ok: false; periodStart: string; saved: any } {
+  const key = `${userId}|${kind}|${periodStart}`;
+  const existing = freePeriodCards.get(key);
+  if (existing && (existing.payload || Date.now() - existing.createdAt <= staleMs)) {
+    return { ok: false, periodStart, saved: existing.payload ?? null };
+  }
+  freePeriodCards.set(key, { payload: null, createdAt: Date.now() });
+  return { ok: true, periodStart };
+}
+
+export function memoryCompleteFreePeriodCard(userId: string, kind: string, periodStart: string, payload: unknown): void {
+  const key = `${userId}|${kind}|${periodStart}`;
+  const existing = freePeriodCards.get(key);
+  freePeriodCards.set(key, { payload, createdAt: existing?.createdAt ?? Date.now() });
+}
+
+export function memoryReleaseFreePeriodCard(userId: string, kind: string, periodStart: string): void {
+  const key = `${userId}|${kind}|${periodStart}`;
+  if (!freePeriodCards.get(key)?.payload) freePeriodCards.delete(key);
+}
+
+export function memoryListFreePeriodCards(userId: string): Array<{ kind: any; period_start: string; payload: any }> {
+  const rows: Array<{ kind: any; period_start: string; payload: any }> = [];
+  for (const [key, value] of freePeriodCards) {
+    const [uid, kind, periodStart] = key.split('|');
+    if (uid === userId) rows.push({ kind, period_start: periodStart, payload: value.payload });
+  }
+  return rows;
 }

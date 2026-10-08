@@ -3,6 +3,7 @@ export const ACQUISITION_SOURCES = [
   'ig_bio',
   'ig_stories',
   'yt_shorts',
+  'tiktok',
   'other',
 ] as const;
 
@@ -34,5 +35,6 @@ export const ACQUISITION_SOURCE_LABELS: Record<AcquisitionSource, string> = {
   ig_bio: 'Instagram bio',
   ig_stories: 'Instagram stories',
   yt_shorts: 'YouTube Shorts',
+  tiktok: 'TikTok',
   other: 'Other',
 };

@@ -8,6 +8,82 @@ import {
 
 const FLOOD_DELAY_MS = 45;
 const BROADCAST_STATE_KEY = 'broadcast_daily_free_v1';
+/** Журнал запусков рассылок для админки (bot_notify_state, без отдельной таблицы). */
+const NOTIFY_LOG_KEY = 'notify_log_v1';
+const NOTIFY_LOG_LIMIT = 50;
+
+export type NotifyLogKind = 'daily_free' | 'broadcast_deploy' | 'broadcast_admin' | 'user_admin';
+
+export type NotifyLogEntry = {
+  kind: NotifyLogKind;
+  /** ISO-время завершения отправки. */
+  at: string;
+  sent: number;
+  failed: number;
+  skipped: number;
+  /** Для user_admin — кому отправили. */
+  userId?: string;
+};
+
+/** In-process журнал для memory-бэкенда (локальный dev без Supabase). */
+const memoryNotifyLog: NotifyLogEntry[] = [];
+
+/**
+ * Дописать запуск в журнал (последние NOTIFY_LOG_LIMIT записей, новые первыми).
+ * Read-modify-write без транзакции: гонка двух одновременных запусков потеряет
+ * одну запись журнала — для админской сводки это приемлемо. Ошибка журнала
+ * не ломает рассылку.
+ */
+async function recordNotifyRun(entry: Omit<NotifyLogEntry, 'at'>): Promise<void> {
+  const full: NotifyLogEntry = { ...entry, at: new Date().toISOString() };
+  if (useMemoryBackend()) {
+    memoryNotifyLog.unshift(full);
+    memoryNotifyLog.length = Math.min(memoryNotifyLog.length, NOTIFY_LOG_LIMIT);
+    return;
+  }
+  try {
+    const admin = getSupabaseAdmin();
+    const { data } = await admin.from('bot_notify_state').select('value').eq('key', NOTIFY_LOG_KEY).maybeSingle();
+    const prev = Array.isArray((data?.value as { entries?: unknown } | null)?.entries)
+      ? ((data?.value as { entries: NotifyLogEntry[] }).entries)
+      : [];
+    const entries = [full, ...prev].slice(0, NOTIFY_LOG_LIMIT);
+    const { error } = await admin
+      .from('bot_notify_state')
+      .upsert({ key: NOTIFY_LOG_KEY, value: { entries }, updated_at: full.at }, { onConflict: 'key' });
+    if (error) console.warn('[dailyFreeNotify] notify log upsert failed:', error.message);
+  } catch (logError) {
+    console.warn('[dailyFreeNotify] notify log failed:', logError);
+  }
+}
+
+export type NotifyOverview = {
+  entries: NotifyLogEntry[];
+  /** Сколько пользователей уже получили «бесплатный расклад доступен» за текущие UTC-сутки. */
+  dailyFreeToday: number;
+  /** UTC-день слота, к которому относится dailyFreeToday. */
+  day: string;
+};
+
+/** Сводка для админки: журнал запусков + сколько получили дневное уведомление сегодня. */
+export async function getNotifyOverview(): Promise<NotifyOverview> {
+  const day = utcToday();
+  if (useMemoryBackend()) {
+    return { entries: [...memoryNotifyLog], dailyFreeToday: 0, day };
+  }
+  const admin = getSupabaseAdmin();
+  const [{ data: logRow, error: logError }, { count, error: countError }] = await Promise.all([
+    admin.from('bot_notify_state').select('value').eq('key', NOTIFY_LOG_KEY).maybeSingle(),
+    admin
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('daily_free_nudge_sent_on', day),
+  ]);
+  if (logError) throw logError;
+  if (countError) throw countError;
+  const entries = (logRow?.value as { entries?: NotifyLogEntry[] } | null)?.entries ?? [];
+  return { entries: Array.isArray(entries) ? entries : [], dailyFreeToday: count ?? 0, day };
+}
 
 type NotifyLang = 'ru' | 'en';
 
@@ -24,12 +100,12 @@ type ProfileNudgeRow = {
  * Совпадает с apps/bot/src/messages.ts (dailyFreeAvailableText).
  */
 const DAILY_FREE_RENEWED: Record<NotifyLang, string> = {
-  ru: `Погадаем сегодня?
+  ru: `Какая карта отзовётся тебе сегодня?
 
-Бесплатный расклад снова доступен — дневной заряд обновился. Загляни в приложение.`,
-  en: `Shall we do a reading today?
+Карта дня уже ждёт, а ежедневный ⚡ обновился — хватит на расклад с твоим вопросом.`,
+  en: `Which card speaks to you today?
 
-Your free daily spread is back — the free slot has refreshed. Open the app.`,
+Your card of the day is waiting, and your daily ⚡ has refilled — enough for a reading with your own question.`,
 };
 
 /**
@@ -37,27 +113,23 @@ Your free daily spread is back — the free slot has refreshed. Open the app.`,
  * Совпадает с apps/bot/src/messages.ts (dailyEngageText).
  */
 const DAILY_ENGAGE: Record<NotifyLang, string> = {
-  ru: `Погадаем сегодня?
-
-Открой Mindful Tarot — карты уже ждут.`,
-  en: `Shall we do a reading today?
-
-Open Mindful Tarot — the cards are waiting.`,
+  ru: `Минута для себя? Одна карта — один вопрос на сегодня.`,
+  en: `A minute for yourself? One card, one question for today.`,
 };
 
 /** Тексты совпадают с apps/bot/src/messages.ts (dailyFreeBroadcastText). */
 const DAILY_FREE_BROADCAST: Record<NotifyLang, string> = {
-  ru: `Погадаем сегодня?
+  ru: `Что тебе важно заметить сегодня?
 
-В Mindful Tarot каждый день есть бесплатный расклад с толкованием — заряд уже обновился.`,
-  en: `Shall we do a reading today?
+Карта дня в Mindful Tarot уже ждёт, а ежедневный ⚡ обновился.`,
+  en: `What’s worth noticing today?
 
-Mindful Tarot gives you a free reading every day — your free slot is ready.`,
+Your card of the day in Mindful Tarot is waiting, and your daily ⚡ has refilled.`,
 };
 
 const OPEN_APP_LABEL: Record<NotifyLang, string> = {
-  ru: '🔮 Погадаем',
-  en: '🔮 Let’s read',
+  ru: '🃏 Карта дня',
+  en: '🃏 Card of the day',
 };
 
 export type DailyFreeNudgeResult = {
@@ -79,6 +151,12 @@ export function utcToday(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** Окно отправки nudge: 06:00–18:00 UTC (09:00–21:00 по Москве). */
+export function isNudgeWindowOpen(now: Date = new Date()): boolean {
+  const hour = now.getUTCHours();
+  return hour >= 6 && hour < 18;
+}
+
 function resolveLang(_row?: ProfileNudgeRow): NotifyLang {
   // На профиле языка нет — по умолчанию RU.
   return 'ru';
@@ -90,7 +168,7 @@ function webAppKeyboard(lang: NotifyLang) {
       [
         {
           text: OPEN_APP_LABEL[lang],
-          web_app: { url: buildWebAppDeepLink('/spreads', lang) },
+          web_app: { url: buildWebAppDeepLink('/', lang) },
         },
       ],
     ],
@@ -144,6 +222,13 @@ function nudgeTextForProfile(
  */
 export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
   if (useMemoryBackend()) {
+    return { sent: 0, skipped: 0, failed: 0 };
+  }
+
+  // Тихие часы: не шлём с 21:00 до 06:00 по Москве (UTC+3) = вне 06:00–18:00 UTC.
+  // Пропущенные ночью остаются кандидатами (daily_free_nudge_sent_on не обновлён)
+  // и получат сообщение при первом прогоне после 06:00 UTC.
+  if (!isNudgeWindowOpen()) {
     return { sent: 0, skipped: 0, failed: 0 };
   }
 
@@ -243,6 +328,8 @@ export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
     await sleep(FLOOD_DELAY_MS);
   }
 
+  // Пустые часовые прогоны в журнал не пишем — только когда были адресаты.
+  if (sent + failed > 0) await recordNotifyRun({ kind: 'daily_free', sent, failed, skipped });
   return { sent, skipped, failed };
 }
 
@@ -321,6 +408,7 @@ export async function runBroadcastDailyFreeOnce(): Promise<BroadcastDailyFreeRes
     throw upsertError;
   }
 
+  await recordNotifyRun({ kind: 'broadcast_deploy', sent, failed, skipped: 0 });
   return { alreadyDone: false, sent, failed };
 }
 
@@ -389,6 +477,7 @@ export async function sendTelegramNudgeToUserAdmin(
     replyMarkup: webAppKeyboard(lang),
   });
 
+  await recordNotifyRun({ kind: 'user_admin', sent: 1, failed: 0, skipped: 0, userId });
   return { sent: true };
 }
 
@@ -435,5 +524,6 @@ export async function sendTelegramBroadcastAdmin(): Promise<AdminTelegramNotifyR
     await sleep(FLOOD_DELAY_MS);
   }
 
+  await recordNotifyRun({ kind: 'broadcast_admin', sent, failed, skipped });
   return { sent, skipped, failed };
 }

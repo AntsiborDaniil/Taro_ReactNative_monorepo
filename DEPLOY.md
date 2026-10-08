@@ -90,6 +90,7 @@ Vercel не запускает долгоживущий Node-сервер — AP
 | `SUPABASE_ANON_KEY` | `eyJ...` |
 | `SUPABASE_SERVICE_ROLE_KEY` | `eyJ...` (секрет!) |
 | `OPENAI_API_KEY` | `sk-...` |
+| `OPENAI_DEEP_MODEL` | необязательно: модель «Глубокого разбора» (⚡2); пусто — та же, что у обычного расклада |
 | `CORS_ORIGIN` | `https://taro-react-native-monorepo-x59s.vercel.app` |
 | `WEB_APP_URL` | `https://taro-react-native-monorepo-x59s.vercel.app` |
 | `API_PUBLIC_URL` | `https://taro-react-native-monorepo.vercel.app` (тот же домен, что Vercel — для OAuth/PKCE) |
