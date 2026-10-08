@@ -5,6 +5,7 @@ import { RouterProvider } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
 import { store } from '@app/store';
 import { router } from '@app/router';
+import { userApi } from '@entities/user/api';
 import { i18nReady } from '@shared/i18n';
 import { initTheme } from '@shared/lib/theme';
 import { injectYandexMetrika } from '@shared/lib/metrika';
@@ -48,6 +49,11 @@ async function bootstrap() {
     const { startMockWorker } = await import('@shared/api/mocks/browser');
     await startMockWorker();
   }
+
+  // Сессия и квота (бейдж зарядов) — стартуем /me сразу, параллельно с загрузкой
+  // i18n и чанков, а не после монтирования AppShell. useAuthMeQuery в AppShell
+  // подхватит этот же запрос из кэша RTK Query (дубля не будет).
+  store.dispatch(userApi.endpoints.authMe.initiate());
 
   const i18n = await i18nReady;
 

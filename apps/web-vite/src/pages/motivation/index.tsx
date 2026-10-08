@@ -11,10 +11,10 @@ import {
   type GenerateMotivationErrorBody,
   type TMotivationItem,
 } from '@entities/tarotMotivation';
-import { useAppSelector } from '@shared/lib/store';
+import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { ensureI18nNamespaces } from '@shared/i18n';
 import { isWebAuthPending, shouldPromptWebSignIn } from '@shared/lib/webAuthGate';
-import { AILoader, Button, EmptyState, Header, Skeleton, Text, useToast } from '@shared/ui';
+import { AILoader, Button, EmptyState, Header, openModal, Skeleton, Text, useToast } from '@shared/ui';
 import styles from './Motivation.module.css';
 
 type MotivationNavState = { key: MotivationKey; params?: Record<string, unknown> } | null;
@@ -47,6 +47,7 @@ export default function MotivationPage(): ReactElement {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const toast = useToast();
+  const dispatch = useAppDispatch();
   const location = useLocation();
   const requestState = (location.state as MotivationNavState) ?? null;
 
@@ -113,12 +114,17 @@ export default function MotivationPage(): ReactElement {
       .catch((err: { status?: number; data?: GenerateMotivationErrorBody }) => {
         if (err.status === 401) {
           toast.info(t('core:ai.errorProvider'));
+        } else if (err.status === 429) {
+          // Зарядов нет (гонка с проверкой на /mood) — тот же лист, что перед раскладом.
+          dispatch(openModal({ id: 'out-of-charges' }));
+          navigate('/mood', { replace: true });
+          return;
         } else {
           toast.error(t('core:ai.error1'));
         }
         setFailed(true);
       });
-  }, [motivation, cardNsReady, requestState, isAuthenticated, sessionLoading, generateMotivation, i18n.language, t, toast]);
+  }, [motivation, cardNsReady, requestState, isAuthenticated, sessionLoading, generateMotivation, i18n.language, t, toast, dispatch, navigate]);
 
   const card = motivation?.cards[0];
 

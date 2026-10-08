@@ -1,3 +1,5 @@
+import { isTelegramMiniApp } from './web/telegramWebApp';
+
 /**
  * Deep-link на расшаренную интерпретацию — как apps/web:
  * основная ссылка `t.me/<bot>?startapp=r_<hex32>` (Mini App),
@@ -45,7 +47,7 @@ export function isShareableReadingUid(uid: string | undefined | null): uid is st
   return typeof uid === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(uid.trim());
 }
 
-function decodeSharedReadingParam(param: string | null | undefined): string | null {
+export function decodeSharedReadingParam(param: string | null | undefined): string | null {
   if (!param) return null;
   const trimmed = param.trim();
 
@@ -61,14 +63,42 @@ function decodeSharedReadingParam(param: string | null | undefined): string | nu
   return uuidMatch ? uuidMatch[1].toLowerCase() : null;
 }
 
+/** Хэндл бота `@<bot>` — подпись внизу картинки для сторис. */
+export function getBotHandle(): string {
+  return `@${getBotUsername()}`;
+}
+
+/** Ссылка на бота. */
+export function getBotUrl(): string {
+  return `https://t.me/${getBotUsername()}`;
+}
+
+/** Путь страницы расшаренного расклада внутри SPA. */
+export function sharedReadingPath(spreadUid: string): string {
+  return `/r/${spreadUid.toLowerCase()}`;
+}
+
 /**
- * Ссылка для шаринга: Telegram Mini App deep link.
- * Приоритет — прямая ссылка на приложение `t.me/<bot>/<app>?startapp=…`;
- * без VITE_TELEGRAM_MINI_APP_SHORT_NAME остаётся `t.me/<bot>?startapp=…`
- * (сработает при настроенном Main Mini App, иначе бот ответит кнопкой —
- * см. apps/bot/src/sharedReading.ts).
+ * Веб-ссылка `${origin}/r/<id>` — открывается в обычном браузере без входа и без
+ * Telegram (печатается на картинке для сторис, копируется кнопкой «Скопировать ссылку»).
+ * Mini App отдаётся с того же origin, что и сайт, поэтому origin текущей страницы подходит.
+ */
+export function buildWebReadingUrl(spreadUid: string): string {
+  return `${window.location.origin}${sharedReadingPath(spreadUid)}`;
+}
+
+/**
+ * Ссылка для шаринга. Внутри Mini App — Telegram deep link
+ * (приоритет — прямая ссылка на приложение `t.me/<bot>/<app>?startapp=…`;
+ * без VITE_TELEGRAM_MINI_APP_SHORT_NAME остаётся `t.me/<bot>?startapp=…`:
+ * сработает при настроенном Main Mini App, иначе бот ответит кнопкой —
+ * см. apps/bot/src/sharedReading.ts). Вне Telegram — веб-ссылка `${origin}/r/<id>`,
+ * которая открывается в обычном браузере без входа.
  */
 export function buildSharedReadingUrl(spreadUid: string): string {
+  if (!isTelegramMiniApp() && typeof window !== 'undefined') {
+    return buildWebReadingUrl(spreadUid);
+  }
   const startapp = encodeSharedReadingStartParam(spreadUid);
   const bot = getBotUsername();
   const shortName = getMiniAppShortName();

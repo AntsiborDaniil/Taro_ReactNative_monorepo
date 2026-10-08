@@ -13,6 +13,7 @@ export type { TSpread, TSpreadCategory };
 export { SpreadName, SpreadsCategory } from '@legacy-data';
 
 export type SpreadSection = {
+  id: string;
   title: string;
   data: TSpread[];
 };
@@ -23,6 +24,7 @@ export type SpreadSection = {
  * spreadsData (@legacy-data) — не копируются.
  */
 export const SPREAD_SECTIONS: SpreadSection[] = spreadsData.map((category: TSpreadCategory) => ({
+  id: category.id,
   title: category.name,
   data: category.spreads,
 }));

@@ -1,113 +1,220 @@
+/* Тот же визуальный язык, что у виджета состояния (MoodDashboard): тёплый градиент, r18. */
 .root {
   width: 100%;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--ds-space-12);
   padding: var(--ds-space-16);
+  box-sizing: border-box;
   border: var(--ds-size-hairline) solid var(--ds-ground-600);
-  border-radius: 18px;
-  background: var(--ds-ground-700);
-  cursor: pointer;
-  text-align: left;
-  transition: border-color var(--ds-dur-state) var(--ds-ease);
-  -webkit-tap-highlight-color: transparent;
+  border-radius: var(--ds-radius-list-row);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--ds-calm-500) 10%, transparent) 0%, transparent 50%),
+    var(--ds-ground-800);
 }
 
-.root:hover {
-  border-color: var(--ds-accent-400);
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-12);
 }
 
-.root:focus-visible {
-  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
-  outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .root {
-    transition: none;
-  }
-}
-
-.main {
+.headLink {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-8);
-}
-
-.headerRow {
-  display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--ds-space-12);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
-/* Обычный регистр («Среда, 30 сент.»), не капс — роль label (uppercase) тут
-   не подходит, дата не является лейблом/тегом. */
-.date {
-  color: var(--ds-ink-100);
-  font-family: var(--ds-font-micro-family);
-  font-size: var(--ds-font-micro-size);
-  line-height: var(--ds-font-micro-line-height);
-  letter-spacing: var(--ds-font-micro-letter-spacing);
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  min-width: 0;
 }
 
 .percent {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-4);
   flex: 0 0 auto;
-  padding: 4px 10px;
-  border-radius: 16px;
-  border: var(--ds-size-hairline) solid var(--ds-calm-500);
-  background: var(--ds-calm-600);
-  color: var(--ds-on-calm);
-  font-family: var(--ds-font-lead-family);
-  font-size: 15px;
-  line-height: 20px;
+  color: var(--ds-accent-400);
+  font-variant-numeric: tabular-nums;
+}
+
+.addButton {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-size-min-touch);
+  height: var(--ds-size-min-touch);
+  border-radius: 50%;
+  border: var(--ds-size-edge-width) solid var(--ds-accent-400);
+  background: var(--ds-ground-700);
+  color: var(--ds-accent-400);
+  cursor: pointer;
+  transition: background-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.addButton:hover {
+  background: var(--ds-ground-600);
 }
 
 .track {
-  height: 12px;
-  border-radius: 16px;
+  display: block;
+  height: 8px;
+  border-radius: 4px;
   background: var(--ds-ground-600);
   overflow: hidden;
 }
 
 .fill {
+  display: block;
   height: 100%;
-  border-radius: 16px;
+  border-radius: 4px;
   background: var(--ds-calm-500);
-  transition: width var(--ds-dur-state) var(--ds-ease);
+  transition: width var(--ds-dur-block) var(--ds-ease);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .fill {
-    transition: none;
-  }
-}
-
-.goalsText {
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
   margin: 0;
-  color: var(--ds-ink-100);
-  font-family: var(--ds-font-body-family);
-  font-size: 14px;
-  line-height: 20px;
+  padding: 0;
+  list-style: none;
 }
 
-.addButton {
-  flex: 0 0 auto;
-  width: 52px;
-  height: 52px;
-  border-radius: 17px;
-  border: var(--ds-size-hairline) solid var(--ds-accent-400);
-  background: var(--ds-ground-600);
+.row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-12);
+  min-height: var(--ds-size-min-touch);
+  padding: var(--ds-space-8) var(--ds-space-12);
+  box-sizing: border-box;
+  border-radius: 14px;
+  border: var(--ds-size-hairline) solid transparent;
+  background: var(--ds-ground-700);
   color: var(--ds-ink-50);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color var(--ds-dur-state) var(--ds-ease),
+    color var(--ds-dur-state) var(--ds-ease);
+}
+
+.row:disabled {
+  cursor: default;
+}
+
+.check {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: var(--ds-size-edge-width) solid var(--ds-calm-500);
+  color: var(--ds-on-calm);
+  transition: background-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.rowDone {
+  background: transparent;
+  border-color: var(--ds-ground-600);
+  color: var(--ds-ink-100);
+}
+
+.rowDone .check {
+  background: var(--ds-calm-500);
+}
+
+.rowDone .rowTitle {
+  text-decoration: line-through;
+  text-decoration-color: var(--ds-ink-100);
+}
+
+.rowTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--ds-font-body-family);
+  font-size: var(--ds-font-body-size);
+  line-height: var(--ds-font-body-line-height);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-8);
+}
+
+.reward {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-4);
+}
+
+.more {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ds-accent-400);
+  font-family: var(--ds-font-label-family);
+  font-size: var(--ds-font-label-size);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: var(--ds-size-hairline);
   cursor: pointer;
 }
 
-.addButton:focus-visible {
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: var(--ds-space-12);
+  border-radius: 14px;
+  border: var(--ds-size-hairline) dashed var(--ds-ground-600);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.headLink:focus-visible,
+.addButton:focus-visible,
+.row:focus-visible,
+.more:focus-visible,
+.empty:focus-visible {
   outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill,
+  .row,
+  .check,
+  .addButton {
+    transition: none;
+  }
 }

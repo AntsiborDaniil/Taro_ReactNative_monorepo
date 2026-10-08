@@ -17,7 +17,7 @@ type SeriesKey = 'mood' | 'energy' | 'stress';
 const SERIES: { key: SeriesKey; color: string }[] = [
   { key: 'mood', color: 'var(--ds-accent-400)' },
   { key: 'energy', color: 'var(--ds-calm-500)' },
-  { key: 'stress', color: 'var(--ds-alarm-600)' },
+  { key: 'stress', color: 'var(--ds-action-500)' },
 ];
 
 function buildPoints(data: TMemoryMoodItem[], key: SeriesKey): { x: number; y: number }[] {

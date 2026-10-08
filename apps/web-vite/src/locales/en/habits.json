@@ -2,7 +2,6 @@
   "page.habitCreate": "Create Habits",
   "page.habitCreateBuild": "Build a positive habit",
   "page.habitCreateQuit": "Quit a negative habit",
-
   "button.chooseBad": "Build a positive\nhabit",
   "button.chooseGood": "Let go of a bad\nhabit",
   "button.create": "Create",
@@ -27,7 +26,6 @@
   "button.deleteHabit": "Delete",
   "button.resetHabit": "Reset progress",
   "button.cancel": "Cancel",
-
   "title.progress": "Habit Progress",
   "title.habit": "Main info",
   "title.startDate": "Start date",
@@ -54,9 +52,26 @@
   "placeholder.habitDesc": "Description",
   "placeholder.goalTitle": "0",
   "placeholder.goalUnit": "unit",
-
-  "widget.completedGoals": "{{completed}} of {{total}} goals completed",
+  "widget.completedGoals": "{{completed}} of {{total}} done",
   "widget.empty": "Add a new goal!",
-  "banner.rewardTitle": "A free tarot spread awaits",
-  "banner.rewardDescription": "Complete every weekly goal to unlock your reward."
+  "banner.rewardTitle": "Close this week’s goals — get +1 charge",
+  "banner.rewardDescription": "Tick your goals every day: the charge is for daily check-ins, not backdated ticks.",
+  "widget.label": "Today’s goals",
+  "widget.emptyTitle": "No goals yet",
+  "widget.emptyHint": "Add a small goal — you can tick it off right here",
+  "widget.allDone": "All goals for today done",
+  "widget.add": "Add a goal",
+  "widget.more_one": "{{count}} more goal",
+  "widget.more_few": "{{count}} more goals",
+  "widget.more_many": "{{count}} more goals",
+  "widget.more_other": "{{count}} more goals",
+  "banner.rewardReady": "Week complete — claim +1 charge",
+  "pin.on": "On home",
+  "pin.off": "Show on home",
+  "pin.limit_one": "You can keep {{count}} goal on home",
+  "pin.limit_few": "You can keep {{count}} goals on home",
+  "pin.limit_many": "You can keep {{count}} goals on home",
+  "pin.limit_other": "You can keep {{count}} goals on home",
+  "day.today": "Tick today",
+  "widget.reward": "Goal week → +1"
 }

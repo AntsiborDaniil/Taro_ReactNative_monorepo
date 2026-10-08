@@ -1,6 +1,6 @@
 import { baseApi } from '@shared/api/baseApi';
 import type { TarotDailyQuota } from '@entities/user/model/types';
-import type { TSpread } from '@legacy-data';
+import type { TSpread, TSpreadMemoryNote, TSpreadMemoryStats } from '@legacy-data';
 import type { TarotSpreadInput } from './model/getAIRequestBody';
 import {
   cloudRecordToSpread,
@@ -12,6 +12,9 @@ export type InterpretResponse = {
   interpretation: string;
   tarotDaily?: TarotDailyQuota;
   spreadCredits?: number;
+  /** Детерминированный факт из истории раскладов (без LLM), если есть. */
+  memoryNote?: TSpreadMemoryNote | null;
+  memoryStats?: TSpreadMemoryStats | null;
 };
 
 export type InterpretErrorBody = {
@@ -27,17 +30,34 @@ export type FollowUpInput = TarotSpreadInput & {
 };
 
 /**
- * POST /api/interpret — требует авторизацию (401 без сессии, см.
+ * POST /api/interpret — карта дня (spread_key simple_daySuggest) бесплатна, лимит 3/сутки
+ * (429 code:'day_card_limit_reached'); mode:'deep' списывает 2 единицы. Требует авторизацию (401 без сессии, см.
  * apps/api/src/routes/interpret.ts) и тратит дневной лимит/кредит расклада
  * (429 code:'daily_limit_reached' с телом tarotDaily/spreadCredits).
  * invalidatesTags:['User'] — после успеха/лимита обновляем /api/auth/me
  * (бейдж зарядов в Header берёт квоту из userSlice).
  */
+export type FreePeriodStatus = {
+  kind: 'day' | 'week' | 'month';
+  periodStart: string;
+  available: boolean;
+  /** UTC ISO — когда откроется следующая карта (00:00 по Москве). */
+  nextAt: string;
+  saved: { interpretation: string; card: { card_id?: string; card: string; direction: string } } | null;
+};
+
 export const spreadApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
+    /** Статус бесплатных карт дня/недели/месяца (GET /api/free-cards). */
+    getFreeCards: build.query<FreePeriodStatus[], void>({
+      query: () => ({ url: '/api/free-cards', method: 'GET' }),
+      transformResponse: (response: { cards: FreePeriodStatus[] }) => response.cards,
+      providesTags: ['Spreads'],
+    }),
     interpretSpread: build.mutation<InterpretResponse, TarotSpreadInput>({
       query: (body) => ({ url: '/api/interpret', method: 'POST', body }),
-      invalidatesTags: ['User'],
+      // Spreads — чтобы статус бесплатных карт периода обновился после открытия.
+      invalidatesTags: ['User', 'Spreads'],
     }),
     /** POST /api/interpret/follow-up — всегда 1 заряд (не дневной слот). */
     followUpSpread: build.mutation<InterpretResponse, FollowUpInput>({
@@ -86,4 +106,6 @@ export const {
   useCreateSpreadHistoryMutation,
   useUpdateSpreadHistoryMutation,
   useLazyGetSharedSpreadQuery,
+  useGetSharedSpreadQuery,
+  useGetFreeCardsQuery,
 } = spreadApi;

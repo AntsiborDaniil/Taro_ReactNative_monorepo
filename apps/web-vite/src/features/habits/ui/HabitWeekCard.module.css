@@ -102,7 +102,40 @@
 .dayDotNeeded {
   opacity: 1;
   border-color: var(--ds-ground-600);
+}
+
+.dayDot:disabled {
+  cursor: default;
+}
+
+/* Сегодня — единственный день, который можно отметить: акцентный контур. */
+.dayDotToday {
+  border: var(--ds-size-edge-width) solid var(--ds-accent-400);
   cursor: pointer;
+}
+
+.pin {
+  flex: 0 0 auto;
+  height: 28px;
+  padding: 0 var(--ds-space-8);
+  border-radius: 14px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: transparent;
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-micro-family);
+  font-size: var(--ds-font-micro-size);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pinOn {
+  border-color: var(--ds-accent-400);
+  color: var(--ds-accent-400);
+}
+
+.pin:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
 }
 
 .dayDotDone {

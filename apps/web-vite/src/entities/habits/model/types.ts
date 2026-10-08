@@ -26,4 +26,8 @@ export type THabit = {
   /** Время напоминания "HH:MM" — вводится нативным <input type="time"> в /habits/new. */
   reminderTime?: string | null;
   bestStreak?: number;
+  /** Показывать на главной (виджет целей). Не больше MAX_PINNED_HABITS. */
+  pinned?: boolean;
 };
+
+export const MAX_PINNED_HABITS = 3;

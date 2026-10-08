@@ -1,0 +1,20 @@
+.note {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-12);
+  padding: var(--ds-space-12) var(--ds-space-16);
+  background: var(--ds-ground-800);
+  border: var(--ds-size-hairline) dashed var(--ds-ground-600);
+  border-radius: var(--ds-radius-list-row);
+}
+
+.thumb {
+  flex: none;
+  display: block;
+  width: 32px;
+}
+
+.text {
+  margin: 0;
+  min-width: 0;
+}

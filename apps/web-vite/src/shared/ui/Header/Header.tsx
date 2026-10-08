@@ -14,10 +14,22 @@ export type HeaderProps = {
   /** Правый слот (кастомное действие) — рендерится после CreditsBadge. */
   right?: ReactNode;
   showCredits?: boolean;
+  /**
+   * Корневой экран таба (Главная, Расклады, Библиотека, Настройки): «назад» нет —
+   * это вершина стека, заголовок крупный и слева, справа бейдж зарядов.
+   */
+  root?: boolean;
 };
 
-/** Шапка экрана DS: «назад» слева, заголовок по центру, CreditsBadge + right справа. */
-export function Header({ title, showBack = true, onBack, right, showCredits = true }: HeaderProps): ReactElement {
+/** Шапка экрана DS: «назад» слева, заголовок по центру, CreditsBadge + right справа; root — шапка корня таба. */
+export function Header({
+  title,
+  showBack = true,
+  onBack,
+  right,
+  showCredits = true,
+  root = false,
+}: HeaderProps): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -34,6 +46,20 @@ export function Header({ title, showBack = true, onBack, right, showCredits = tr
       navigate('/', { replace: true });
     }
   };
+
+  if (root) {
+    return (
+      <header className={`${styles.header} ${styles.headerRoot}`}>
+        <Text role="display" as="h1" className={styles.titleRoot} truncate>
+          {title}
+        </Text>
+        <div className={`${styles.side} ${styles.sideEnd}`}>
+          {showCredits ? <CreditsBadge /> : null}
+          {right}
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className={styles.header}>

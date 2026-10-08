@@ -12,8 +12,23 @@ declare global {
     username?: string;
   }
 
+  /** Bot API 6.1+: тактильная отдача (работает и на iOS, в отличие от navigator.vibrate). */
+  interface TelegramHapticFeedback {
+    impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
+    notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
+    selectionChanged: () => void;
+  }
+
   interface TelegramWebApp {
     initData?: string;
+    HapticFeedback?: TelegramHapticFeedback;
+    /** Bot API 7.7+: вернуть свайп вниз после disableVerticalSwipes. */
+    enableVerticalSwipes?: () => void;
+    /** Bot API 7.8+: опубликовать сторис; media_url — публичный https-URL картинки/видео. */
+    shareToStory?: (
+      mediaUrl: string,
+      params?: { text?: string; widget_link?: { url: string; name?: string } },
+    ) => void;
     /** Разобранный initData; start_param — параметр запуска (например, lava_success / r_<hex>). */
     initDataUnsafe?: {
       start_param?: string;

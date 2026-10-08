@@ -54,3 +54,14 @@
   outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
   outline-offset: 2px;
 }
+
+/* Корень таба: крупный заголовок слева (display), без «назад». */
+.headerRoot {
+  padding-top: var(--ds-space-8);
+}
+
+.titleRoot {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+}

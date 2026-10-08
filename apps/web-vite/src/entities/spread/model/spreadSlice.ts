@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { TSelectedTarotCard, TSpreadFollowUp } from '@legacy-data';
+import type { TSelectedTarotCard, TSpreadFollowUp, TSpreadMemoryNote, TSpreadMemoryStats } from '@legacy-data';
 import type { TSpread } from './catalog';
 
 export type SpreadFlowStatus = 'choosing' | 'interpreting' | 'done' | 'error';
@@ -67,6 +67,24 @@ const spreadSlice = createSlice({
       state.status = 'done';
       state.errorCode = null;
     },
+    /** Результат /interpret: текст + факт памяти + пометка «Глубокий разбор». */
+    setInterpretationResult(
+      state,
+      action: PayloadAction<{
+        interpretation: string;
+        memoryNote?: TSpreadMemoryNote | null;
+        memoryStats?: TSpreadMemoryStats | null;
+        mode?: 'deep';
+      }>,
+    ) {
+      if (!state.selectedSpread) return;
+      state.selectedSpread.interpretation = action.payload.interpretation;
+      state.selectedSpread.memoryNote = action.payload.memoryNote ?? undefined;
+      state.selectedSpread.memoryStats = action.payload.memoryStats ?? undefined;
+      state.selectedSpread.mode = action.payload.mode;
+      state.status = 'done';
+      state.errorCode = null;
+    },
     setStatus(state, action: PayloadAction<SpreadFlowStatus>) {
       state.status = action.payload;
       // Новый запрос толкования — убираем прошлую ошибку, иначе UI залипает на error.
@@ -79,7 +97,7 @@ const spreadSlice = createSlice({
       state.errorCode = action.payload;
     },
     /** После сохранения в историю (локально/облако) — uid/date/packKey нужны для повторного сохранения и шаринга. */
-    setSpreadMeta(state, action: PayloadAction<{ uid?: string; date?: string; packKey?: string }>) {
+    setSpreadMeta(state, action: PayloadAction<{ uid?: string; date?: string; packKey?: string; shareQuestion?: boolean }>) {
       if (!state.selectedSpread) return;
       Object.assign(state.selectedSpread, action.payload);
     },
@@ -126,6 +144,7 @@ export const {
   addSelectedCards,
   clearSelectedCards,
   setInterpretation,
+  setInterpretationResult,
   setStatus,
   setError,
   setSpreadMeta,

@@ -23,6 +23,8 @@ const SIMPLE_SPREADS = [
   SpreadName.Simple_YesNo,
   SpreadName.Simple_DaySuggest,
   SpreadName.Simple_DayParts,
+  SpreadName.Period_WeekCard,
+  SpreadName.Period_MonthCard,
 ];
 
 export function getRandomCardId(selectedCardsIds: Record<string, boolean>): number {

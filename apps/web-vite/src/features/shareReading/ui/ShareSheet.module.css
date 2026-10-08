@@ -1,0 +1,11 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-16);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Header, ListRow, SettingsIcon } from '@shared/ui';
+import { BookIcon, Header, ListRow, SettingsIcon } from '@shared/ui';
 import { getImage } from '@shared/lib/getImage';
 import { LEGAL_ENTITY } from '@legacy-legal';
 import { LibraryCard } from './ui/LibraryCard';
@@ -24,6 +24,13 @@ const PLATES: Plate[] = [
     to: '/history',
   },
   {
+    id: 'mirror',
+    titleKey: 'main:mirror.title',
+    subtitleKey: 'main:mirror.link.subtitle',
+    img: getImage(['core', 'mirror']),
+    to: '/mirror',
+  },
+  {
     id: 'favorite',
     titleKey: 'core:library.tile.favorite.title',
     subtitleKey: 'core:library.tile.favorite.subtitle',
@@ -43,7 +50,7 @@ export default function LibraryPage(): ReactElement {
   return (
     <div className={styles.page}>
       <div className={styles.column}>
-        <Header title={t('core:library')} />
+        <Header root title={t('core:library')} />
         <p className={styles.intro}>{t('core:library.intro.lead')}</p>
         <div className={styles.grid}>
           {PLATES.map((plate) => (
@@ -57,7 +64,11 @@ export default function LibraryPage(): ReactElement {
           to="/settings"
         />
         <div className={styles.footer}>
-          <ListRow title={t('settings:legal.title')} to="/documents" />
+          <ListRow
+            leadingIcon={<BookIcon width={22} height={22} />}
+            title={t('settings:legal.title')}
+            to="/documents"
+          />
           <p className={styles.copy}>{`© ${new Date().getFullYear()} ${LEGAL_ENTITY.brand} · ${t('settings:legal.badge.age')}`}</p>
         </div>
       </div>

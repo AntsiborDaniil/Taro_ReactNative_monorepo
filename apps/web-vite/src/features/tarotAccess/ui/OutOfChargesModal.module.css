@@ -1,0 +1,100 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-24);
+}
+
+/* Таймер до нового бесплатного расклада: бейдж-молния как у CreditsBadge + полоса дня. */
+.timer {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--ds-space-16);
+  row-gap: var(--ds-space-16);
+  padding: var(--ds-space-16) var(--ds-space-16) var(--ds-space-16);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-700);
+  border-left: var(--ds-size-edge-width) solid var(--ds-accent-400);
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: var(--ds-ground-800);
+  border: var(--ds-size-edge-width) solid var(--ds-accent-400);
+  color: var(--ds-accent-400);
+}
+
+.timerText {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  min-width: 0;
+}
+
+.track {
+  grid-column: 1 / -1;
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ds-ground-600);
+  overflow: hidden;
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 3px;
+  background: var(--ds-accent-400);
+  transition: width var(--ds-dur-block) var(--ds-ease);
+}
+
+.lead {
+  margin: 0;
+  text-align: center;
+}
+
+.free {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+.freeTitle {
+  margin: 0;
+  text-align: left;
+}
+
+.thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.goalIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  background: var(--ds-ground-600);
+  color: var(--ds-accent-400);
+}
+
+.topUp {
+  margin-top: calc(var(--ds-space-8) * -1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill {
+    transition: none;
+  }
+}

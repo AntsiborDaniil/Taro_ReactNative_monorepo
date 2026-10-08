@@ -1,11 +1,12 @@
 import { useEffect, useState, type ReactElement } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { TarotCardDirection, tarotCards } from '@legacy-data';
-import { getTarotCardReadings, TarotCardFace } from '@entities/spread';
+import { getTarotCardReadings, isCardOpenedFromSpread, TarotCardFace } from '@entities/spread';
 import { FavoriteButton } from '@entities/favorites';
 import { ensureI18nNamespaces } from '@shared/i18n';
-import { Chip, EmptyState, Header, Text } from '@shared/ui';
+import { Button, Chip, EmptyState, Header, Text } from '@shared/ui';
+import { CardStudy } from './ui/CardStudy';
 import styles from './CardDetail.module.css';
 
 /**
@@ -20,8 +21,10 @@ import styles from './CardDetail.module.css';
 export default function CardDetailPage(): ReactElement {
   const { cardId } = useParams<{ cardId: string }>();
   const { t } = useTranslation();
+  const study = !isCardOpenedFromSpread(useLocation().state);
   const [cardNsReady, setCardNsReady] = useState(false);
   const [direction, setDirection] = useState<TarotCardDirection>(TarotCardDirection.Upright);
+  const [descriptionOpen, setDescriptionOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -86,10 +89,25 @@ export default function CardDetailPage(): ReactElement {
         ) : null}
 
         {cardNsReady && reading.description ? (
-          <Text role="body" tone="ink50" className={styles.description}>
-            {t(reading.description)}
-          </Text>
+          <section className={styles.panel}>
+            <Text role="label" tone="ink100" as="h2">
+              {t('core:cardStudy.meaning')}
+            </Text>
+            <Text role="body" tone="ink100" className={descriptionOpen ? undefined : styles.clamped}>
+              {t(reading.description)}
+            </Text>
+            <Button
+              variant="link"
+              className={styles.more}
+              onClick={() => setDescriptionOpen((open) => !open)}
+              aria-expanded={descriptionOpen}
+            >
+              {descriptionOpen ? t('core:cardStudy.collapse') : t('core:cardStudy.readMore')}
+            </Button>
+          </section>
         ) : null}
+
+        {cardNsReady && study ? <CardStudy cardId={card.id} direction={direction} /> : null}
       </div>
     </div>
   );

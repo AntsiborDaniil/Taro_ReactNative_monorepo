@@ -1,5 +1,5 @@
 import { SpreadsCategory } from '@legacy-data';
-import type { SpreadName, TSpread, TSpreadFollowUp } from '@legacy-data';
+import type { SpreadName, TSpread, TSpreadFollowUp, TSpreadMemoryNote, TSpreadMemoryStats } from '@legacy-data';
 
 /** Максимум уточнений на один расклад (совпадает с лимитом в readingResult). */
 export const FOLLOW_UP_MAX = 3;
@@ -16,6 +16,34 @@ export function normalizeFollowUps(value: unknown): TSpreadFollowUp[] {
     if (result.length >= FOLLOW_UP_MAX) break;
   }
   return result;
+}
+
+/** payload.memoryStats — opaque jsonb: принимаем, только если форма узнаваема. */
+export function normalizeMemoryStats(value: unknown): TSpreadMemoryStats | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+  const v = value as Partial<TSpreadMemoryStats>;
+  if (typeof v.spreadsCount !== 'number' || typeof v.cardsCount !== 'number') return undefined;
+  return {
+    spreadsCount: v.spreadsCount,
+    cardsCount: v.cardsCount,
+    topCards: Array.isArray(v.topCards) ? v.topCards.filter((c) => typeof c?.cardId === 'string') : [],
+    dominantSuit: v.dominantSuit && typeof v.dominantSuit.suit === 'string' ? v.dominantSuit : null,
+    reversedPct: typeof v.reversedPct === 'number' ? v.reversedPct : null,
+    repeats: Array.isArray(v.repeats) ? v.repeats.filter((c) => typeof c?.cardId === 'string') : [],
+  };
+}
+
+/** payload.memoryNote — opaque jsonb: принимаем только известные формы. */
+export function normalizeMemoryNote(value: unknown): TSpreadMemoryNote | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+  const v = value as Record<string, unknown>;
+  if (v.kind === 'card' && typeof v.cardId === 'string' && typeof v.date === 'string') {
+    return { kind: 'card', cardId: v.cardId, date: v.date, spreadName: typeof v.spreadName === 'string' ? v.spreadName : '' };
+  }
+  if (v.kind === 'suit' && typeof v.suit === 'string' && typeof v.pct === 'number') {
+    return { kind: 'suit', suit: v.suit, pct: v.pct };
+  }
+  return undefined;
 }
 
 /** Перенос apps/web/src/shared/api/cloud/spreadMapping.ts (1-в-1, без RN-типов). */
@@ -65,6 +93,11 @@ export function spreadToCloudBody(spread: TSpread): CreateSpreadBody {
       horizontalPosition: spread.horizontalPosition,
       availableSubscriptions: spread.availableSubscriptions,
       followUps: normalizeFollowUps(spread.followUps),
+      memoryNote: spread.memoryNote ?? null,
+      memoryStats: spread.memoryStats ?? null,
+      mode: spread.mode ?? null,
+      // shareQuestion: GET /spreads/shared/:id отдаёт вопрос только при true.
+      shareQuestion: spread.shareQuestion === true,
     },
   };
 }
@@ -90,6 +123,10 @@ export function cloudRecordToSpread(record: CloudSpreadRecord): TSpread {
     question: record.question ?? undefined,
     interpretation: record.interpretation ?? undefined,
     followUps: normalizeFollowUps(payload.followUps),
+    memoryNote: normalizeMemoryNote(payload.memoryNote),
+    memoryStats: normalizeMemoryStats(payload.memoryStats),
+    mode: payload.mode === 'deep' ? 'deep' : undefined,
+    shareQuestion: payload.shareQuestion === true ? true : undefined,
   };
 }
 

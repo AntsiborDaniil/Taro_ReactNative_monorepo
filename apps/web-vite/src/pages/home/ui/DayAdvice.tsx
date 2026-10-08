@@ -1,8 +1,7 @@
 import { useState, type ReactElement } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { DAY_ADVICE_SPREAD, selectSpread } from '@entities/spread';
-import { useAppDispatch } from '@shared/lib/store';
+import { DAY_ADVICE_SPREAD } from '@entities/spread';
+import { useOpenFreePeriodCard } from '@features/freePeriodCard';
 import { getCurrentDate } from '@shared/lib/date';
 import { getImage } from '@shared/lib/getImage';
 import { AnalyticAction, track } from '@shared/lib/analytics';
@@ -24,9 +23,8 @@ function capitalizeFirst(value: string): string {
  */
 export function DayAdvice(): ReactElement {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { open: openFreeCard } = useOpenFreePeriodCard();
 
   const dateLabel = capitalizeFirst(getCurrentDate('badge'));
   const girlImage = getImage(['core', 'girl']);
@@ -35,10 +33,9 @@ export function DayAdvice(): ReactElement {
     if (isSubmitting) return;
     setIsSubmitting(true);
     track(AnalyticAction.ClickDayCard);
-    dispatch(selectSpread(DAY_ADVICE_SPREAD));
+    // Карта дня одна на день (по серверу): уже открыта — показываем её, иначе сразу к выбору карты.
     reachMetrikaGoal(MetrikaGoal.spreadStarted, { spreadId: DAY_ADVICE_SPREAD.id });
-    // «Совету дня» вопрос не нужен — сразу к выбору карты, без промежуточного экрана.
-    navigate('/reading');
+    openFreeCard(DAY_ADVICE_SPREAD);
   };
 
   return (

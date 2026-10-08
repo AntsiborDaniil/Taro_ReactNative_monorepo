@@ -1,27 +1,41 @@
 import { useEffect, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { selectHabitsLoaded, selectHabitsTodayProgress, loadHabits } from '@entities/habits';
-import { useAppDispatch, useAppSelector } from '@shared/lib/store';
+import {
+  getHabitDayProgress,
+  HabitType,
+  loadHabits,
+  selectHabitsLoaded,
+  selectHabitsOfTheDay,
+  selectHabitsTodayProgress,
+} from '@entities/habits';
+import { useToggleHabitToday } from '@features/habits';
 import { getCurrentDate } from '@shared/lib/date';
-import { PlusIcon } from '@shared/ui';
+import { useAppDispatch, useAppSelector } from '@shared/lib/store';
+import { ChargeMark, CheckIcon, ChevronRightIcon, PlusIcon, Text } from '@shared/ui';
 import styles from './HabitWidget.module.css';
+
+/** Сколько целей показываем прямо на главной; остальные — по «Ещё N». */
+const MAX_ROWS = 3;
 
 function capitalizeFirst(value: string): string {
   return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
 }
 
 /**
- * Перенос apps/web/src/widgets/habitWidget/HabitWidget.tsx — логика 1-в-1
- * (чтение habitsOfTheDay из локального хранилища, доля выполнения за сегодня),
- * разметка на CSS Modules. Клик по плашке → /habits/week, «+» → /habits/new.
+ * Виджет целей на главной (в паре с виджетом состояния, тот же визуальный язык):
+ * заголовок-итог дня, полоса прогресса и до трёх целей сегодняшнего дня, которые
+ * можно отметить прямо отсюда (toggleHabitDay, как в недельной карточке).
+ * Пусто — приглашение добавить первую цель. Шапка → /habits/week, «+» → /habits/new.
  */
 export function HabitWidget(): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const loaded = useAppSelector(selectHabitsLoaded);
+  const habits = useAppSelector(selectHabitsOfTheDay);
   const { progressPercent, completedGoals, total } = useAppSelector(selectHabitsTodayProgress);
+  const toggleToday = useToggleHabitToday();
 
   useEffect(() => {
     if (!loaded) {
@@ -29,46 +43,105 @@ export function HabitWidget(): ReactElement {
     }
   }, [dispatch, loaded]);
 
-  const date = capitalizeFirst(getCurrentDate());
+  const today = new Date();
   const percent = Math.round(Math.min(1, Math.max(0, progressPercent)) * 100);
+  const allDone = total > 0 && completedGoals === total;
+  const title = !total
+    ? t('habits:widget.emptyTitle')
+    : allDone
+      ? t('habits:widget.allDone')
+      : t('habits:widget.completedGoals', { completed: completedGoals, total });
+  // Закреплённые («На главной» в недельном экране) — первыми; если закреплены — только они.
+  const pinned = habits.filter((h) => h.pinned);
+  const shown = (pinned.length ? pinned : habits).slice(0, MAX_ROWS);
+  const rest = habits.length - shown.length;
 
   return (
-    <div
-      className={styles.root}
-      role="button"
-      tabIndex={0}
-      onClick={() => navigate('/habits/week')}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          navigate('/habits/week');
-        }
-      }}
-    >
-      <div className={styles.main}>
-        <div className={styles.headerRow}>
-          <span className={styles.date}>{date}</span>
-          <span className={styles.percent}>{`${percent}%`}</span>
-        </div>
-        <div className={styles.track}>
-          <div className={styles.fill} style={{ width: `${percent}%` }} />
-        </div>
-        <p className={styles.goalsText}>
-          {total
-            ? t('habits:widget.completedGoals', { completed: completedGoals, total })
-            : t('habits:widget.empty')}
-        </p>
+    <section className={styles.root}>
+      <div className={styles.head}>
+        <button type="button" className={styles.headLink} onClick={() => navigate('/habits/week')}>
+          <span className={styles.headText}>
+            <Text role="label" tone="accent" as="span">
+              {t('habits:widget.label')}
+            </Text>
+            <Text role="lead" tone="ink50" as="span">
+              {title}
+            </Text>
+            <Text role="micro" tone="ink100" as="span">
+              {capitalizeFirst(getCurrentDate())}
+            </Text>
+          </span>
+          {total ? (
+            <span className={styles.percent}>
+              <Text role="micro" tone="ink100" as="span">
+                {`${percent}%`}
+              </Text>
+              <ChevronRightIcon width={18} height={18} />
+            </span>
+          ) : null}
+        </button>
+        <button
+          type="button"
+          className={styles.addButton}
+          onClick={() => navigate('/habits/new')}
+          aria-label={t('habits:widget.add')}
+        >
+          <PlusIcon width={22} height={22} />
+        </button>
       </div>
-      <button
-        type="button"
-        className={styles.addButton}
-        onClick={(event) => {
-          event.stopPropagation();
-          navigate('/habits/new');
-        }}
-      >
-        <PlusIcon width={24} height={24} />
-      </button>
-    </div>
+
+      {total ? (
+        <>
+          <span className={styles.track} aria-hidden="true">
+            <span className={styles.fill} style={{ width: `${percent}%` }} />
+          </span>
+          <ul className={styles.list}>
+            {shown.map((habit) => {
+              const { isCompleted } = getHabitDayProgress({ habit, date: today });
+              // «Бросить привычку» с автозаполнением отмечается сама — руками не трогаем.
+              const auto = habit.type === HabitType.QuitNegative && habit.isAutoFillEnabled;
+              return (
+                <li key={habit.id ?? habit.title}>
+                  <button
+                    type="button"
+                    className={[styles.row, isCompleted ? styles.rowDone : ''].filter(Boolean).join(' ')}
+                    aria-pressed={isCompleted}
+                    disabled={auto || !habit.id}
+                    onClick={() => toggleToday(habit)}
+                  >
+                    <span className={styles.check} aria-hidden="true">
+                      {isCompleted ? <CheckIcon width={16} height={16} /> : null}
+                    </span>
+                    <span className={styles.rowTitle}>{habit.title}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <div className={styles.footer}>
+            {rest > 0 ? (
+              <button type="button" className={styles.more} onClick={() => navigate('/habits/week')}>
+                {t('habits:widget.more', { count: rest })}
+              </button>
+            ) : (
+              <span />
+            )}
+            {/* Награда недели — чтобы было понятно, за что цели «платят». */}
+            <span className={styles.reward}>
+              <Text role="micro" tone="ink100" as="span">
+                {t('habits:widget.reward')}
+              </Text>
+              <ChargeMark size="xs" />
+            </span>
+          </div>
+        </>
+      ) : (
+        <button type="button" className={styles.empty} onClick={() => navigate('/habits/new')}>
+          <Text role="body" tone="ink100" as="span">
+            {t('habits:widget.emptyHint')}
+          </Text>
+        </button>
+      )}
+    </section>
   );
 }

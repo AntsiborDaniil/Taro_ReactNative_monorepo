@@ -17,6 +17,10 @@ import {
   isCloudSpread,
   normalizeFollowUps,
   saveSpreadLocally,
+  CARD_FROM_SPREAD_STATE,
+  freePeriodKindOf,
+  getFreePeriodCard,
+  saveFreePeriodCard,
   FOLLOW_UP_MAX,
   setFollowUps,
   setSpreadMeta,
@@ -34,12 +38,13 @@ import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { AnalyticAction, track } from '@shared/lib/analytics';
 import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { ensureI18nNamespaces } from '@shared/i18n';
+import { haptic } from '@shared/lib/haptics';
 import { isRtkNetworkError } from '@shared/lib/rtkQueryError';
-import { buildSharedReadingUrl, isShareableReadingUid } from '@shared/lib/sharedReadingLink';
-import { copyTextToClipboard } from '@shared/lib/web/copyTextToClipboard';
-import { isTelegramMiniApp } from '@shared/lib/web/telegramWebApp';
+import { isShareableReadingUid } from '@shared/lib/sharedReadingLink';
+import { registerShareProvider } from '@features/shareReading';
 import {
   Button,
+  ChargeMark,
   ChevronLeftIcon,
   ChevronRightIcon,
   Header,
@@ -49,9 +54,18 @@ import {
   Textarea,
   useToast,
 } from '@shared/ui';
+import { DeepInsights } from './ui/DeepInsights';
+import { DeepText } from './ui/DeepText';
+import { MemoryNote } from './ui/MemoryNote';
 import styles from './ReadingResult.module.css';
 
 /** Абзацы ответа AI: пустая строка — граница абзаца. */
+/**
+ * Уже запущенные сохранения в историю за жизнь вкладки: ключ «id расклада + текст
+ * толкования» → промис сохранения. Защищает от дублей при повторном прогоне эффектов.
+ */
+const persistedReadings = new Map<string, Promise<TSpread | null>>();
+
 function toParagraphs(text: string): string[] {
   return text
     .split(/\n{2,}/)
@@ -229,7 +243,6 @@ export default function ReadingResultPage(): ReactElement {
   const [cardNsReady, setCardNsReady] = useState(false);
   const [activeCard, setActiveCard] = useState(0);
   const [activeFollowUp, setActiveFollowUp] = useState(0);
-  const [isSharing, setIsSharing] = useState(false);
   const [followUpQuestion, setFollowUpQuestion] = useState('');
   const detailLock = useHeightLock(spread?.id);
   const followUpLock = useHeightLock(spread?.id);
@@ -290,6 +303,16 @@ export default function ReadingResultPage(): ReactElement {
     persistPromise.current = null;
   }, [spread?.id]);
 
+  /**
+   * Карта дня: после сохранения в историю обновляем кэш дня (uid/packKey), чтобы
+   * повторное открытие не создавало дубль в истории.
+   */
+  const rememberDayCard = (value: TSpread) => {
+    const kind = freePeriodKindOf(value.id);
+    if (!kind || openedAsShared) return;
+    if (getFreePeriodCard(kind)) saveFreePeriodCard(kind, value);
+  };
+
   /** Облачная запись (POST/PATCH /api/spreads) — только она даёт uid для ссылки. */
   const saveSpreadToCloud = async (value: TSpread): Promise<TSpread | null> => {
     try {
@@ -297,7 +320,15 @@ export default function ReadingResultPage(): ReactElement {
         value.uid && isCloudSpread(value)
           ? await updateSpreadHistory({ uid: value.uid, spread: value }).unwrap()
           : await createSpreadHistory(value).unwrap();
-      dispatch(setSpreadMeta({ uid: saved.uid, date: saved.date, packKey: saved.packKey }));
+      dispatch(
+        setSpreadMeta({
+          uid: saved.uid,
+          date: saved.date,
+          packKey: saved.packKey,
+          shareQuestion: value.shareQuestion === true,
+        }),
+      );
+      rememberDayCard({ ...value, uid: saved.uid, date: saved.date, packKey: saved.packKey });
       return saved;
     } catch {
       return null;
@@ -309,16 +340,27 @@ export default function ReadingResultPage(): ReactElement {
     if (isAuthenticated) return saveSpreadToCloud(value);
     const saved = saveSpreadLocally(value);
     dispatch(setSpreadMeta({ uid: saved.uid, date: saved.date, packKey: saved.packKey }));
+    rememberDayCard(saved);
     return saved;
   };
 
   // Толкование уже получено на /reading — здесь только сохраняем в историю (для шаринга).
+  // Ключ — сам текст толкования: он уникален для расклада. Реестр модульный, а не ref:
+  // StrictMode (и повторный маунт) заново прогоняет эффекты, а эффект сброса выше
+  // обнуляет ref — с ref-флагом в историю уходило два POST, «карта выпала 2 раза».
   useEffect(() => {
     if (!spread || !interpretation || openedAsShared) return;
-    const key = `${spread.id}:${interpretation.length}`;
+    const key = `${spread.id}:${interpretation}`;
     if (persistStartedFor.current === key) return;
     persistStartedFor.current = key;
-    persistPromise.current = persistSpreadToHistory({ ...spread, interpretation });
+    const started = persistedReadings.get(key);
+    if (started) {
+      persistPromise.current = started;
+      return;
+    }
+    const promise = persistSpreadToHistory({ ...spread, interpretation });
+    persistedReadings.set(key, promise);
+    persistPromise.current = promise;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spread?.id, interpretation, openedAsShared, isAuthenticated]);
 
@@ -417,71 +459,45 @@ export default function ReadingResultPage(): ReactElement {
    * best effort и могло не успеть или упасть, поэтому перед шарингом дожимаем
    * сохранение и берём свежий uid (раньше кнопка в этом случае просто пропадала).
    */
-  const ensureShareableUid = async (): Promise<string | null> => {
+  const ensureShareableUid = async (shareQuestion = spread?.shareQuestion === true): Promise<string | null> => {
     if (!spread) return null;
 
     // Сначала дожидаемся фонового сохранения, иначе создадим вторую запись того же расклада.
     const pending = await persistPromise.current;
     const cloudSpread = pending && isCloudSpread(pending) ? pending : isCloudSpread(spread) ? spread : null;
     const cloudUid = cloudSpread?.uid;
-    if (isShareableReadingUid(cloudUid)) return cloudUid;
+    const wanted = shareQuestion === true;
+    // Флаг shareQuestion пишется в payload; если облачная запись уже есть, но флаг другой — обновляем её (PATCH).
+    if (isShareableReadingUid(cloudUid) && cloudSpread && (cloudSpread.shareQuestion === true) === wanted) {
+      return cloudUid;
+    }
     if (!isAuthenticated) return null;
 
-    const saved = await saveSpreadToCloud({ ...spread, interpretation });
+    const base = cloudSpread ? { ...spread, uid: cloudSpread.uid, date: cloudSpread.date, packKey: cloudSpread.packKey } : spread;
+    const saved = await saveSpreadToCloud({ ...base, interpretation, shareQuestion: wanted });
     const savedUid = saved?.uid;
     return isShareableReadingUid(savedUid) ? savedUid : null;
   };
 
-  const handleShare = async () => {
-    if (!spread || !interpretation || isSharing) return;
+  // Лист «Поделиться» (features/shareReading) берёт «дожми сохранение и верни uid» отсюда.
+  // Свежая версия ensureShareableUid лежит в ref, чтобы не пересоздавать регистрацию на каждый рендер.
+  const ensureUidRef = useRef(ensureShareableUid);
+  ensureUidRef.current = ensureShareableUid;
+  useEffect(
+    () =>
+      registerShareProvider({
+        ensureUid: (shareQuestion) => ensureUidRef.current(shareQuestion),
+        isAuthenticated,
+      }),
+    [isAuthenticated],
+  );
+
+  const openShareSheet = () => {
+    if (!spread || !interpretation) return;
     track(AnalyticAction.ClickShareSpread, { spread: spread.name });
     reachMetrikaGoal(MetrikaGoal.shareClick, { spreadId: spread.id });
-    setIsSharing(true);
-
-    try {
-      const uid = await ensureShareableUid();
-      if (!uid) {
-        toast.error(
-          isAuthenticated ? t('core:ai.copy.shareFailed') : t('core:ai.copy.shareNeedAuth'),
-        );
-        return;
-      }
-
-      const url = buildSharedReadingUrl(uid);
-      const title = t(spread.name);
-
-      // Mini App: нативный shareURL клиента Telegram (Bot API 8+).
-      const tgShare = window.Telegram?.WebApp?.shareURL;
-      if (isTelegramMiniApp() && typeof tgShare === 'function') {
-        try {
-          tgShare(url, title);
-          reachMetrikaGoal(MetrikaGoal.shareSuccess, { spreadId: spread.id, channel: 'telegram' });
-          return;
-        } catch {
-          // fallback ниже
-        }
-      }
-
-      if (typeof navigator.share === 'function') {
-        try {
-          await navigator.share({ url, title });
-          reachMetrikaGoal(MetrikaGoal.shareSuccess, { spreadId: spread.id, channel: 'native' });
-          return;
-        } catch {
-          // отменено или не поддержано — копируем ссылку
-        }
-      }
-
-      const copied = await copyTextToClipboard(url);
-      if (copied) {
-        toast.success(t('core:ai.copy.shareSuccess'));
-        reachMetrikaGoal(MetrikaGoal.shareSuccess, { spreadId: spread.id, channel: 'clipboard' });
-      } else {
-        toast.error(t('core:ai.copy.fail'));
-      }
-    } finally {
-      setIsSharing(false);
-    }
+    haptic.impact('light');
+    dispatch(openModal({ id: 'share-reading' }));
   };
 
   if (!spread || !isComplete || !interpretation) {
@@ -539,7 +555,28 @@ export default function ReadingResultPage(): ReactElement {
   return (
     <div className={styles.page}>
       <div className={styles.column}>
-        <Header title={t(spread.name)} showBack />
+        <Header
+          title={t(spread.name)}
+          showBack
+          right={
+            openedAsShared ? undefined : (
+              <button
+                type="button"
+                className={styles.headerShare}
+                onClick={openShareSheet}
+                aria-label={t('spread:share.headerA11y')}
+              >
+                <ShareIcon width={20} height={20} />
+              </button>
+            )
+          }
+        />
+
+        {spread.mode === 'deep' ? (
+          <Text role="label" tone="accent" className={styles.deepLabel}>
+            {t('spread:deep.subtitle')}
+          </Text>
+        ) : null}
 
         {spread.question ? (
           <div className={styles.question}>
@@ -585,20 +622,17 @@ export default function ReadingResultPage(): ReactElement {
             {t('spread:summaryTitle')}
           </Text>
 
-          <div className={styles.paragraphs}>
-            {paragraphs.map((paragraph, index) => (
-              <Text
-                key={index}
-                role="body"
-                tone="ink50"
-                className={styles.paragraph}
-                style={{ animationDelay: `${Math.min(index, 4) * 60}ms` }}
-              >
-                {paragraph}
-              </Text>
-            ))}
-          </div>
+          {/* Лид-слова («Связи.», «Вопросы к себе.», «Шаг на сегодня:») — отдельные плашки. */}
+          <DeepText paragraphs={paragraphs} />
         </section>
+
+        {/* Глубокий разбор: рисунок расклада + история за 30 дней (считает код, не модель). */}
+        {spread.mode === 'deep' && !openedAsShared ? (
+          <DeepInsights cards={spread.selectedCards ?? []} stats={spread.memoryStats} namesReady={cardNsReady} />
+        ) : null}
+
+        {/* Память: факт из истории; чужой расклад (шаренная ссылка) — скрыта. */}
+        {spread.memoryNote && !openedAsShared && cardNsReady ? <MemoryNote note={spread.memoryNote} /> : null}
 
         {/* 3. Уточнения — отдельный блок: сначала ответы, потом поле */}
         {/* Тред видят все (в т.ч. по шаренной ссылке), форму — только автор. */}
@@ -699,6 +733,8 @@ export default function ReadingResultPage(): ReactElement {
                     variant="action"
                     className={styles.askCta}
                     loading={isFollowUpLoading}
+                    icon={<ChargeMark size="md" onAction />}
+                    iconPosition="end"
                     onClick={handleFollowUp}
                   >
                     {isFollowUpLoading ? t('spread:followUp.ctaBusy') : t('spread:followUp.cta')}
@@ -809,7 +845,7 @@ export default function ReadingResultPage(): ReactElement {
                 className={styles.cardLink}
                 icon={<ChevronRightIcon width={16} height={16} />}
                 iconPosition="end"
-                onClick={() => navigate(`/card/${current.id}`)}
+                onClick={() => navigate(`/card/${current.id}`, { state: CARD_FROM_SPREAD_STATE })}
               >
                 {t('spread:aboutCard')}
               </Button>
@@ -820,22 +856,9 @@ export default function ReadingResultPage(): ReactElement {
 
         {interpretation ? (
           <div className={styles.actions}>
-            <Button
-              variant="quiet"
-              className={styles.actionBtn}
-              icon={<ShareIcon width={18} height={18} />}
-              loading={isSharing}
-              onClick={handleShare}
-            >
-              {t('core:ai.copy.share')}
-            </Button>
-            <Button
-              variant="quiet"
-              quietTone="neutral"
-              className={styles.actionBtn}
-              onClick={() => navigate('/spreads')}
-            >
-              {t('spread:newSpread')}
+            {/* Внизу — только ссылка-возврат к раскладам (DS link); «Поделиться» — иконка в шапке. */}
+            <Button variant="link" className={styles.backToSpreads} onClick={() => navigate('/spreads')}>
+              {t('spread:backToSpreads')}
             </Button>
           </div>
         ) : null}

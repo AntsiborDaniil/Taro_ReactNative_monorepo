@@ -1,0 +1,164 @@
+.ritual {
+  position: relative;
+  width: 100cqw;
+  max-width: none;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-8);
+  --deck-card-w: 92px;
+}
+
+@container readingCol (min-width: 768px) {
+  .ritual {
+    --deck-card-w: 120px;
+  }
+}
+
+/* Высота как у сцены coverflow — при раскрытии колоды раскладка не прыгает. */
+.stage {
+  position: relative;
+  width: 100%;
+  height: calc(var(--deck-card-w) * 16 / 9 + var(--ds-space-48));
+  overflow: hidden;
+}
+
+.stack {
+  position: absolute;
+  left: 50%;
+  top: var(--ds-space-24);
+  width: var(--deck-card-w);
+  height: calc(var(--deck-card-w) * 16 / 9);
+  transform: translateX(-50%);
+  /* Горизонтальные жесты забираем себе, вертикальные остаются странице. */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.stackCut {
+  cursor: grab;
+}
+
+.stackDragging {
+  cursor: grabbing;
+}
+
+.stackCut:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 6px;
+  border-radius: 9%;
+}
+
+/* Половина стопки: слой для сдвига верхних карт целиком. */
+.half {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  will-change: transform;
+}
+
+.halfTop {
+  z-index: 2;
+}
+
+/* После снятия верхняя половина ложится под низ. */
+.halfUnder {
+  z-index: 0;
+}
+
+.card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  z-index: calc(10 - var(--i));
+  transform: translateY(calc(var(--i) * 1.5px));
+  pointer-events: none;
+}
+
+/* Рифл-перемешивание (RiffleShuffle): карты анимирует Web Animations API. */
+.shuffleDeck {
+  position: absolute;
+  inset: 0;
+}
+
+.shuffleCard {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  will-change: transform;
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.35));
+}
+
+/* Мягкое золотое свечение под колодой — «дышит» в такт рифлу. */
+.shuffleGlow {
+  position: absolute;
+  left: -40%;
+  right: -40%;
+  bottom: -10%;
+  height: 40%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--ds-accent-400) 55%, transparent), transparent);
+  opacity: 0.25;
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.spark {
+  position: absolute;
+  left: calc(50% - 3px);
+  top: calc(50% - 3px);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ds-accent-400);
+  box-shadow: 0 0 8px var(--ds-accent-400);
+  opacity: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-4);
+  min-height: 84px;
+  text-align: center;
+}
+
+.hintRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-8);
+}
+
+.hintArrow {
+  color: var(--ds-accent-400);
+  animation: hintPulse 1.6s var(--ds-ease) infinite;
+}
+
+@keyframes hintPulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hintArrow {
+    animation: none;
+  }
+
+  .half {
+    transition: none !important;
+  }
+}

@@ -7,6 +7,8 @@ export enum SpreadsCategory {
   Universal = 'universal',
   SelfDevelopment = 'selfDevelopment',
   Choice = 'choice',
+  /** Бесплатные карты периода: дня, недели, месяца. */
+  Period = 'period',
 }
 
 export enum SpreadName {
@@ -29,6 +31,8 @@ export enum SpreadName {
   Choice_StayOrGo = 'choice_stayOrGo',
   Simple_DayParts = 'simple_dayParts',
   SelfDevelopment_InMyHands = 'selfDevelopment_inMyHands',
+  Period_WeekCard = 'period_weekCard',
+  Period_MonthCard = 'period_monthCard',
 }
 
 export enum TarotCardDirection {
@@ -100,6 +104,21 @@ export type TSpreadFollowUp = {
   createdAt?: string;
 };
 
+/** «Память» таролога: детерминированный факт из истории (форматируется через i18n на клиенте). */
+export type TSpreadMemoryNote =
+  | { kind: 'card'; cardId: string; date: string; spreadName: string }
+  | { kind: 'suit'; suit: string; pct: number };
+
+/** Статистика истории за 30 дней из /interpret (payload.memoryStats) — плашки глубокого разбора. */
+export type TSpreadMemoryStats = {
+  spreadsCount: number;
+  cardsCount: number;
+  topCards: Array<{ cardId: string; count: number }>;
+  dominantSuit: { suit: string; pct: number } | null;
+  reversedPct: number | null;
+  repeats: Array<{ cardId: string; count: number; lastDate: string }>;
+};
+
 export type TSpread = {
   name: string;
   id: SpreadName;
@@ -120,6 +139,14 @@ export type TSpread = {
   interpretation?: string;
   /** Уточнения автора; читают все (шаренная ссылка), добавляет только владелец. */
   followUps?: TSpreadFollowUp[];
+  /** Факт памяти из ответа /interpret (payload.memoryNote). */
+  memoryNote?: TSpreadMemoryNote;
+  /** Статистика истории на момент расклада (payload.memoryStats). */
+  memoryStats?: TSpreadMemoryStats;
+  /** 'deep' — «Глубокий разбор» (payload.mode). */
+  mode?: 'deep';
+  /** Автор разрешил показывать свой вопрос по ссылке (payload.shareQuestion). */
+  shareQuestion?: boolean;
 };
 
 export type TSpreadCategory = {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type ReactElement } from 'react';
+import { useEffect, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -6,20 +6,17 @@ import {
   selectAllHabitsCompletedThisWeek,
   selectHabitsLoaded,
   selectHabitsOfTheWeek,
+  useGetHabitWeekRewardQuery,
 } from '@entities/habits';
 import { HabitWeekCard } from '@features/habits';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
-import { getDateISO, getCurrentWeekBounds } from '@shared/lib/date';
-import { Button, EmptyState, Header, Text } from '@shared/ui';
+import { Button, ChargeMark, EmptyState, Header, Text } from '@shared/ui';
 import styles from './HabitWeek.module.css';
 
-const REWARD_STORAGE_KEY = 'GoalCelebrationWeek';
-
 /**
- * Перенос apps/web/src/pages/habitWeek — список карточек привычек недели +
- * баннер награды (переход на /goal), если все цели недели закрыты на 100% и
- * награда ещё не забиралась на этой неделе (ключ в localStorage, 1-в-1
- * AsyncMemoryKey.GoalCelebrationWeek).
+ * Список карточек привычек недели + баннер награды (+1 заряд за неделю, /goal):
+ * виден, пока награда этой недели не получена (статус — с сервера).
+ * Отмечать можно только сегодняшний день (HabitWeekCard).
  */
 export default function HabitWeekPage(): ReactElement {
   const { t } = useTranslation();
@@ -33,9 +30,10 @@ export default function HabitWeekPage(): ReactElement {
     if (!loaded) dispatch(loadHabits());
   }, [dispatch, loaded]);
 
-  const weekStartISO = useMemo(() => getDateISO(getCurrentWeekBounds().start), []);
-  const rewardWeek = typeof window !== 'undefined' ? window.localStorage.getItem(REWARD_STORAGE_KEY) : null;
-  const showRewardBanner = habitsOfTheWeek.length > 0 && allCompleted && rewardWeek !== weekStartISO;
+  const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
+  const { data: reward } = useGetHabitWeekRewardQuery(undefined, { skip: !isAuthenticated });
+  // Награда видна всю неделю (за что цели «платят»), пока не получена.
+  const showRewardBanner = habitsOfTheWeek.length > 0 && !reward?.claimed;
 
   return (
     <div className={styles.page}>
@@ -52,10 +50,12 @@ export default function HabitWeekPage(): ReactElement {
           <>
             {showRewardBanner ? (
               <button type="button" className={styles.banner} onClick={() => navigate('/goal')}>
-                <span className={styles.bannerIcon}>★</span>
+                <span className={styles.bannerIcon}>
+                  <ChargeMark size="md" />
+                </span>
                 <span className={styles.bannerTextCol}>
                   <Text role="label" as="span" className={styles.bannerTitle}>
-                    {t('habits:banner.rewardTitle')}
+                    {allCompleted ? t('habits:banner.rewardReady') : t('habits:banner.rewardTitle')}
                   </Text>
                   <Text role="body" tone="ink100" as="span">
                     {t('habits:banner.rewardDescription')}

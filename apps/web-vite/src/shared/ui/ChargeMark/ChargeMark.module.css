@@ -1,0 +1,59 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  color: var(--ds-accent-400);
+  line-height: 1;
+}
+
+.icon {
+  display: block;
+}
+
+.count {
+  font-family: var(--ds-font-label-family);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.xs .icon {
+  width: 12px;
+  height: 12px;
+}
+.xs .count {
+  font-size: 10px;
+}
+
+.sm .icon {
+  width: 14px;
+  height: 14px;
+}
+.sm .count {
+  font-size: 12px;
+}
+
+.md .icon {
+  width: 18px;
+  height: 18px;
+}
+.md .count {
+  font-size: 15px;
+}
+
+.onAction {
+  color: var(--ds-on-action);
+  opacity: 0.85;
+}
+
+.overlay {
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border-radius: 11px;
+  background: var(--ds-scrim-ground-900);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}

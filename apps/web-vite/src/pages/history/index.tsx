@@ -11,6 +11,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { formatHistoryDate } from '@shared/lib/date';
 import { EmptyState, Header, ListRow, Button, Skeleton } from '@shared/ui';
+import { topCardOfLastWeek } from './lib/topCardOfLastWeek';
 import styles from './History.module.css';
 
 type HistorySection = { title: string; data: TSpread[] };
@@ -39,7 +40,7 @@ function groupByDay(spreads: TSpread[], todayText: string, yesterdayText: string
  * (уже с готовым interpretation — повторной интерпретации не будет).
  */
 export default function HistoryPage(): ReactElement {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
@@ -66,6 +67,14 @@ export default function HistoryPage(): ReactElement {
   const spreads = isAuthenticated ? (cloudSpreads ?? []) : localSpreads;
   const sections = useMemo(() => groupByDay(spreads, t('core:today'), t('core:yesterday')), [spreads, t]);
 
+  // Тизер «Зеркала недели»: самая частая карта за 7 дней. Название берём из
+  // card.json только если namespace уже загружен (там 20+ МБ — не тянем ради подписи).
+  const topCard = useMemo(() => topCardOfLastWeek(spreads), [spreads]);
+  const teaserSubtitle =
+    topCard && i18n.hasLoadedNamespace('card')
+      ? t('main:mirror.teaser.top', { card: t(`card:${topCard.cardId}.name`), count: topCard.count })
+      : t('main:mirror.link.subtitle');
+
   const canLoadMore = isAuthenticated
     ? (cloudSpreads?.length ?? 0) >= cloudLimit
     : shownLocalPackIndex > 0;
@@ -89,6 +98,8 @@ export default function HistoryPage(): ReactElement {
     <div className={styles.page}>
       <div className={styles.column}>
         <Header title={t('core:page.spreadsHistory')} />
+
+        <ListRow title={t('main:mirror.title')} subtitle={teaserSubtitle} to="/mirror" />
 
         {loading ? (
           <div className={styles.rows}>

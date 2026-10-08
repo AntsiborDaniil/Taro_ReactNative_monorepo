@@ -1,0 +1,131 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-16);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-16);
+  padding: var(--ds-space-24);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-800);
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+}
+
+.title,
+.groupTitle {
+  margin: 0;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: var(--ds-space-8);
+  margin: 0;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-12);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-700);
+  min-width: 0;
+}
+
+.tileValue {
+  margin: 0;
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-title-family);
+  font-size: var(--ds-font-title-size);
+  line-height: var(--ds-font-title-line-height);
+  font-variant-numeric: tabular-nums;
+}
+
+.tileLabel {
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-micro-family);
+  font-size: var(--ds-font-micro-size);
+  line-height: var(--ds-font-micro-line-height);
+  letter-spacing: var(--ds-font-micro-letter-spacing);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-12);
+  padding: var(--ds-space-8) var(--ds-space-12);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-700);
+  color: inherit;
+  text-decoration: none;
+}
+
+.thumb {
+  display: block;
+  flex: 0 0 auto;
+  width: 36px;
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.topRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-12);
+}
+
+.topCard {
+  position: relative;
+  display: block;
+  width: 64px;
+  border-radius: 6px;
+}
+
+.topBadge {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  min-width: 28px;
+  padding: 2px 6px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  background: var(--ds-ground-900);
+  border: var(--ds-size-hairline) solid var(--ds-accent-400);
+  color: var(--ds-accent-400);
+  font-family: var(--ds-font-label-family);
+  font-size: var(--ds-font-micro-size);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.row:focus-visible,
+.topCard:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}

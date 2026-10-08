@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
+import { haptic } from '@shared/lib/haptics';
 import { useGetSettingsQuery, usePatchSettingsMutation } from '../api';
 import { getLocalSettings, patchLocalSettings } from './local';
 import { setSettings } from './settingsSlice';
@@ -58,14 +59,12 @@ export function useSettings(): {
     [dispatch, settings, isAuthenticated, patchSettings],
   );
 
+  const vibrationOn = settings.sound?.vibration ?? true;
   const handleVibrationClick = useCallback(() => {
-    if (!settings.sound?.vibration) return;
-    // Перенос handleVibrationClick (expo-haptics) на web: Vibration API,
-    // тихо игнорируем отсутствие поддержки (Safari/iOS).
-    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
-      navigator.vibrate(10);
-    }
-  }, [settings.sound?.vibration]);
+    if (!vibrationOn) return;
+    // HapticFeedback в Mini App (iOS тоже), navigator.vibrate на вебе.
+    haptic.impact('light');
+  }, [vibrationOn]);
 
   return useMemo(
     () => ({ settings, loaded, updateSetting, handleVibrationClick }),

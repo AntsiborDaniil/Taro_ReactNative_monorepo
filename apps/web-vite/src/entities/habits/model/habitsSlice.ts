@@ -60,6 +60,13 @@ const habitsSlice = createSlice({
       };
       persist(state.habits);
     },
+    /** Закрепить/открепить цель на главной (не больше MAX_PINNED_HABITS — проверяет UI). */
+    togglePinHabit: (state, action: PayloadAction<string>) => {
+      const habit = state.habits.find((item) => item.id === action.payload);
+      if (!habit) return;
+      habit.pinned = !habit.pinned;
+      persist(state.habits);
+    },
     /** 1-в-1 useHabits().deleteHabit. */
     removeHabit: (state, action: PayloadAction<string>) => {
       state.habits = state.habits.filter((habit) => habit.id !== action.payload);
@@ -74,7 +81,7 @@ const habitsSlice = createSlice({
   },
 });
 
-export const { addHabit, toggleHabitDay, removeHabit } = habitsSlice.actions;
+export const { addHabit, toggleHabitDay, removeHabit, togglePinHabit } = habitsSlice.actions;
 export const habitsReducer = habitsSlice.reducer;
 
 const selectHabits = (state: RootState) => state.habits.habits;
@@ -106,6 +113,25 @@ export const selectHabitsOfTheWeek = createSelector(selectHabits, (habits) => {
     if (habit.endDate && new Date(habit.endDate).getTime() < start.getTime()) return false;
     return true;
   });
+});
+
+/**
+ * Сколько разных дней недели требуют ручной отметки (объединение расписаний
+ * привычек; автозаполняемые «бросить» не считаются) — для награды недели:
+ * сервер проверяет, что отметки реально были в столько разных дней.
+ */
+export const selectWeekRequiredDays = createSelector(selectHabitsOfTheWeek, (habitsOfTheWeek) => {
+  const { days } = getCurrentWeekBounds();
+  const needed = new Set<number>();
+  for (const habit of habitsOfTheWeek) {
+    if (!habit.startDate) continue;
+    if (habit.type === HabitType.QuitNegative && habit.isAutoFillEnabled) continue;
+    days.forEach((day, index) => {
+      const scheduled = habit.type === HabitType.QuitNegative || habit.frequencyDays?.includes(index);
+      if (scheduled && day.getTime() >= new Date(habit.startDate as string).getTime()) needed.add(index);
+    });
+  }
+  return needed.size;
 });
 
 /** 1-в-1 HabitWeek.isHabitCompletedForWeek — все привычки недели закрыты на 100%. */

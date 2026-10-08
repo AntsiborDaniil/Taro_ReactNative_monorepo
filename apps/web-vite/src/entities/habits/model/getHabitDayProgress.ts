@@ -48,7 +48,8 @@ export function getHabitsOfTheDay(habits: THabit[]): THabit[] {
     if (
       curr.type === HabitType.BuildPositive &&
       curr.frequencyDays &&
-      !curr.frequencyDays.includes(new Date().getDay() - 1)
+      // Индекс дня недели с понедельника (Пн=0…Вс=6); getDay() у воскресенья — 0.
+      !curr.frequencyDays.includes((new Date().getDay() + 6) % 7)
     ) {
       return acc;
     }

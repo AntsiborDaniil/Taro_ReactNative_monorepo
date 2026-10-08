@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -11,11 +12,14 @@ import {
   type WheelEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TarotCardDirection, type SpreadName, type TSelectedTarotCard } from '@legacy-data';
-import { getTarotCardReadings, pickRandomCard, TarotCardFace, type TSpread } from '@entities/spread';
+import { SpreadName, TarotCardDirection, tarotCards, type TSelectedTarotCard, type TTarotCard } from '@legacy-data';
+import { getTarotCardReadings, isFreePeriodSpread, TarotCardFace, type TSpread } from '@entities/spread';
 import { getImage, DECK_STYLE_FLAT } from '@shared/lib/getImage';
+import { haptic } from '@shared/lib/haptics';
 import { useAppSelector } from '@shared/lib/store';
 import { Button, ChevronLeftIcon, ChevronRightIcon, Text } from '@shared/ui';
+import { DeckRitual } from './DeckRitual';
+import { shuffleSecure } from './shuffleDeck';
 import styles from './CardChoice.module.css';
 
 const DECK_SIZE = 21;
@@ -26,6 +30,44 @@ const TILT_DEG = 32;
 const DEPTH_PX = 70;
 const VISIBLE_RANGE = 6;
 const DRAG_CLICK_TOLERANCE = 6;
+const TOTAL_CARDS = 78;
+/** Раскрытие стопки в coverflow: --ds-dur-scene (700ms) + стаггер 15ms на карту. */
+const REVEAL_DURATION_MS = 700;
+const REVEAL_STAGGER_MS = 15;
+const REDUCED_FADE_MS = 150;
+const RITUAL_FLAG_PREFIX = 'mt.deckRitual.v1:';
+
+type Phase = 'shuffle' | 'cut' | 'reveal' | 'pick';
+
+/** Церемония уже была в этой сессии для этого расклада (назад → вперёд не повторяем). */
+function ritualSeen(spreadId: string): boolean {
+  try {
+    return window.sessionStorage.getItem(RITUAL_FLAG_PREFIX + spreadId) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function markRitualSeen(spreadId: string): void {
+  try {
+    window.sessionStorage.setItem(RITUAL_FLAG_PREFIX + spreadId, '1');
+  } catch {
+    /* ignore (private mode) */
+  }
+}
+
+function clearRitualSeen(spreadId: string): void {
+  try {
+    window.sessionStorage.removeItem(RITUAL_FLAG_PREFIX + spreadId);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Новый порядок колоды (id 0..77): Fisher–Yates на crypto.getRandomValues. */
+function freshDeckOrder(): number[] {
+  return shuffleSecure(Array.from({ length: TOTAL_CARDS }, (_, i) => i));
+}
 
 type CardChoiceProps = {
   spread: TSpread;
@@ -77,10 +119,39 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
   const [cardWidth, setCardWidth] = useState(96);
   const [justFilled, setJustFilled] = useState<number | null>(null);
 
+  // Церемония: shuffle → cut → reveal → pick. Не нужна, если карты уже тянули
+  // (возврат на экран), расклад завершён или церемония уже была в этой сессии.
+  // При reduced-motion shuffle/reveal пропускаются — остаётся тап «Снять колоду».
+  const [phase, setPhase] = useState<Phase>(() => {
+    if (selectedCards.length > 0 || ritualSeen(spread.id)) return 'pick';
+    return prefersReducedMotion() ? 'cut' : 'shuffle';
+  });
+  const [fadeIn, setFadeIn] = useState(false);
+  // Порядок колоды 0..77: стартовый и после cut (карта под рубашкой берётся отсюда).
+  const deckOrderRef = useRef<number[]>([]);
+  if (deckOrderRef.current.length === 0) deckOrderRef.current = freshDeckOrder();
+  // Карты дня/недели/месяца — короткая церемония (один рифл).
+  const isDayCard = isFreePeriodSpread(spread.id);
+
   const selectedIdsMap = useMemo(
     () => Object.fromEntries(selectedCards.map((card) => [card.id, true])),
     [selectedCards],
   );
+
+  /**
+   * Карта под рубашкой: берём из перемешанного порядка по стабильному ключу рубашки
+   * (первые DECK_SIZE позиций); если она уже лежит в слоте (возврат на экран) —
+   * следующая свободная из хвоста порядка.
+   */
+  const takeCard = useCallback((preferredKey: number | null, used: Record<string, boolean>): TTarotCard => {
+    const order = deckOrderRef.current;
+    const preferred = preferredKey != null ? order[preferredKey] : undefined;
+    const id =
+      preferred != null && !used[String(preferred)]
+        ? preferred
+        : (order.find((candidate) => !used[String(candidate)]) ?? order[0]);
+    return tarotCards[String(id)];
+  }, []);
 
   const positionLabels = useMemo(
     () =>
@@ -92,7 +163,10 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
   );
 
   // Ширина карты колоды задаётся в CSS (var по брейкпоинтам) — меряем, чтобы считать шаг.
-  useEffect(() => {
+  // Перемеряем при смене фазы: coverflow монтируется только после церемонии.
+  const showDeck = phase === 'reveal' || phase === 'pick';
+  useLayoutEffect(() => {
+    if (!showDeck) return undefined;
     const measure = () => {
       const el = Object.values(cardRefs.current).find(Boolean);
       if (el) setCardWidth(el.offsetWidth || 96);
@@ -100,10 +174,53 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
     measure();
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
-  }, []);
+  }, [showDeck]);
+
+  // Церемония завершается раскрытием: после него — обычный выбор.
+  useEffect(() => {
+    if (phase !== 'reveal') return undefined;
+    const id = window.setTimeout(
+      () => setPhase('pick'),
+      REVEAL_DURATION_MS + deck.length * REVEAL_STAGGER_MS,
+    );
+    return () => window.clearTimeout(id);
+    // deck.length на момент входа в reveal; повторный запуск не нужен.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
+
+  // Расклад закончен — при следующем заходе на тот же расклад церемония снова нужна.
+  useEffect(() => {
+    if (isComplete) clearRitualSeen(spread.id);
+  }, [isComplete, spread.id]);
+
+  const finishRitual = useCallback(
+    () => {
+      markRitualSeen(spread.id);
+      // Колода тасуется заново после cut (и при пропуске — чтобы порядок не был «стартовым»).
+      deckOrderRef.current = freshDeckOrder();
+      haptic.success();
+      if (prefersReducedMotion()) {
+        setFadeIn(true);
+        setPhase('pick');
+        window.setTimeout(() => setFadeIn(false), REDUCED_FADE_MS);
+      } else {
+        setPhase('reveal');
+      }
+    },
+    [spread.id],
+  );
 
   const lastIndex = deck.length - 1;
   const activeIndex = clamp(Math.round(pos), 0, Math.max(0, lastIndex));
+
+  // Хаптика на шаге карусели (только в pick; смена длины колоды после вытягивания — не шаг).
+  const lastStepRef = useRef<{ index: number; length: number } | null>(null);
+  useEffect(() => {
+    const prev = lastStepRef.current;
+    lastStepRef.current = { index: activeIndex, length: deck.length };
+    if (phase !== 'pick' || !prev || prev.length !== deck.length) return;
+    if (prev.index !== lastStepRef.current.index) haptic.selection();
+  }, [activeIndex, deck.length, phase]);
 
   const goTo = useCallback((index: number) => setPos(clamp(index, 0, Math.max(0, deck.length - 1))), [deck.length]);
 
@@ -111,13 +228,14 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
 
   const draw = useCallback(
     (deckIndex: number) => {
-      if (busyRef.current || isComplete) return;
+      if (busyRef.current || isComplete || phase !== 'pick') return;
       const cardKey = deck[deckIndex];
       const deckEl = cardRefs.current[cardKey];
       const slotIndex = selectedCards.length;
       const targetEl = slotRefs.current[slotIndex];
 
-      const card = pickRandomCard(selectedIdsMap);
+      haptic.impact('medium');
+      const card = takeCard(cardKey, selectedIdsMap);
       const reading = getTarotCardReadings({
         card,
         spreadId: spread.id as SpreadName,
@@ -165,6 +283,7 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
       const reversed = reading.direction === TarotCardDirection.Reversed;
 
       window.setTimeout(() => {
+        haptic.impact('light');
         img.src = faceImage;
         if (reversed) img.style.transform = 'rotate(180deg)';
       }, FLIGHT_DURATION / 2);
@@ -188,12 +307,12 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
         commit();
       };
     },
-    [backImage, deck, deckStyle, hasReversed, isComplete, onDraw, selectedCards.length, selectedIdsMap, spread.id],
+    [backImage, deck, deckStyle, hasReversed, isComplete, onDraw, phase, selectedCards.length, selectedIdsMap, spread.id, takeCard],
   );
 
   /** Оставшиеся позиции — случайные уникальные карты, без перелёта по одной. */
   const drawAllRandom = useCallback(() => {
-    if (busyRef.current || isComplete) return;
+    if (busyRef.current || isComplete || phase !== 'pick') return;
     const remaining = cardsCount - selectedCards.length;
     if (remaining <= 0) return;
 
@@ -202,7 +321,7 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
     const readings: TSelectedTarotCard[] = [];
 
     for (let i = 0; i < remaining; i += 1) {
-      const card = pickRandomCard(used);
+      const card = takeCard(null, used);
       used[String(card.id)] = true;
       readings.push(
         getTarotCardReadings({
@@ -214,15 +333,16 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
       );
     }
 
+    haptic.impact('medium');
     setDeck((prev) => prev.slice(0, Math.max(0, prev.length - remaining)));
     setPos((current) => clamp(Math.round(current), 0, Math.max(0, deck.length - remaining - 1)));
     setJustFilled(startSlot + remaining - 1);
     onDrawAll(readings);
-  }, [cardsCount, deck.length, hasReversed, isComplete, onDrawAll, selectedCards.length, selectedIdsMap, spread.id]);
+  }, [cardsCount, deck.length, hasReversed, isComplete, onDrawAll, phase, selectedCards.length, selectedIdsMap, spread.id, takeCard]);
 
   /* ---- перетаскивание ---- */
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (isComplete || event.button !== 0) return;
+    if (isComplete || phase !== 'pick' || event.button !== 0) return;
     dragRef.current = { startX: event.clientX, startPos: pos, moved: false, pointerId: event.pointerId };
   };
 
@@ -261,7 +381,7 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
 
   /* ---- горизонтальное колесо трекпада (вертикальное оставляем странице) ---- */
   const onWheel = (event: WheelEvent<HTMLDivElement>) => {
-    if (isComplete) return;
+    if (isComplete || phase !== 'pick') return;
     const horizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.shiftKey ? event.deltaY : 0;
     if (!horizontal) return;
     setDragging(true);
@@ -274,7 +394,7 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (isComplete) return;
+    if (isComplete || phase !== 'pick') return;
     if (event.key === 'ArrowRight') {
       event.preventDefault();
       step(1);
@@ -301,7 +421,8 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
       opacity: hidden ? 0 : Math.max(0.25, 1 - distance * 0.14),
       zIndex: 100 - Math.round(distance * 2),
       pointerEvents: hidden ? 'none' : undefined,
-    };
+      '--i': index,
+    } as CSSProperties;
   };
 
   return (
@@ -358,7 +479,24 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
         </Text>
       </div>
 
-      <div className={[styles.deck, isComplete ? styles.deckDone : ''].join(' ')}>
+      {!showDeck ? (
+        <DeckRitual
+          stage={phase === 'cut' ? 'cut' : 'shuffle'}
+          riffles={isDayCard ? 1 : 2}
+          reducedMotion={prefersReducedMotion()}
+          onShuffleDone={() => setPhase('cut')}
+          onCutDone={finishRitual}
+          onSkip={finishRitual}
+        />
+      ) : (
+      <div
+        className={[
+          styles.deck,
+          isComplete ? styles.deckDone : '',
+          phase === 'reveal' ? styles.deckReveal : '',
+          fadeIn ? styles.deckFadeIn : '',
+        ].join(' ')}
+      >
         <button
           type="button"
           className={`${styles.navButton} ${styles.navPrev}`}
@@ -417,8 +555,9 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
           <ChevronRightIcon width={22} height={22} />
         </button>
       </div>
+      )}
 
-      {!isComplete ? (
+      {!isComplete && phase === 'pick' ? (
         <>
           <Button type="button" variant="quiet" quietTone="accent" className={styles.drawAll} onClick={drawAllRandom}>
             {t('core:choice.drawAll')}

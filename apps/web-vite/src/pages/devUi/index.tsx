@@ -3,6 +3,7 @@ import { useAppDispatch } from '@shared/lib/store';
 import {
   Button,
   CardFrame,
+  ChargeMark,
   Chip,
   EmptyState,
   Header,
@@ -190,6 +191,28 @@ export default function DevUiPage(): ReactElement {
         <Text role="micro" tone="ink100">
           CreditsBadge скрыт для гостя (isAuthenticated=false); появится после входа.
         </Text>
+      </section>
+
+      <section className={styles.section}>
+        <Text role="title" as="h2" className={styles.sectionTitle}>
+          ChargeMark
+        </Text>
+        <div className={styles.row}>
+          <ChargeMark size="xs" />
+          <ChargeMark size="sm" />
+          <ChargeMark size="md" />
+          <ChargeMark size="sm" cost={2} />
+          <ChargeMark size="md" cost={2} />
+          <Button icon={<ChargeMark size="md" onAction />} iconPosition="end">
+            Сделать расклад
+          </Button>
+          <Button icon={<ChargeMark size="md" cost={2} onAction />} iconPosition="end">
+            Расклад ×2
+          </Button>
+          <span style={{ position: 'relative', display: 'inline-block', width: 96, height: 48, background: 'var(--ds-ground-700)', borderRadius: 8 }}>
+            <ChargeMark size="xs" overlay />
+          </span>
+        </div>
       </section>
 
       <section className={styles.section}>

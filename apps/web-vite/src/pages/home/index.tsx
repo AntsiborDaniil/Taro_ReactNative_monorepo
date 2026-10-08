@@ -4,7 +4,7 @@ import { FAVORITE_SPREADS } from '@entities/spread';
 import { DeferredMount } from '@shared/lib/DeferredMount';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { AnalyticAction, track } from '@shared/lib/analytics';
-import { Button, LightningIcon, openModal } from '@shared/ui';
+import { Button, Header, LightningIcon, openModal } from '@shared/ui';
 import { HabitWidget } from '@widgets/habitWidget';
 import { MoodDashboard } from '@features/moodDashboard';
 import { DayAdvice } from './ui/DayAdvice';
@@ -35,13 +35,22 @@ export default function HomePage(): ReactElement {
   return (
     <div className={styles.root}>
       <div className={styles.inner}>
+        {/* Шапка корня таба: заголовок + бейдж зарядов (как на «Расклады»/«Библиотека»/«Настройки»). */}
+        <Header root title={t('core:nav.tab.main')} />
         <div className={styles.layout}>
           <div className={styles.day}>
-            <DayAdvice />
+            {/*
+              .dayCard — отдельная обёртка: DayAdvice тянется на height:100% (на
+              десктопе — до высоты правой колонки), и без обёртки он растягивался
+              на высоту .day ВМЕСТЕ с вечерней отметкой, а та вылезала поверх quick.
+            */}
+            <div className={styles.dayCard}>
+              <DayAdvice />
+            </div>
           </div>
           {/*
-            .side: на мобилке display:contents — quick/habits/mood остаются
-            отдельными grid-area (порядок day → quick → spreads → habits → mood).
+            .side: на мобилке display:contents — quick/mood/habits остаются
+            отдельными grid-area (порядок day → quick → spreads → mood → habits).
             На десктопе — одна колонка той же высоты, что и «Карта дня».
           */}
           <div className={styles.side}>
@@ -50,14 +59,14 @@ export default function HomePage(): ReactElement {
                 <MainQuickLinks />
               </DeferredMount>
             </div>
-            <div className={styles.habits}>
-              <DeferredMount delayMs={240} fallback={<WidgetSkeleton />}>
-                <HabitWidget />
+            <div className={styles.mood}>
+              <DeferredMount delayMs={240} fallback={<WidgetSkeleton tall />}>
+                <MoodDashboard />
               </DeferredMount>
             </div>
-            <div className={styles.mood}>
-              <DeferredMount delayMs={320} fallback={<WidgetSkeleton tall />}>
-                <MoodDashboard />
+            <div className={styles.habits}>
+              <DeferredMount delayMs={320} fallback={<WidgetSkeleton />}>
+                <HabitWidget />
               </DeferredMount>
             </div>
           </div>

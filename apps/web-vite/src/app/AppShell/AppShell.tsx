@@ -4,14 +4,19 @@ import { useAuthMeQuery } from '@entities/user/api';
 import { ModalRoot, PageSkeleton, Toaster } from '@shared/ui';
 // Побочный эффект: регистрирует модалки 'buy-credits'/'daily-limit' в реестре ModalSheet до первого рендера ModalRoot.
 import '@features/tarotAccess';
+// Побочный эффект: лист 'share-reading' (картинка для сторис / ссылка).
+import '@features/shareReading';
 // Побочный эффект: модалка 'add-to-home-screen' (ярлык Mini App на домашний экран).
 import '@features/telegramHomeScreen';
 // Побочный эффект: регистрирует модалку 'favorite-like-error'.
 import '@entities/favorites';
-import { tryDevQuickLogin } from '@shared/lib/devQuickLogin';
+import { isDevQuickLoginEnabled, tryDevQuickLogin } from '@shared/lib/devQuickLogin';
+import { setAuthRetryPending } from '@entities/user';
 import { syncLanguageFromTelegram } from '@shared/i18n';
+import { setHapticsEnabled } from '@shared/lib/haptics';
+import { clearQuotaCache, writeQuotaCache } from '@shared/lib/quotaCache';
 import { trackMetrikaPaymentSuccessIfNeeded } from '@shared/lib/metrika';
-import { useAppSelector } from '@shared/lib/store';
+import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { lockMobileInputZoom } from '@shared/lib/web/lockMobileInputZoom';
 import { initSafeAreaInsetVars } from '@shared/lib/web/safeAreaInsets';
 import {
@@ -21,6 +26,7 @@ import {
   tryAuthenticateTelegramMiniApp,
 } from '@shared/lib/web/telegramWebApp';
 import { useTelegramBackButton } from '@shared/lib/web/useTelegramBackButton';
+import { useSyncTodayCheckins } from '@features/habits';
 import { NavRail } from './NavRail';
 import { BottomTabBar } from './BottomTabBar';
 import { useSharedReadingDeepLink } from './useSharedReadingDeepLink';
@@ -43,6 +49,7 @@ export function AppShell(): ReactElement {
     refetchOnFocus: true,
     refetchOnReconnect: true,
   });
+  const dispatch = useAppDispatch();
   const quickLoginAttempted = useRef(false);
   const telegramAuthAttempted = useRef(false);
 
@@ -54,10 +61,30 @@ export function AppShell(): ReactElement {
     if (!sessionLoading) trackMetrikaPaymentSuccessIfNeeded(spreadCredits ?? undefined);
   }, [spreadCredits, sessionLoading]);
 
+  // Кэш квоты для бейджа зарядов (CreditsBadge рисует его, пока /me летит):
+  // пишем на любой странице, а не только там, где бейдж смонтирован.
+  const tarotDaily = useAppSelector((state) => state.user.tarotDaily);
+  const authRetryPending = useAppSelector((state) => state.user.authRetryPending);
+  useEffect(() => {
+    if (isAuthenticated && tarotDaily) {
+      writeQuotaCache({ tarotDaily, spreadCredits: spreadCredits ?? 0 });
+    } else if (!isAuthenticated && !sessionLoading && !authRetryPending) {
+      clearQuotaCache();
+    }
+  }, [isAuthenticated, sessionLoading, authRetryPending, tarotDaily, spreadCredits]);
+
+  // Выключатель «Вибрация» из настроек → модуль haptics (он вне React/Redux).
+  const vibrationOn = useAppSelector((state) => state.settings.settings.sound?.vibration ?? true);
+  useEffect(() => {
+    setHapticsEnabled(vibrationOn);
+  }, [vibrationOn]);
+
   // Открыть расшаренную интерпретацию по ?reading=<uuid>, если пришли по ссылке.
   useSharedReadingDeepLink();
   // Telegram Mini App: системная кнопка «назад» клиента (no-op вне Telegram).
   useTelegramBackButton();
+  // Цели: отметки «за сегодня», сделанные до входа/без сети, — на сервер (награда недели).
+  useSyncTodayCheckins();
 
   // --tarot-app-height/зум инпутов — один раз на весь shell (perm., без cleanup:
   // AppShell не размонтируется в течение жизни SPA).
@@ -86,9 +113,21 @@ export function AppShell(): ReactElement {
   // Telegram Mini App: тихий логин по initData → /api/auth/telegram (см.
   // shared/lib/web/telegramWebApp.ts) — пробуем раньше dev quick-login, когда
   // бридж Telegram обнаружен.
+  // Бейдж зарядов: заранее помечаем, что за 401 последует тихий вход — иначе в
+  // окне «401 → initData-логин» бейдж на долю секунды пропадал как у гостя.
+  useEffect(() => {
+    if (isLikelyTelegramMiniApp() || isDevQuickLoginEnabled()) {
+      dispatch(setAuthRetryPending(true));
+    }
+  }, [dispatch]);
+
   useEffect(() => {
     // Сеть/5xx на /me не должны запускать повторный telegram/dev login, если сессия уже есть.
     if (!isError || isAuthenticated) return;
+    const settle = (ok: boolean) => {
+      if (ok) void refetch();
+      else dispatch(setAuthRetryPending(false));
+    };
 
     if (isLikelyTelegramMiniApp() && !telegramAuthAttempted.current) {
       telegramAuthAttempted.current = true;
@@ -97,9 +136,9 @@ export function AppShell(): ReactElement {
           void refetch();
         } else if (!quickLoginAttempted.current) {
           quickLoginAttempted.current = true;
-          void tryDevQuickLogin().then((ok) => {
-            if (ok) void refetch();
-          });
+          void tryDevQuickLogin().then(settle);
+        } else {
+          settle(false);
         }
       });
       return;
@@ -107,18 +146,18 @@ export function AppShell(): ReactElement {
 
     if (quickLoginAttempted.current) return;
     quickLoginAttempted.current = true;
-    void tryDevQuickLogin().then((ok) => {
-      if (ok) void refetch();
-    });
-  }, [isError, isAuthenticated, refetch]);
+    void tryDevQuickLogin().then(settle);
+  }, [dispatch, isError, isAuthenticated, refetch]);
 
   const { pathname } = useLocation();
   // Карусель выбора карт: таббар прячем с анимацией, чтобы не перекрывал CTA.
-  const hideBottomNav = pathname === '/reading' || pathname.startsWith('/reading/');
+  // Расшаренный расклад (/r/:id) — витрина для друга без функциональности: без навигации вообще.
+  const isSharedReading = pathname.startsWith('/r/');
+  const hideBottomNav = pathname === '/reading' || pathname.startsWith('/reading/') || isSharedReading;
 
   return (
     <div className={styles.shell}>
-      <NavRail />
+      {isSharedReading ? null : <NavRail />}
       <main
         className={
           hideBottomNav ? `${styles.content} ${styles.contentNavHidden}` : styles.content

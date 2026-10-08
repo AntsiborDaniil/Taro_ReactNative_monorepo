@@ -40,6 +40,14 @@
   transition: border-color var(--ds-dur-state) var(--ds-ease);
 }
 
+/* Ценник заряда поверх картинки: правый верхний угол рамки. */
+.chargeMark {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+}
+
 .card:hover .imageInner {
   border-color: var(--ds-accent-400);
 }

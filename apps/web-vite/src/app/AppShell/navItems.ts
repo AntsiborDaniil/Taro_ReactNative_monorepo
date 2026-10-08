@@ -14,14 +14,18 @@ export const MAIN_NAV_ITEMS: NavItem[] = [
     to: '/',
     labelKey: 'nav.tab.main',
     Icon: PlanetIcon,
-    isActive: (p) => p === '/',
+    // Зеркало недели открывается с главной — подсвечиваем её же.
+    isActive: (p) => p === '/' || p.startsWith('/mirror'),
   },
   {
     to: '/spreads',
     labelKey: 'nav.tab.spreads',
     Icon: CardsIcon,
     isActive: (p) =>
-      p.startsWith('/spreads') || p.startsWith('/reading') || p.startsWith('/card') || p.startsWith('/history'),
+      p.startsWith('/spreads') ||
+      p.startsWith('/reading') ||
+      p.startsWith('/card') ||
+      p.startsWith('/history'),
   },
   {
     to: '/library',

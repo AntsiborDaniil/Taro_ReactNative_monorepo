@@ -16,6 +16,13 @@ type QuickLink = {
 
 const LINKS: QuickLink[] = [
   {
+    id: 'mirror',
+    labelKey: 'main:mirror.title',
+    subtitleKey: 'main:mirror.link.subtitle',
+    to: '/mirror',
+    img: getImage(['core', 'mirrorBackgroundClear']),
+  },
+  {
     id: 'favorite',
     labelKey: 'core:library.tile.favorite.title',
     subtitleKey: 'core:library.tile.favorite.subtitle',

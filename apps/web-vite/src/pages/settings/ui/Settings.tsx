@@ -121,7 +121,7 @@ export default function SettingsPage(): ReactElement {
     <div className={styles.page}>
       {/* Header внутри .column — как на /spreads и /library: тот же горизонтальный gutter. */}
       <div className={styles.column}>
-        <Header title={t('settings:settings')} />
+        <Header root title={t('settings:settings')} />
         <section className={styles.section}>
           <Text role="label" as="h2" className={styles.sectionTitle}>
             {t('settings:section.game')}

@@ -9,6 +9,7 @@ export {
   EyeHideIcon,
   HeartIcon,
   ShareIcon,
+  DownloadIcon,
   PersonIcon,
   LanguageIcon,
   PaintIcon,

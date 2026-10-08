@@ -1,0 +1,413 @@
+.page {
+  container-type: inline-size;
+  container-name: mirrorCol;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.column {
+  width: calc(100% - var(--ds-gutter) * 2);
+  max-width: 100%;
+  margin: 0 auto;
+  padding: var(--ds-gutter) 0 var(--ds-space-32);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-24);
+  min-width: 0;
+}
+
+@container mirrorCol (min-width: 768px) {
+  .column {
+    max-width: 640px;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+  min-width: 0;
+}
+
+.sectionTitle {
+  margin: 0;
+}
+
+/* Диапазон дат и переключатель недели */
+.weekNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-8);
+  margin-top: calc(var(--ds-space-8) * -1);
+}
+
+.weekButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ds-ink-50);
+  cursor: pointer;
+}
+
+.weekButton:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.weekButton:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+/* Итог недели */
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-16);
+  padding: var(--ds-space-24);
+  border-radius: 24px;
+  background: var(--ds-ground-800);
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+}
+
+.heroHead {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-16);
+}
+
+.heroIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--ds-ground-700);
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  min-width: 0;
+}
+
+.heroText > * {
+  margin: 0;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ds-space-8);
+  margin: 0;
+}
+
+@container mirrorCol (min-width: 520px) {
+  .tiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-12);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-700);
+}
+
+.tileValue {
+  margin: 0;
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-title-family);
+  font-size: var(--ds-font-title-size);
+  line-height: var(--ds-font-title-line-height);
+  font-variant-numeric: tabular-nums;
+}
+
+.tileLabel {
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-micro-family);
+  font-size: var(--ds-font-micro-size);
+  line-height: var(--ds-font-micro-line-height);
+  letter-spacing: var(--ds-font-micro-letter-spacing);
+}
+
+/* Подсказка о точности (меньше 3 раскладов) */
+.precision {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+/* Карта недели */
+.weekCard {
+  display: flex;
+  gap: var(--ds-space-16);
+  align-items: center;
+  padding: var(--ds-space-16);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-800);
+  border-left: var(--ds-size-edge-width) solid var(--ds-accent-400);
+  text-decoration: none;
+  color: inherit;
+}
+
+.weekCard:focus-visible,
+.dayCard:focus-visible,
+.repeatChip:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+.weekCardFace {
+  display: block;
+  flex: 0 0 auto;
+  width: 96px;
+}
+
+.weekCardText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+  min-width: 0;
+}
+
+.repeatRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-8);
+}
+
+.repeatChip {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 var(--ds-space-12);
+  border-radius: 16px;
+  background: var(--ds-ground-700);
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-label-family);
+  font-size: var(--ds-font-micro-size);
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Дни недели */
+.days {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dayRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+  padding: var(--ds-space-12) var(--ds-space-16);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-800);
+}
+
+.dayDate::first-letter {
+  text-transform: uppercase;
+}
+
+.dayDate {
+  display: block;
+}
+
+.dayMore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  aspect-ratio: 9 / 16;
+  border-radius: 6px;
+  background: var(--ds-ground-700);
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-label-family);
+  font-size: var(--ds-font-label-size);
+  font-variant-numeric: tabular-nums;
+}
+
+.dayCards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-8);
+}
+
+.dayCard {
+  display: block;
+  width: 44px;
+  border-radius: 6px;
+}
+
+.dayMood {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-8);
+}
+
+.moodChip {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 var(--ds-space-8);
+  border-radius: 13px;
+  background: var(--ds-ground-700);
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-label-family);
+  font-size: var(--ds-font-micro-size);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Состояние недели */
+.metrics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+  padding: var(--ds-space-16);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-800);
+}
+
+.metricRow {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: var(--ds-space-12);
+}
+
+.metricTrack {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--ds-ground-600);
+  overflow: hidden;
+}
+
+.metricFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 4px;
+  background: var(--ds-calm-500);
+}
+
+.metricFillStress {
+  background: var(--ds-action-500);
+}
+
+.metricValue {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.textLink {
+  color: var(--ds-accent-400);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: var(--ds-size-hairline);
+}
+
+/* Перевёрнутые */
+.reversedRow {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-16);
+}
+
+.ringWrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+}
+
+.ringLabel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-label-family);
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Масть ↔ настроение */
+.insightCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+  padding: var(--ds-space-16);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-800);
+  border-left: var(--ds-size-edge-width) solid var(--ds-accent-400);
+}
+
+.insightText {
+  margin: 0;
+}
+
+.moodHint {
+  margin: 0;
+}
+
+.disclaimer {
+  margin: 0;
+}
+
+/* Порог: прогресс до зеркала */
+.progress {
+  display: flex;
+  gap: var(--ds-space-8);
+  width: 100%;
+  max-width: 220px;
+}
+
+.progressSegment {
+  flex: 1 1 0;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ds-ground-600);
+}
+
+.progressSegmentOn {
+  background: var(--ds-accent-400);
+}
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+}
+
+.emptyAction {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-16);
+  width: 100%;
+}

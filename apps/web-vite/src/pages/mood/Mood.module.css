@@ -24,57 +24,32 @@
   }
 }
 
-.intro {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-4);
-}
-
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-12);
-}
-
-.stepHead {
+/* Приветствие + кольцо прогресса: тот же «тёплый» градиент, что у общего разбора. */
+.hero {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--ds-space-16);
+  padding: var(--ds-space-24);
+  border-radius: 24px;
+  border: var(--ds-size-hairline) solid color-mix(in srgb, var(--ds-accent-400) 35%, var(--ds-ground-600));
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--ds-accent-400) 10%, transparent) 0%, transparent 45%),
+    var(--ds-ground-800);
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
   gap: var(--ds-space-8);
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-.badge {
-  padding: 2px var(--ds-space-8);
-  border-radius: 10px;
-  background: var(--ds-ground-700);
-  color: var(--ds-ink-100);
-  font-family: var(--ds-font-micro-family);
-  font-size: var(--ds-font-micro-size);
-  white-space: nowrap;
+.heroText > * {
+  margin: 0;
 }
 
-.sliders {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-16);
-}
-
-.cardRow {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-16);
-  padding: var(--ds-space-16);
-  border-radius: 18px;
-  border: var(--ds-size-hairline) solid var(--ds-ground-600);
-  background: var(--ds-ground-800);
-}
-
-.progressWrap {
+.ring {
   position: relative;
   flex: 0 0 auto;
   display: flex;
@@ -82,17 +57,150 @@
   justify-content: center;
 }
 
-.progressLabel {
-  position: absolute;
-  color: var(--ds-ink-50);
-  font-family: 'Onest-Bold', system-ui, sans-serif;
-  font-size: 16px;
+.ringArc {
+  transition: stroke-dashoffset var(--ds-dur-block) var(--ds-ease);
 }
 
-.cardTextCol {
-  flex: 1;
-  min-width: 0;
+.ringLabel {
+  position: absolute;
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-title-family);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Метрики */
+.metrics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+  padding: var(--ds-space-16);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-800);
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  transition: border-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.metricUnset {
+  border-style: dashed;
+}
+
+.metricHead {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-12);
+}
+
+.glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--ds-ground-700);
+}
+
+.metricText {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.metricValue {
+  flex: 0 0 auto;
+  min-width: 40px;
+  text-align: right;
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-display-family);
+  font-size: var(--ds-font-display-size);
+  line-height: var(--ds-font-display-line-height);
+  font-variant-numeric: tabular-nums;
+}
+
+.scale {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ds-space-8);
+}
+
+/* Карта-подсказка */
+.oracle {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--ds-space-16);
+  padding: var(--ds-space-16);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-800);
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  border-left: var(--ds-size-edge-width) solid var(--ds-ground-600);
+  transition: border-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.oracleReady {
+  border-left-color: var(--ds-accent-400);
+}
+
+.oracleCard {
+  display: block;
+  width: 72px;
+  transition: transform var(--ds-dur-block) var(--ds-ease);
+}
+
+.oracleReady .oracleCard {
+  transform: rotate(-4deg);
+}
+
+.oracleText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  min-width: 0;
+}
+
+.oracleText > * {
+  margin: 0;
+}
+
+.oracleCta {
+  grid-column: 1 / -1;
+}
+
+/* График */
+.chartCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+  padding: var(--ds-space-16);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-800);
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+}
+
+.chartHead {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chartHead > * {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ringArc,
+  .oracleCard,
+  .metric {
+    transition: none;
+  }
 }

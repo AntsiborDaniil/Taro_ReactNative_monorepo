@@ -1,12 +1,17 @@
 {
-  "header": "Milestone unlocked",
-  "title": "You're unstoppable!",
-  "badge": "Weekly streak completed",
-  "description": "You reached every habit goal this week. Feel the momentum and keep charging toward your next breakthrough.",
-  "cta": "Claim reward",
-  "alert": {
-    "title": "Reward saved",
-    "description": "We noted your achievement and will add the surprise in the next update."
-  }
+  "header": "Weekly goal",
+  "title": "Week complete",
+  "badge": "All goals at 100%",
+  "description": "You did what you promised yourself. Claim your charge and see which card sums up the week.",
+  "cta": "Reveal card of the week",
+  "titleProgress": "Goals of the week",
+  "descriptionProgress": "Hit 100% on all goals this week — and get a free charge for a reading.",
+  "toGoals": "To weekly goals",
+  "reward.badge": "Reward: +1 charge",
+  "reward.claim": "Claim +1 charge",
+  "reward.granted": "+1 charge added",
+  "reward.already": "This week’s charge is already claimed — the next one in a week.",
+  "reward.signIn": "Sign in to get your weekly charge.",
+  "reward.progress": "Days with check-ins: {{done}} of {{total}}. Tick your goals every day — backdated ticks don’t count.",
+  "reward.notEnough": "{{done}} of {{total}} days with check-ins so far — the charge is for daily check-ins."
 }
-

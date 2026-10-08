@@ -10,8 +10,10 @@ const SpreadsPage = lazy(() => import('@pages/spreads'));
 const SpreadDetailPage = lazy(() => import('@pages/spreadDetail'));
 const ReadingPage = lazy(() => import('@pages/reading'));
 const ReadingResultPage = lazy(() => import('@pages/readingResult'));
+const SharedReadingPage = lazy(() => import('@pages/sharedReading'));
 const CardDetailPage = lazy(() => import('@pages/cardDetail'));
 const HistoryPage = lazy(() => import('@pages/history'));
+const MirrorPage = lazy(() => import('@pages/mirror'));
 const LibraryPage = lazy(() => import('@pages/library'));
 const DictionaryPage = lazy(() => import('@pages/dictionary'));
 const FavoritesPage = lazy(() => import('@pages/favorites'));
@@ -46,8 +48,10 @@ export const router = createBrowserRouter([
       { path: 'spreads/:spreadId', Component: SpreadDetailPage },
       { path: 'reading', Component: ReadingPage },
       { path: 'reading/result', Component: ReadingResultPage },
+      { path: 'r/:id', Component: SharedReadingPage },
       { path: 'card/:cardId', Component: CardDetailPage },
       { path: 'history', Component: HistoryPage },
+      { path: 'mirror', Component: MirrorPage },
       { path: 'library', Component: LibraryPage },
       { path: 'dictionary', Component: DictionaryPage },
       { path: 'favorites', Component: FavoritesPage },

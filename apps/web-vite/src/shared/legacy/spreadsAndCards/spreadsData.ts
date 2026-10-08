@@ -23,7 +23,7 @@ export const simpleSpreads: Record<string, TSpread> = {
     name: 'spread:daySuggest.name',
     description: 'spread:daySuggest.description',
     id: SpreadName.Simple_DaySuggest,
-    category: SpreadsCategory.Simple,
+    category: SpreadsCategory.Period,
     img: '',
     cardsCount: 1,
     cardsPosition: [],
@@ -589,19 +589,54 @@ export const choiceSpreads: Record<string, TSpread> = {
   },
 };
 
+/** Бесплатные карты периода: по одной на день / неделю / месяц (сервер считает период по Москве). */
+export const periodSpreads: Record<string, TSpread> = {
+  weekCard: {
+    name: 'spread:period_weekCard.name',
+    description: 'spread:period_weekCard.description',
+    id: SpreadName.Period_WeekCard,
+    category: SpreadsCategory.Period,
+    img: '',
+    cardsCount: 1,
+    cardsPosition: [],
+    selectedCards: [],
+    availableSubscriptions: [SubscriptionType.Freemium, SubscriptionType.Practice],
+    cardsOrder: [],
+  },
+  monthCard: {
+    name: 'spread:period_monthCard.name',
+    description: 'spread:period_monthCard.description',
+    id: SpreadName.Period_MonthCard,
+    category: SpreadsCategory.Period,
+    img: '',
+    cardsCount: 1,
+    cardsPosition: [],
+    selectedCards: [],
+    availableSubscriptions: [SubscriptionType.Freemium, SubscriptionType.Practice],
+    cardsOrder: [],
+  },
+};
+
 export const spreadsDataNames = {
   [SpreadsCategory.Choice]: 'spread:choice.name',
   [SpreadsCategory.Simple]: 'spread:simple.name',
   [SpreadsCategory.SelfDevelopment]: 'spread:selfDevelopment.name',
   [SpreadsCategory.Universal]: 'spread:universal.name',
   [SpreadsCategory.Thematic]: 'spread:thematic.name',
+  [SpreadsCategory.Period]: 'spread:period.name',
 };
 
 export const spreadsData: TSpreadCategory[] = [
   {
     name: 'spread:simple.name.multiple',
     id: SpreadsCategory.Simple,
-    spreads: [simpleSpreads.yesNo, simpleSpreads.daySuggest, simpleSpreads.dayParts],
+    spreads: [simpleSpreads.yesNo, simpleSpreads.dayParts],
+  },
+  // Вторым разделом — бесплатные карты дня, недели и месяца.
+  {
+    name: 'spread:period.name.multiple',
+    id: SpreadsCategory.Period,
+    spreads: [simpleSpreads.daySuggest, periodSpreads.weekCard, periodSpreads.monthCard],
   },
   {
     name: 'spread:selfDevelopment.name.multiple',

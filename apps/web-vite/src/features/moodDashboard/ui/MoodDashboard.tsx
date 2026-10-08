@@ -1,25 +1,39 @@
 import { useEffect, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { loadMood, selectMoodLoaded, selectTodayMoodProgress } from '@entities/mood';
+import {
+  loadMood,
+  MetricGlyph,
+  selectMoodLoaded,
+  selectTodayMoodProgress,
+  selectTodayMoodValues,
+  summaryKey,
+  type MoodMetric,
+} from '@entities/mood';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
+import { ChevronRightIcon, Text } from '@shared/ui';
 import styles from './MoodDashboard.module.css';
 
-const SIZE = 60;
-const TRACK_WIDTH = 5;
-const RADIUS = (SIZE - TRACK_WIDTH) / 2;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+const METRICS: MoodMetric[] = ['mood', 'energy', 'stress'];
+// Те же цвета, что на /mood и у линий MoodChart.
+const COLOR: Record<MoodMetric, string> = {
+  mood: 'var(--ds-accent-400)',
+  energy: 'var(--ds-calm-500)',
+  stress: 'var(--ds-action-500)',
+};
 
 /**
- * Перенос apps/web/src/features/MoodDashboard (только режим isWidget=true —
- * на главной рендерится исключительно MoodProgress-эквивалент, полный график
- * за неделю/месяц/год — экран /mood, вне фазы 2). Клик → /mood.
+ * Виджет состояния на главной: три «живые» иконки метрик с сегодняшними
+ * значениями. Не заполнено — приглашение «Как ты сегодня?» и пустые (пунктир)
+ * метрики; заполнено — итог дня одной фразой (тот же summaryKey, что на /mood).
+ * Клик → /mood.
  */
 export function MoodDashboard(): ReactElement {
   const { t } = useTranslation('moodAndEnergy');
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const loaded = useAppSelector(selectMoodLoaded);
+  const values = useAppSelector(selectTodayMoodValues);
   const { percents, filledValuesCount, allValuesCount } = useAppSelector(selectTodayMoodProgress);
 
   useEffect(() => {
@@ -28,46 +42,49 @@ export function MoodDashboard(): ReactElement {
     }
   }, [dispatch, loaded]);
 
-  const clamped = Math.max(0, Math.min(1, percents / 100));
   const isComplete = percents === 100;
+  const summary =
+    isComplete && values.mood != null && values.energy != null && values.stress != null
+      ? summaryKey({ mood: values.mood, energy: values.energy, stress: values.stress })
+      : null;
 
   return (
-    <div
-      className={styles.root}
-      role="button"
-      tabIndex={0}
-      onClick={() => navigate('/mood')}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          navigate('/mood');
-        }
-      }}
-    >
-      <div className={styles.progressWrap}>
-        <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
-          <circle cx={SIZE / 2} cy={SIZE / 2} r={RADIUS} stroke="var(--ds-ground-600)" strokeWidth={TRACK_WIDTH} fill="none" />
-          <circle
-            cx={SIZE / 2}
-            cy={SIZE / 2}
-            r={RADIUS}
-            stroke="var(--ds-calm-500)"
-            strokeWidth={TRACK_WIDTH}
-            fill="none"
-            strokeLinecap="round"
-            strokeDasharray={CIRCUMFERENCE}
-            strokeDashoffset={CIRCUMFERENCE * (1 - clamped)}
-            transform={`rotate(-90 ${SIZE / 2} ${SIZE / 2})`}
-          />
-        </svg>
-        <span className={styles.progressLabel}>{`${Math.round(clamped * 100)}%`}</span>
-      </div>
-      <div className={styles.texts}>
-        <p className={styles.mainText}>{isComplete ? t('progress.howAreYou') : t('progress.assess')}</p>
-        {!isComplete ? (
-          <p className={styles.subText}>{`${t('progress')} ${filledValuesCount}/${allValuesCount}`}</p>
-        ) : null}
-      </div>
-    </div>
+    <button type="button" className={styles.root} onClick={() => navigate('/mood')}>
+      <span className={styles.head}>
+        <span className={styles.headText}>
+          <Text role="label" tone="accent" as="span">
+            {t('widget.label')}
+          </Text>
+          <Text role="lead" tone="ink50" as="span">
+            {summary ? t(`summary.${summary}.title`) : t('intro.title')}
+          </Text>
+        </span>
+        <span className={styles.cta}>
+          <Text role="micro" tone="ink100" as="span">
+            {isComplete ? t('widget.open') : t('widget.progress', { filled: filledValuesCount, total: allValuesCount })}
+          </Text>
+          <ChevronRightIcon width={18} height={18} />
+        </span>
+      </span>
+      <span className={styles.metrics}>
+        {METRICS.map((metric) => {
+          const value = values[metric];
+          const unset = value == null;
+          return (
+            <span key={metric} className={[styles.metric, unset ? styles.metricUnset : ''].filter(Boolean).join(' ')}>
+              <span className={styles.glyph} style={{ color: unset ? undefined : COLOR[metric] }}>
+                <MetricGlyph metric={metric} value={value} size={24} />
+              </span>
+              <span className={styles.metricText}>
+                <span className={styles.metricName}>{t(`name.${metric}`)}</span>
+                <span className={styles.metricValue} style={{ color: unset ? undefined : COLOR[metric] }}>
+                  {unset ? '—' : value}
+                </span>
+              </span>
+            </span>
+          );
+        })}
+      </span>
+    </button>
   );
 }

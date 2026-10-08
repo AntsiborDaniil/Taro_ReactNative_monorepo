@@ -3,8 +3,14 @@
   flex-direction: column;
   justify-content: flex-start;
   flex: 0 0 auto;
-  min-height: 100dvh;
-  padding: var(--ds-space-16) 0 var(--ds-space-24);
+  /* Рейка привязана к экрану, а не к высоте страницы: «Настройки» (margin-top:auto)
+     всегда видны внизу окна, а не уезжают в самый низ длинной страницы. */
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100dvh;
+  box-sizing: border-box;
+  padding: calc(var(--safe-top) + var(--ds-space-16)) 0 calc(var(--safe-bottom) + var(--ds-space-24));
   background: var(--ds-ground-800);
   border-right: var(--ds-size-hairline) solid var(--ds-ground-600);
   transition: width var(--ds-dur-state) var(--ds-ease);

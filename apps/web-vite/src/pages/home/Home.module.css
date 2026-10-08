@@ -26,8 +26,11 @@
   width: calc(100% - var(--ds-gutter) * 2);
   max-width: 100%;
   margin: 0 auto;
-  padding: var(--ds-space-24) 0 var(--ds-space-32);
+  padding: var(--ds-space-8) 0 var(--ds-space-32);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-16);
 }
 
 @container mainCol (min-width: 768px) {
@@ -55,14 +58,14 @@
     'day'
     'quick'
     'spreads'
-    'habits'
-    'mood';
+    'mood'
+    'habits';
   gap: var(--ds-space-32);
 }
 
 /*
  * Мобилка: дети .side участвуют в родительской сетке напрямую, чтобы
- * сохранить areas day → quick → spreads → habits → mood.
+ * сохранить areas day → quick → spreads → mood → habits.
  * Десктоп: .side становится колонкой той же высоты, что и .day.
  */
 .side {
@@ -131,6 +134,22 @@
 
 .day {
   grid-area: day;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Карта дня занимает всё, что осталось в .day после вечерней отметки. */
+.dayCard {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* button — для специфичности выше, чем у .card (height:100%) в DayAdvice.module.css. */
+.dayCard > button {
+  flex: 1 1 auto;
+  height: auto;
 }
 
 .quick {

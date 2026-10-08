@@ -24,7 +24,7 @@ export type GenerateMotivationErrorBody = {
 /**
  * Перенос useMotivation().getAIMotivation на RTK Query — POST /api/motivation/:key
  * (1-в-1 getTarotAiApiBaseUrl() на web: тот же origin, значит тот же baseApi).
- * Mood/habits не списывают дневной слот расклада (в отличие от /api/interpret).
+ * moodAndEnergy стоит 1 заряд (дневной слот → купленный), habits (награда за цель) — бесплатно.
  */
 export const motivationApi = baseApi.injectEndpoints({
   endpoints: (build) => ({

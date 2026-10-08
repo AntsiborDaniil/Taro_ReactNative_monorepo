@@ -85,3 +85,8 @@
 .cta {
   margin-top: var(--ds-space-8);
 }
+
+.nextHint {
+  margin-top: calc(var(--ds-space-8) * -1);
+  text-align: center;
+}

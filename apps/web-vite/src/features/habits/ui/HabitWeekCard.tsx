@@ -1,9 +1,17 @@
 import { useMemo, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getDateISO, getCurrentWeekBounds, getLocalizedWeekdays } from '@shared/lib/date';
-import { getHabitDayProgress, HabitType, removeHabit, toggleHabitDay, type THabit } from '@entities/habits';
-import { useAppDispatch } from '@shared/lib/store';
-import { CheckIcon, CloseIcon, Text } from '@shared/ui';
+import {
+  getHabitDayProgress,
+  HabitType,
+  MAX_PINNED_HABITS,
+  removeHabit,
+  togglePinHabit,
+  type THabit,
+} from '@entities/habits';
+import { useAppDispatch, useAppSelector } from '@shared/lib/store';
+import { CheckIcon, CloseIcon, Text, useToast } from '@shared/ui';
+import { useToggleHabitToday } from '../model/useToggleHabitToday';
 import styles from './HabitWeekCard.module.css';
 
 export type HabitWeekCardProps = { habit: THabit };
@@ -17,6 +25,19 @@ export type HabitWeekCardProps = { habit: THabit };
 export function HabitWeekCard({ habit }: HabitWeekCardProps): ReactElement {
   const { t, i18n } = useTranslation();
   const dispatch = useAppDispatch();
+  const toast = useToast();
+  const toggleToday = useToggleHabitToday();
+  const pinnedCount = useAppSelector((state) => state.habits.habits.filter((h) => h.pinned).length);
+  const todayISO = getDateISO(new Date());
+
+  const handlePin = () => {
+    if (!habit.id) return;
+    if (!habit.pinned && pinnedCount >= MAX_PINNED_HABITS) {
+      toast.info(t('habits:pin.limit', { count: MAX_PINNED_HABITS }));
+      return;
+    }
+    dispatch(togglePinHabit(habit.id));
+  };
 
   const { days } = useMemo(() => getCurrentWeekBounds(), []);
   const weekDays = useMemo(() => getLocalizedWeekdays(i18n.language), [i18n.language]);
@@ -69,6 +90,14 @@ export function HabitWeekCard({ habit }: HabitWeekCardProps): ReactElement {
           </Text>
         </div>
         {!isAutoFillEnabled ? <span className={styles.percent}>{`${percent}%`}</span> : null}
+        <button
+          type="button"
+          className={[styles.pin, habit.pinned ? styles.pinOn : ''].filter(Boolean).join(' ')}
+          aria-pressed={Boolean(habit.pinned)}
+          onClick={handlePin}
+        >
+          {habit.pinned ? t('habits:pin.on') : t('habits:pin.off')}
+        </button>
         <button type="button" className={styles.deleteButton} aria-label={t('habits:button.deleteHabit')} onClick={handleDelete}>
           <CloseIcon width={16} height={16} />
         </button>
@@ -80,18 +109,27 @@ export function HabitWeekCard({ habit }: HabitWeekCardProps): ReactElement {
             const needToFill = needToFillDays.includes(index);
             const dayISO = getDateISO(day);
             const { isCompleted } = getHabitDayProgress({ habit, date: day });
+            // Отмечать можно только сегодня: прошлые дни не «добиваются» задним числом,
+            // будущие — заранее. Иначе неделю можно закрыть за один вечер.
+            const isToday = dayISO === todayISO;
 
             return (
               <div key={dayISO} className={styles.dayCell}>
                 <span className={styles.dayLabel}>{weekDays[index]?.day ?? ''}</span>
                 <button
                   type="button"
-                  disabled={!needToFill || !habit.id}
-                  className={[styles.dayDot, needToFill ? styles.dayDotNeeded : null, isCompleted ? styles.dayDotDone : null]
+                  disabled={!needToFill || !habit.id || !isToday}
+                  className={[
+                    styles.dayDot,
+                    needToFill ? styles.dayDotNeeded : null,
+                    needToFill && isToday ? styles.dayDotToday : null,
+                    isCompleted ? styles.dayDotDone : null,
+                  ]
                     .filter(Boolean)
                     .join(' ')}
-                  onClick={() => habit.id && dispatch(toggleHabitDay({ id: habit.id, date: dayISO }))}
+                  onClick={() => toggleToday(habit)}
                   aria-pressed={isCompleted}
+                  aria-label={isToday ? t('habits:day.today') : undefined}
                 >
                   {isCompleted ? <CheckIcon width={16} height={16} /> : null}
                 </button>

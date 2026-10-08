@@ -51,8 +51,10 @@ export function getCurrentWeekBounds(): TWeekBounds {
   end.setDate(start.getDate() + 6);
   end.setHours(23, 59, 59, 999);
 
+  // Пн…Вс: индекс 0 = понедельник — как подписи getLocalizedWeekdays и frequencyDays
+  // привычек. (Раньше цикл шёл с 1 — дни были сдвинуты на вторник…понедельник.)
   const days: Date[] = [];
-  for (let i = 1; i < 8; i += 1) {
+  for (let i = 0; i < 7; i += 1) {
     const dayDate = new Date(start);
     dayDate.setDate(start.getDate() + i);
     days.push(dayDate);

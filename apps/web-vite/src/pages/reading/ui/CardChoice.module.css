@@ -308,3 +308,40 @@
   object-fit: cover;
   display: block;
 }
+
+/* ---- раскрытие стопки в coverflow (reveal) ---- */
+
+/* Карты веером выходят из центральной стопки: from-кадр — «в стопке», to — их
+   inline-transform из cardStyle. Стаггер 15ms на карту, только transform/opacity. */
+.deckReveal .deckCard {
+  transition: none;
+  animation: deckFan var(--ds-dur-scene) var(--ds-ease) calc(var(--i) * 15ms) backwards;
+}
+
+.deckReveal .stage {
+  pointer-events: none;
+}
+
+@keyframes deckFan {
+  from {
+    transform: translateX(-50%) translateZ(0) rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+/* reduced-motion: раскрытие пропущено, колода просто проявляется за 150ms. */
+.deckFadeIn {
+  animation: deckFadeIn 150ms linear both;
+}
+
+@keyframes deckFadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deckReveal .deckCard {
+    animation: none;
+  }
+}
