@@ -39,6 +39,7 @@ const acquisitionChoices = [
   { id: 'ig_bio', name: 'Instagram bio' },
   { id: 'ig_stories', name: 'Instagram stories' },
   { id: 'yt_shorts', name: 'YouTube Shorts' },
+  { id: 'tiktok', name: 'TikTok' },
   { id: 'other', name: 'Other' },
 ];
 
@@ -156,6 +157,7 @@ export function UserList() {
             <SelectField source="role" choices={roleChoices} label="Роль" />
             <NumberField source="spread_credits" label="Заряды" />
             <DateField source="created_at" label="Создан" showTime />
+            <DateField source="daily_free_nudge_sent_on" label="Уведомление бота" emptyText="—" />
             <EditButton />
           </Datagrid>
         )}
@@ -208,6 +210,11 @@ export function UserShow() {
         <TextField source="daily_day" label="День учёта лимита" emptyText="—" />
         <DateField source="created_at" showTime label="Создан" />
         <DateField source="last_seen_at" showTime label="Mini App (последний визит)" emptyText="—" />
+        <DateField
+          source="daily_free_nudge_sent_on"
+          label="Последнее уведомление «бесплатный расклад» (день)"
+          emptyText="—"
+        />
         <UserSpreadsLink />
         <TelegramUserNotifyButton />
       </SimpleShowLayout>

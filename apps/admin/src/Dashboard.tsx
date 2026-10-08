@@ -12,6 +12,7 @@ import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import { adminHeaders, getApiBase } from './auth';
 import { TelegramBroadcastButton } from './components/TelegramNotifyButtons';
+import { NotifyLogCard } from './components/NotifyLogCard';
 
 type AcquisitionStats = {
   total: number;
@@ -83,6 +84,8 @@ export function Dashboard() {
       <Box sx={{ mb: 2 }}>
         <TelegramBroadcastButton />
       </Box>
+
+      <NotifyLogCard />
 
       {stats ? (
         <Card sx={{ mb: 2, bgcolor: 'background.paper' }}>
