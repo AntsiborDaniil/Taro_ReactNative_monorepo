@@ -1,6 +1,7 @@
-import type { ReactElement } from 'react';
+import { useEffect, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BookIcon, Header, ListRow, SettingsIcon } from '@shared/ui';
+import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { getImage } from '@shared/lib/getImage';
 import { LEGAL_ENTITY } from '@legacy-legal';
 import { LibraryCard } from './ui/LibraryCard';
@@ -46,6 +47,10 @@ const PLATES: Plate[] = [
  */
 export default function LibraryPage(): ReactElement {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    reachMetrikaGoal(MetrikaGoal.libraryOpen);
+  }, []);
 
   return (
     <div className={styles.page}>

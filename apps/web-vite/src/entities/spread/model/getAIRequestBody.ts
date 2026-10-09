@@ -27,6 +27,8 @@ export type TarotSpreadInput = {
   /** 'deep' — «Глубокий разбор» (⚡2), только для раскладов с 3+ картами. */
   mode?: 'deep';
   context?: InterpretContext;
+  /** «Расклад для парочки»: имена пары. */
+  couple?: { him: string; her: string };
 };
 
 /** Перенос 1-в-1 apps/web/src/entities/Spread/lib/getAIRequestBody.ts — тело POST /api/interpret. */
@@ -62,5 +64,6 @@ export function getAIRequestBody({
     })),
     ...(mode ? { mode } : {}),
     ...(context ? { context } : {}),
+    ...(spread.couple ? { couple: spread.couple } : {}),
   };
 }

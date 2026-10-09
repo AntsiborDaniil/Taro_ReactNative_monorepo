@@ -15,6 +15,7 @@ export const STARTUP_I18N_NAMESPACES = [
   'moodAndEnergy',
   'habits',
   'achievements',
+  'together',
 ] as const;
 
 export const LAZY_I18N_NAMESPACES = ['card', 'affirmations'] as const;

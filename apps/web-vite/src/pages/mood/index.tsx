@@ -1,4 +1,4 @@
-import { useEffect, type ReactElement } from 'react';
+import { useEffect, useRef, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,6 +15,7 @@ import { TarotCardFace } from '@entities/spread';
 import { MoodChart } from '@features/moodDashboard';
 import { getMotivationMemoryKey, MotivationKey } from '@entities/tarotMotivation';
 import { haptic } from '@shared/lib/haptics';
+import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { Button, ChargeMark, Header, openModal, Text } from '@shared/ui';
 import { MetricCard } from './ui/MetricCard';
@@ -65,6 +66,16 @@ export default function MoodPage(): ReactElement {
   }, [dispatch, loaded]);
 
   const isComplete = percents === 100;
+
+  // mood_checkin — только момент заполнения всех метрик (не уже заполненный день при заходе).
+  const wasCompleteRef = useRef<boolean | null>(null);
+  useEffect(() => {
+    if (!loaded) return;
+    if (wasCompleteRef.current === false && isComplete) {
+      reachMetrikaGoal(MetrikaGoal.moodCheckin, { filled: filledValuesCount });
+    }
+    wasCompleteRef.current = isComplete;
+  }, [loaded, isComplete, filledValuesCount]);
   const clamped = Math.max(0, Math.min(1, percents / 100));
   const summary =
     isComplete && values.mood != null && values.energy != null && values.stress != null
@@ -157,6 +168,7 @@ export default function MoodPage(): ReactElement {
                 }
               }
               haptic.impact('medium');
+              reachMetrikaGoal(MetrikaGoal.moodCardOpen);
               navigate('/motivation', { state: { key: MotivationKey.MoodAndEnergy, params: values } });
             }}
           >

@@ -15,6 +15,19 @@ describe('parseDeepText', () => {
     expect(parts[3].text).toBe('Напиши одно письмо.');
   });
 
+  it('распознаёт блоки расклада на двоих (ru/en), «Связь» не путается со «Связи»', () => {
+    const parts = parseDeepText([
+      'Общий рисунок. Две тройки звучат в одном ключе.',
+      'Позиция «Что я приношу» — у одного Маг, у другого Шут.',
+      'Связь. Усиливает умение слушать.',
+      'Разговор, который стоит начать: что тебе трудно сказать вслух?',
+      'Connection. Listening helps.',
+      'Connections. Tower vs Star.',
+    ]);
+    expect(parts.map((p) => p.kind)).toEqual(['overall', 'text', 'connection', 'conversation', 'connection', 'connections']);
+    expect(parts[2].text).toBe('Усиливает умение слушать.');
+  });
+
   it('делит вопросы по знаку вопроса', () => {
     expect(splitQuestions('Что я держу? Чего боюсь? Что отпущу?')).toEqual(['Что я держу?', 'Чего боюсь?', 'Что отпущу?']);
     expect(splitQuestions('Один вопрос без знака')).toEqual(['Один вопрос без знака']);

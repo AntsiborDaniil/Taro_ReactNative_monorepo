@@ -1,5 +1,11 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { TSelectedTarotCard, TSpreadFollowUp, TSpreadMemoryNote, TSpreadMemoryStats } from '@legacy-data';
+import type {
+  TCoupleNames,
+  TSelectedTarotCard,
+  TSpreadFollowUp,
+  TSpreadMemoryNote,
+  TSpreadMemoryStats,
+} from '@legacy-data';
 import type { TSpread } from './catalog';
 
 export type SpreadFlowStatus = 'choosing' | 'interpreting' | 'done' | 'error';
@@ -56,6 +62,11 @@ const spreadSlice = createSlice({
       const room = state.selectedSpread.cardsCount - state.selectedSpread.selectedCards.length;
       if (room <= 0) return;
       state.selectedSpread.selectedCards.push(...action.payload.slice(0, room));
+    },
+    /** «Расклад для парочки»: имена пары перед выбором карт. */
+    setCoupleMeta(state, action: PayloadAction<{ couple: TCoupleNames }>) {
+      if (!state.selectedSpread) return;
+      state.selectedSpread.couple = action.payload.couple;
     },
     clearSelectedCards(state) {
       if (!state.selectedSpread) return;
@@ -148,6 +159,7 @@ export const {
   setStatus,
   setError,
   setSpreadMeta,
+  setCoupleMeta,
   openSavedSpread,
   openSharedSpread,
   setFollowUps,

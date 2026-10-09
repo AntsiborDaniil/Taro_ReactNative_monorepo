@@ -5,7 +5,8 @@ import { isFreePeriodSpread, selectSpread, type TSpread } from '@entities/spread
 import { useAppDispatch } from '@shared/lib/store';
 import { getImage, DECK_STYLE_FLAT } from '@shared/lib/getImage';
 import { AnalyticAction, track } from '@shared/lib/analytics';
-import { ChargeMark, SmartImage } from '@shared/ui';
+import { SpreadPriceTag, spreadChargeCost } from '@features/freeFirsts';
+import { SmartImage } from '@shared/ui';
 import styles from './TarotSpreadsCarousel.module.css';
 
 export function MainSpreadCard({ spread }: { spread: TSpread }): ReactElement {
@@ -32,7 +33,7 @@ export function MainSpreadCard({ spread }: { spread: TSpread }): ReactElement {
       onClick={handleClick}
       aria-label={
         paid
-          ? `${t('main:spreadCard.a11y', { name, cards: cardsLabel })}, ${t('core:charge.a11y', { count: 1 })}`
+          ? `${t('main:spreadCard.a11y', { name, cards: cardsLabel })}, ${t('core:charge.a11y', { count: spreadChargeCost(spread.id) })}`
           : t('main:spreadCard.a11y', { name, cards: cardsLabel })
       }
     >
@@ -40,7 +41,7 @@ export function MainSpreadCard({ spread }: { spread: TSpread }): ReactElement {
         <span className={styles.imageInner}>
           <SmartImage className={styles.image} src={img} />
         </span>
-        {paid ? <ChargeMark size="xs" overlay className={styles.chargeMark} /> : null}
+        {paid ? <SpreadPriceTag spreadId={spread.id} className={styles.chargeMark} /> : null}
       </span>
       <span className={styles.textCol}>
         <span className={styles.name}>{name}</span>

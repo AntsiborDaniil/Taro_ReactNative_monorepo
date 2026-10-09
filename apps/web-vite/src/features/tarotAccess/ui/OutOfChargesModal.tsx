@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { getImage } from '@shared/lib/getImage';
 import { haptic } from '@shared/lib/haptics';
 import { useAppDispatch } from '@shared/lib/store';
@@ -11,10 +12,11 @@ import styles from './OutOfChargesModal.module.css';
 const MODAL_ID = 'out-of-charges';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** До следующей полуночи UTC — тогда сервер выдаёт новый бесплатный расклад (tarot_daily_usage.day). */
+/** До ближайших 10:00 МСК (= 07:00 UTC) — тогда сервер выдаёт новый бесплатный расклад (tarot_daily_usage.day). */
 function untilRefill(now = Date.now()): { hours: number; minutes: number; dayProgress: number } {
   const next = new Date(now);
-  next.setUTCHours(24, 0, 0, 0);
+  next.setUTCHours(7, 0, 0, 0);
+  if (next.getTime() <= now) next.setUTCDate(next.getUTCDate() + 1);
   const left = Math.max(0, next.getTime() - now);
   return {
     hours: Math.floor(left / 3_600_000),
@@ -30,7 +32,10 @@ function untilRefill(now = Date.now()): { hours: number; minutes: number; dayPro
  * Пополнение — тихая кнопка внизу без цены, не продажа «в лоб»; закрыть — крестик.
  * «Пополнить» заменяет лист покупкой (а не кладёт сверху).
  */
-export function OutOfChargesModal(_props: ModalComponentProps): ReactElement {
+/** Почему не хватило зарядов: обычный расклад, глубокий разбор (⚡2) или уточнение (только купленные заряды). */
+export type OutOfChargesReason = 'spread' | 'deep' | 'followUp';
+
+export function OutOfChargesModal({ reason = 'spread' }: ModalComponentProps & { reason?: OutOfChargesReason }): ReactElement {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -41,13 +46,19 @@ export function OutOfChargesModal(_props: ModalComponentProps): ReactElement {
     return () => window.clearInterval(id);
   }, []);
 
-  const goTo = (action: () => void) => {
+  useEffect(() => {
+    reachMetrikaGoal(MetrikaGoal.outOfChargesOpen, { reason });
+  }, [reason]);
+
+  const goTo = (target: 'free_spreads' | 'mirror' | 'goals', action: () => void) => {
+    reachMetrikaGoal(MetrikaGoal.outOfChargesFreeClick, { target });
     haptic.selection();
     dispatch(closeModal(MODAL_ID));
     action();
   };
 
   const handleTopUp = () => {
+    reachMetrikaGoal(MetrikaGoal.outOfChargesTopup, { reason });
     haptic.impact('light');
     dispatch(closeModal(MODAL_ID));
     dispatch(openModal({ id: 'buy-credits' }));
@@ -73,7 +84,7 @@ export function OutOfChargesModal(_props: ModalComponentProps): ReactElement {
       </section>
 
       <Text role="body" tone="ink100" className={styles.lead}>
-        {t('spread:outOfCharges.body')}
+        {t(reason === 'spread' ? 'spread:outOfCharges.body' : `spread:outOfCharges.body.${reason}`)}
       </Text>
 
       <div className={styles.free}>
@@ -84,13 +95,13 @@ export function OutOfChargesModal(_props: ModalComponentProps): ReactElement {
           leadingIcon={<SmartImage className={styles.thumb} src={getImage(['core', 'girl'])} />}
           title={t('spread:outOfCharges.freeSpreads')}
           subtitle={t('spread:outOfCharges.freeSpreadsHint')}
-          onClick={() => goTo(() => navigate('/spreads#free'))}
+          onClick={() => goTo('free_spreads', () => navigate('/spreads#free'))}
         />
         <ListRow
           leadingIcon={<SmartImage className={styles.thumb} src={getImage(['core', 'mirror'])} />}
           title={t('spread:outOfCharges.mirror')}
           subtitle={t('spread:outOfCharges.mirrorHint')}
-          onClick={() => goTo(() => navigate('/mirror'))}
+          onClick={() => goTo('mirror', () => navigate('/mirror'))}
         />
         <ListRow
           leadingIcon={
@@ -100,7 +111,7 @@ export function OutOfChargesModal(_props: ModalComponentProps): ReactElement {
           }
           title={t('spread:outOfCharges.goals')}
           subtitle={t('spread:outOfCharges.goalsHint')}
-          onClick={() => goTo(() => navigate('/habits/week'))}
+          onClick={() => goTo('goals', () => navigate('/habits/week'))}
         />
       </div>
 

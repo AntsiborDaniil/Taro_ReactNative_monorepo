@@ -12,8 +12,9 @@ export type CachedQuota = {
   spreadCredits: number;
 };
 
+/** День бесплатного слота: сутки с 10:00 МСК (= 07:00 UTC), как tarot_daily_usage.day на сервере. */
 function utcDay(): string {
-  return new Date().toISOString().slice(0, 10);
+  return new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
 export function readQuotaCache(): CachedQuota | null {
@@ -23,7 +24,7 @@ export function readQuotaCache(): CachedQuota | null {
     const parsed = JSON.parse(raw) as CachedQuota;
     if (typeof parsed?.spreadCredits !== 'number') return null;
     const daily = parsed.tarotDaily;
-    // Дневной слот обновляется по UTC-суткам: вчерашний «used» сегодня уже 0.
+    // Дневной слот обновляется в 10:00 МСК: вчерашний «used» после этого уже 0.
     if (daily && daily.day !== utcDay()) {
       return { ...parsed, tarotDaily: { ...daily, used: 0, day: utcDay() } };
     }

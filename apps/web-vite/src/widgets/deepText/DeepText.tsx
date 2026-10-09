@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text } from '@shared/ui';
-import { parseDeepText, splitQuestions } from '../lib/parseDeepText';
+import { parseDeepText, splitQuestions } from './lib/parseDeepText';
 import styles from './DeepText.module.css';
 
 /**
@@ -59,10 +59,15 @@ export function DeepText({ paragraphs }: { paragraphs: string[] }): ReactElement
             </div>
           );
         }
+        // Блоки пары лежат в неймспейсе together, остальные — в spread.
+        const titleKey =
+          part.kind === 'overall' || part.kind === 'connection' || part.kind === 'conversation'
+            ? `together:block.${part.kind}`
+            : `spread:deep.block.${part.kind}`;
         return (
           <div key={index} className={styles.block} style={delay}>
             <Text role="label" tone="accent" as="h3" className={styles.blockTitle}>
-              {t(`spread:deep.block.${part.kind}`)}
+              {t(titleKey)}
             </Text>
             <Text role="body" tone="ink50" className={styles.blockText}>
               {part.text}

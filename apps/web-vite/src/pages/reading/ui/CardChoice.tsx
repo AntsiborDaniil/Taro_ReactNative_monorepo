@@ -13,7 +13,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SpreadName, TarotCardDirection, tarotCards, type TSelectedTarotCard, type TTarotCard } from '@legacy-data';
-import { getTarotCardReadings, isFreePeriodSpread, TarotCardFace, type TSpread } from '@entities/spread';
+import { getTarotCardReadings, isShortRitual, TarotCardFace, type TSpread } from '@entities/spread';
 import { getImage, DECK_STYLE_FLAT } from '@shared/lib/getImage';
 import { haptic } from '@shared/lib/haptics';
 import { useAppSelector } from '@shared/lib/store';
@@ -130,8 +130,8 @@ export function CardChoice({ spread, selectedCards, onDraw, onDrawAll }: CardCho
   // Порядок колоды 0..77: стартовый и после cut (карта под рубашкой берётся отсюда).
   const deckOrderRef = useRef<number[]>([]);
   if (deckOrderRef.current.length === 0) deckOrderRef.current = freshDeckOrder();
-  // Карты дня/недели/месяца — короткая церемония (один рифл).
-  const isDayCard = isFreePeriodSpread(spread.id);
+  // Карты дня/недели/месяца и карта для друга — короткая церемония (один рифл).
+  const isDayCard = isShortRitual(spread.id);
 
   const selectedIdsMap = useMemo(
     () => Object.fromEntries(selectedCards.map((card) => [card.id, true])),

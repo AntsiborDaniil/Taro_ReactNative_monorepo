@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   addSelectedCard,
   addSelectedCards,
   buildInterpretContext,
   getAIRequestBody,
+  findSpreadById,
   freePeriodKindOf,
   saveFreePeriodCard,
+  selectSpread,
   spreadFromSavedFreeCard,
   openSavedSpread,
   setError,
@@ -19,10 +21,13 @@ import {
 import { loadHabits } from '@entities/habits';
 import { loadMood } from '@entities/mood';
 import { SpreadName, type TSelectedTarotCard } from '@legacy-data';
+import { useGetFreeFirstsQuery } from '@features/freeFirsts';
+import { useGetPairQuotaQuery, useSubmitPairReading } from '@features/pairReading';
 import { ensureI18nNamespaces } from '@shared/i18n';
 import { haptic } from '@shared/lib/haptics';
 import { AnalyticAction, track } from '@shared/lib/analytics';
 import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
+import { COUPLE_COST } from '@features/couple';
 import { isRtkNetworkError, rtkErrorStatus } from '@shared/lib/rtkQueryError';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { isWebAuthPending, shouldPromptWebSignIn } from '@shared/lib/webAuthGate';
@@ -50,13 +55,44 @@ export default function ReadingPage(): ReactElement {
   const habits = useAppSelector((state) => state.habits.habits);
   const [interpretSpread, { isLoading: isInterpreting }] = useInterpretSpreadMutation();
   const [isStarting, setIsStarting] = useState(false);
+  // «Вместе»: ?pair=<id> — партнёр тянет свои карты по приглашению; together_pair без него — автор.
+  const [searchParams] = useSearchParams();
+  const pairId = searchParams.get('pair');
+  const isTogetherPair = selectedSpread?.id === SpreadName.Together_Pair || Boolean(pairId);
+  const isTogether = isTogetherPair;
+  const pairSubmit = useSubmitPairReading();
+  const { data: pairQuota } = useGetPairQuotaQuery(undefined, {
+    skip: !isAuthenticated || !isTogetherPair || Boolean(pairId),
+  });
+
+  // Первый глубокий разбор на аккаунт бесплатный (сервер — источник истины).
+  const { data: freeFirsts } = useGetFreeFirstsQuery(undefined, { skip: !isAuthenticated });
+  const deepFree = freeFirsts?.deep === true;
 
   const hasInterpretation = Boolean(selectedSpread?.interpretation?.trim());
   const drawnCount = selectedSpread?.selectedCards?.length ?? 0;
   const hasAllCards = drawnCount > 0 && drawnCount >= (selectedSpread?.cardsCount ?? 0);
 
+  // Партнёр открыл /reading?pair=<id> (в том числе перезагрузкой): готовим чистый расклад для пары.
   useEffect(() => {
+    if (!pairId) return;
+    const pairSpread = findSpreadById(SpreadName.Together_Pair);
+    if (!pairSpread) return;
+    if (selectedSpread?.id !== SpreadName.Together_Pair || selectedSpread.selectedCards.length >= pairSpread.cardsCount) {
+      dispatch(selectSpread(pairSpread));
+    }
+    // Один раз на вход: дальше расклад ведёт сам пользователь.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pairId]);
+
+  useEffect(() => {
+    // Парочка без имён (перезагрузка, прямая ссылка) — назад к форме.
+    if (selectedSpread?.id === SpreadName.Together_Couple && !selectedSpread.couple && !hasInterpretation) {
+      navigate(`/spreads/${selectedSpread.id}`, { replace: true });
+      return;
+    }
     if (!selectedSpread) {
+      if (pairId) return;
       navigate('/spreads', { replace: true });
     } else if (hasInterpretation && hasAllCards) {
       // История / уже готовое толкование — сразу результат.
@@ -83,7 +119,10 @@ export default function ReadingPage(): ReactElement {
   const isDayCard = freeKind !== null;
   const cardsTotal = selectedSpread?.cardsCount ?? 0;
   /** «Глубокий разбор» — только обычные расклады с 3+ картами (не «Утро, день, вечер»). */
-  const canDeep = !isDayCard && cardsTotal >= 3 && selectedSpread?.id !== SpreadName.Simple_DayParts;
+  // У парочки свой формат толкования, «глубокого» нет.
+  const isCouple = selectedSpread?.id === SpreadName.Together_Couple;
+  const canDeep =
+    !isDayCard && !isTogether && !isCouple && cardsTotal >= 3 && selectedSpread?.id !== SpreadName.Simple_DayParts;
 
   const remainingCredits =
     (tarotDaily != null ? Math.max(0, tarotDaily.limit - tarotDaily.used) : 0) +
@@ -103,9 +142,12 @@ export default function ReadingPage(): ReactElement {
     if (!isDayCard) {
       if (tarotDaily == null) return;
 
-      if (remainingCredits < (mode === 'deep' ? 2 : 1)) {
+      // «Для влюблённых» стоит ⚡2 (как глубокий разбор), остальные — ⚡1.
+      const needed = mode === 'deep' ? (deepFree ? 0 : 2) : isCouple ? COUPLE_COST : 1;
+      if (remainingCredits < needed) {
         haptic.notify('warning');
-        dispatch(openModal({ id: 'daily-limit' }));
+        // Тихая модалка (таймер до бесплатного расклада + «Пока ждёшь»), как на всех кнопках с ⚡.
+        dispatch(openModal({ id: 'out-of-charges', props: { reason: mode === 'deep' ? 'deep' : 'spread' } }));
         return;
       }
     }
@@ -177,7 +219,7 @@ export default function ReadingPage(): ReactElement {
       }
       if (status === 429) {
         haptic.notify('warning');
-        dispatch(openModal({ id: 'daily-limit' }));
+        dispatch(openModal({ id: 'out-of-charges', props: { reason: mode === 'deep' ? 'deep' : 'spread' } }));
         dispatch(setError('daily_limit'));
         return;
       }
@@ -195,7 +237,29 @@ export default function ReadingPage(): ReactElement {
     }
   };
 
-  if (!selectedSpread) {
+  /** «Расклад для друзей» (автор / приглашённый) — свой путь вместо /api/interpret. */
+  const handleTogetherDone = async () => {
+    if (!selectedSpread || pairSubmit.busy) return;
+    if (isWebAuthPending(sessionLoading)) return;
+    if (shouldPromptWebSignIn(isAuthenticated, sessionLoading)) {
+      toast.info(t('together:error.signIn'));
+      return;
+    }
+    if (pairId) {
+      await pairSubmit.submitPartner(selectedSpread, pairId);
+      return;
+    }
+    // Бесплатная пара уже использована, а ⚡2 нет — модалка сразу, а не ошибкой сервера.
+    if (pairQuota && !pairQuota.freeAvailable && tarotDaily != null && remainingCredits < 2) {
+      haptic.notify('warning');
+      dispatch(openModal({ id: 'out-of-charges', props: { reason: 'deep' } }));
+      return;
+    }
+    await pairSubmit.submitAuthor(selectedSpread);
+  };
+
+  // Партнёр по ссылке: пока эффект не подготовил расклад пары, чужой расклад не показываем.
+  if (!selectedSpread || (pairId && selectedSpread.id !== SpreadName.Together_Pair)) {
     return (
       <div className={styles.page}>
         <div className={styles.column}>
@@ -207,12 +271,20 @@ export default function ReadingPage(): ReactElement {
 
   const selectedCards = selectedSpread.selectedCards ?? [];
   const isComplete = selectedSpread.cardsCount > 0 && hasAllCards;
-  const busy = isStarting || isInterpreting;
+  const busy = isStarting || isInterpreting || pairSubmit.busy;
+  const togetherLabel = pairId ? t('together:pair.reading.partnerDone') : t('together:pair.reading.done');
+  const togetherPaid = isTogetherPair && !pairId && pairQuota?.freeAvailable === false;
 
   return (
     <div className={styles.page}>
       <div className={styles.column}>
         <Header title={t(selectedSpread.name)} showBack />
+
+        {selectedSpread.couple ? (
+          <Text role="label" tone="accent" className={styles.coupleNames}>
+            {t('together:couple.names', { him: selectedSpread.couple.him, her: selectedSpread.couple.her })}
+          </Text>
+        ) : null}
 
         {selectedSpread.question ? (
           <div className={styles.question}>
@@ -232,13 +304,30 @@ export default function ReadingPage(): ReactElement {
           onDrawAll={(cards: TSelectedTarotCard[]) => dispatch(addSelectedCards(cards))}
         />
 
-        {isComplete ? (
+        {isComplete && isTogether ? (
           <div className={styles.completion}>
             <Button
               variant="action"
               fullWidth
               disabled={busy}
-              icon={isDayCard ? undefined : <ChargeMark size="md" onAction />}
+              icon={togetherPaid ? <ChargeMark cost={2} size="md" onAction /> : undefined}
+              iconPosition="end"
+              onClick={() => {
+                void handleTogetherDone();
+              }}
+            >
+              {togetherLabel}
+            </Button>
+          </div>
+        ) : null}
+
+        {isComplete && !isTogether ? (
+          <div className={styles.completion}>
+            <Button
+              variant="action"
+              fullWidth
+              disabled={busy}
+              icon={isDayCard ? undefined : <ChargeMark cost={isCouple ? COUPLE_COST : 1} size="md" onAction />}
               iconPosition="end"
               onClick={() => {
                 void handleReadExplanation();
@@ -247,18 +336,26 @@ export default function ReadingPage(): ReactElement {
               {t('core:choice.completed')}
             </Button>
             {canDeep ? (
-              <Button
-                variant="quiet"
-                fullWidth
-                disabled={busy}
-                icon={<ChargeMark cost={2} size="md" />}
-                iconPosition="end"
-                onClick={() => {
-                  void handleReadExplanation('deep');
-                }}
-              >
-                {t('spread:deep.cta')}
-              </Button>
+              <>
+                <Button
+                  variant="quiet"
+                  fullWidth
+                  disabled={busy}
+                  icon={deepFree ? undefined : <ChargeMark cost={2} size="md" />}
+                  iconPosition="end"
+                  onClick={() => {
+                    reachMetrikaGoal(MetrikaGoal.deepReadingClick, { spreadId: selectedSpread?.id });
+                    void handleReadExplanation('deep');
+                  }}
+                >
+                  {t('spread:deep.cta')}
+                </Button>
+                {deepFree ? (
+                  <Text role="micro" tone="ink100" className={styles.deepFree}>
+                    {t('spread:deep.firstFree')}
+                  </Text>
+                ) : null}
+              </>
             ) : null}
           </div>
         ) : null}

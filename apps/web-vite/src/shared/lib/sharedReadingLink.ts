@@ -47,6 +47,42 @@ export function isShareableReadingUid(uid: string | undefined | null): uid is st
   return typeof uid === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(uid.trim());
 }
 
+export type IncomingLinkKind = 'reading' | 'pair' | 'gift';
+export type IncomingLink = { kind: IncomingLinkKind; id: string };
+
+const PAIR_PREFIX = 'pair_';
+const GIFT_PREFIX = 'gift_';
+
+function hexToUuid(hex: string): string {
+  const h = hex.toLowerCase();
+  return [h.slice(0, 8), h.slice(8, 12), h.slice(12, 16), h.slice(16, 20), h.slice(20)].join('-');
+}
+
+/** UUID пары → `pair_<hex32>` для startapp. */
+export function encodePairStartParam(pairId: string): string {
+  return `${PAIR_PREFIX}${pairId.replace(/-/g, '').toLowerCase()}`;
+}
+
+/** UUID подарка → `gift_<hex32>` для startapp. */
+export function encodeGiftStartParam(giftId: string): string {
+  return `${GIFT_PREFIX}${giftId.replace(/-/g, '').toLowerCase()}`;
+}
+
+/**
+ * Общий разбор параметра запуска: `r_<hex32>` (расклад), `pair_<hex32>` (пара),
+ * `gift_<hex32>` (подарок); для раскладов дополнительно — «голый» UUID из `?reading=`.
+ */
+export function decodeStartParam(param: string | null | undefined): IncomingLink | null {
+  if (!param) return null;
+  const trimmed = param.trim();
+  const pair = trimmed.match(new RegExp(`^${PAIR_PREFIX}([a-f0-9]{32})$`, 'i'));
+  if (pair) return { kind: 'pair', id: hexToUuid(pair[1]) };
+  const gift = trimmed.match(new RegExp(`^${GIFT_PREFIX}([a-f0-9]{32})$`, 'i'));
+  if (gift) return { kind: 'gift', id: hexToUuid(gift[1]) };
+  const reading = decodeSharedReadingParam(trimmed);
+  return reading ? { kind: 'reading', id: reading } : null;
+}
+
 export function decodeSharedReadingParam(param: string | null | undefined): string | null {
   if (!param) return null;
   const trimmed = param.trim();
@@ -87,6 +123,39 @@ export function buildWebReadingUrl(spreadUid: string): string {
   return `${window.location.origin}${sharedReadingPath(spreadUid)}`;
 }
 
+/** Путь страницы пары / подарка внутри SPA. */
+export function pairPath(pairId: string): string {
+  return `/pair/${pairId.toLowerCase()}`;
+}
+
+export function giftPath(giftId: string): string {
+  return `/gift/${giftId.toLowerCase()}`;
+}
+
+function buildMiniAppUrl(startapp: string): string {
+  const bot = getBotUsername();
+  const shortName = getMiniAppShortName();
+  return shortName
+    ? `https://t.me/${bot}/${shortName}?startapp=${startapp}`
+    : `https://t.me/${bot}?startapp=${startapp}`;
+}
+
+/** Ссылка-приглашение в расклад на двоих: Mini App → t.me, веб → `${origin}/pair/<id>`. */
+export function buildPairUrl(pairId: string): string {
+  if (!isTelegramMiniApp() && typeof window !== 'undefined') {
+    return `${window.location.origin}${pairPath(pairId)}`;
+  }
+  return buildMiniAppUrl(encodePairStartParam(pairId));
+}
+
+/** Ссылка на «Карту для друга»: Mini App → t.me, веб → `${origin}/gift/<id>`. */
+export function buildGiftUrl(giftId: string): string {
+  if (!isTelegramMiniApp() && typeof window !== 'undefined') {
+    return `${window.location.origin}${giftPath(giftId)}`;
+  }
+  return buildMiniAppUrl(encodeGiftStartParam(giftId));
+}
+
 /**
  * Ссылка для шаринга. Внутри Mini App — Telegram deep link
  * (приоритет — прямая ссылка на приложение `t.me/<bot>/<app>?startapp=…`;
@@ -123,27 +192,44 @@ function readFromHash(): string | null {
   return null;
 }
 
-export function readIncomingSharedReadingId(): string | null {
-  if (typeof window === 'undefined') return null;
+/** Параметры запуска в порядке приоритета: query → фрагмент → initDataUnsafe.start_param. */
+function readRawStartParams(): string[] {
+  const out: string[] = [];
+  if (typeof window === 'undefined') return out;
 
   try {
     const url = new URL(window.location.href);
     for (const key of START_PARAM_KEYS) {
-      const decoded = decodeSharedReadingParam(url.searchParams.get(key));
-      if (decoded) return decoded;
+      const value = url.searchParams.get(key);
+      if (value) out.push(value);
     }
   } catch {
     // ignore
   }
 
-  const fromHash = decodeSharedReadingParam(readFromHash());
-  if (fromHash) return fromHash;
+  const fromHash = readFromHash();
+  if (fromHash) out.push(fromHash);
 
   const startParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
-  if (typeof startParam === 'string') {
-    return decodeSharedReadingParam(startParam);
-  }
+  if (typeof startParam === 'string' && startParam) out.push(startParam);
 
+  return out;
+}
+
+/** Входящая ссылка любого вида (расклад / пара / подарок) или null. */
+export function readIncomingLink(): IncomingLink | null {
+  for (const raw of readRawStartParams()) {
+    const decoded = decodeStartParam(raw);
+    if (decoded) return decoded;
+  }
+  return null;
+}
+
+export function readIncomingSharedReadingId(): string | null {
+  for (const raw of readRawStartParams()) {
+    const decoded = decodeSharedReadingParam(raw);
+    if (decoded) return decoded;
+  }
   return null;
 }
 
@@ -165,6 +251,19 @@ export async function waitForIncomingSharedReadingId(timeoutMs = BRIDGE_WAIT_MS)
   while (Date.now() < deadline) {
     await new Promise((resolve) => window.setTimeout(resolve, BRIDGE_POLL_MS));
     const found = readIncomingSharedReadingId();
+    if (found) return found;
+  }
+  return null;
+}
+
+export async function waitForIncomingLink(timeoutMs = BRIDGE_WAIT_MS): Promise<IncomingLink | null> {
+  const immediate = readIncomingLink();
+  if (immediate || !looksLikeTelegramLaunch()) return immediate;
+
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    await new Promise((resolve) => window.setTimeout(resolve, BRIDGE_POLL_MS));
+    const found = readIncomingLink();
     if (found) return found;
   }
   return null;

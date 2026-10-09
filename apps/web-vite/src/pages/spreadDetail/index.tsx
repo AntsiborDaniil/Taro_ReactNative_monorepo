@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { getImage, DECK_STYLE_FLAT } from '@shared/lib/getImage';
 import { AnalyticAction, track } from '@shared/lib/analytics';
 import { Button, ChargeMark, EmptyState, Header, openModal, Text, Textarea, SmartImage } from '@shared/ui';
+import { TogetherActions } from './ui/TogetherActions';
 import styles from './SpreadDetail.module.css';
 import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 
@@ -22,6 +23,12 @@ import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
  */
 /** «Как это работает» у карт периода: ключи spread:<prefix>.how.* */
 const DAY_ADVICE_STEPS = ['breath', 'draw', 'read', 'return'] as const;
+/** «Как это работает» у раскладов «Вместе»: ключи together:<couple|pair>.how.* */
+const TOGETHER_STEPS = ['1', '2', '3'] as const;
+const TOGETHER_KIND: Partial<Record<SpreadName, string>> = {
+  [SpreadName.Together_Couple]: 'couple',
+  [SpreadName.Together_Pair]: 'pair',
+};
 const HOW_PREFIX: Record<FreePeriodKind, string> = {
   day: 'daySuggest',
   week: 'period_weekCard',
@@ -82,7 +89,10 @@ export default function SpreadDetailPage(): ReactElement {
   // Карты дня/недели/месяца бесплатны (одна на период), остальные расклады тратят заряд.
   const freeKind = freePeriodKindOf(spread.id);
   const freeState = freeKind ? stateOf(spread) : null;
-  const isPaid = !freeKind;
+  // «Вместе» (влюблённые / друзья) — своя форма и свой CTA (ui/TogetherActions).
+  const togetherKind = TOGETHER_KIND[spread.id] ?? null;
+  const isTogether = togetherKind !== null;
+  const isPaid = !freeKind && !isTogether;
   // Вопрос не обязателен для карт периода и «Утро, день, вечер».
   const requiresQuestion = isPaid && spread.id !== SpreadName.Simple_DayParts;
   const heroImage = getImage(['spreads', DECK_STYLE_FLAT, spread.id]);
@@ -148,6 +158,24 @@ export default function SpreadDetailPage(): ReactElement {
           </div>
         ) : null}
 
+        {isTogether ? (
+          <div className={styles.panel}>
+            <Text role="label" tone="ink100" as="h2">
+              {t(`together:${togetherKind}.how.title`)}
+            </Text>
+            <ol className={styles.positions}>
+              {TOGETHER_STEPS.map((key, index) => (
+                <li key={key} className={styles.position}>
+                  <span className={styles.positionIndex}>{index + 1}</span>
+                  <span>
+                    {t(`together:${togetherKind}.how.${key}`)}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : null}
+
         {positionLabels.length > 0 && !freeKind ? (
           <div className={styles.panel}>
             <Text role="label" tone="ink100" as="h2">
@@ -164,6 +192,8 @@ export default function SpreadDetailPage(): ReactElement {
             </ol>
           </div>
         ) : null}
+
+        {isTogether ? <TogetherActions spread={spread} /> : null}
 
         {requiresQuestion ? (
           <div className={styles.panel}>
@@ -187,6 +217,7 @@ export default function SpreadDetailPage(): ReactElement {
           </div>
         ) : null}
 
+        {isTogether ? null : (
         <Button
           variant="action"
           fullWidth
@@ -202,6 +233,7 @@ export default function SpreadDetailPage(): ReactElement {
               ? t(`spread:freeCard.open.${freeKind}`)
               : t(`spread:${HOW_PREFIX[freeKind as FreePeriodKind]}.cta`)}
         </Button>
+        )}
         {freeKind && freeState?.used ? (
           <Text role="micro" tone="ink100" className={styles.nextHint}>
             {t(`spread:freeCard.next.${freeKind}`)}

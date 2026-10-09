@@ -1,5 +1,9 @@
+import { lazy } from 'react';
 import { registerModal } from '@shared/ui/ModalSheet';
-import { AddToHomeScreenModal } from './ui/AddToHomeScreenModal';
+
+const AddToHomeScreenModal = lazy(() =>
+  import('./ui/AddToHomeScreenModal').then((m) => ({ default: m.AddToHomeScreenModal })),
+);
 
 // Побочный эффект (импорт из AppShell до ModalRoot): модалка после первого расклада
 // и строка в настройках Mini App.
@@ -8,7 +12,6 @@ registerModal('add-to-home-screen', {
   Component: AddToHomeScreenModal,
 });
 
-export { AddToHomeScreenModal };
 export { maybeOfferAddToHomeScreen } from './lib/maybeOfferAddToHomeScreen';
 export {
   readHomeScreenPromptState,

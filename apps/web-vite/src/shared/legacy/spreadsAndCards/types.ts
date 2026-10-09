@@ -9,6 +9,8 @@ export enum SpreadsCategory {
   Choice = 'choice',
   /** Бесплатные карты периода: дня, недели, месяца. */
   Period = 'period',
+  /** «Вместе»: расклад на двоих и карта для друга (шаринг по ссылке). */
+  Together = 'together',
 }
 
 export enum SpreadName {
@@ -33,6 +35,10 @@ export enum SpreadName {
   SelfDevelopment_InMyHands = 'selfDevelopment_inMyHands',
   Period_WeekCard = 'period_weekCard',
   Period_MonthCard = 'period_monthCard',
+  /** «Расклад для друзей» — по приглашению (id исторический: старые ссылки /pair/:id). */
+  Together_Pair = 'together_pair',
+  /** «Расклад для парочки» — на одном устройстве: имена обоих + вопрос. */
+  Together_Couple = 'together_couple',
 }
 
 export enum TarotCardDirection {
@@ -147,7 +153,11 @@ export type TSpread = {
   mode?: 'deep';
   /** Автор разрешил показывать свой вопрос по ссылке (payload.shareQuestion). */
   shareQuestion?: boolean;
+  /** «Расклад для парочки»: имена пары (payload.couple). */
+  couple?: TCoupleNames;
 };
+
+export type TCoupleNames = { him: string; her: string };
 
 export type TSpreadCategory = {
   name: string;

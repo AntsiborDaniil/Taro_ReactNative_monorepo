@@ -11,6 +11,7 @@ import {
   type FreePeriodStatus,
   type TSpread,
 } from '@entities/spread';
+import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 
 export type FreeCardState = {
@@ -60,6 +61,7 @@ export function useOpenFreePeriodCard(): {
       // ведёт в каталог, а не снова на описание уже открытой карты.
       const replace = pathname.startsWith('/spreads/');
       const kind = freePeriodKindOf(spread.id);
+      if (kind) reachMetrikaGoal(MetrikaGoal.freeCardOpen, { kind });
       if (kind) {
         const local = getFreePeriodCard(kind);
         if (local) {

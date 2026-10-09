@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import { Suspense, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { closeModal, type ModalStackItem } from './model/modalsSlice';
@@ -36,5 +36,9 @@ export function ModalRoot(): ReactElement | null {
 function StackModal({ entry, item }: { entry: ModalRegistryEntry; item: ModalStackItem }): ReactElement {
   const requestClose = useModalSheetClose();
   const onClose = requestClose ?? (() => undefined);
-  return <entry.Component {...item.props} onClose={onClose} />;
+  return (
+    <Suspense fallback={null}>
+      <entry.Component {...item.props} onClose={onClose} />
+    </Suspense>
+  );
 }

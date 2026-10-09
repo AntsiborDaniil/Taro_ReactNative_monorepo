@@ -153,11 +153,15 @@ export function AppShell(): ReactElement {
   // Карусель выбора карт: таббар прячем с анимацией, чтобы не перекрывал CTA.
   // Расшаренный расклад (/r/:id) — витрина для друга без функциональности: без навигации вообще.
   const isSharedReading = pathname.startsWith('/r/');
-  const hideBottomNav = pathname === '/reading' || pathname.startsWith('/reading/') || isSharedReading;
+  // Ссылки на пару и подарок (/pair/:id, /gift/:id, но не /gift/new): гость, пришедший по ссылке,
+  // видит витрину без навигации — как /r/. Авторизованному навигация остаётся.
+  const isTogetherLink = /^\/(pair|gift)\/(?!new$)[^/]+$/.test(pathname);
+  const hideNav = isSharedReading || (isTogetherLink && !isAuthenticated);
+  const hideBottomNav = pathname === '/reading' || pathname.startsWith('/reading/') || hideNav;
 
   return (
     <div className={styles.shell}>
-      {isSharedReading ? null : <NavRail />}
+      {hideNav ? null : <NavRail />}
       <main
         className={
           hideBottomNav ? `${styles.content} ${styles.contentNavHidden}` : styles.content

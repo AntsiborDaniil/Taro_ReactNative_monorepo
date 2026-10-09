@@ -11,6 +11,8 @@ const SpreadDetailPage = lazy(() => import('@pages/spreadDetail'));
 const ReadingPage = lazy(() => import('@pages/reading'));
 const ReadingResultPage = lazy(() => import('@pages/readingResult'));
 const SharedReadingPage = lazy(() => import('@pages/sharedReading'));
+const PairPage = lazy(() => import('@pages/pair'));
+const GiftPage = lazy(() => import('@pages/gift'));
 const CardDetailPage = lazy(() => import('@pages/cardDetail'));
 const HistoryPage = lazy(() => import('@pages/history'));
 const MirrorPage = lazy(() => import('@pages/mirror'));
@@ -49,6 +51,9 @@ export const router = createBrowserRouter([
       { path: 'reading', Component: ReadingPage },
       { path: 'reading/result', Component: ReadingResultPage },
       { path: 'r/:id', Component: SharedReadingPage },
+      // «Вместе»: пара и карта для друга (ссылки открываются и гостем).
+      { path: 'pair/:id', Component: PairPage },
+      { path: 'gift/:id', Component: GiftPage },
       { path: 'card/:cardId', Component: CardDetailPage },
       { path: 'history', Component: HistoryPage },
       { path: 'mirror', Component: MirrorPage },

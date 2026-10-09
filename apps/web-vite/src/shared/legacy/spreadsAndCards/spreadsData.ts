@@ -617,6 +617,46 @@ export const periodSpreads: Record<string, TSpread> = {
   },
 };
 
+/**
+ * «Вместе»: «Для влюблённых» (на одном устройстве, ⚡2) и расклад для друзей (3+3 карты по приглашению). Тексты — неймспейс together.
+ */
+export const togetherSpreads: Record<string, TSpread> = {
+  couple: {
+    name: 'together:couple.name',
+    description: 'together:couple.description',
+    id: SpreadName.Together_Couple,
+    category: SpreadsCategory.Together,
+    img: '',
+    cardsCount: 5,
+    cardsPosition: [],
+    selectedCards: [],
+    availableSubscriptions: [SubscriptionType.Freemium, SubscriptionType.Practice],
+    cardsOrder: [
+      { meaning: 'together_couple.cardMeaning.0' },
+      { meaning: 'together_couple.cardMeaning.1' },
+      { meaning: 'together_couple.cardMeaning.2' },
+      { meaning: 'together_couple.cardMeaning.3' },
+      { meaning: 'together_couple.cardMeaning.4' },
+    ],
+  },
+  pair: {
+    name: 'together:pair.name',
+    description: 'together:pair.description',
+    id: SpreadName.Together_Pair,
+    category: SpreadsCategory.Together,
+    img: '',
+    cardsCount: 3,
+    cardsPosition: [],
+    selectedCards: [],
+    availableSubscriptions: [SubscriptionType.Freemium, SubscriptionType.Practice],
+    cardsOrder: [
+      { meaning: 'together_pair.cardMeaning.0' },
+      { meaning: 'together_pair.cardMeaning.1' },
+      { meaning: 'together_pair.cardMeaning.2' },
+    ],
+  },
+};
+
 export const spreadsDataNames = {
   [SpreadsCategory.Choice]: 'spread:choice.name',
   [SpreadsCategory.Simple]: 'spread:simple.name',
@@ -624,6 +664,7 @@ export const spreadsDataNames = {
   [SpreadsCategory.Universal]: 'spread:universal.name',
   [SpreadsCategory.Thematic]: 'spread:thematic.name',
   [SpreadsCategory.Period]: 'spread:period.name',
+  [SpreadsCategory.Together]: 'together:section.name',
 };
 
 export const spreadsData: TSpreadCategory[] = [
@@ -637,6 +678,12 @@ export const spreadsData: TSpreadCategory[] = [
     name: 'spread:period.name.multiple',
     id: SpreadsCategory.Period,
     spreads: [simpleSpreads.daySuggest, periodSpreads.weekCard, periodSpreads.monthCard],
+  },
+  // Вторым после бесплатных карт — «Вместе»: влюблённые и друзья.
+  {
+    name: 'together:section.name',
+    id: SpreadsCategory.Together,
+    spreads: [togetherSpreads.couple, togetherSpreads.pair],
   },
   {
     name: 'spread:selfDevelopment.name.multiple',

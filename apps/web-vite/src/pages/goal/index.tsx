@@ -13,6 +13,7 @@ import {
 } from '@entities/habits';
 import { MotivationKey } from '@entities/tarotMotivation';
 import { haptic } from '@shared/lib/haptics';
+import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { Button, ChargeMark, CheckIcon, Header, Text, useToast } from '@shared/ui';
 import styles from './Goal.module.css';
@@ -54,6 +55,7 @@ export default function GoalPage(): ReactElement {
   const handleClaim = async () => {
     try {
       await claim({ requiredDays }).unwrap();
+      reachMetrikaGoal(MetrikaGoal.habitWeekRewardClaim, { requiredDays });
       haptic.success();
       toast.success(t('achievements:reward.granted'));
     } catch (error) {

@@ -8,7 +8,6 @@
 .lead {
   text-align: center;
   margin: 0;
-  line-height: 1.45;
 }
 
 .balance {
@@ -69,4 +68,270 @@
   height: auto;
   min-height: var(--ds-size-min-touch);
   padding: var(--ds-space-4) var(--ds-space-12);
+}
+
+
+/* Баланс сейчас — спокойная плашка вместо «купи». */
+.balanceCard {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-12);
+  padding: var(--ds-space-12) var(--ds-space-16);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-700);
+}
+
+.balanceIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--ds-ground-800);
+  border: var(--ds-size-edge-width) solid var(--ds-accent-400);
+}
+
+.balanceText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.sectionTitle {
+  margin: 0;
+  text-align: left;
+}
+
+.rhythm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+.rhythmChips {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--ds-ground-700);
+}
+
+/* Сегмент-переключатель ритма: компактно, без капса. */
+.segment {
+  min-height: 40px;
+  padding: var(--ds-space-4) var(--ds-space-8);
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-micro-family);
+  font-size: var(--ds-font-micro-size);
+  line-height: 15px;
+  cursor: pointer;
+  transition:
+    background-color var(--ds-dur-state) var(--ds-ease),
+    color var(--ds-dur-state) var(--ds-ease);
+}
+
+.segmentOn {
+  background: var(--ds-calm-600);
+  color: var(--ds-on-calm);
+}
+
+.segment:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+/* Пакеты — строки списка (DS ListRow): радио, что входит, цена справа. */
+.packs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+.pack {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-12);
+  width: 100%;
+  padding: var(--ds-space-12) var(--ds-space-16);
+  box-sizing: border-box;
+  border-radius: var(--ds-radius-list-row);
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-700);
+  color: var(--ds-ink-50);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--ds-dur-state) var(--ds-ease),
+    background-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.packActive {
+  border-color: var(--ds-accent-400);
+  background: var(--ds-ground-800);
+}
+
+.pack:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+.packRadio {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: var(--ds-size-edge-width) solid var(--ds-ground-600);
+  transition: border-color var(--ds-dur-state) var(--ds-ease);
+}
+
+.packActive .packRadio {
+  border: 6px solid var(--ds-accent-400);
+}
+
+.packMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.packTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-8);
+  flex-wrap: wrap;
+}
+
+.packCredits {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--ds-font-title-family);
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* «Подходит тебе» — спокойный calm, не акцент-продажа. */
+.packFits {
+  padding: 1px var(--ds-space-8);
+  border-radius: 10px;
+  background: var(--ds-calm-600);
+  color: var(--ds-on-calm);
+  font-family: var(--ds-font-micro-family);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.packWhat {
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-micro-family);
+  font-size: var(--ds-font-micro-size);
+  line-height: var(--ds-font-micro-line-height);
+}
+
+.packPriceCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.packPrice {
+  font-family: var(--ds-font-lead-family);
+  font-size: var(--ds-font-body-size);
+  line-height: var(--ds-font-body-line-height);
+  white-space: nowrap;
+}
+
+.packPer {
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-micro-family);
+  font-size: 11px;
+  line-height: 14px;
+  white-space: nowrap;
+}
+
+/* Наглядный «бак»: по точке на заряд, появляются волной при смене пакета. */
+.preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-8);
+}
+
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-width: 260px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ds-accent-400);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--ds-accent-400) 60%, transparent);
+  animation: dotIn var(--ds-dur-block) var(--ds-ease) both;
+}
+
+@keyframes dotIn {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.previewText {
+  margin: 0;
+  text-align: center;
+}
+
+.receipt {
+  margin: 0;
+  text-align: center;
+}
+
+.receiptEdit {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ds-accent-400);
+  font-family: var(--ds-font-micro-family);
+  font-size: var(--ds-font-micro-size);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.reassure {
+  margin: calc(var(--ds-space-8) * -1) 0 0;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pack,
+  .packRadio,
+  .segment {
+    transition: none;
+  }
+
+  .dot {
+    animation: none;
+  }
 }

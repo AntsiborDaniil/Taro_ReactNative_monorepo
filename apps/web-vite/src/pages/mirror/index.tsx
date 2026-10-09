@@ -4,6 +4,7 @@ import { loadMood, selectMoodLoaded } from '@entities/mood';
 import { DAY_ADVICE_SPREAD, SpreadName, SuitBalance } from '@entities/spread';
 import { useOpenFreePeriodCard } from '@features/freePeriodCard';
 import { ensureI18nNamespaces } from '@shared/i18n';
+import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { Button, ChevronLeftIcon, ChevronRightIcon, EmptyState, Header, Skeleton, Text } from '@shared/ui';
 import { computeMirror, MIRROR_MIN_SPREADS } from './model/computeMirror';
@@ -33,6 +34,10 @@ export default function MirrorPage(): ReactElement {
   const moods = useAppSelector((state) => state.mood.allMoods);
   const moodLoaded = useAppSelector(selectMoodLoaded);
   const hasReversed = useAppSelector((state) => state.settings.settings.spread?.hasReversed ?? true);
+
+  useEffect(() => {
+    reachMetrikaGoal(MetrikaGoal.mirrorOpen);
+  }, []);
 
   useEffect(() => {
     if (!moodLoaded) dispatch(loadMood());

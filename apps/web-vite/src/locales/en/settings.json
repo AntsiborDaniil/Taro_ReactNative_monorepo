@@ -31,7 +31,7 @@
 
   "credits.buy.row": "Top up charges",
   "credits.buy.rowHint": "Charges after the daily limit. Now: {{count}}",
-  "credits.buy.title": "+3 spreads pack",
+  "credits.buy.title": "Charge packs",
   "credits.buy.sheetTitle": "Top up charges",
   "credits.limit.sheetTitle": "Today’s limit",
   "credits.buy.modalLead": "+3 charges · {{price}}. Used when today’s free limit is already spent.",

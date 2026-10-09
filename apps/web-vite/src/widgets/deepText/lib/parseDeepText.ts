@@ -1,6 +1,15 @@
 /** Разметка толкования по лид-словам — чистые функции для ui/DeepText. */
 
-export type DeepBlockKind = 'connections' | 'pattern' | 'memory' | 'questions' | 'step';
+export type DeepBlockKind =
+  | 'connections'
+  | 'pattern'
+  | 'memory'
+  | 'questions'
+  | 'step'
+  // «Расклад на двоих» (pairSystemPrompt): общий рисунок → связь → разговор.
+  | 'overall'
+  | 'connection'
+  | 'conversation';
 
 /** Лид-слова, которыми модель начинает абзацы (ru/en, см. deepSystemPrompt и SPREAD_RULES в API). */
 const LEADS: Array<{ kind: DeepBlockKind; re: RegExp }> = [
@@ -9,6 +18,9 @@ const LEADS: Array<{ kind: DeepBlockKind; re: RegExp }> = [
   { kind: 'memory', re: /^(Память|Memory)\s*[.:]\s*/i },
   { kind: 'questions', re: /^(Вопросы к себе|Questions for yourself)\s*[.:]\s*/i },
   { kind: 'step', re: /^(Шаг на сегодня|Today[’']s step)\s*[.:]\s*/i },
+  { kind: 'overall', re: /^(Общий рисунок|Overall pattern)\s*[.:]\s*/i },
+  { kind: 'connection', re: /^(Связь|Connection)\s*[.:]\s*/i },
+  { kind: 'conversation', re: /^(Разговор, который стоит начать|A conversation worth starting)\s*[.:]\s*/i },
 ];
 
 export type DeepPart = { kind: 'text'; text: string } | { kind: DeepBlockKind; text: string };

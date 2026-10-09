@@ -29,7 +29,9 @@ export function AILoader(): ReactElement | null {
     () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches,
   );
   const reducedMotion = useMemo(prefersReducedMotion, []);
-  const src = useMemo(() => (Math.random() < 0.2 ? '/videos/loaderCar.mp4' : '/videos/loader.mp4'), []);
+  const videoName = useMemo(() => (Math.random() < 0.2 ? 'loaderCar' : 'loader'), []);
+  const src = `/videos/${videoName}.mp4`;
+  const poster = `/videos/${videoName}.jpg`;
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -77,11 +79,12 @@ export function AILoader(): ReactElement | null {
                 : ({ objectFit: 'cover', objectPosition: 'center center' } as CSSProperties)
             }
             src={src}
+            poster={poster}
             autoPlay
             muted
             loop
             playsInline
-            preload="auto"
+            preload="metadata"
             aria-hidden="true"
             onLoadedMetadata={(event) => {
               const video = event.currentTarget;

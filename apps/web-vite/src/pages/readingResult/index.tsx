@@ -55,7 +55,7 @@ import {
   useToast,
 } from '@shared/ui';
 import { DeepInsights } from './ui/DeepInsights';
-import { DeepText } from './ui/DeepText';
+import { DeepText } from '@widgets/deepText';
 import { MemoryNote } from './ui/MemoryNote';
 import styles from './ReadingResult.module.css';
 
@@ -373,8 +373,8 @@ export default function ReadingResultPage(): ReactElement {
       return;
     }
     if (spreadCredits <= 0) {
-      toast.info(t('spread:followUp.needCredits'));
-      dispatch(openModal({ id: 'buy-credits' }));
+      haptic.notify('warning');
+      dispatch(openModal({ id: 'out-of-charges', props: { reason: 'followUp' } }));
       return;
     }
 
@@ -402,8 +402,8 @@ export default function ReadingResultPage(): ReactElement {
         return;
       }
       if (rtkError.status === 429) {
-        toast.info(t('spread:followUp.needCredits'));
-        dispatch(openModal({ id: 'buy-credits' }));
+        haptic.notify('warning');
+        dispatch(openModal({ id: 'out-of-charges', props: { reason: 'followUp' } }));
         return;
       }
       if (isRtkNetworkError(err)) {
@@ -575,6 +575,12 @@ export default function ReadingResultPage(): ReactElement {
         {spread.mode === 'deep' ? (
           <Text role="label" tone="accent" className={styles.deepLabel}>
             {t('spread:deep.subtitle')}
+          </Text>
+        ) : null}
+
+        {spread.couple ? (
+          <Text role="label" tone="accent" className={styles.coupleNames}>
+            {t('together:couple.names', { him: spread.couple.him, her: spread.couple.her })}
           </Text>
         ) : null}
 

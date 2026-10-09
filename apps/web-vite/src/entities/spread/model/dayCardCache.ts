@@ -27,6 +27,16 @@ export function isFreePeriodSpread(spreadId: string | undefined | null): boolean
   return freePeriodKindOf(spreadId) !== null;
 }
 
+/** Короткая церемония выбора карты (один рифл): карты периода. */
+export function isShortRitual(spreadId: string | undefined | null): boolean {
+  return isFreePeriodSpread(spreadId);
+}
+
+/** Расклады без ⚡ (в каталоге без ценника): карты периода. Друзья ⚡2 (первая бесплатно), «Для влюблённых» ⚡2. */
+export function isFreeOfCharge(spreadId: string | undefined | null): boolean {
+  return isFreePeriodSpread(spreadId);
+}
+
 function moscowDate(now: Date): { y: number; m: number; d: number; weekday: number } {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'Europe/Moscow',

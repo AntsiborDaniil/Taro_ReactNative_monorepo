@@ -1,11 +1,12 @@
 import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { isFreePeriodSpread, selectSpread, type TSpread } from '@entities/spread';
+import { isFreeOfCharge, selectSpread, type TSpread } from '@entities/spread';
 import { useAppDispatch } from '@shared/lib/store';
 import { getImage, DECK_STYLE_FLAT } from '@shared/lib/getImage';
 import { AnalyticAction, track } from '@shared/lib/analytics';
-import { ChargeMark, SmartImage } from '@shared/ui';
+import { SpreadPriceTag, spreadChargeCost } from '@features/freeFirsts';
+import { SmartImage } from '@shared/ui';
 import styles from './SpreadCatalogCard.module.css';
 
 /**
@@ -20,7 +21,8 @@ export function SpreadCatalogCard({ spread }: { spread: TSpread }): ReactElement
 
   const name = t(spread.name);
   // Карты дня/недели/месяца бесплатны — без ценника; остальные расклады тратят заряд.
-  const paid = !isFreePeriodSpread(spread.id);
+  const paid = !isFreeOfCharge(spread.id);
+  const chargeCost = spreadChargeCost(spread.id);
   const cardsLabel = t('spread:catalog.count', { count: spread.cardsCount });
   const img = getImage(['spreads', DECK_STYLE_FLAT, spread.id]);
 
@@ -31,12 +33,12 @@ export function SpreadCatalogCard({ spread }: { spread: TSpread }): ReactElement
   };
 
   return (
-    <button type="button" className={styles.card} onClick={handleClick} aria-label={paid ? `${name}, ${cardsLabel}, ${t('core:charge.a11y', { count: 1 })}` : `${name}, ${cardsLabel}`}>
+    <button type="button" className={styles.card} onClick={handleClick} aria-label={paid ? `${name}, ${cardsLabel}, ${t('core:charge.a11y', { count: chargeCost })}` : `${name}, ${cardsLabel}`}>
       <span className={styles.imageFrame}>
         <span className={styles.imageInner}>
           <SmartImage className={styles.image} src={img} />
         </span>
-        {paid ? <ChargeMark size="xs" overlay className={styles.chargeMark} /> : null}
+        {paid ? <SpreadPriceTag spreadId={spread.id} className={styles.chargeMark} /> : null}
       </span>
       <span className={styles.textCol}>
         <span className={styles.name}>{name}</span>

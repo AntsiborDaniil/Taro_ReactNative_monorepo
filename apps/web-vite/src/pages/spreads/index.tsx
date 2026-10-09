@@ -17,12 +17,14 @@ export default function SpreadsPage(): ReactElement {
   const navigate = useNavigate();
   const { hash } = useLocation();
 
-  // /spreads#free — к разделу бесплатных карт (из модалки «Расклад на сегодня уже сделан»).
+  // /spreads#free — к разделу бесплатных карт (из модалки «Расклад на сегодня уже сделан»),
+  // /spreads#together — к разделу «Вместе» (пара и подарок другу).
   // rAF: AppShell сбрасывает скролл наверх в своём эффекте, который идёт после нашего.
   useEffect(() => {
-    if (hash !== '#free') return undefined;
+    if (hash !== '#free' && hash !== '#together') return undefined;
+    const anchor = hash.slice(1);
     const id = requestAnimationFrame(() => {
-      document.getElementById('free')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
     return () => cancelAnimationFrame(id);
   }, [hash]);
@@ -44,7 +46,13 @@ export default function SpreadsPage(): ReactElement {
           SPREAD_SECTIONS.map((section) => (
             <section
               key={section.title}
-              id={section.id === SpreadsCategory.Period ? 'free' : undefined}
+              id={
+                section.id === SpreadsCategory.Period
+                  ? 'free'
+                  : section.id === SpreadsCategory.Together
+                    ? 'together'
+                    : undefined
+              }
               className={styles.section}
             >
               <h2 className={styles.sectionTitle}>{t(section.title)}</h2>

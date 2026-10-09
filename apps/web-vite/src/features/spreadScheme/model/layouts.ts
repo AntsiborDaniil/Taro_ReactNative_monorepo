@@ -69,4 +69,6 @@ export const SPREAD_SCHEME_LAYOUTS: Partial<Record<SpreadName, SchemeBlock[]>> =
   ],
   [SpreadName.Simple_DayParts]: [{ cells: [0, 1, 2] }],
   [SpreadName.SelfDevelopment_InMyHands]: [{ cells: [0] }, { cells: [1, 2] }],
+  // Парочка: он и она → что связывает и что мешает → совет.
+  [SpreadName.Together_Couple]: [{ cells: [0, 1] }, { cells: [2, 3] }, { cells: [4] }],
 };

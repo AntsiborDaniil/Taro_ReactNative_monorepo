@@ -9,6 +9,7 @@ import {
   togglePinHabit,
   type THabit,
 } from '@entities/habits';
+import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { CheckIcon, CloseIcon, Text, useToast } from '@shared/ui';
 import { useToggleHabitToday } from '../model/useToggleHabitToday';
@@ -26,7 +27,7 @@ export function HabitWeekCard({ habit }: HabitWeekCardProps): ReactElement {
   const { t, i18n } = useTranslation();
   const dispatch = useAppDispatch();
   const toast = useToast();
-  const toggleToday = useToggleHabitToday();
+  const toggleToday = useToggleHabitToday('week');
   const pinnedCount = useAppSelector((state) => state.habits.habits.filter((h) => h.pinned).length);
   const todayISO = getDateISO(new Date());
 
@@ -36,6 +37,7 @@ export function HabitWeekCard({ habit }: HabitWeekCardProps): ReactElement {
       toast.info(t('habits:pin.limit', { count: MAX_PINNED_HABITS }));
       return;
     }
+    if (!habit.pinned) reachMetrikaGoal(MetrikaGoal.habitPin);
     dispatch(togglePinHabit(habit.id));
   };
 

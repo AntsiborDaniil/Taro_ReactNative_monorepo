@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   useResendVerificationMutation,
   useSignInMutation,
@@ -87,13 +88,22 @@ export default function Auth(): ReactElement {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  // ?next=/pair/<id> — после входа вернуть на страницу, откуда пришли (приглашение, подарок).
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextPath = searchParams.get('next');
+
   const wasAuthenticated = useRef(false);
   useEffect(() => {
     if (isAuthenticated && !wasAuthenticated.current && user?.id) {
       void migrateLocalDataToCloud(user.id);
+      // Только внутренние пути приложения: `//host` и абсолютные URL отбрасываем.
+      if (nextPath && /^\/(?!\/)[\w\-./?=&%]*$/.test(nextPath)) {
+        navigate(nextPath, { replace: true });
+      }
     }
     wasAuthenticated.current = isAuthenticated;
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?.id, nextPath, navigate]);
 
   useEffect(() => {
     setProfileName(user?.name ?? '');

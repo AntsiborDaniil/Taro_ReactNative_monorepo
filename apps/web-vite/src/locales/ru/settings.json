@@ -31,7 +31,7 @@
 
   "credits.buy.row": "Пополнить заряды",
   "credits.buy.rowHint": "Заряды после дневного лимита. Сейчас: {{count}}",
-  "credits.buy.title": "Пакет +3 расклада",
+  "credits.buy.title": "Пакеты зарядов",
   "credits.buy.sheetTitle": "Пополнить заряды",
   "credits.limit.sheetTitle": "Лимит на сегодня",
   "credits.buy.modalLead": "+3 заряда на баланс · {{price}}. Тратятся, когда бесплатный лимит на сегодня уже использован.",

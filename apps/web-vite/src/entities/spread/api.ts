@@ -57,7 +57,8 @@ export const spreadApi = baseApi.injectEndpoints({
     interpretSpread: build.mutation<InterpretResponse, TarotSpreadInput>({
       query: (body) => ({ url: '/api/interpret', method: 'POST', body }),
       // Spreads — чтобы статус бесплатных карт периода обновился после открытия.
-      invalidatesTags: ['User', 'Spreads'],
+      // FreeFirsts — первый глубокий разбор бесплатный, после него метка пропадает.
+      invalidatesTags: ['User', 'Spreads', 'FreeFirsts'],
     }),
     /** POST /api/interpret/follow-up — всегда 1 заряд (не дневной слот). */
     followUpSpread: build.mutation<InterpretResponse, FollowUpInput>({

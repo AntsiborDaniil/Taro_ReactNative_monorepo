@@ -5,6 +5,19 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { adminStaticPlugin } from './scripts/adminDevMiddleware';
 
+/** Пакеты, вынесенные в общий vendor-чанк (кэшируется отдельно от кода приложения). */
+const VENDOR_PACKAGES = [
+  'react',
+  'react-dom',
+  'react-router',
+  'react-router-dom',
+  '@reduxjs/toolkit',
+  'react-redux',
+  'i18next',
+  'react-i18next',
+  'scheduler',
+];
+
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
@@ -46,6 +59,15 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          const match = id.match(/node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?((?:@[^/]+\/)?[^/]+)\//);
+          if (match && VENDOR_PACKAGES.includes(match[1])) return 'vendor';
+          return undefined;
+        },
+      },
+    },
   },
   test: {
     environment: 'jsdom',

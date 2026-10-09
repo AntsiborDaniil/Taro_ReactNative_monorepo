@@ -5,6 +5,7 @@ import { TarotCardDirection, tarotCards } from '@legacy-data';
 import { getTarotCardReadings, isCardOpenedFromSpread, TarotCardFace } from '@entities/spread';
 import { FavoriteButton } from '@entities/favorites';
 import { ensureI18nNamespaces } from '@shared/i18n';
+import { MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
 import { Button, Chip, EmptyState, Header, Text } from '@shared/ui';
 import { CardStudy } from './ui/CardStudy';
 import styles from './CardDetail.module.css';
@@ -25,6 +26,10 @@ export default function CardDetailPage(): ReactElement {
   const [cardNsReady, setCardNsReady] = useState(false);
   const [direction, setDirection] = useState<TarotCardDirection>(TarotCardDirection.Upright);
   const [descriptionOpen, setDescriptionOpen] = useState(false);
+
+  useEffect(() => {
+    if (cardId) reachMetrikaGoal(MetrikaGoal.cardDetailOpen, { cardId });
+  }, [cardId]);
 
   useEffect(() => {
     let alive = true;

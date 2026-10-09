@@ -19,6 +19,6 @@ export const baseApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['User', 'Favorites', 'Spreads', 'Settings', 'HabitWeek'],
+  tagTypes: ['User', 'Favorites', 'Spreads', 'Settings', 'HabitWeek', 'Pairs', 'PairQuota', 'Gifts', 'FreeFirsts'],
   endpoints: () => ({}),
 });

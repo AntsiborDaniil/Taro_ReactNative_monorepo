@@ -496,3 +496,9 @@
 .deepLabel {
   text-align: center;
 }
+
+/* «Расклад для парочки»: «Иван и Мария». */
+.coupleNames {
+  text-align: center;
+  overflow-wrap: anywhere;
+}

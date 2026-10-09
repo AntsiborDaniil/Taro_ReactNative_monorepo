@@ -1,5 +1,12 @@
 import { SpreadsCategory } from '@legacy-data';
-import type { SpreadName, TSpread, TSpreadFollowUp, TSpreadMemoryNote, TSpreadMemoryStats } from '@legacy-data';
+import type {
+  SpreadName,
+  TCoupleNames,
+  TSpread,
+  TSpreadFollowUp,
+  TSpreadMemoryNote,
+  TSpreadMemoryStats,
+} from '@legacy-data';
 
 /** Максимум уточнений на один расклад (совпадает с лимитом в readingResult). */
 export const FOLLOW_UP_MAX = 3;
@@ -44,6 +51,13 @@ export function normalizeMemoryNote(value: unknown): TSpreadMemoryNote | undefin
     return { kind: 'suit', suit: v.suit, pct: v.pct };
   }
   return undefined;
+}
+
+/** payload.couple — имена пары («Расклад для парочки»). */
+export function normalizeCouple(value: unknown): TCoupleNames | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+  const { him, her } = value as Record<string, unknown>;
+  return typeof him === 'string' && typeof her === 'string' && him && her ? { him, her } : undefined;
 }
 
 /** Перенос apps/web/src/shared/api/cloud/spreadMapping.ts (1-в-1, без RN-типов). */
@@ -98,6 +112,7 @@ export function spreadToCloudBody(spread: TSpread): CreateSpreadBody {
       mode: spread.mode ?? null,
       // shareQuestion: GET /spreads/shared/:id отдаёт вопрос только при true.
       shareQuestion: spread.shareQuestion === true,
+      couple: spread.couple ?? null,
     },
   };
 }
@@ -127,6 +142,7 @@ export function cloudRecordToSpread(record: CloudSpreadRecord): TSpread {
     memoryStats: normalizeMemoryStats(payload.memoryStats),
     mode: payload.mode === 'deep' ? 'deep' : undefined,
     shareQuestion: payload.shareQuestion === true ? true : undefined,
+    couple: normalizeCouple(payload.couple),
   };
 }
 

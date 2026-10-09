@@ -1,0 +1,305 @@
+.page {
+  container-type: inline-size;
+  container-name: pairCol;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.column {
+  width: calc(100% - var(--ds-gutter) * 2);
+  max-width: 100%;
+  margin: 0 auto;
+  padding: var(--ds-gutter) 0 var(--ds-space-48);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-24);
+  min-width: 0;
+}
+
+@container pairCol (min-width: 768px) {
+  .column {
+    max-width: 720px;
+  }
+}
+
+.center {
+  text-align: center;
+}
+
+.question {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-4);
+  text-align: center;
+}
+
+.inviteHead,
+.statusBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-8);
+  text-align: center;
+}
+
+/* ---- свои карты / рубашки ---- */
+
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: var(--ds-space-12);
+}
+
+.cardItem {
+  flex: 1 1 0;
+  max-width: 108px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-4);
+}
+
+.cardFace {
+  display: block;
+  width: 100%;
+  border-radius: 9%;
+}
+
+.cardCaption {
+  width: 100%;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* ---- личное толкование ---- */
+
+.personal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+  padding: var(--ds-space-16);
+  border-radius: 18px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-800);
+}
+
+/* ---- общий результат: «Ты» | позиция | «Партнёр» ---- */
+
+.resultBoard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-16);
+}
+
+.resultHead,
+.resultRow {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) 76px;
+  align-items: center;
+  gap: var(--ds-space-8);
+}
+
+.resultHead > :first-child,
+.resultHead > :last-child {
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.resultCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-4);
+  min-width: 0;
+}
+
+.resultFace {
+  display: block;
+  width: 76px;
+  border-radius: 9%;
+}
+
+.resultPosition {
+  text-align: center;
+  overflow-wrap: anywhere;
+  text-transform: none;
+  letter-spacing: 0.4px;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+}
+
+.actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+}
+
+/* ---- степпер ---- */
+
+.stepper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}
+
+.stepperBar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--ds-space-8);
+}
+
+.segment {
+  height: var(--ds-size-selection-bar);
+  border-radius: 3px;
+  background: var(--ds-ground-600);
+}
+
+.segmentDone {
+  background: var(--ds-calm-500);
+}
+
+.segmentActive {
+  background: var(--ds-accent-400);
+}
+
+/* ---- блоки «сторона» ---- */
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+  padding: var(--ds-space-16);
+  border-radius: 18px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-800);
+  min-width: 0;
+}
+
+.side .personal {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.cardFaceDim {
+  opacity: 0.7;
+}
+
+.statusPill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-12) var(--ds-space-16);
+  border-radius: 18px;
+  border: var(--ds-size-edge-width) solid var(--ds-accent-400);
+  text-align: center;
+}
+
+.actions .quietLink {
+  color: var(--ds-ink-100);
+}
+
+/* ---- шаги приглашения ---- */
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-12);
+  color: var(--ds-ink-50);
+  font-family: var(--ds-font-body-family);
+  font-size: var(--ds-font-body-size);
+  line-height: var(--ds-font-body-line-height);
+}
+
+.stepIndex {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--ds-ground-700);
+  color: var(--ds-accent-400);
+  font-family: var(--ds-font-micro-family);
+  font-size: var(--ds-font-micro-size);
+}
+
+.questionCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-16);
+  border-radius: 18px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-800);
+  overflow-wrap: anywhere;
+}
+
+/* ---- выбор согласия: две карточки-кнопки ---- */
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ds-space-4);
+  width: 100%;
+  min-height: var(--ds-size-min-touch);
+  padding: var(--ds-space-16);
+  border-radius: 18px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-800);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--ds-dur-state) var(--ds-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.choiceShare {
+  border: var(--ds-size-edge-width) solid var(--ds-accent-400);
+}
+
+.choice:hover:not(:disabled) {
+  border-color: var(--ds-accent-400);
+}
+
+.choice:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+.choice:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .choice {
+    transition: none;
+  }
+}
