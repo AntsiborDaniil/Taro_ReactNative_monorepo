@@ -36,3 +36,27 @@ describe('ссылка на Mini App с раскладом', () => {
     expect(url.searchParams.get('lang')).toBe('en');
   });
 });
+
+describe('пейлоады пары и подарка', () => {
+  const HEX = UID.replace(/-/g, '');
+
+  it('pair_/gift_ + hex32 → вид и UUID', async () => {
+    const { parseTogetherStartPayload } = await import('../src/sharedReading');
+    expect(parseTogetherStartPayload(`pair_${HEX}`)).toEqual({ kind: 'pair', id: UID });
+    expect(parseTogetherStartPayload(`GIFT_${HEX}`)).toEqual({ kind: 'gift', id: UID });
+  });
+
+  it('чужие и битые пейлоады не перехватываются', async () => {
+    const { parseTogetherStartPayload } = await import('../src/sharedReading');
+    for (const p of [PAYLOAD, 'pair_1111', `pair_${HEX}00`, 'ig_bio', 'lava_success', '']) {
+      expect(parseTogetherStartPayload(p)).toBeNull();
+    }
+  });
+
+  it('ссылка Mini App ведёт на /pair/<uuid>', async () => {
+    const { buildTogetherWebAppUrl } = await import('../src/sharedReading');
+    const url = new URL(buildTogetherWebAppUrl({ kind: 'pair', id: UID }, 'en'));
+    expect(url.pathname).toBe(`/pair/${UID}`);
+    expect(url.searchParams.get('lang')).toBe('en');
+  });
+});

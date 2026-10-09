@@ -1,6 +1,8 @@
 import { getSupabaseAdmin } from '../lib/supabase';
 import { filterString, isSupervisorRole } from '../lib/adminAuth';
 import { sendTelegramMessage } from '../lib/telegramNotify';
+import { useMemoryBackend } from '../lib/devMode';
+import { listMemoryLeads } from './acquisitionService';
 
 const USER_SORT = new Set([
   'created_at',
@@ -12,6 +14,7 @@ const USER_SORT = new Set([
   'acquisition_source',
   'acquisition_at',
 ]);
+const LEAD_SORT = new Set(['created_at', 'updated_at', 'source', 'telegram_id']);
 const SPREAD_SORT = new Set([
   'created_at',
   'updated_at',
@@ -152,6 +155,148 @@ export async function listAdminUsers(input: {
   }
 
   return { rows: (data ?? []) as Record<string, unknown>[], total: count ?? 0 };
+}
+
+type LeadRow = Record<string, unknown> & { telegram_id: number };
+
+/** Добавляет opened_app/user_id по профилям с теми же telegram_id (один запрос на страницу). */
+async function attachLeadProfiles(rows: LeadRow[]): Promise<Record<string, unknown>[]> {
+  const ids = rows.map((row) => row.telegram_id);
+  const byTelegram = new Map<number, string>();
+  if (ids.length) {
+    const admin = getSupabaseAdmin();
+    for (let i = 0; i < ids.length; i += 200) {
+      const { data, error } = await admin
+        .from('profiles')
+        .select('id, telegram_id')
+        .in('telegram_id', ids.slice(i, i + 200));
+      if (error) throw error;
+      for (const profile of data ?? []) {
+        byTelegram.set(Number(profile.telegram_id), String(profile.id));
+      }
+    }
+  }
+  return rows.map((row) => {
+    const userId = byTelegram.get(Number(row.telegram_id)) ?? null;
+    return { ...row, id: row.telegram_id, opened_app: Boolean(userId), user_id: userId };
+  });
+}
+
+function matchesLeadSearch(row: LeadRow, q: string): boolean {
+  const needle = q.toLowerCase();
+  return (
+    String(row.telegram_id).includes(needle) ||
+    String(row.username ?? '').toLowerCase().includes(needle) ||
+    String(row.display_name ?? '').toLowerCase().includes(needle)
+  );
+}
+
+export async function listAdminLeads(input: {
+  start: number;
+  end: number;
+  sortField: string;
+  sortOrder: 'asc' | 'desc';
+  filter: Record<string, unknown>;
+}): Promise<AdminListResult<Record<string, unknown>>> {
+  const q = sanitizeSearch(filterString(input.filter, 'q'));
+  const source = filterString(input.filter, 'source');
+  const openedRaw = input.filter.opened;
+  const opened =
+    openedRaw === true || openedRaw === 'true'
+      ? true
+      : openedRaw === false || openedRaw === 'false'
+        ? false
+        : null;
+  const field = sortField(input.sortField, LEAD_SORT, 'created_at');
+  const asc = input.sortOrder === 'asc';
+
+  if (useMemoryBackend()) {
+    let rows = listMemoryLeads() as LeadRow[];
+    if (source) rows = rows.filter((row) => row.source === source);
+    if (q) rows = rows.filter((row) => matchesLeadSearch(row, q));
+    rows.sort((a, b) => {
+      const av = a[field] as string | number;
+      const bv = b[field] as string | number;
+      return (av < bv ? -1 : av > bv ? 1 : 0) * (asc ? 1 : -1);
+    });
+    const withApp = rows.map((row) => ({
+      ...row,
+      id: row.telegram_id,
+      opened_app: false,
+      user_id: null,
+    }));
+    const filtered = opened === null ? withApp : withApp.filter((row) => row.opened_app === opened);
+    return {
+      rows: filtered.slice(input.start, input.end + 1),
+      total: filtered.length,
+    };
+  }
+
+  const admin = getSupabaseAdmin();
+  const applyFilters = <T extends { eq: Function; or: Function }>(builder: T): T => {
+    let next = builder;
+    if (source) next = next.eq('source', source);
+    if (q) {
+      next = /^\d+$/.test(q)
+        ? next.or(`username.ilike.%${q}%,display_name.ilike.%${q}%,telegram_id.eq.${q}`)
+        : next.or(`username.ilike.%${q}%,display_name.ilike.%${q}%`);
+    }
+    return next;
+  };
+
+  if (opened === null) {
+    const { data, error, count } = await applyFilters(
+      admin.from('telegram_acquisition').select('*', { count: 'exact' })
+    )
+      .order(field, { ascending: asc })
+      .range(input.start, input.end);
+    if (error) throw error;
+    return {
+      rows: await attachLeadProfiles((data ?? []) as LeadRow[]),
+      total: count ?? 0,
+    };
+  }
+
+  // Фильтр «открыл приложение» требует пересечения с profiles — считаем в памяти.
+  const all: LeadRow[] = [];
+  const PAGE = 1000;
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await applyFilters(
+      admin.from('telegram_acquisition').select('*')
+    )
+      .order(field, { ascending: asc })
+      .range(from, from + PAGE - 1);
+    if (error) throw error;
+    all.push(...((data ?? []) as LeadRow[]));
+    if ((data ?? []).length < PAGE) break;
+  }
+  const withProfiles = (await attachLeadProfiles(all)).filter(
+    (row) => row.opened_app === opened
+  );
+  return {
+    rows: withProfiles.slice(input.start, input.end + 1),
+    total: withProfiles.length,
+  };
+}
+
+export async function getAdminLead(id: string): Promise<Record<string, unknown> | null> {
+  const telegramId = Number(id);
+  if (!Number.isFinite(telegramId) || telegramId <= 0) return null;
+  if (useMemoryBackend()) {
+    const lead = (listMemoryLeads() as LeadRow[]).find((row) => row.telegram_id === telegramId);
+    return lead
+      ? { ...lead, id: lead.telegram_id, opened_app: false, user_id: null }
+      : null;
+  }
+  const { data, error } = await getSupabaseAdmin()
+    .from('telegram_acquisition')
+    .select('*')
+    .eq('telegram_id', telegramId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  const [row] = await attachLeadProfiles([data as LeadRow]);
+  return row;
 }
 
 export async function getAdminUser(id: string): Promise<Record<string, unknown> | null> {

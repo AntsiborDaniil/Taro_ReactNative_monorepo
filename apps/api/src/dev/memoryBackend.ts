@@ -1,11 +1,14 @@
 import { createHash, randomUUID } from 'crypto';
 import type { AuthPublicUser, AuthSession } from '../services/authService';
+import type { GiftRow } from '../services/giftCardService';
+import type { PairCountFilter, PairGuard, PairRow } from '../services/pairReadingService';
 import type { SpreadRecord } from '../services/spreadsService';
 import type { TarotDailyUsage } from '../services/tarotDailyUsageService';
 import type { UserSettingsRecord } from '../services/userSettingsService';
 import { logAuthEmail, logAuthGoogleDevSignIn, logAuthSignupComplete } from '../lib/authEmailLog';
 import { devAuthRequireEmailVerify } from '../lib/devMode';
 import { getTarotDailyLimit } from '../lib/env';
+import { tarotSlotDay } from '../lib/tarotSlotDay';
 
 type DevUser = {
   id: string;
@@ -69,8 +72,9 @@ function hashPassword(password: string): string {
   return createHash('sha256').update(`taro-dev:${password}`).digest('hex');
 }
 
+/** День слота — сутки с 10:00 МСК, как public.tarot_slot_day(). */
 function utcDay(): string {
-  return new Date().toISOString().slice(0, 10);
+  return tarotSlotDay();
 }
 
 function dailyKey(userId: string, day: string): string {
@@ -752,4 +756,128 @@ export function memoryListFreePeriodCards(userId: string): Array<{ kind: any; pe
     if (uid === userId) rows.push({ kind, period_start: periodStart, payload: value.payload });
   }
   return rows;
+}
+
+// --- «Первый раз бесплатно» (freeFirstService) --------------------------------
+
+const freeFirstUses = new Set<string>();
+
+export function memoryClaimFreeFirst(userId: string, feature: string): boolean {
+  const key = `${userId}|${feature}`;
+  if (freeFirstUses.has(key)) return false;
+  freeFirstUses.add(key);
+  return true;
+}
+
+export function memoryReleaseFreeFirst(userId: string, feature: string): void {
+  freeFirstUses.delete(`${userId}|${feature}`);
+}
+
+export function memoryHasUsedFreeFirst(userId: string, feature: string): boolean {
+  return freeFirstUses.has(`${userId}|${feature}`);
+}
+
+// --- Расклад на двоих (pairReadingService) и «Карта для друга» (giftCardService) --
+
+const pairReadings = new Map<string, PairRow>();
+
+function pairMatchesGuard(row: PairRow, guard: PairGuard): boolean {
+  if (guard.statusIn && !guard.statusIn.includes(row.status)) return false;
+  if (guard.partnerIsNull && row.partner_id !== null) return false;
+  if (guard.partnerIs && row.partner_id !== guard.partnerIs) return false;
+  if (guard.notExpiredAt && new Date(row.expires_at).getTime() <= new Date(guard.notExpiredAt).getTime()) return false;
+  if (guard.expiredAt && new Date(row.expires_at).getTime() > new Date(guard.expiredAt).getTime()) return false;
+  return true;
+}
+
+export function memoryInsertPair(row: Omit<PairRow, 'id' | 'created_at' | 'updated_at'>): PairRow {
+  if (row.is_free) {
+    for (const existing of pairReadings.values()) {
+      if (existing.author_id === row.author_id && existing.is_free) {
+        // Как уникальный индекс pair_readings_one_free_per_author в Postgres.
+        throw Object.assign(new Error('duplicate key value violates unique constraint'), { code: '23505' });
+      }
+    }
+  }
+  const now = new Date().toISOString();
+  const created: PairRow = { ...row, id: randomUUID(), created_at: now, updated_at: now };
+  pairReadings.set(created.id, created);
+  return { ...created };
+}
+
+export function memoryGetPair(id: string): PairRow | null {
+  const row = pairReadings.get(id);
+  return row ? { ...row } : null;
+}
+
+/** Условное обновление (атомарно в рамках одного тика): null — условие не выполнено. */
+export function memoryUpdatePairGuarded(id: string, patch: Partial<PairRow>, guard: PairGuard): PairRow | null {
+  const row = pairReadings.get(id);
+  if (!row || !pairMatchesGuard(row, guard)) return null;
+  const next: PairRow = { ...row, ...patch, updated_at: new Date().toISOString() };
+  pairReadings.set(id, next);
+  return { ...next };
+}
+
+export function memoryCountPairs(filter: PairCountFilter): number {
+  let count = 0;
+  for (const row of pairReadings.values()) {
+    if (filter.authorId && row.author_id !== filter.authorId) continue;
+    if (filter.partnerId && row.partner_id !== filter.partnerId) continue;
+    if (filter.statusIn && !filter.statusIn.includes(row.status)) continue;
+    if (filter.createdSince && row.created_at < filter.createdSince) continue;
+    if (filter.joinedSince && (!row.joined_at || row.joined_at < filter.joinedSince)) continue;
+    if (filter.notExpiredAt && new Date(row.expires_at).getTime() <= new Date(filter.notExpiredAt).getTime()) continue;
+    count += 1;
+  }
+  return count;
+}
+
+export function memoryHasFreePair(authorId: string): boolean {
+  for (const row of pairReadings.values()) {
+    if (row.author_id === authorId && row.is_free) return true;
+  }
+  return false;
+}
+
+/** Просроченные (по сроку) открытые приглашения автора. */
+export function memoryListExpiredOpenPairs(authorId: string, nowIso: string): PairRow[] {
+  return [...pairReadings.values()]
+    .filter(
+      (row) =>
+        row.author_id === authorId &&
+        (row.status === 'waiting' || row.status === 'drawn') &&
+        new Date(row.expires_at).getTime() <= new Date(nowIso).getTime(),
+    )
+    .map((row) => ({ ...row }));
+}
+
+const giftCards = new Map<string, GiftRow>();
+
+export function memoryInsertGift(row: Omit<GiftRow, 'id' | 'created_at'>): GiftRow {
+  const created: GiftRow = { ...row, id: randomUUID(), created_at: new Date().toISOString() };
+  giftCards.set(created.id, created);
+  return { ...created };
+}
+
+export function memoryGetGift(id: string): GiftRow | null {
+  const row = giftCards.get(id);
+  return row ? { ...row } : null;
+}
+
+/** Первое открытие: ставит opened_at только если он пуст; null — уже открывали. */
+export function memoryMarkGiftOpened(id: string, nowIso: string): GiftRow | null {
+  const row = giftCards.get(id);
+  if (!row || row.opened_at) return null;
+  const next = { ...row, opened_at: nowIso };
+  giftCards.set(id, next);
+  return { ...next };
+}
+
+export function memoryCountGiftsSince(senderId: string, sinceIso: string): number {
+  let count = 0;
+  for (const row of giftCards.values()) {
+    if (row.sender_id === senderId && row.created_at >= sinceIso) count += 1;
+  }
+  return count;
 }

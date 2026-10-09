@@ -1,7 +1,6 @@
 import {
   getLavaApiBaseUrl,
   getLavaApiKey,
-  getLavaOfferId,
   getTelegramBotUsername,
   getWebAppUrl,
 } from '../lib/env';
@@ -51,9 +50,13 @@ function httpsReturnUrls(): {
 export async function createLavaOneTimeInvoice(input: {
   email: string;
   userId: string;
+  /** Оффер Lava выбранного пакета (CREDIT_PACKS). */
+  offerId: string;
+  /** Пакет — в utm_campaign, чтобы видеть в кабинете Lava. */
+  packId: string;
 }): Promise<LavaCreateInvoiceResult> {
   const apiKey = getLavaApiKey();
-  const offerId = getLavaOfferId();
+  const offerId = input.offerId;
   if (!apiKey || !offerId) {
     throw new Error('LAVA_NOT_CONFIGURED');
   }
@@ -67,7 +70,7 @@ export async function createLavaOneTimeInvoice(input: {
     clientUtm: {
       utm_source: 'mindful_web',
       utm_medium: 'spread_credits',
-      utm_campaign: 'starter_plus3',
+      utm_campaign: input.packId,
       utm_content: input.userId,
     },
     ...httpsReturnUrls(),

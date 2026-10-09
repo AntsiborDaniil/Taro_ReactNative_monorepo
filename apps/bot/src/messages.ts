@@ -87,7 +87,31 @@ export const sharedReadingText: Record<BotLang, string> = {
 Tap the button below to open it in the app.`,
 };
 
-/** Nudge в Telegram: бесплатный дневной слот снова доступен (UTC-сутки). */
+export const openTogetherLabel: Record<'pair' | 'gift', Record<BotLang, string>> = {
+  pair: { ru: '🔮 Открыть расклад на двоих', en: '🔮 Open reading for two' },
+  gift: { ru: '✦ Открыть карту', en: '✦ Open the card' },
+};
+
+export const togetherText: Record<'pair' | 'gift', Record<BotLang, string>> = {
+  pair: {
+    ru: `Тебя зовут в расклад на двоих.
+
+Нажми кнопку ниже — вытянешь свои три карты в приложении.`,
+    en: `You're invited to a reading for two.
+
+Tap the button below to draw your three cards in the app.`,
+  },
+  gift: {
+    ru: `Тебе прислали карту.
+
+Нажми кнопку ниже — она откроется в приложении.`,
+    en: `Someone sent you a card.
+
+Tap the button below to open it in the app.`,
+  },
+};
+
+/** Nudge в Telegram: бесплатный дневной слот снова доступен (каждый день в 10:00 МСК). */
 /** Бесплатный слот обновился (dailyFreeAvailableText в API = DAILY_FREE_RENEWED). */
 export const dailyFreeAvailableText: Record<BotLang, string> = {
   ru: `Какая карта отзовётся тебе сегодня?
@@ -257,7 +281,7 @@ const faqTopicsRu: FaqTopics = {
 
 • Карта дня и «Да или нет» тоже тратят слот / заряд — как остальные расклады.
 • Один успешный расклад с толкованием = один слот.
-• Заряды не сгорают в полночь, дневной лимит обновляется каждый день.
+• Заряды не сгорают в полночь, дневной ⚡ обновляется каждый день в 10:00 по Москве.
 • Если толкование не сгенерировалось из‑за ошибки сервиса, слот обычно возвращается.`,
 
   rules: `Правила сервиса
@@ -308,7 +332,7 @@ When the daily limit is used up, purchased credits are spent.
 
 • Card of the day and “Yes or no” also use a slot / credit — like other spreads.
 • One successful reading with an interpretation = one slot.
-• Purchased credits don’t expire at midnight; the free daily limit resets each day.
+• Purchased credits don’t expire at midnight; the free daily ⚡ refills every day at 10:00 Moscow time.
 • If interpretation failed because of a service error, the slot is usually refunded.`,
 
   rules: `Service rules

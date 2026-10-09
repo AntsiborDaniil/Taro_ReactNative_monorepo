@@ -11,10 +11,15 @@ import {
   faqButtonLabels,
   openAppLabel,
   openSharedReadingLabel,
+  openTogetherLabel,
   returnToAppLabel,
   type FaqTopicId,
 } from './messages';
-import { buildSharedReadingWebAppUrl } from './sharedReading';
+import {
+  buildSharedReadingWebAppUrl,
+  buildTogetherWebAppUrl,
+  type TogetherStartPayload,
+} from './sharedReading';
 
 export { CHANNEL_URL, CHANNEL_HANDLE };
 
@@ -70,6 +75,17 @@ export function openSharedReadingInlineKeyboard(
       openSharedReadingLabel[lang],
       buildSharedReadingWebAppUrl(readingUid, lang),
     )
+    .row()
+    .url(channelLinkLabel[lang], CHANNEL_URL);
+}
+
+/** Кнопка «Открыть» для ссылки на пару / подарок: web_app сразу на /pair/:id или /gift/:id. */
+export function openTogetherInlineKeyboard(
+  link: TogetherStartPayload,
+  lang: BotLang,
+): InlineKeyboard {
+  return new InlineKeyboard()
+    .webApp(openTogetherLabel[link.kind][lang], buildTogetherWebAppUrl(link, lang))
     .row()
     .url(channelLinkLabel[lang], CHANNEL_URL);
 }

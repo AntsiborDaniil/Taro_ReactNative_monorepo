@@ -1,7 +1,12 @@
 import { useMemoryBackend } from '../lib/devMode';
 import * as memory from '../dev/memoryBackend';
 import { getSupabaseAdmin } from '../lib/supabase';
-import { getLavaCreditsPerPurchase } from '../lib/env';
+import {
+  DEFAULT_CREDIT_PACK,
+  findCreditPack,
+  getPackOfferId,
+  packCredits,
+} from '../lib/creditPacks';
 import { sanitizeReturnPath } from '../lib/telegramNotify';
 import { createLavaOneTimeInvoice } from './lavaClient';
 import { notifyLavaPaymentSuccess } from './paymentNotifyService';
@@ -19,10 +24,17 @@ export async function createLavaCheckoutForUser(input: {
   userId: string;
   email: string;
   returnPath?: string | null;
+  packId?: string | null;
 }): Promise<{ paymentUrl: string; invoiceId: string }> {
   const email = input.email.trim().toLowerCase();
   if (!isValidCheckoutEmail(email)) {
     throw new Error('INVALID_EMAIL');
+  }
+
+  const pack = findCreditPack(input.packId ?? DEFAULT_CREDIT_PACK);
+  const offerId = pack ? getPackOfferId(pack) : undefined;
+  if (!pack || !offerId) {
+    throw new Error('PACK_UNAVAILABLE');
   }
 
   const returnPath = sanitizeReturnPath(input.returnPath);
@@ -30,9 +42,12 @@ export async function createLavaCheckoutForUser(input: {
   const invoice = await createLavaOneTimeInvoice({
     email,
     userId: input.userId,
+    offerId,
+    packId: pack.id,
   });
 
-  const credits = getLavaCreditsPerPurchase();
+  // Сколько начислить — фиксируем в checkout: вебхук берёт число отсюда, а не из конфига.
+  const credits = packCredits(pack);
 
   if (useMemoryBackend()) {
     memory.memoryCreateLavaCheckout({
@@ -155,7 +170,9 @@ export async function fulfillLavaPaymentSuccess(
 
   const utmUserId = payload.clientUtm?.utm_content?.trim() || null;
   const email = payload.buyer?.email?.trim().toLowerCase() || '';
-  const credits = getLavaCreditsPerPurchase();
+  // Запасной вариант, если checkout не найден (пакет +3 по умолчанию).
+  const fallbackPack = findCreditPack(DEFAULT_CREDIT_PACK);
+  const credits = fallbackPack ? packCredits(fallbackPack) : 3;
 
   if (useMemoryBackend()) {
     const result = memory.memoryFulfillLavaCheckout({
@@ -201,7 +218,8 @@ export async function fulfillLavaPaymentSuccess(
   const { data, error } = await admin.rpc('add_spread_credits_for_invoice', {
     p_invoice_id: invoiceId,
     p_user_id: userId,
-    p_credits: credits,
+    // Число зарядов купленного пакета (из checkout), а не константа.
+    p_credits: creditsAdded,
     p_email: email,
     p_raw: payload,
   });

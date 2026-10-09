@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import PeopleIcon from '@mui/icons-material/People';
 import StyleIcon from '@mui/icons-material/Style';
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import { LoginPage } from './LoginPage';
 import { Dashboard } from './Dashboard';
@@ -17,6 +18,7 @@ import {
 import { UserEdit, UserList, UserShow } from './resources/users';
 import { SpreadEdit, SpreadList, SpreadShow } from './resources/spreads';
 import { TicketEdit, TicketList, TicketShow } from './resources/tickets';
+import { LeadList, LeadShow } from './resources/leads';
 import { PaymentList, PaymentShow } from './resources/payments';
 import './admin.css';
 
@@ -101,6 +103,13 @@ export function App() {
           list={UserList}
           show={UserShow}
           edit={UserEdit}
+        />
+        <Resource
+          name="leads"
+          options={{ label: 'Лиды бота' }}
+          icon={PersonAddAltIcon}
+          list={LeadList}
+          show={LeadShow}
         />
         <Resource
           name="spreads"

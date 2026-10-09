@@ -3,13 +3,14 @@ import { config } from './config';
 import { startHealthServer } from './health';
 import {
   ingestAcquisition,
-  isTrackedStartPayload,
+  resolveStartSource,
 } from './acquisition';
-import { parseSharedReadingStartPayload } from './sharedReading';
+import { parseSharedReadingStartPayload, parseTogetherStartPayload } from './sharedReading';
 import {
   openMiniAppInlineKeyboard,
   openReturnPathInlineKeyboard,
   openSharedReadingInlineKeyboard,
+  openTogetherInlineKeyboard,
   mainReplyKeyboard,
   channelInlineKeyboard,
   faqInlineKeyboard,
@@ -32,6 +33,7 @@ import {
   supportAcceptedText,
   supportFailedText,
   sharedReadingText,
+  togetherText,
   supportPromptText,
   welcomeText,
   CHANNEL_URL,
@@ -42,6 +44,7 @@ import {
   triggerBroadcastDailyFreeOnce,
   triggerDailyFreeNudges,
 } from './dailyFreeNudge';
+import { scheduleDailyAtMoscow } from './schedule';
 
 const bot = new Bot(config.botToken);
 
@@ -72,7 +75,8 @@ function fromMeta(ctx: Context) {
 }
 
 async function trackStartIfNeeded(ctx: Context, payload: string): Promise<void> {
-  if (!isTrackedStartPayload(payload)) {
+  const source = resolveStartSource(payload);
+  if (!source) {
     return;
   }
   const meta = fromMeta(ctx);
@@ -82,7 +86,7 @@ async function trackStartIfNeeded(ctx: Context, payload: string): Promise<void> 
   try {
     await ingestAcquisition({
       ...meta,
-      source: payload.trim().toLowerCase(),
+      source,
     });
   } catch (error) {
     console.error('[bot] acquisition ingest failed:', error);
@@ -199,6 +203,15 @@ bot.command('start', async (ctx) => {
   if (sharedReadingUid) {
     await ctx.reply(sharedReadingText[lang], {
       reply_markup: openSharedReadingInlineKeyboard(sharedReadingUid, lang),
+    });
+    return;
+  }
+
+  // «Расклад на двоих» / «Карта для друга»: pair_<hex32> / gift_<hex32> → кнопка на нужную страницу.
+  const together = parseTogetherStartPayload(payload);
+  if (together) {
+    await ctx.reply(togetherText[together.kind][lang], {
+      reply_markup: openTogetherInlineKeyboard(together, lang),
     });
     return;
   }
@@ -345,7 +358,13 @@ async function main(): Promise<void> {
     }
   };
 
-  // Nudge: бесплатный слот снова доступен (UTC-сутки). Первый прогон ~30с, далее каждый час.
+  // «Заряд обновился»: бесплатный ⚡ начисляется в 10:00 МСК — шлём ровно тогда
+  // (+5 с запаса, чтобы день слота на API точно сменился). Ежечасный прогон и
+  // прогон через ~30с после старта догоняют тех, кому не дошло (API шлёт не чаще
+  // раза в день слота и только с 10:00 до 21:00 МСК).
+  scheduleDailyAtMoscow(10, 0, 5, () => {
+    void runDailyFreeJob();
+  });
   setTimeout(() => {
     void runDailyFreeJob();
   }, 30_000);

@@ -2,8 +2,30 @@ import { config } from './config';
 
 const TRACKED = new Set(['ig_bio', 'ig_stories', 'yt_shorts', 'tiktok', 'other']);
 
+/** Служебные payload: не первый вход, лидом не считаем. */
+const SERVICE_EXACT = new Set(['lava_success', 'lava_failed', 'lava_cancelled']);
+const SERVICE_PREFIXES = ['r_', 'pair_', 'gift_'];
+
+/**
+ * Источник лида по payload /start: известная метка → она, служебный payload → null
+ * (не записываем), пусто или неизвестное → 'direct'.
+ */
+export function resolveStartSource(payload: string): string | null {
+  const normalized = payload.trim().toLowerCase();
+  if (TRACKED.has(normalized)) {
+    return normalized;
+  }
+  if (
+    SERVICE_EXACT.has(normalized) ||
+    SERVICE_PREFIXES.some((prefix) => normalized.startsWith(prefix))
+  ) {
+    return null;
+  }
+  return 'direct';
+}
+
 export function isTrackedStartPayload(payload: string): boolean {
-  return TRACKED.has(payload.trim().toLowerCase());
+  return resolveStartSource(payload) !== null;
 }
 
 export async function ingestAcquisition(input: {

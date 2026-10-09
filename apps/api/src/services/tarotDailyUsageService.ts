@@ -2,6 +2,7 @@ import { useMemoryBackend } from '../lib/devMode';
 import * as memory from '../dev/memoryBackend';
 import { getSupabaseAdmin } from '../lib/supabase';
 import { getTarotDailyLimit } from '../lib/env';
+import { tarotSlotDay } from '../lib/tarotSlotDay';
 
 export type TarotDailyUsage = {
   used: number;
@@ -224,7 +225,7 @@ export async function refundTarotDailySlot(userId: string): Promise<void> {
   }
 
   const admin = getSupabaseAdmin();
-  const day = new Date().toISOString().slice(0, 10);
+  const day = tarotSlotDay();
   const { data, error } = await admin
     .from('tarot_daily_usage')
     .select('count')

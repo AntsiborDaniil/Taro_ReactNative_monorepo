@@ -6,7 +6,9 @@ import {
   getAdminPayment,
   getAdminSpread,
   getAdminTicket,
+  getAdminLead,
   getAdminUser,
+  listAdminLeads,
   listAdminPayments,
   listAdminSpreads,
   listAdminTickets,
@@ -16,7 +18,7 @@ import {
   updateAdminTicketStatus,
   updateAdminUser,
 } from '../services/adminService';
-import { getAcquisitionSummary } from '../services/acquisitionService';
+import { getAcquisitionSummary, getAcquisitionTotals } from '../services/acquisitionService';
 import {
   sendTelegramBroadcastAdmin,
   sendTelegramNudgeToUserAdmin,
@@ -57,7 +59,35 @@ export const adminRoute = async (
     }
     const rows = await getAcquisitionSummary();
     const total = rows.reduce((sum, row) => sum + row.count, 0);
-    return reply.send({ total, rows });
+    let totals = { usersTotal: 0, leadsTotal: total, leadsWithApp: 0 };
+    try {
+      totals = await getAcquisitionTotals();
+    } catch (error) {
+      request.log.error(error);
+    }
+    return reply.send({ total, rows, ...totals });
+  });
+
+  fastify.get('/admin/leads', async (request, reply) => {
+    const actor = await requireAdmin(request, reply);
+    if (!actor) {
+      return;
+    }
+    const parsed = parseRaListQuery(request.query as Record<string, unknown>);
+    const { rows, total } = await listAdminLeads(parsed);
+    return sendList(reply, 'leads', parsed.start, parsed.end, total, rows);
+  });
+
+  fastify.get<{ Params: { id: string } }>('/admin/leads/:id', async (request, reply) => {
+    const actor = await requireAdmin(request, reply);
+    if (!actor) {
+      return;
+    }
+    const row = await getAdminLead(request.params.id);
+    if (!row) {
+      return reply.status(404).send({ message: 'Lead not found' });
+    }
+    return reply.send(row);
   });
 
   // Сводка уведомлений бота: журнал запусков рассылок + сколько получили дневное сегодня.

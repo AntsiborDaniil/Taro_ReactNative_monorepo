@@ -80,6 +80,8 @@ export function getLavaCreditsPerPurchase(): number {
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 3;
 }
 
+/** Хотя бы один пакет с оффером (CREDIT_PACKS), ключ и секрет вебхука. */
 export function isLavaPaymentsConfigured(): boolean {
-  return Boolean(getLavaApiKey() && getLavaOfferId() && getLavaWebhookSecret());
+  const anyOffer = ['LAVA_OFFER_ID', 'LAVA_OFFER_ID_9', 'LAVA_OFFER_ID_15'].some((key) => process.env[key]?.trim());
+  return Boolean(getLavaApiKey() && anyOffer && getLavaWebhookSecret());
 }

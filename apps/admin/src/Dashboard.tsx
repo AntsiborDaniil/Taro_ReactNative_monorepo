@@ -16,6 +16,9 @@ import { NotifyLogCard } from './components/NotifyLogCard';
 
 type AcquisitionStats = {
   total: number;
+  usersTotal?: number;
+  leadsTotal?: number;
+  leadsWithApp?: number;
   rows: Array<{ source: string; label: string; count: number }>;
 };
 
@@ -93,6 +96,16 @@ export function Dashboard() {
             <Typography variant="subtitle1" sx={{ mb: 1 }}>
               Лиды по источникам бота — {stats.total}
             </Typography>
+            {stats.leadsTotal != null ? (
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                Пользователей в приложении: {stats.usersTotal ?? 0} · Лидов в боте:{' '}
+                {stats.leadsTotal} · Конверсия в приложение:{' '}
+                {stats.leadsTotal > 0
+                  ? Math.round(((stats.leadsWithApp ?? 0) / stats.leadsTotal) * 1000) / 10
+                  : 0}
+                %
+              </Typography>
+            ) : null}
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
               {stats.rows.map((row) => (
                 <Box key={row.source} sx={{ minWidth: 96 }}>

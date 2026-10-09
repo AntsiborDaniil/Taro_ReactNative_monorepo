@@ -22,8 +22,26 @@ export type RecordAcquisitionResult = {
 
 const memoryLeads = new Map<
   number,
-  { source: AcquisitionSource; createdAt: string }
+  {
+    source: AcquisitionSource;
+    createdAt: string;
+    updatedAt: string;
+    username: string | null;
+    displayName: string | null;
+  }
 >();
+
+/** Лиды memory-бэкенда (для админки в dev). */
+export function listMemoryLeads() {
+  return [...memoryLeads.entries()].map(([telegramId, lead]) => ({
+    telegram_id: telegramId,
+    username: lead.username,
+    display_name: lead.displayName,
+    source: lead.source,
+    created_at: lead.createdAt,
+    updated_at: lead.updatedAt,
+  }));
+}
 
 export async function recordTelegramAcquisition(
   input: RecordAcquisitionInput
@@ -36,6 +54,9 @@ export async function recordTelegramAcquisition(
   if (useMemoryBackend()) {
     const existing = memoryLeads.get(input.telegramId);
     if (existing) {
+      existing.username = input.username ?? null;
+      existing.displayName = input.displayName ?? null;
+      existing.updatedAt = new Date().toISOString();
       return {
         telegramId: input.telegramId,
         source: existing.source,
@@ -43,9 +64,13 @@ export async function recordTelegramAcquisition(
         profileUpdated: false,
       };
     }
+    const nowIso = new Date().toISOString();
     memoryLeads.set(input.telegramId, {
       source,
-      createdAt: new Date().toISOString(),
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      username: input.username ?? null,
+      displayName: input.displayName ?? null,
     });
     return {
       telegramId: input.telegramId,
@@ -165,6 +190,54 @@ export async function applyAcquisitionToProfile(input: {
     })
     .eq('id', input.userId)
     .is('acquisition_source', null);
+}
+
+/** Итоги воронки: пользователи в приложении, лиды бота, лиды с профилем. */
+export async function getAcquisitionTotals(): Promise<{
+  usersTotal: number;
+  leadsTotal: number;
+  leadsWithApp: number;
+}> {
+  if (useMemoryBackend()) {
+    return { usersTotal: 0, leadsTotal: memoryLeads.size, leadsWithApp: 0 };
+  }
+  const admin = getSupabaseAdmin();
+  const [users, leads] = await Promise.all([
+    admin.from('profiles').select('id', { count: 'exact', head: true }),
+    admin
+      .from('telegram_acquisition')
+      .select('telegram_id', { count: 'exact', head: true }),
+  ]);
+  if (users.error) throw users.error;
+  if (leads.error) throw leads.error;
+
+  // Лиды с профилем: пересечение telegram_id пачками (без миграции/RPC).
+  let leadsWithApp = 0;
+  const PAGE = 1000;
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await admin
+      .from('telegram_acquisition')
+      .select('telegram_id')
+      .order('telegram_id', { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error) throw error;
+    const ids = (data ?? []).map((row) => row.telegram_id);
+    if (ids.length) {
+      const { count, error: profError } = await admin
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .in('telegram_id', ids);
+      if (profError) throw profError;
+      leadsWithApp += count ?? 0;
+    }
+    if (ids.length < PAGE) break;
+  }
+
+  return {
+    usersTotal: users.count ?? 0,
+    leadsTotal: leads.count ?? 0,
+    leadsWithApp,
+  };
 }
 
 export async function getAcquisitionSummary(): Promise<

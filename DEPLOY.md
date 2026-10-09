@@ -91,6 +91,9 @@ Vercel не запускает долгоживущий Node-сервер — AP
 | `SUPABASE_SERVICE_ROLE_KEY` | `eyJ...` (секрет!) |
 | `OPENAI_API_KEY` | `sk-...` |
 | `OPENAI_DEEP_MODEL` | необязательно: модель «Глубокого разбора» (⚡2); пусто — та же, что у обычного расклада |
+| `LAVA_OFFER_ID` | id оффера Lava на пакет +3 (129 ₽) |
+| `LAVA_OFFER_ID_9` | id оффера на +9 (249 ₽); без него пакет скрыт |
+| `LAVA_OFFER_ID_15` | id оффера на +15 (379 ₽); без него пакет скрыт |
 | `CORS_ORIGIN` | `https://taro-react-native-monorepo-x59s.vercel.app` |
 | `WEB_APP_URL` | `https://taro-react-native-monorepo-x59s.vercel.app` |
 | `API_PUBLIC_URL` | `https://taro-react-native-monorepo.vercel.app` (тот же домен, что Vercel — для OAuth/PKCE) |

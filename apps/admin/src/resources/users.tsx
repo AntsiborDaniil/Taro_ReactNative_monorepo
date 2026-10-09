@@ -41,6 +41,7 @@ const acquisitionChoices = [
   { id: 'yt_shorts', name: 'YouTube Shorts' },
   { id: 'tiktok', name: 'TikTok' },
   { id: 'other', name: 'Other' },
+  { id: 'direct', name: 'Без метки (прямой /start)' },
 ];
 
 const userFilters = [

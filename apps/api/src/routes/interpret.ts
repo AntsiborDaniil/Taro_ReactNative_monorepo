@@ -14,6 +14,8 @@ import {
   tryConsumeSpreadSlot,
   tryConsumeSpreadSlots,
 } from '../services/tarotDailyUsageService';
+import { claimFreeFirst, hasUsedFreeFirst, releaseFreeFirst } from '../services/freeFirstService';
+import { getPairQuota } from '../services/pairReadingService';
 import { listRecentSpreads } from '../services/spreadsService';
 import {
   claimFreePeriodCard,
@@ -31,14 +33,19 @@ import {
   type SpreadMemory,
 } from '../services/spreadContext';
 import { TarotSpreadInput } from '../types';
+import { cleanName, isCoupleSpread, type CoupleNames } from '../lib/couple';
 
 type InterpretBody = Omit<TarotSpreadInput, 'positions'> & {
   positions: InterpretPosition[];
-  /** 'deep' — глубокий разбор за 2 единицы. */
+  /** 'deep' — глубокий разбор: первый на аккаунт бесплатно, дальше 2 единицы. */
   mode?: 'deep';
   /** Необязательный контекст клиента: последнее настроение и активные привычки. */
   context?: InterpretContext;
+  /** «Расклад для парочки»: имена пары. */
+  couple?: CoupleNames;
 };
+
+const COUPLE_CARDS = 5;
 
 /** Память не должна ронять толкование: любая ошибка агрегации → без памяти. */
 async function loadMemory(
@@ -123,6 +130,14 @@ export const interpretRoute = async (
             spread_key: { type: 'string' },
             mode: { type: 'string', enum: ['deep'] },
             positions: positionsSchema,
+            couple: {
+              type: 'object',
+              required: ['him', 'her'],
+              properties: {
+                him: { type: 'string', maxLength: 40 },
+                her: { type: 'string', maxLength: 40 },
+              },
+            },
             context: {
               type: 'object',
               properties: {
@@ -170,6 +185,19 @@ export const interpretRoute = async (
           code: 'invalid_day_card',
           message: 'Period card must contain exactly one card',
         });
+      }
+      // Парочка: имена обязательны, ровно 5 карт, без «глубокого» разбора.
+      let couple: CoupleNames | undefined;
+      if (isCoupleSpread(spread_key)) {
+        const him = cleanName(request.body.couple?.him);
+        const her = cleanName(request.body.couple?.her);
+        if (!him || !her || positions.length !== COUPLE_CARDS || mode === 'deep') {
+          return reply.status(400).send({
+            code: 'invalid_couple',
+            message: 'Couple names are required',
+          });
+        }
+        couple = { him, her };
       }
       if (mode === 'deep' && (positions.length < 3 || isFreeCard)) {
         return reply.status(400).send({
@@ -224,7 +252,31 @@ export const interpretRoute = async (
             message: 'Could not generate interpretation',
           });
         }
-      } else if (deep) {
+      } else if (deep && (await claimFreeFirst(user.id, 'deep').catch(() => false))) {
+        // Первый глубокий разбор на аккаунт — бесплатно: слоты не списываем,
+        // при ошибке модели запись удаляется (бесплатность возвращается).
+        try {
+          const [usage, spreadCredits] = await Promise.all([
+            getTarotDailyUsage(user.id),
+            getSpreadCredits(user.id),
+          ]);
+          consumed = {
+            refund: () => releaseFreeFirst(user.id, 'deep'),
+            used: usage.used,
+            limit: usage.limit,
+            day: usage.day,
+            spreadCredits,
+          };
+        } catch (error) {
+          await releaseFreeFirst(user.id, 'deep').catch(() => undefined);
+          request.log.error(error);
+          return reply.status(500).send({
+            code: 'interpret_failed',
+            message: 'Could not generate interpretation',
+          });
+        }
+      } else if (deep || couple) {
+        // Глубокий разбор и «Для влюблённых» стоят 2 единицы (дневной ⚡ + купленные заряды).
         const slots = await tryConsumeSpreadSlots(user.id, 2);
         if (!slots.ok) {
           return reply.status(429).send({
@@ -273,7 +325,8 @@ export const interpretRoute = async (
       }
 
       try {
-        const memory = await loadMemory(user.id, request.body);
+        // У пары своя тема — личная «память» раскладов сюда не подмешивается.
+        const memory = couple ? null : await loadMemory(user.id, request.body);
         const interpretation = await generateInterpretation({
           spread_type,
           positions,
@@ -281,6 +334,7 @@ export const interpretRoute = async (
           question,
           spread_key,
           mode: deep ? 'deep' : undefined,
+          couple,
           structureBlock: buildStructureBlock(positions, language) || undefined,
           memoryBlock: memory?.block || undefined,
         });
@@ -324,6 +378,19 @@ export const interpretRoute = async (
       }
     }
   );
+
+  /** «Первый раз бесплатно»: true — бесплатное использование ещё доступно. */
+  fastify.get('/free-firsts', async (request, reply) => {
+    const user = await resolveAuthedUser(request);
+    if (!user) return reply.status(401).send({ message: 'Unauthorized' });
+    try {
+      const [deepUsed, pair] = await Promise.all([hasUsedFreeFirst(user.id, 'deep'), getPairQuota(user.id)]);
+      return reply.send({ deep: !deepUsed, pair: pair.freeAvailable });
+    } catch (error) {
+      request.log.error(error);
+      return reply.status(500).send({ message: 'Failed to load free firsts' });
+    }
+  });
 
   /** Статус бесплатных карт периода: доступна ли, когда следующая, сохранённая карта. */
   fastify.get('/free-cards', async (request, reply) => {

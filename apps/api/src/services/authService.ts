@@ -16,6 +16,7 @@ import {
 } from '../lib/telegramWebApp';
 import * as memory from '../dev/memoryBackend';
 import { applyAcquisitionToProfile } from './acquisitionService';
+import { applyStartParamAcquisition } from './startParamAcquisitionService';
 
 export type AuthPublicUser = {
   id: string;
@@ -537,6 +538,7 @@ export async function signInWithTelegram(initData: string): Promise<AuthSession>
     .eq('telegram_id', telegramId)
     .maybeSingle();
 
+  const isNewTelegramUser = !existingProfile;
   if (!existingProfile) {
     const { data: created, error: createError } =
       await admin.auth.admin.createUser({
@@ -619,6 +621,11 @@ export async function signInWithTelegram(initData: string): Promise<AuthSession>
   } catch (error) {
     // Attribution must not block login.
     console.error('[auth telegram] acquisition sync failed:', error);
+  }
+
+  // Новый пользователь пришёл по ссылке «пара»/«подарок» — запомнить источник (если он пуст).
+  if (isNewTelegramUser) {
+    await applyStartParamAcquisition(publicUser.id, validated.startParam);
   }
 
   return mapSession(

@@ -1,6 +1,7 @@
 import { useMemoryBackend } from '../lib/devMode';
 import { getTarotDailyLimit } from '../lib/env';
 import { getSupabaseAdmin } from '../lib/supabase';
+import { moscowHour, SLOT_RESET_HOUR_MSK, tarotSlotDay } from '../lib/tarotSlotDay';
 import {
   buildWebAppDeepLink,
   sendTelegramMessage,
@@ -59,9 +60,9 @@ async function recordNotifyRun(entry: Omit<NotifyLogEntry, 'at'>): Promise<void>
 
 export type NotifyOverview = {
   entries: NotifyLogEntry[];
-  /** Сколько пользователей уже получили «бесплатный расклад доступен» за текущие UTC-сутки. */
+  /** Сколько пользователей уже получили «бесплатный расклад доступен» за текущий день слота. */
   dailyFreeToday: number;
-  /** UTC-день слота, к которому относится dailyFreeToday. */
+  /** День слота (сутки с 10:00 МСК), к которому относится dailyFreeToday. */
   day: string;
 };
 
@@ -146,15 +147,15 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** День слота tarot_daily_usage — как в RPC consume/get (UTC). */
+/** День слота tarot_daily_usage — как в RPC consume/get (сутки с 10:00 МСК). */
 export function utcToday(): string {
-  return new Date().toISOString().slice(0, 10);
+  return tarotSlotDay();
 }
 
-/** Окно отправки nudge: 06:00–18:00 UTC (09:00–21:00 по Москве). */
+/** Окно отправки nudge: с момента обновления ⚡ (10:00 МСК) до 21:00 МСК. */
 export function isNudgeWindowOpen(now: Date = new Date()): boolean {
-  const hour = now.getUTCHours();
-  return hour >= 6 && hour < 18;
+  const hour = moscowHour(now);
+  return hour >= SLOT_RESET_HOUR_MSK && hour < 21;
 }
 
 function resolveLang(_row?: ProfileNudgeRow): NotifyLang {
@@ -215,9 +216,10 @@ function nudgeTextForProfile(
 }
 
 /**
- * Как только бесплатный дневной слот снова доступен (новый UTC-день, used < limit):
- * шлём в Telegram «заряд обновился» + кнопку Mini App.
- * Не чаще 1 раза на UTC-сутки (`daily_free_nudge_sent_on` = день слота).
+ * Как только бесплатный дневной слот снова доступен (10:00 МСК, used < limit):
+ * шлём в Telegram «заряд обновился» + кнопку Mini App. Бот дёргает это ровно в
+ * 10:00 МСК и затем каждый час (догоняет тех, кому не удалось отправить).
+ * Не чаще 1 раза на день слота (`daily_free_nudge_sent_on` = день слота).
  * Если слот уже потрачен — не шлём (платные заряды сами по себе автонудж не триггерят).
  */
 export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
@@ -225,9 +227,8 @@ export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
     return { sent: 0, skipped: 0, failed: 0 };
   }
 
-  // Тихие часы: не шлём с 21:00 до 06:00 по Москве (UTC+3) = вне 06:00–18:00 UTC.
-  // Пропущенные ночью остаются кандидатами (daily_free_nudge_sent_on не обновлён)
-  // и получат сообщение при первом прогоне после 06:00 UTC.
+  // До 10:00 МСК новый ⚡ ещё не начислен, после 21:00 — тихие часы.
+  // Не получившие сообщение остаются кандидатами (daily_free_nudge_sent_on не обновлён).
   if (!isNudgeWindowOpen()) {
     return { sent: 0, skipped: 0, failed: 0 };
   }
@@ -260,7 +261,7 @@ export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
   const chunkSize = 200;
   for (let i = 0; i < userIds.length; i += chunkSize) {
     const chunk = userIds.slice(i, i + chunkSize);
-    // day в tarot_daily_usage — UTC (как consume_tarot_daily_slot_for_user).
+    // day в tarot_daily_usage — день слота (как consume_tarot_daily_slot_for_user).
     const { data: usageRows, error: usageError } = await admin
       .from('tarot_daily_usage')
       .select('user_id, count')

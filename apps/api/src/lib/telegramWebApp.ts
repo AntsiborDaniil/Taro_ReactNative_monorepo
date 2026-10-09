@@ -14,6 +14,8 @@ export type TelegramWebAppUser = {
 export type ValidatedTelegramWebAppData = {
   user: TelegramWebAppUser;
   authDate: number;
+  /** start_param из initData (startapp=… в ссылке на Mini App), если был. */
+  startParam?: string;
 };
 
 const MAX_AUTH_AGE_SEC = 24 * 60 * 60;
@@ -49,7 +51,8 @@ function parseUserFromParams(
     return null;
   }
 
-  return { user, authDate };
+  const startParam = params.get('start_param')?.trim();
+  return { user, authDate, ...(startParam ? { startParam } : {}) };
 }
 
 /**

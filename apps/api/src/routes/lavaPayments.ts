@@ -13,6 +13,7 @@ import {
   isValidCheckoutEmail,
   type LavaWebhookPayload,
 } from '../services/lavaPaymentsService';
+import { CREDIT_PACKS, listAvailablePacks } from '../lib/creditPacks';
 
 function readWebhookApiKey(request: {
   headers: Record<string, string | string[] | undefined>;
@@ -50,7 +51,12 @@ export const lavaPaymentsRoute = async (
   fastify: FastifyInstance,
   _opts: FastifyPluginOptions
 ) => {
-  fastify.post<{ Body: { email?: string; returnPath?: string } }>(
+  /** Витрина: пакеты, для которых настроен оффер Lava (заряды, цена, метка). */
+  fastify.get('/payments/lava/packs', async (_request, reply) => {
+    return reply.send({ packs: isLavaPaymentsConfigured() ? listAvailablePacks() : [] });
+  });
+
+  fastify.post<{ Body: { email?: string; returnPath?: string; pack?: string } }>(
     '/payments/lava/checkout',
     {
       schema: {
@@ -60,6 +66,7 @@ export const lavaPaymentsRoute = async (
           properties: {
             email: { type: 'string', minLength: 3 },
             returnPath: { type: 'string', maxLength: 200 },
+            pack: { type: 'string', enum: CREDIT_PACKS.map((p) => p.id) },
           },
         },
       },
@@ -94,6 +101,7 @@ export const lavaPaymentsRoute = async (
           userId: user.id,
           email,
           returnPath: request.body?.returnPath,
+          packId: request.body?.pack,
         });
         return reply.send({
           paymentUrl: checkout.paymentUrl,
@@ -108,6 +116,12 @@ export const lavaPaymentsRoute = async (
             code: 'invalid_email',
             message:
               'Оплата доступна только с почтой Яндекса (@yandex.ru, @ya.ru и др.).',
+          });
+        }
+        if (message === 'PACK_UNAVAILABLE') {
+          return reply.status(400).send({
+            code: 'pack_unavailable',
+            message: 'This credit pack is not available',
           });
         }
         if (message === 'LAVA_NOT_CONFIGURED') {

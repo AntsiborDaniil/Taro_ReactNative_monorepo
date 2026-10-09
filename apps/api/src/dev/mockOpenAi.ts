@@ -288,3 +288,93 @@ export async function mockGenerateFollowUp(input: {
       `This is a short follow-up stub for local UI.`,
   };
 }
+
+// --- Расклад на двоих и «Карта для друга» ------------------------------------
+
+type MockPairCard = { card: string; direction: string; label: string };
+
+/** Mock общего чтения пары (структура как у боевого промпта). */
+export async function mockGeneratePairInterpretation(input: {
+  language: string;
+  question: string;
+  questionVisible: boolean;
+  authorCards: MockPairCard[];
+  partnerCards: MockPairCard[];
+}): Promise<string> {
+  await delay(MOCK_DELAY_MS);
+  const ru = langIsRu(input.language);
+  const rows = input.authorCards.map((a, i) => {
+    const b = input.partnerCards[i];
+    const label = a.label || `${i + 1}`;
+    return ru
+      ? `Позиция «${label}» — у одного ${a.card} (${a.direction}), у другого ${b?.card ?? '—'} (${b?.direction ?? '—'}): два разных взгляда на одно и то же.`
+      : `Position "${label}" — one of you has ${a.card} (${a.direction}), the other ${b?.card ?? '—'} (${b?.direction ?? '—'}): two views of the same thing.`;
+  });
+  return ru
+    ? `Общий рисунок. [DEV MOCK] Ваши карты звучат в одном ключе, но с разной громкостью.\n\n${rows.join('\n\n')}\n\n` +
+        `Связь. Усиливает вас готовность слушать, спорит — привычка догадываться вместо вопросов.\n\n` +
+        `Разговор, который стоит начать: что для каждого из вас сейчас самое трудное сказать вслух?`
+    : `Overall pattern. [DEV MOCK] Your cards speak in one key, at different volumes.\n\n${rows.join('\n\n')}\n\n` +
+        `Connection. Listening strengthens you; guessing instead of asking is what clashes.\n\n` +
+        `A conversation worth starting: what is hardest for each of you to say out loud right now?`;
+}
+
+/** Mock личного толкования одной стороны. */
+export async function mockGeneratePairPersonal(input: {
+  language: string;
+  question: string;
+  cards: MockPairCard[];
+}): Promise<string> {
+  await delay(MOCK_DELAY_MS);
+  const names = input.cards.map((c) => `${c.card} (${c.direction})`).join(', ');
+  return langIsRu(input.language)
+    ? `[DEV MOCK] Твои карты — ${names}. Ты приносишь в разговор больше внимания, чем замечаешь, ждёшь ясности, а труднее всего тебе сказать о том, что уже давно просится наружу. Начни с одной простой фразы о своём ожидании.`
+    : `[DEV MOCK] Your cards are ${names}. You bring more attention to this than you notice, you hope for clarity, and what is hardest to say has been waiting a while. Start with one simple sentence about what you hope for.`;
+}
+
+/** Mock послания для карты друга. */
+export async function mockGenerateGiftMessage(input: {
+  language: string;
+  recipientName: string;
+  occasion: string;
+  note: string;
+  card: { card: string; direction: string };
+}): Promise<string> {
+  await delay(MOCK_DELAY_MS);
+  const name = input.recipientName.trim();
+  return langIsRu(input.language)
+    ? `[DEV MOCK] ${name ? `${name}, ` : ''}эта карта — ${input.card.card} (${input.card.direction}) — напоминает тебе: ты справляешься лучше, чем думаешь.\n\nТебя сейчас поддержит спокойный ритм и разговор с тем, кому доверяешь.\n\nМаленький шаг: выдели сегодня десять минут тишины только для себя.`
+    : `[DEV MOCK] ${name ? `${name}, ` : ''}this card — ${input.card.card} (${input.card.direction}) — reminds you that you are doing better than you think.\n\nA calm rhythm and a talk with someone you trust will support you now.\n\nA small step: take ten quiet minutes just for yourself today.`;
+}
+
+/** «Расклад для парочки» без OpenAI — формат как в coupleSystemPrompt. */
+export async function mockGenerateCoupleInterpretation(input: {
+  positions: Array<{ label?: string; card: string; direction: string }>;
+  language: string;
+  couple: { him: string; her: string };
+}): Promise<TarotInterpretationOutput> {
+  await delay(MOCK_DELAY_MS);
+  const ru = langIsRu(input.language);
+  const { him, her } = input.couple;
+  const card = (index: number) => {
+    const p = input.positions[index];
+    return p ? `${p.card} (${p.direction})` : '—';
+  };
+  return {
+    interpretation: ru
+      ? [
+          `[DEV MOCK] Сейчас между вами больше тепла, чем кажется со стороны, но оно ждёт слов.`,
+          `${him}: ${card(0)} — внимание и готовность быть рядом.`,
+          `${her}: ${card(1)} — желание ясности; здесь вы с ${him} сходитесь больше, чем расходитесь.`,
+          `Связь. ${card(2)} держит вас вместе, а ${card(3)} показывает, что мешает: недосказанность.`,
+          `Разговор, который стоит начать. ${card(4)}: что каждому из вас сейчас нужно от другого?`,
+        ].join('\n\n')
+      : [
+          `[DEV MOCK] There is more warmth between you than it looks, but it is waiting for words.`,
+          `${him}: ${card(0)} — attention and wanting to be close.`,
+          `${her}: ${card(1)} — a wish for clarity; here you meet more than you differ.`,
+          `Connection. ${card(2)} holds you together, while ${card(3)} shows what gets in the way: things left unsaid.`,
+          `A conversation worth starting. ${card(4)}: what does each of you need from the other right now?`,
+        ].join('\n\n'),
+  };
+}
