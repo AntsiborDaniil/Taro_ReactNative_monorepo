@@ -107,6 +107,8 @@
 
 .topBadge {
   position: absolute;
+  /* Над картой: картинка (SmartImage) рисуется своим слоем и иначе перекрывает число. */
+  z-index: 1;
   right: -6px;
   bottom: -6px;
   min-width: 28px;
