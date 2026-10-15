@@ -155,3 +155,73 @@
   --ds-skeleton-base: #e6e5d2;
   --ds-skeleton-highlight: #d5d6c0;
 }
+
+/*
+ * Мир «Астрология» (data-section='astro' на <html>): ночное небо и лунная лаванда
+ * вместо леса и горчицы. Переопределяются те же ролевые токены — все компоненты
+ * shared/ui перекрашиваются сами. Кремовый текст и коралловая кнопка action общие:
+ * это ДНК бренда, переход читается как смена неба над тем же приложением.
+ */
+:root {
+  --ds-astro-star: #f1e6c4;
+}
+
+:root[data-section='astro'] {
+  --ds-ground-900: #0c1324;
+  --ds-ground-800: #131d36;
+  --ds-ground-700: #1c2a4a;
+  --ds-ground-600: #283a63;
+  --ds-calm-600: #4b5fa8;
+  --ds-calm-500: #6f86d6;
+  --ds-accent-400: #c3b4f5;
+  --ds-on-calm: #f1ecff;
+  --ds-press-dim: rgba(12, 19, 36, 0.2);
+  --ds-scrim-ground-900: rgba(12, 19, 36, 0.8);
+  --ds-skeleton-base: #1c2a4a;
+  --ds-skeleton-highlight: #283a63;
+}
+
+:root[data-theme='light'][data-section='astro'] {
+  --ds-ground-900: #eef0f7;
+  --ds-ground-800: #e2e5f1;
+  --ds-ground-700: #e2e5f1;
+  --ds-ground-600: #cdd2e6;
+  --ds-calm-600: #3e4f94;
+  --ds-calm-500: #4b5fa8;
+  --ds-accent-400: #5a47a6;
+  --ds-ink-100: #1c2a4a;
+  --ds-ink-50: #131d36;
+  --ds-astro-star: #8c7fd0;
+  --ds-skeleton-base: #e2e5f1;
+  --ds-skeleton-highlight: #cdd2e6;
+}
+
+/*
+ * Смена неба за 700 мс (--ds-dur-scene): цветовые токены зарегистрированы как <color>,
+ * поэтому браузер интерполирует их, а не переключает скачком. Без поддержки
+ * @property смена мгновенная — это допустимая деградация.
+ */
+@property --ds-ground-900 { syntax: '<color>'; inherits: true; initial-value: #091519; }
+@property --ds-ground-800 { syntax: '<color>'; inherits: true; initial-value: #0f2228; }
+@property --ds-ground-700 { syntax: '<color>'; inherits: true; initial-value: #17333d; }
+@property --ds-ground-600 { syntax: '<color>'; inherits: true; initial-value: #204956; }
+@property --ds-accent-400 { syntax: '<color>'; inherits: true; initial-value: #eaa433; }
+@property --ds-calm-600 { syntax: '<color>'; inherits: true; initial-value: #206a75; }
+@property --ds-calm-500 { syntax: '<color>'; inherits: true; initial-value: #2c8e9e; }
+
+:root {
+  transition:
+    --ds-ground-900 var(--ds-dur-scene) var(--ds-ease),
+    --ds-ground-800 var(--ds-dur-scene) var(--ds-ease),
+    --ds-ground-700 var(--ds-dur-scene) var(--ds-ease),
+    --ds-ground-600 var(--ds-dur-scene) var(--ds-ease),
+    --ds-accent-400 var(--ds-dur-scene) var(--ds-ease),
+    --ds-calm-600 var(--ds-dur-scene) var(--ds-ease),
+    --ds-calm-500 var(--ds-dur-scene) var(--ds-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    transition: none;
+  }
+}

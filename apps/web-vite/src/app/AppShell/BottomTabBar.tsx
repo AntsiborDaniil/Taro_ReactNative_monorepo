@@ -6,6 +6,7 @@ import {
   type ReactElement,
 } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { homePath } from '@shared/lib/section';
 import { useTranslation } from 'react-i18next';
 import { ALL_NAV_ITEMS } from './navItems';
 import styles from './BottomTabBar.module.css';
@@ -118,7 +119,7 @@ export function BottomTabBar({ hidden = false }: BottomTabBarProps): ReactElemen
             aria-current={active ? 'page' : undefined}
             aria-label={label}
             tabIndex={hidden ? -1 : undefined}
-            onClick={() => navigate(to)}
+            onClick={() => navigate(to === '/' ? homePath() : to)}
           >
             <Icon className={styles.icon} />
             <span className={styles.label}>{label}</span>

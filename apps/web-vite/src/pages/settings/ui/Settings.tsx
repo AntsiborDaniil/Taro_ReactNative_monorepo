@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '@entities/settings';
+import { clearAstroProfile, useAstroProfile } from '@shared/lib/astro';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { setThemePreference, useThemePreference, type ThemePreference } from '@shared/lib/theme';
 import { AnalyticAction, track } from '@shared/lib/analytics';
@@ -17,11 +18,13 @@ import {
 } from '@features/telegramHomeScreen';
 import {
   BookIcon,
+  Button,
   Chip,
   Header,
   LanguageIcon,
   LightningIcon,
   ListRow,
+  ModalSheet,
   openModal,
   PaintIcon,
   PlusIcon,
@@ -46,6 +49,8 @@ export default function SettingsPage(): ReactElement {
   const { settings, updateSetting, handleVibrationClick } = useSettings();
   const spreadCredits = useAppSelector((state) => state.user.spreadCredits);
   const theme = useThemePreference();
+  const astroProfile = useAstroProfile();
+  const [astroConfirmOpen, setAstroConfirmOpen] = useState(false);
   /** Показывать строку «на домашний экран» только в Mini App, пока ярлык не добавлен. */
   const [showHomeScreenRow, setShowHomeScreenRow] = useState(false);
 
@@ -115,6 +120,12 @@ export default function SettingsPage(): ReactElement {
       toast.info(t('settings:homeScreen.unsupported'));
     }
     // Успех — через onTelegramHomeScreenAdded в useEffect выше.
+  };
+
+  const handleAstroClear = () => {
+    clearAstroProfile();
+    setAstroConfirmOpen(false);
+    toast.success(t('astro:profile.deleted'));
   };
 
   return (
@@ -189,6 +200,22 @@ export default function SettingsPage(): ReactElement {
           </div>
         </section>
 
+        {astroProfile ? (
+          <section className={styles.section}>
+            <Text role="label" as="h2" className={styles.sectionTitle}>
+              {t('astro:settings.section')}
+            </Text>
+            <div className={styles.group}>
+              <ListRow
+                leadingIcon={<span aria-hidden="true">☽</span>}
+                title={t('astro:settings.delete')}
+                subtitle={t('astro:settings.deleteHint')}
+                onClick={() => setAstroConfirmOpen(true)}
+              />
+            </div>
+          </section>
+        ) : null}
+
         {showHomeScreenRow ? (
           <section className={styles.section}>
             <Text role="label" as="h2" className={styles.sectionTitle}>
@@ -219,6 +246,17 @@ export default function SettingsPage(): ReactElement {
           </div>
         </section>
       </div>
+      <ModalSheet open={astroConfirmOpen} onClose={() => setAstroConfirmOpen(false)} title={t('astro:settings.confirmTitle')}>
+        <Text role="body" tone="ink100">
+          {t('astro:settings.confirmText')}
+        </Text>
+        <div className={styles.confirmActions}>
+          <Button onClick={handleAstroClear}>{t('astro:settings.confirm')}</Button>
+          <Button variant="quiet" onClick={() => setAstroConfirmOpen(false)}>
+            {t('astro:settings.cancel')}
+          </Button>
+        </div>
+      </ModalSheet>
     </div>
   );
 }

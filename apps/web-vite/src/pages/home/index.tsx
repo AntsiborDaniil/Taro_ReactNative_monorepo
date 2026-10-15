@@ -7,6 +7,8 @@ import { AnalyticAction, track } from '@shared/lib/analytics';
 import { Button, Header, LightningIcon, openModal } from '@shared/ui';
 import { HabitWidget } from '@widgets/habitWidget';
 import { MoodDashboard } from '@features/moodDashboard';
+import { SectionSwitch } from '@features/sectionSwitch';
+import { AstroAnnounce } from './ui/AstroAnnounce';
 import { DayAdvice } from './ui/DayAdvice';
 import { MainQuickLinks } from './ui/MainQuickLinks';
 import { TarotSpreadsCarousel } from './ui/TarotSpreadsCarousel';
@@ -37,6 +39,10 @@ export default function HomePage(): ReactElement {
       <div className={styles.inner}>
         {/* Шапка корня таба: заголовок + бейдж зарядов (как на «Расклады»/«Библиотека»/«Настройки»). */}
         <Header root title={t('core:nav.tab.main')} />
+        {/* Переключатель миров: Таро | Астрология (/astro). */}
+        <SectionSwitch current="tarot" />
+        {/* Одноразовый анонс астро-мира: прячется после первого визита в /astro (пока мир в разработке — скрыт). */}
+        <AstroAnnounce />
         <div className={styles.layout}>
           <div className={styles.day}>
             {/*

@@ -1,5 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { computeQuotaBalance } from '@shared/lib/quotaBalance';
 import { readQuotaCache } from '@shared/lib/quotaCache';
 import { useAppDispatch, useAppSelector } from '@shared/lib/store';
 import { isLikelyTelegramMiniApp } from '@shared/lib/web/telegramWebApp';
@@ -37,11 +38,10 @@ export function CreditsBadge(): ReactElement | null {
 
   const live = isAuthenticated && tarotDaily != null;
   const source = live ? { tarotDaily, spreadCredits } : cached;
-  const credits = source?.spreadCredits ?? 0;
-  const daily = source?.tarotDaily ?? null;
-  const quotaReady = daily != null;
-  const dailyRemaining = quotaReady ? Math.max(0, daily.limit - daily.used) : 0;
-  const remaining = dailyRemaining + credits;
+  const { quotaReady, credits, total: remaining } = computeQuotaBalance({
+    tarotDaily: source?.tarotDaily ?? null,
+    spreadCredits: source?.spreadCredits,
+  });
   // Не живые данные (кэш или ничего) — приглушаем, а без кэша показываем «…», не ложный «0».
   const loading = !live;
   const countLabel = !quotaReady

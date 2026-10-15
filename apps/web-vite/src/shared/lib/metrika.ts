@@ -45,6 +45,15 @@ export const MetrikaGoal = {
   pairCreateOpen: 'pair_create_open',
   // «Расклад для парочки».
   coupleOpen: 'couple_open',
+  // «Астрология»: переключатель миров и экраны /astro/*.
+  sectionSwitch: 'section_switch',
+  astroProfileSaved: 'astro_profile_saved',
+  astroHoroscopeView: 'astro_horoscope_view',
+  astroNatalView: 'astro_natal_view',
+  astroNatalReading: 'astro_natal_reading',
+  astroCompatView: 'astro_compat_view',
+  astroMoonView: 'astro_moon_view',
+  astroToTarot: 'astro_to_tarot',
   pairCreated: 'pair_created',
   pairInviteShare: 'pair_invite_share',
   pairInviteOpen: 'pair_invite_open',

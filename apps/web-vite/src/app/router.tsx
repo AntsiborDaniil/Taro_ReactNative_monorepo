@@ -1,5 +1,6 @@
 import { lazy } from 'react';
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { ASTRO_ENABLED } from '@shared/lib/section';
 import { AppShell } from './AppShell/AppShell';
 // Прямой (не lazy) импорт: errorElement должен ловить и ошибки самой
 // загрузки чанков lazy-страниц, поэтому не может сам быть чанком.
@@ -13,6 +14,13 @@ const ReadingResultPage = lazy(() => import('@pages/readingResult'));
 const SharedReadingPage = lazy(() => import('@pages/sharedReading'));
 const PairPage = lazy(() => import('@pages/pair'));
 const GiftPage = lazy(() => import('@pages/gift'));
+// «Астрология»: второй мир Главной (переключатель «Таро | Астрология»).
+const AstroHomePage = lazy(() => import('@pages/astroHome'));
+const AstroProfilePage = lazy(() => import('@pages/astroProfile'));
+const AstroHoroscopePage = lazy(() => import('@pages/astroHoroscope'));
+const AstroMoonPage = lazy(() => import('@pages/astroMoon'));
+const AstroNatalPage = lazy(() => import('@pages/astroNatal'));
+const AstroCompatPage = lazy(() => import('@pages/astroCompat'));
 const CardDetailPage = lazy(() => import('@pages/cardDetail'));
 const HistoryPage = lazy(() => import('@pages/history'));
 const MirrorPage = lazy(() => import('@pages/mirror'));
@@ -54,6 +62,17 @@ export const router = createBrowserRouter([
       // «Вместе»: пара и карта для друга (ссылки открываются и гостем).
       { path: 'pair/:id', Component: PairPage },
       { path: 'gift/:id', Component: GiftPage },
+      // Пока астрология в разработке — любые /astro/* (старые ссылки, deep link) уводят на Главную.
+      ...(ASTRO_ENABLED
+        ? [
+            { path: 'astro', Component: AstroHomePage },
+            { path: 'astro/profile', Component: AstroProfilePage },
+            { path: 'astro/horoscope', Component: AstroHoroscopePage },
+            { path: 'astro/moon', Component: AstroMoonPage },
+            { path: 'astro/natal', Component: AstroNatalPage },
+            { path: 'astro/compat', Component: AstroCompatPage },
+          ]
+        : [{ path: 'astro/*', element: <Navigate to="/" replace /> }]),
       { path: 'card/:cardId', Component: CardDetailPage },
       { path: 'history', Component: HistoryPage },
       { path: 'mirror', Component: MirrorPage },

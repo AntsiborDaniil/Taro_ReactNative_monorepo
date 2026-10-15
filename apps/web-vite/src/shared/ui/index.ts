@@ -20,3 +20,5 @@ export * from './AILoader';
 export * from './SmartImage';
 export * from './PageSkeleton';
 export * from './ChargeMark';
+export * from './MoonPhaseIcon';
+export * from './StarField';

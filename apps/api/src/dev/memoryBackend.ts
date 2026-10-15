@@ -52,6 +52,9 @@ const favoritesByUser = new Map<string, Set<string>>();
 const settingsByUser = new Map<string, UserSettingsRecord>();
 const dailyUsageByUserDay = new Map<string, number>();
 const spreadCreditsByUser = new Map<string, number>();
+
+/** Стартовый заряд новому пользователю (как profiles.spread_credits в handle_new_user). */
+export const SIGNUP_SPREAD_CREDITS = 1;
 const lavaCheckoutsByInvoice = new Map<
   string,
   {
@@ -130,6 +133,10 @@ function createVerifiedUser(input: {
   };
   usersByEmail.set(input.email, user);
   usersById.set(user.id, user);
+  // Только при создании: повторный логин сюда не попадает (пользователь уже в usersByEmail).
+  if (!spreadCreditsByUser.has(user.id)) {
+    spreadCreditsByUser.set(user.id, SIGNUP_SPREAD_CREDITS);
+  }
   return user;
 }
 

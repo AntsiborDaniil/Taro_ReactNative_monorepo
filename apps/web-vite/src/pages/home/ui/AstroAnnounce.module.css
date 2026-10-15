@@ -1,0 +1,10 @@
+/* Анонс живёт в Таро-мире, но подсвечен лавандой астро-мира — намёк на «другое небо». */
+.row {
+  border-color: color-mix(in srgb, #c3b4f5 45%, transparent);
+}
+
+.glyph {
+  color: #c3b4f5;
+  font-size: 20px;
+  line-height: 1;
+}

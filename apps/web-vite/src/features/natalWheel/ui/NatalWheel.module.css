@@ -1,0 +1,118 @@
+.svg {
+  font-family: 'Onest-Bold', system-ui, sans-serif;
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.disc {
+  fill: var(--ds-ground-800);
+  stroke: var(--ds-ground-600);
+}
+
+.ring {
+  fill: none;
+  stroke: var(--ds-ground-600);
+}
+
+.center {
+  fill: var(--ds-ground-900);
+  stroke: var(--ds-ground-600);
+}
+
+.tick {
+  stroke: var(--ds-ground-600);
+}
+
+.signGlyph {
+  fill: var(--ds-ink-100);
+  font-size: 15px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.houseLine {
+  stroke: var(--ds-ground-600);
+  stroke-width: 1;
+}
+
+.houseNum {
+  fill: var(--ds-ink-100);
+  font-size: 7.5px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.axis {
+  stroke: var(--ds-accent-400);
+  stroke-width: 1.6;
+  stroke-opacity: 0.75;
+}
+
+.axisLabel {
+  fill: var(--ds-accent-400);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.aspectCalm {
+  stroke: var(--ds-calm-500);
+  stroke-width: 1.1;
+  transition: opacity var(--ds-dur-state) var(--ds-ease);
+}
+
+.aspectTense {
+  stroke: var(--ds-action-500);
+  stroke-width: 1.1;
+  transition: opacity var(--ds-dur-state) var(--ds-ease);
+}
+
+.planet {
+  cursor: pointer;
+  transition: opacity var(--ds-dur-state) var(--ds-ease);
+}
+
+.dotLine {
+  stroke: var(--ds-accent-400);
+  stroke-width: 1.4;
+}
+
+.bubble {
+  fill: var(--ds-ground-700);
+  stroke: var(--ds-ground-600);
+}
+
+.bubbleMain {
+  fill: var(--ds-ground-700);
+  stroke: var(--ds-accent-400);
+}
+
+.bubble[data-selected],
+.bubbleMain[data-selected] {
+  stroke: var(--ds-ink-50);
+  stroke-width: 1.6;
+}
+
+.planetGlyph {
+  fill: var(--ds-ink-50);
+  font-size: 12.5px;
+  pointer-events: none;
+}
+
+.centerTitle {
+  fill: var(--ds-ink-50);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.centerSub {
+  fill: var(--ds-ink-100);
+  font-size: 9.5px;
+  opacity: 0.85;
+}

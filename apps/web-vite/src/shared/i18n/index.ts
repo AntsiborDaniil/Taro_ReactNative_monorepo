@@ -1,16 +1,21 @@
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import {
-  languageFromTelegramCode,
   loadLocaleNamespace,
   normalizeLanguage,
   STARTUP_I18N_NAMESPACES,
   type AppLanguage,
 } from './namespaces';
+import {
+  isLanguageManual,
+  LANGUAGE_KEY,
+  LANGUAGE_MANUAL_KEY,
+  looksLikeTelegramLaunch,
+  readAutoLanguage,
+  readTelegramLanguageCode,
+  resolveInitialLanguage,
+} from './resolveLanguage';
 import { syncDocumentMeta } from './syncDocumentMeta';
-
-const LANGUAGE_KEY = 'language';
-const LANGUAGE_MANUAL_KEY = 'languageManual';
 
 const loadedKeys = new Set<string>();
 const inflight = new Map<string, Promise<void>>();
@@ -55,58 +60,6 @@ export async function ensureI18nNamespaces(...args: [...string[], AppLanguage] |
   await Promise.all(namespaces.map((ns) => loadNamespace(lng, ns)));
 }
 
-function isLanguageManual(): boolean {
-  try {
-    return window.localStorage.getItem(LANGUAGE_MANUAL_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
-function readTelegramLanguage(): AppLanguage | null {
-  try {
-    const code = window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code;
-    if (!code) return null;
-    return languageFromTelegramCode(code);
-  } catch {
-    return null;
-  }
-}
-
-/** Язык из бота: `WEB_APP_URL?lang=ru|en` на кнопках web_app / Menu Button. */
-function readUrlLanguage(): AppLanguage | null {
-  try {
-    const raw = new URLSearchParams(window.location.search).get('lang');
-    if (raw === 'en' || raw === 'ru') return raw;
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-function readSavedLanguage(): AppLanguage | null {
-  try {
-    const raw = window.localStorage.getItem(LANGUAGE_KEY);
-    return raw ? normalizeLanguage(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Старт: ручной выбор → ?lang= от бота → language_code Telegram → сохранённый → ru.
- */
-function resolveInitialLanguage(): AppLanguage {
-  if (isLanguageManual()) {
-    return readSavedLanguage() ?? 'ru';
-  }
-  const fromUrl = readUrlLanguage();
-  if (fromUrl) return fromUrl;
-  const fromTelegram = readTelegramLanguage();
-  if (fromTelegram) return fromTelegram;
-  return readSavedLanguage() ?? 'ru';
-}
-
 async function applyLanguage(lng: AppLanguage): Promise<void> {
   await Promise.all(STARTUP_I18N_NAMESPACES.map((ns) => loadNamespace(lng, ns)));
   await i18next.changeLanguage(lng);
@@ -140,6 +93,8 @@ async function initI18next() {
     void syncDocumentMeta(normalizeLanguage(nextLng));
   });
 
+  watchTelegramLanguage();
+
   return i18next;
 }
 
@@ -154,17 +109,37 @@ export async function changeLanguage(lng: AppLanguage): Promise<void> {
 }
 
 /**
- * Подтянуть язык после загрузки bridge (script defer).
- * Приоритет как при старте: ?lang= от бота → language_code Telegram.
+ * Подтянуть язык после загрузки bridge (script defer) или прихода initData.
+ * Приоритет как при старте: язык Telegram → ?lang= от бота.
  * Не трогает ручной выбор пользователя.
  */
 export async function syncLanguageFromTelegram(): Promise<AppLanguage | null> {
   if (typeof window === 'undefined' || isLanguageManual()) return null;
-  const next = readUrlLanguage() ?? readTelegramLanguage();
+  const next = readAutoLanguage();
   if (!next) return null;
   if (normalizeLanguage(i18next.language) === next) return next;
   await applyLanguage(next);
   return next;
+}
+
+/**
+ * Мост Telegram может появиться уже после старта i18n (defer-скрипт, медленная
+ * сеть, initData приходит позже). Если запуск похож на Telegram — до таймаута
+ * периодически досинхронизируем язык.
+ */
+export function watchTelegramLanguage(timeoutMs = 6000, intervalMs = 150): void {
+  if (typeof window === 'undefined' || !looksLikeTelegramLaunch()) return;
+  const started = Date.now();
+  const tick = () => {
+    if (isLanguageManual()) return;
+    if (readTelegramLanguageCode()) {
+      void syncLanguageFromTelegram();
+      return;
+    }
+    if (Date.now() - started < timeoutMs) window.setTimeout(tick, intervalMs);
+    else void syncLanguageFromTelegram();
+  };
+  tick();
 }
 
 export const i18nReady = initI18next();

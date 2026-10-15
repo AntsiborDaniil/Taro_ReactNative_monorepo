@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { homePath } from '@shared/lib/section';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ChevronRightIcon } from '@shared/ui';
 import { MAIN_NAV_ITEMS, SETTINGS_NAV_ITEM } from './navItems';
@@ -58,7 +59,7 @@ export function NavRail(): ReactElement {
               key={to}
               type="button"
               className={active ? `${styles.item} ${styles.itemActive}` : styles.item}
-              onClick={() => navigate(to)}
+              onClick={() => navigate(to === '/' ? homePath() : to)}
               aria-current={active ? 'page' : undefined}
               aria-label={collapsed ? label : undefined}
               title={collapsed ? label : undefined}

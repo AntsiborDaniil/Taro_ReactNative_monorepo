@@ -15,7 +15,8 @@ export const MAIN_NAV_ITEMS: NavItem[] = [
     labelKey: 'nav.tab.main',
     Icon: PlanetIcon,
     // Зеркало недели открывается с главной — подсвечиваем её же.
-    isActive: (p) => p === '/' || p.startsWith('/mirror'),
+    // Астрология — второй мир той же Главной (переключатель «Таро | Астрология»).
+    isActive: (p) => p === '/' || p.startsWith('/mirror') || p.startsWith('/astro'),
   },
   {
     to: '/spreads',

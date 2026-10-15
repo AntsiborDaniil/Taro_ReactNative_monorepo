@@ -1,0 +1,25 @@
+/*
+ * Точки — radial-gradient цвета --ds-astro-star разных размеров и плотности.
+ * Статично: анимации нет вовсе, поэтому prefers-reduced-motion не требуется;
+ * слой лежит под контентом и не перехватывает касания.
+ */
+.stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(1.2px 1.2px at 12% 8%, var(--ds-astro-star) 99%, transparent),
+    radial-gradient(1px 1px at 78% 14%, var(--ds-astro-star) 99%, transparent),
+    radial-gradient(1.6px 1.6px at 46% 26%, var(--ds-astro-star) 99%, transparent),
+    radial-gradient(1px 1px at 90% 38%, var(--ds-astro-star) 99%, transparent),
+    radial-gradient(1.2px 1.2px at 22% 52%, var(--ds-astro-star) 99%, transparent),
+    radial-gradient(1px 1px at 64% 66%, var(--ds-astro-star) 99%, transparent),
+    radial-gradient(1.4px 1.4px at 8% 82%, var(--ds-astro-star) 99%, transparent),
+    radial-gradient(1px 1px at 84% 90%, var(--ds-astro-star) 99%, transparent),
+    radial-gradient(1px 1px at 38% 94%, var(--ds-astro-star) 99%, transparent);
+  background-size: 100% 720px;
+  background-repeat: repeat-y;
+  mask-image: linear-gradient(to bottom, #000 0%, #000 60%, transparent 100%);
+}

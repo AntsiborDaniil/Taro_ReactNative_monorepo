@@ -28,6 +28,7 @@ import { internalSupportRoute } from './routes/internalSupport';
 import { internalNotifyRoute } from './routes/internalNotify';
 import { pairsRoute } from './routes/pairs';
 import { giftsRoute } from './routes/gifts';
+import { astroRoute } from './routes/astro';
 
 dotenv.config();
 
@@ -132,6 +133,7 @@ async function bootstrap(): Promise<void> {
   await fastify.register(internalNotifyRoute, { prefix: '/api' });
   await fastify.register(pairsRoute, { prefix: '/api' });
   await fastify.register(giftsRoute, { prefix: '/api' });
+  await fastify.register(astroRoute, { prefix: '/api' });
 
   const address = await fastify.listen({
     port: process.env.PORT ? Number(process.env.PORT) : 3002,

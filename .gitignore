@@ -51,3 +51,6 @@ apps/native/*.mobileprovision
 
 # ── Test / coverage ───────────────────────────────────────────
 coverage/
+
+# ── DB dumps (ПДн, см. .claude/BACKUP_POLICY.md) ─────────────
+backups/

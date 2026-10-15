@@ -11,6 +11,11 @@
           } else {
             var fromUrl = new URLSearchParams(location.search).get('lang');
             if (fromUrl === 'en' || fromUrl === 'ru') lng = fromUrl;
+            // Язык Telegram (hash запуска) важнее ?lang= — как в shared/i18n/resolveLanguage.ts.
+            var tgData = new URLSearchParams(location.hash.replace(/^#/, '')).get('tgWebAppData');
+            var tgUser = tgData && new URLSearchParams(tgData).get('user');
+            var tgCode = tgUser && JSON.parse(tgUser).language_code;
+            if (tgCode) lng = String(tgCode).toLowerCase().split(/[-_]/)[0] === 'ru' ? 'ru' : 'en';
           }
         } catch (e) {}
         var en = lng === 'en';

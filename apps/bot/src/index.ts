@@ -309,18 +309,20 @@ bot.on('message:text', async (ctx) => {
 });
 
 async function configureDefaultMenuButton(): Promise<void> {
+  // Глобальная кнопка БЕЗ ?lang=: иначе все, кто не делал /start, открывали бы
+  // Mini App на русском. Язык берётся из language_code Telegram (initData).
   await bot.api.setChatMenuButton({
     menu_button: {
       type: 'web_app',
       text: MENU_BUTTON_TEXT.ru,
-      web_app: { url: webAppUrlWithLang(config.webAppUrl, 'ru') },
+      web_app: { url: config.webAppUrl },
     },
   });
 }
 
 async function configureLocalizedCommands(): Promise<void> {
-  // Без language_code — дефолт (русский). Затем en/ru для клиентов Telegram.
-  await bot.api.setMyCommands(botCommandDescriptions.ru);
+  // Без language_code — дефолт для всех не-ru клиентов (en), как resolveBotLang.
+  await bot.api.setMyCommands(botCommandDescriptions.en);
   await bot.api.setMyCommands(botCommandDescriptions.ru, {
     language_code: 'ru',
   });

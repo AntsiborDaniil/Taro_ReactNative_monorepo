@@ -4,6 +4,7 @@ import { isFreePeriodSpread, useListSpreadsHistoryQuery } from '@entities/spread
 import { Button, ChargeMark, Input, Text } from '@shared/ui';
 import type { ModalComponentProps } from '@shared/ui/ModalSheet';
 import { haptic } from '@shared/lib/haptics';
+import { computeQuotaBalance } from '@shared/lib/quotaBalance';
 import { useAppSelector } from '@shared/lib/store';
 import { getLegalDocumentById } from '@legacy-legal';
 import { markAwaitingLavaPayment, MetrikaGoal, reachMetrikaGoal } from '@shared/lib/metrika';
@@ -84,6 +85,9 @@ export function BuySpreadCreditsModal({ copyNamespace = 'settings' }: BuySpreadC
 
   const user = useAppSelector((state) => state.user.user);
   const spreadCredits = useAppSelector((state) => state.user.spreadCredits);
+  const tarotDaily = useAppSelector((state) => state.user.tarotDaily);
+  // Тот же итог, что в бейдже шапки: бесплатный слот дня + заряды.
+  const balance = computeQuotaBalance({ tarotDaily, spreadCredits });
   const [lavaCheckout, { isLoading }] = useLavaCheckoutMutation();
 
   const suggestedEmail = useMemo(() => {
@@ -164,8 +168,13 @@ export function BuySpreadCreditsModal({ copyNamespace = 'settings' }: BuySpreadC
             {tSpread('buyPacks.balanceLabel')}
           </Text>
           <Text role="body" tone="ink50" as="span">
-            {tSpread('buyPacks.balance', { count: spreadCredits ?? 0 })}
+            {tSpread('buyPacks.balance', { count: balance.total })}
           </Text>
+          {balance.dailyRemaining > 0 && balance.credits > 0 ? (
+            <Text role="micro" tone="ink50" as="span">
+              {tSpread('buyPacks.balanceIncludesDaily')}
+            </Text>
+          ) : null}
         </span>
       </div>
 

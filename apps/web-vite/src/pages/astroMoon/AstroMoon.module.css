@@ -1,0 +1,129 @@
+.root {
+  position: relative;
+  width: 100%;
+}
+
+.column {
+  position: relative;
+  z-index: 1;
+  width: calc(100% - var(--ds-gutter) * 2);
+  max-width: 560px;
+  margin: 0 auto;
+  padding: var(--ds-space-8) 0 var(--ds-space-32);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-16);
+  min-width: 0;
+}
+
+.monthBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.monthTitle {
+  margin: 0;
+}
+
+.arrow {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ds-ink-50);
+  cursor: pointer;
+}
+
+.arrow:hover {
+  background: var(--ds-ground-700);
+}
+
+.arrow:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--ds-space-4);
+}
+
+.weekday {
+  text-align: center;
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-micro-family);
+  font-size: 11px;
+  line-height: 16px;
+  text-transform: uppercase;
+  padding-bottom: var(--ds-space-4);
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--ds-space-4) 0;
+  min-height: 56px;
+  border: var(--ds-size-hairline) solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ds-ink-100);
+  font: inherit;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.cell:hover {
+  background: var(--ds-ground-700);
+}
+
+.cell:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+}
+
+.num {
+  font-family: var(--ds-font-label-family);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.selected {
+  background: var(--ds-ground-700);
+}
+
+.today {
+  border: 2px solid var(--ds-accent-400);
+  color: var(--ds-ink-50);
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-12);
+  padding: var(--ds-space-16);
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  border-radius: var(--ds-radius-list-row);
+  background: var(--ds-ground-700);
+}
+
+.detailsHead {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-12);
+}
+
+.phaseName {
+  margin: 0;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-8);
+}

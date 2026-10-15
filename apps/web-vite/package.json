@@ -15,6 +15,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.5.1",
     "@supabase/supabase-js": "^2.49.8",
+    "astronomy-engine": "^2.1.19",
     "cookie": "^1.0.2",
     "i18next": "^24.2.3",
     "react": "19.0.0",

@@ -354,6 +354,7 @@
   "buyPacks.balance_few": "{{count}} заряда",
   "buyPacks.balance_many": "{{count}} зарядов",
   "buyPacks.balance_other": "{{count}} заряда",
+  "buyPacks.balanceIncludesDaily": "включая бесплатный расклад дня",
   "buyPacks.leadSoft": "Заряды нужны для раскладов на свой вопрос, уточнений и глубоких разборов. Бери столько, сколько хочется — они не сгорают.",
   "buyPacks.leadLimitSoft": "Бесплатный расклад на сегодня уже был — можно подождать до завтра или взять немного зарядов. Они не сгорают.",
   "buyPacks.rhythm.title": "Как часто ты обращаешься к картам?",

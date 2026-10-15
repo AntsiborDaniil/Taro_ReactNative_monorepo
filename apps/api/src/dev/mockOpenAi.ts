@@ -378,3 +378,40 @@ export async function mockGenerateCoupleInterpretation(input: {
         ].join('\n\n'),
   };
 }
+
+/** Детерминированный гороскоп по знаку для локальной разработки без ключа OpenAI. */
+export async function mockGenerateHoroscope<S extends string>(input: {
+  sign: S;
+  day: string;
+  lang: string;
+}): Promise<{
+  sign: S;
+  day: string;
+  text: string;
+  question: string;
+  facets: { love: 'warm' | 'even' | 'gentle'; work: 'warm' | 'even' | 'gentle'; energy: 'warm' | 'even' | 'gentle' };
+}> {
+  const order = ['warm', 'even', 'gentle'] as const;
+  const n = [...input.sign].reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  const facets = { love: order[n % 3], work: order[(n + 1) % 3], energy: order[(n + 2) % 3] };
+  if (langIsRu(input.lang)) {
+    return {
+      sign: input.sign,
+      day: input.day,
+      text:
+        `[DEV MOCK] Хороший день, чтобы замедлиться и понаблюдать за собой. Заметь, что даётся легко, а что просит бережного внимания.\n\n` +
+        'Выбери одно небольшое дело и сделай его без спешки. Остальное подождёт до вечера.',
+      question: 'Что сегодня поддержит меня по-настоящему?',
+      facets,
+    };
+  }
+  return {
+    sign: input.sign,
+    day: input.day,
+    text:
+      `[DEV MOCK] Today is a good day for ${input.sign} to slow down and observe. Notice what comes easily and what asks for gentle attention.\n\n` +
+      'Pick one small task and do it without rushing. The rest can wait until the evening.',
+    question: 'What would truly support me today?',
+    facets,
+  };
+}

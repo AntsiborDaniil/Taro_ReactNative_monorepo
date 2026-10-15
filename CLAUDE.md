@@ -2,6 +2,8 @@
 
 Таро-приложение: AI-интерпретация раскладов, настроение/привычки, Telegram Mini App, платные спред-кредиты (Lava.top). Доки и комментарии в коде — на русском.
 
+**Начинайте работу с обязательного прочтения [.claude/CURRENT_STAGE.md](.claude/CURRENT_STAGE.md)** — текущий этап, задачи и ссылки. Принципы — [.claude/PHILOSOPHY.md](.claude/PHILOSOPHY.md), бэкапы и опасные операции — [.claude/BACKUP_POLICY.md](.claude/BACKUP_POLICY.md).
+
 Детали по пакетам лежат в `.claude/rules/*.md` и подгружаются автоматически при работе с файлами пакета (web, api, supabase, bot, admin). Типовые задачи — skills в `.claude/skills/` (`web-screen`, `api-endpoint`, `db-migration`).
 
 ## Пакеты (pnpm workspace, Node 22+, pnpm 10)

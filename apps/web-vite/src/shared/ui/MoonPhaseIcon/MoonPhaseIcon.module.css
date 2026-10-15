@@ -1,0 +1,19 @@
+.icon {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.dark {
+  fill: var(--ds-ground-700);
+}
+
+.lit {
+  fill: var(--ds-ink-50);
+}
+
+.rim {
+  fill: none;
+  stroke: var(--ds-ink-100);
+  stroke-opacity: 0.5;
+  stroke-width: 1;
+}

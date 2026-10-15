@@ -1,0 +1,110 @@
+.root {
+  position: relative;
+  display: grid;
+  /* minmax(0, …): длинная «АСТРОЛОГИЯ» не раздувает свою половину и не сдвигает бегунок. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  padding: 4px;
+  border-radius: 999px;
+  border: var(--ds-size-hairline) solid var(--ds-ground-600);
+  background: var(--ds-ground-800);
+  max-width: 420px;
+  width: 100%;
+  isolation: isolate;
+}
+
+/* Бегунок: подложка ground-700 с гранью accent — грань перетекает из горчицы в лаванду вместе с токеном. */
+.thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 999px;
+  border: 2px solid var(--ds-accent-400);
+  background: var(--ds-ground-700);
+  transition: transform 220ms var(--ds-ease);
+  z-index: -1;
+}
+
+.root[data-current='astro'] .thumb {
+  transform: translateX(100%);
+}
+
+.option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: var(--ds-size-min-touch);
+  padding: 0 var(--ds-space-8);
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ds-ink-100);
+  font-family: var(--ds-font-chip-family);
+  font-size: var(--ds-font-chip-size);
+  letter-spacing: var(--ds-font-chip-letter-spacing);
+  text-transform: var(--ds-font-chip-transform);
+  cursor: pointer;
+  transition: color var(--ds-dur-state) var(--ds-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.option:focus-visible {
+  outline: var(--ds-size-focus-ring-width) solid var(--ds-calm-500);
+  outline-offset: 2px;
+}
+
+.active {
+  color: var(--ds-ink-50);
+}
+
+.glyph {
+  /* Не сжимать: длинное «АСТРОЛОГИЯ» на 360px иначе сплющивает иконку в точку. */
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.active .glyph {
+  stroke: var(--ds-accent-400);
+}
+
+/* Мир в разработке: приглушён и не кликабелен по смыслу (клик — только вибро-отказ). */
+.locked {
+  position: relative;
+  color: color-mix(in srgb, var(--ds-ink-100) 60%, transparent);
+  cursor: not-allowed;
+}
+
+/* Плашка висит на верхней грани капсулы и не занимает места: иначе на 360px «АСТРОЛОГИЯ» вылезает за сегмент. */
+.soon {
+  position: absolute;
+  top: -10px;
+  right: 6px;
+  background: var(--ds-ground-800);
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: var(--ds-size-hairline) solid color-mix(in srgb, #c3b4f5 55%, transparent);
+  color: #c3b4f5;
+  font-size: 10px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+}
+
+/* Узкие телефоны (≤380px): «АСТРОЛОГИЯ» с иконкой не влезает в половину и заезжает под бегунок — иконки убираем. */
+@media (max-width: 380px) {
+  .glyph {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumb {
+    transition: none;
+  }
+}

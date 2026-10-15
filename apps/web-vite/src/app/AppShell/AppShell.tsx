@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useRef, type ReactElement } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { applySection, sectionOfPath, setLastSection } from '@shared/lib/section';
 import { useAuthMeQuery } from '@entities/user/api';
 import { ModalRoot, PageSkeleton, Toaster } from '@shared/ui';
 // Побочный эффект: регистрирует модалки 'buy-credits'/'daily-limit' в реестре ModalSheet до первого рендера ModalRoot.
@@ -99,11 +100,13 @@ export function AppShell(): ReactElement {
   // Здесь же — initTelegramWebAppChrome(): expand + disableVerticalSwipes нужны
   // как можно раньше, до первого скролла (иначе свайп сворачивает приложение).
   useEffect(() => {
+    // Язык не зависит от наличия моста на момент монтирования: hash запуска уже есть.
+    void syncLanguageFromTelegram();
     if (!isLikelyTelegramMiniApp()) return;
     void ensureTelegramWebAppScript()
       .then(() => {
         initTelegramWebAppChrome();
-        syncLanguageFromTelegram();
+        return syncLanguageFromTelegram();
       })
       .catch(() => undefined);
   }, []);
@@ -132,6 +135,8 @@ export function AppShell(): ReactElement {
     if (isLikelyTelegramMiniApp() && !telegramAuthAttempted.current) {
       telegramAuthAttempted.current = true;
       void tryAuthenticateTelegramMiniApp().then((result) => {
+        // initData уже пришёл — язык Telegram точно известен.
+        void syncLanguageFromTelegram();
         if (result.authenticated) {
           void refetch();
         } else if (!quickLoginAttempted.current) {
@@ -150,6 +155,12 @@ export function AppShell(): ReactElement {
   }, [dispatch, isError, isAuthenticated, refetch]);
 
   const { pathname } = useLocation();
+  // Мир «Астрология» (/astro/*): перекрашиваем токены и шапку Telegram, запоминаем выбор.
+  useEffect(() => {
+    const section = sectionOfPath(pathname);
+    applySection(section);
+    if (pathname === '/' || section === 'astro') setLastSection(section);
+  }, [pathname]);
   // Карусель выбора карт: таббар прячем с анимацией, чтобы не перекрывал CTA.
   // Расшаренный расклад (/r/:id) — витрина для друга без функциональности: без навигации вообще.
   const isSharedReading = pathname.startsWith('/r/');
