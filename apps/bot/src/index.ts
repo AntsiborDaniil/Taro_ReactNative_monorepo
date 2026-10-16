@@ -45,8 +45,38 @@ import {
   triggerDailyFreeNudges,
 } from './dailyFreeNudge';
 import { scheduleDailyAtMoscow } from './schedule';
+import { reportSubscriber, shouldReportInteraction } from './subscribers';
 
 const bot = new Bot(config.botToken);
+
+// Реестр подписчиков: любое взаимодействие с ботом (/start, текст, кнопки) —
+// человек начал диалог и может получать ежедневную рассылку. Не блокируем ответ.
+bot.use(async (ctx, next) => {
+  const from = ctx.from;
+  if (from && !from.is_bot && ctx.chat?.type === 'private' && shouldReportInteraction(from.id)) {
+    void reportSubscriber({
+      telegramId: from.id,
+      event: 'interaction',
+      languageCode: from.language_code,
+    });
+  }
+  await next();
+});
+
+// Блокировка/разблокировка бота: kicked → не слать, member → снова можно.
+bot.on('my_chat_member', async (ctx) => {
+  if (ctx.chat.type !== 'private') return;
+  const status = ctx.myChatMember.new_chat_member.status;
+  if (status === 'kicked') {
+    await reportSubscriber({ telegramId: ctx.from.id, event: 'blocked' });
+  } else if (status === 'member') {
+    await reportSubscriber({
+      telegramId: ctx.from.id,
+      event: 'unblocked',
+      languageCode: ctx.from.language_code,
+    });
+  }
+});
 
 /** Users who pressed /support and should send the next text as a ticket. */
 const pendingSupportByUser = new Set<number>();
@@ -353,8 +383,9 @@ async function main(): Promise<void> {
 
   const runDailyFreeJob = async (): Promise<void> => {
     try {
+      // API отвечает 202 и шлёт в фоне; ретраи/таймаут — внутри triggerDailyFreeNudges.
       const result = await triggerDailyFreeNudges();
-      console.log('[bot] daily-free nudges:', result);
+      console.log('[bot] daily-free nudges accepted:', result);
     } catch (error) {
       console.error('[bot] daily-free nudges failed:', error);
     }
@@ -362,8 +393,9 @@ async function main(): Promise<void> {
 
   // «Заряд обновился»: бесплатный ⚡ начисляется в 10:00 МСК — шлём ровно тогда
   // (+5 с запаса, чтобы день слота на API точно сменился). Ежечасный прогон и
-  // прогон через ~30с после старта догоняют тех, кому не дошло (API шлёт не чаще
-  // раза в день слота и только с 10:00 до 21:00 МСК).
+  // прогон через ~30с после старта догоняют тех, кому не дошло (API шлёт каждому
+  // подписчику не чаще раза в день слота, захват атомарный — дублей не будет;
+  // окно отправки 10:00–21:00 МСК).
   scheduleDailyAtMoscow(10, 0, 5, () => {
     void runDailyFreeJob();
   });
@@ -383,7 +415,10 @@ async function main(): Promise<void> {
   console.log(`[bot] channel: ${CHANNEL_URL}`);
   console.log('[bot] polling… (Ctrl+C to stop)');
 
-  await bot.start();
+  // my_chat_member нужен явно: по нему узнаём о блокировке бота.
+  await bot.start({
+    allowed_updates: ['message', 'callback_query', 'my_chat_member'],
+  });
 }
 
 main().catch((error) => {

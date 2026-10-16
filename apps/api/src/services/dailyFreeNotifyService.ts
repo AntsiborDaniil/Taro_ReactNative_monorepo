@@ -6,8 +6,26 @@ import {
   buildWebAppDeepLink,
   sendTelegramMessage,
 } from '../lib/telegramNotify';
+import { pickDailyNudge } from '../lib/dailyNudgeMessages';
+import { classifyTelegramSendError, type SendFailure } from '../lib/telegramSendErrors';
+import {
+  claimNudgeDay,
+  getSubscriberLanguage,
+  getSubscriberStats,
+  listNudgeCandidates,
+  markNudgeDelivered,
+  markSubscriberBlocked,
+  releaseNudgeClaim,
+} from './telegramSubscribersService';
 
-const FLOOD_DELAY_MS = 45;
+/** Лимит Telegram ~30 msg/s; шлём последовательно с запасом. */
+export const FLOOD_DELAY_MS = 40;
+/** Сколько раз повторяем одно сообщение после 429 (с паузой retry_after). */
+const MAX_RATE_LIMIT_RETRIES = 3;
+/** Страница кандидатов (keyset по telegram_id: PostgREST режет выборку на 1000 строк). */
+const CANDIDATE_PAGE_SIZE = 200;
+/** Первые часы после обновления ⚡ шлём ВСЕМ; позже — только тем, кто ещё не потратил слот. */
+const PRIMARY_WINDOW_END_HOUR_MSK = 12;
 const BROADCAST_STATE_KEY = 'broadcast_daily_free_v1';
 /** Журнал запусков рассылок для админки (bot_notify_state, без отдельной таблицы). */
 const NOTIFY_LOG_KEY = 'notify_log_v1';
@@ -60,8 +78,11 @@ async function recordNotifyRun(entry: Omit<NotifyLogEntry, 'at'>): Promise<void>
 
 export type NotifyOverview = {
   entries: NotifyLogEntry[];
-  /** Сколько пользователей уже получили «бесплатный расклад доступен» за текущий день слота. */
+  /** Сколько подписчиков бота получили дневное сообщение за текущий день слота. */
   dailyFreeToday: number;
+  /** Всего подписчиков бота и сколько из них заблокировали бота. */
+  subscribers?: number;
+  blockedSubscribers?: number;
   /** День слота (сутки с 10:00 МСК), к которому относится dailyFreeToday. */
   day: string;
 };
@@ -70,20 +91,29 @@ export type NotifyOverview = {
 export async function getNotifyOverview(): Promise<NotifyOverview> {
   const day = utcToday();
   if (useMemoryBackend()) {
-    return { entries: [...memoryNotifyLog], dailyFreeToday: 0, day };
+    const stats = await getSubscriberStats(day);
+    return {
+      entries: [...memoryNotifyLog],
+      dailyFreeToday: stats.deliveredToday,
+      subscribers: stats.total,
+      blockedSubscribers: stats.blocked,
+      day,
+    };
   }
   const admin = getSupabaseAdmin();
-  const [{ data: logRow, error: logError }, { count, error: countError }] = await Promise.all([
+  const [{ data: logRow, error: logError }, stats] = await Promise.all([
     admin.from('bot_notify_state').select('value').eq('key', NOTIFY_LOG_KEY).maybeSingle(),
-    admin
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .eq('daily_free_nudge_sent_on', day),
+    getSubscriberStats(day),
   ]);
   if (logError) throw logError;
-  if (countError) throw countError;
   const entries = (logRow?.value as { entries?: NotifyLogEntry[] } | null)?.entries ?? [];
-  return { entries: Array.isArray(entries) ? entries : [], dailyFreeToday: count ?? 0, day };
+  return {
+    entries: Array.isArray(entries) ? entries : [],
+    dailyFreeToday: stats.deliveredToday,
+    subscribers: stats.total,
+    blockedSubscribers: stats.blocked,
+    day,
+  };
 }
 
 type NotifyLang = 'ru' | 'en';
@@ -94,28 +124,6 @@ type ProfileNudgeRow = {
   daily_free_nudge_sent_on: string | null;
   last_seen_at: string | null;
   spread_credits: number | null;
-};
-
-/**
- * Бесплатный слот снова доступен, платных зарядов нет.
- * Совпадает с apps/bot/src/messages.ts (dailyFreeAvailableText).
- */
-const DAILY_FREE_RENEWED: Record<NotifyLang, string> = {
-  ru: `Какая карта отзовётся тебе сегодня?
-
-Карта дня уже ждёт, а ежедневный ⚡ обновился — хватит на расклад с твоим вопросом.`,
-  en: `Which card speaks to you today?
-
-Your card of the day is waiting, and your daily ⚡ has refilled — enough for a reading with your own question.`,
-};
-
-/**
- * Есть платные заряды — мягкий хук без упоминания бесплатного слота.
- * Совпадает с apps/bot/src/messages.ts (dailyEngageText).
- */
-const DAILY_ENGAGE: Record<NotifyLang, string> = {
-  ru: `Минута для себя? Одна карта — один вопрос на сегодня.`,
-  en: `A minute for yourself? One card, one question for today.`,
 };
 
 /** Тексты совпадают с apps/bot/src/messages.ts (dailyFreeBroadcastText). */
@@ -137,6 +145,8 @@ export type DailyFreeNudgeResult = {
   sent: number;
   skipped: number;
   failed: number;
+  /** Подписчики, у которых бот заблокирован/чат недоступен (помечены blocked_at). */
+  blocked: number;
 };
 
 export type BroadcastDailyFreeResult =
@@ -158,17 +168,30 @@ export function isNudgeWindowOpen(now: Date = new Date()): boolean {
   return hour >= SLOT_RESET_HOUR_MSK && hour < 21;
 }
 
-function resolveLang(_row?: ProfileNudgeRow): NotifyLang {
-  // На профиле языка нет — по умолчанию RU.
-  return 'ru';
+/** Как resolveBotLang в apps/bot/src/lang.ts: ru* → ru, остальное → en, нет кода → ru. */
+export function resolveNudgeLang(languageCode?: string | null): NotifyLang {
+  if (!languageCode) return 'ru';
+  const base = languageCode.toLowerCase().split(/[-_]/)[0] ?? '';
+  return base === 'ru' ? 'ru' : 'en';
 }
 
-function webAppKeyboard(lang: NotifyLang) {
+/** Первые часы после 10:00 МСК: шлём всем, не глядя, потратил ли человек слот. */
+export function isPrimaryNudgeWindow(now: Date = new Date()): boolean {
+  const hour = moscowHour(now);
+  return hour >= SLOT_RESET_HOUR_MSK && hour < PRIMARY_WINDOW_END_HOUR_MSK;
+}
+
+/** Решение по адресату: в основном окне шлём всем, в догоняющем — только с неиспользованным слотом. */
+export function shouldSendNudge(input: { primary: boolean; used: number; limit: number }): boolean {
+  return input.primary || input.used < input.limit;
+}
+
+function webAppKeyboard(lang: NotifyLang, label: string = OPEN_APP_LABEL[lang]) {
   return {
     inline_keyboard: [
       [
         {
-          text: OPEN_APP_LABEL[lang],
+          text: label,
           web_app: { url: buildWebAppDeepLink('/', lang) },
         },
       ],
@@ -201,137 +224,197 @@ function paidCreditsOf(row: ProfileNudgeRow): number {
     : 0;
 }
 
-function nudgeTextForProfile(
-  row: ProfileNudgeRow,
-  usedToday: number,
-  limit: number,
-): string | null {
-  const paidCredits = paidCreditsOf(row);
-  const freeAvailable = usedToday < limit;
-  if (!freeAvailable && paidCredits <= 0) {
-    return null;
-  }
-  const lang = resolveLang(row);
-  return paidCredits > 0 ? DAILY_ENGAGE[lang] : DAILY_FREE_RENEWED[lang];
-}
+export type SendOutcome =
+  | { ok: true }
+  | { ok: false; failure: SendFailure };
 
 /**
- * Как только бесплатный дневной слот снова доступен (10:00 МСК, used < limit):
- * шлём в Telegram «заряд обновился» + кнопку Mini App. Бот дёргает это ровно в
- * 10:00 МСК и затем каждый час (догоняет тех, кому не удалось отправить).
- * Не чаще 1 раза на день слота (`daily_free_nudge_sent_on` = день слота).
- * Если слот уже потрачен — не шлём (платные заряды сами по себе автонудж не триггерят).
+ * Отправка с уважением 429: ждём retry_after и повторяем (до MAX_RATE_LIMIT_RETRIES раз).
+ * Остальные ошибки возвращаются классифицированными, без повторов.
  */
-export async function runDailyFreeNudges(): Promise<DailyFreeNudgeResult> {
-  if (useMemoryBackend()) {
-    return { sent: 0, skipped: 0, failed: 0 };
+export async function sendWithRateLimit(
+  send: () => Promise<void>,
+  sleepFn: (ms: number) => Promise<void> = sleep,
+): Promise<SendOutcome> {
+  let failure: SendFailure = { kind: 'retryable' };
+  for (let attempt = 0; attempt <= MAX_RATE_LIMIT_RETRIES; attempt += 1) {
+    try {
+      await send();
+      return { ok: true };
+    } catch (error) {
+      failure = classifyTelegramSendError(error);
+      if (failure.kind !== 'rate_limit' || attempt === MAX_RATE_LIMIT_RETRIES) break;
+      await sleepFn(failure.retryAfterMs ?? 1000);
+    }
   }
+  return { ok: false, failure };
+}
 
-  // До 10:00 МСК новый ⚡ ещё не начислен, после 21:00 — тихие часы.
-  // Не получившие сообщение остаются кандидатами (daily_free_nudge_sent_on не обновлён).
-  if (!isNudgeWindowOpen()) {
-    return { sent: 0, skipped: 0, failed: 0 };
-  }
+type RecipientContext = { credits: number; used: number };
 
-  const usageDay = utcToday();
-  const limit = getTarotDailyLimit();
+/** Платные заряды и расход слота подписчиков страницы (только для тех, у кого есть профиль). */
+async function loadRecipientContext(
+  telegramIds: number[],
+  day: string,
+  needUsage: boolean,
+): Promise<Map<number, RecipientContext>> {
+  const result = new Map<number, RecipientContext>();
+  if (useMemoryBackend() || telegramIds.length === 0) return result;
   const admin = getSupabaseAdmin();
-
   const { data, error } = await admin
     .from('profiles')
-    .select('id, telegram_id, daily_free_nudge_sent_on, last_seen_at, spread_credits')
-    .not('telegram_id', 'is', null)
-    .or(
-      `daily_free_nudge_sent_on.is.null,daily_free_nudge_sent_on.lt.${usageDay}`,
-    );
-
-  if (error) {
-    throw error;
+    .select('id, telegram_id, spread_credits')
+    .in('telegram_id', telegramIds);
+  if (error) throw error;
+  const idByTelegram = new Map<string, number>();
+  for (const row of data ?? []) {
+    const tg = Number(row.telegram_id);
+    result.set(tg, {
+      credits: paidCreditsOf({ spread_credits: row.spread_credits } as ProfileNudgeRow),
+      used: 0,
+    });
+    idByTelegram.set(row.id as string, tg);
   }
-
-  const candidates = (data ?? []) as ProfileNudgeRow[];
-  if (candidates.length === 0) {
-    return { sent: 0, skipped: 0, failed: 0 };
-  }
-
-  const userIds = candidates.map((row) => row.id);
-  const usageByUser = new Map<string, number>();
-
-  // Батчами, чтобы не раздувать .in()
-  const chunkSize = 200;
-  for (let i = 0; i < userIds.length; i += chunkSize) {
-    const chunk = userIds.slice(i, i + chunkSize);
-    // day в tarot_daily_usage — день слота (как consume_tarot_daily_slot_for_user).
+  if (needUsage && idByTelegram.size > 0) {
     const { data: usageRows, error: usageError } = await admin
       .from('tarot_daily_usage')
       .select('user_id, count')
-      .eq('day', usageDay)
-      .in('user_id', chunk);
-
-    if (usageError) {
-      throw usageError;
-    }
-
-    for (const row of usageRows ?? []) {
-      usageByUser.set(
-        row.user_id as string,
-        typeof row.count === 'number' ? row.count : 0
-      );
+      .eq('day', day)
+      .in('user_id', [...idByTelegram.keys()]);
+    if (usageError) throw usageError;
+    for (const u of usageRows ?? []) {
+      const tg = idByTelegram.get(u.user_id as string);
+      const ctx = tg != null ? result.get(tg) : undefined;
+      if (ctx) ctx.used = typeof u.count === 'number' ? u.count : 0;
     }
   }
+  return result;
+}
 
-  let sent = 0;
-  let skipped = 0;
-  let failed = 0;
+const ZERO_RESULT: DailyFreeNudgeResult = { sent: 0, skipped: 0, failed: 0, blocked: 0 };
 
-  for (const row of candidates) {
-    const used = usageByUser.get(row.id) ?? 0;
-    const freeAvailable = used < limit;
-    if (!freeAvailable) {
-      skipped += 1;
-      continue;
-    }
+/**
+ * Ежедневная рассылка подписчикам бота (telegram_bot_subscribers) после обновления ⚡ в 10:00 МСК.
+ * - Адресаты: не заблокированные, у которых daily_nudge_sent_on < день слота (keyset-страницы).
+ * - Идемпотентность: перед отправкой атомарный «захват» дня (conditional UPDATE ... RETURNING);
+ *   параллельные прогоны (10:00 + часовой + рестарт) не дадут дублей. Неудача → откат захвата.
+ * - 10:00–12:00 МСК шлём всем; позже (догоняющий прогон) — только тем, кто не потратил слот.
+ * - 403/chat not found → blocked_at; 429 → ждём retry_after; сеть/5xx → остаётся кандидатом.
+ */
+export async function runDailyFreeNudges(
+  options: { now?: Date; sleep?: (ms: number) => Promise<void> } = {},
+): Promise<DailyFreeNudgeResult> {
+  const now = options.now ?? new Date();
+  const sleepFn = options.sleep ?? sleep;
 
-    const chatId = Number(row.telegram_id);
-    if (!Number.isFinite(chatId) || chatId <= 0) {
-      skipped += 1;
-      continue;
-    }
+  // До 10:00 МСК новый ⚡ ещё не начислен, после 21:00 — тихие часы.
+  if (!isNudgeWindowOpen(now)) return { ...ZERO_RESULT };
 
-    const lang = resolveLang(row);
-    const text = DAILY_FREE_RENEWED[lang];
+  const day = tarotSlotDay(now);
+  const limit = getTarotDailyLimit();
+  const primary = isPrimaryNudgeWindow(now);
+  const result: DailyFreeNudgeResult = { ...ZERO_RESULT };
 
-    try {
-      await sendTelegramMessage({
-        chatId,
-        text,
-        replyMarkup: webAppKeyboard(lang),
-      });
+  let afterId = 0;
+  for (;;) {
+    const page = await listNudgeCandidates({ day, afterId, limit: CANDIDATE_PAGE_SIZE });
+    if (page.length === 0) break;
+    afterId = page[page.length - 1].telegram_id;
 
-      const { error: markError } = await admin
-        .from('profiles')
-        .update({ daily_free_nudge_sent_on: usageDay })
-        .eq('id', row.id);
+    const ctxById = await loadRecipientContext(
+      page.map((r) => Number(r.telegram_id)),
+      day,
+      !primary,
+    );
 
-      if (markError) {
-        console.warn(
-          '[dailyFreeNotify] mark daily_free_nudge_sent_on failed:',
-          markError.message
-        );
+    for (const row of page) {
+      const chatId = Number(row.telegram_id);
+      if (!Number.isFinite(chatId) || chatId <= 0) {
+        result.skipped += 1;
+        continue;
+      }
+      const ctx = ctxById.get(chatId) ?? { credits: 0, used: 0 };
+      if (!shouldSendNudge({ primary, used: ctx.used, limit })) {
+        result.skipped += 1;
+        continue;
       }
 
-      sent += 1;
-    } catch (sendError) {
-      failed += 1;
-      console.warn('[dailyFreeNotify] send failed:', sendError);
-    }
+      // Захват дня до отправки: проиграли гонку — значит, другой прогон уже шлёт этому человеку.
+      if (!(await claimNudgeDay(chatId, day))) {
+        result.skipped += 1;
+        continue;
+      }
 
-    await sleep(FLOOD_DELAY_MS);
+      const lang = resolveNudgeLang(row.language_code);
+      const picked = pickDailyNudge({
+        lang,
+        day,
+        recipientKey: String(chatId),
+        hasPaidCredits: ctx.credits > 0,
+      });
+      const outcome = await sendWithRateLimit(
+        () =>
+          sendTelegramMessage({
+            chatId,
+            text: picked.text,
+            replyMarkup: webAppKeyboard(lang, picked.buttonLabel),
+          }),
+        sleepFn,
+      );
+
+      if (outcome.ok) {
+        await markNudgeDelivered(chatId);
+        result.sent += 1;
+      } else if (outcome.failure.kind === 'blocked') {
+        await markSubscriberBlocked(chatId);
+        result.blocked += 1;
+      } else if (outcome.failure.kind === 'permanent') {
+        // Повтор не поможет — день остаётся захваченным, чтобы не долбить каждый час.
+        console.warn('[dailyFreeNotify] permanent send failure, chat', chatId);
+        result.failed += 1;
+      } else {
+        // Сеть/5xx/429 — откат захвата: подписчик останется кандидатом догоняющего прогона.
+        await releaseNudgeClaim(chatId, day, row.daily_nudge_sent_on);
+        result.failed += 1;
+      }
+
+      await sleepFn(FLOOD_DELAY_MS);
+    }
   }
 
   // Пустые часовые прогоны в журнал не пишем — только когда были адресаты.
-  if (sent + failed > 0) await recordNotifyRun({ kind: 'daily_free', sent, failed, skipped });
-  return { sent, skipped, failed };
+  if (result.sent + result.failed + result.blocked > 0) {
+    await recordNotifyRun({
+      kind: 'daily_free',
+      sent: result.sent,
+      failed: result.failed + result.blocked,
+      skipped: result.skipped,
+    });
+  }
+  return result;
+}
+
+let dailyRunInFlight: Promise<DailyFreeNudgeResult> | null = null;
+
+/**
+ * Запуск рассылки в фоне (для HTTP 202). Один прогон на процесс: повторный вызов
+ * во время работы не стартует второй (между инстансами защищает захват дня).
+ */
+export function startDailyFreeNudges(): { started: boolean } {
+  if (dailyRunInFlight) return { started: false };
+  dailyRunInFlight = runDailyFreeNudges()
+    .then((result) => {
+      console.log('[dailyFreeNotify] run finished:', result);
+      return result;
+    })
+    .catch((error) => {
+      console.error('[dailyFreeNotify] run failed:', error);
+      return { ...ZERO_RESULT };
+    })
+    .finally(() => {
+      dailyRunInFlight = null;
+    });
+  return { started: true };
 }
 
 /**
@@ -466,16 +549,22 @@ export async function sendTelegramNudgeToUserAdmin(
     typeof usageRow?.count === 'number' && Number.isFinite(usageRow.count)
       ? usageRow.count
       : 0;
-  const text = nudgeTextForProfile(row, used, limit);
-  if (!text) {
+  const paidCredits = paidCreditsOf(row);
+  if (used >= limit && paidCredits <= 0) {
     return { sent: false, reason: 'No free slot and no paid credits' };
   }
 
-  const lang = resolveLang(row);
+  const lang = resolveNudgeLang(await getSubscriberLanguage(chatId));
+  const picked = pickDailyNudge({
+    lang,
+    day: usageDay,
+    recipientKey: String(chatId),
+    hasPaidCredits: paidCredits > 0,
+  });
   await sendTelegramMessage({
     chatId,
-    text,
-    replyMarkup: webAppKeyboard(lang),
+    text: picked.text,
+    replyMarkup: webAppKeyboard(lang, picked.buttonLabel),
   });
 
   await recordNotifyRun({ kind: 'user_admin', sent: 1, failed: 0, skipped: 0, userId });

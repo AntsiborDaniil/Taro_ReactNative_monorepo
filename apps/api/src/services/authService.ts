@@ -14,6 +14,7 @@ import {
   telegramUserPassword,
   validateTelegramWebAppInitData,
 } from '../lib/telegramWebApp';
+import { recordSubscriberEventSafe } from './telegramSubscribersService';
 import * as memory from '../dev/memoryBackend';
 import { applyAcquisitionToProfile } from './acquisitionService';
 import { applyStartParamAcquisition } from './startParamAcquisitionService';
@@ -517,6 +518,13 @@ export async function signInWithTelegram(initData: string): Promise<AuthSession>
   if (!validated) {
     throw new Error('INVALID_TELEGRAM_INIT_DATA');
   }
+
+  // Вход через Mini App — тоже подписчик реестра рассылки (если Telegram не пустит в ЛС — 403 → blocked).
+  await recordSubscriberEventSafe({
+    telegramId: validated.user.id,
+    event: 'miniapp',
+    languageCode: validated.user.language_code,
+  });
 
   if (useMemoryBackend()) {
     return memory.memorySignInWithTelegram({

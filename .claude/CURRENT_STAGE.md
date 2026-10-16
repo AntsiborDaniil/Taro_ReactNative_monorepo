@@ -24,6 +24,15 @@ MVP закоммичен на `main` (закрыт флагом `ASTRO_ENABLED =
 
 Адаптив переключателя: колонки `minmax(0, 1fr)`, у кнопок `min-width: 0`, отступы 8 px, gap 6 px; при `max-width: 380px` иконки скрыты — иначе «АСТРОЛОГИЯ» с иконкой не влезает в половину и заезжает под бегунок. Прогнаны `tsc`, `i18n:check` и тесты; в браузере на 360–375 px после этой правки ещё не смотрели.
 
+## Рассылка 10:00 МСК (2026-10-16)
+
+- **Адресаты — реестр подписчиков бота**, а не `profiles`: таблица `telegram_bot_subscribers`, миграция `supabase/migrations/20261016120000_telegram_bot_subscribers.sql` (бэкфилл из `profiles.telegram_id` и `telegram_acquisition`, к проду не применена). Бот шлёт события в `POST /api/internal/bot-subscribers` (`apps/bot/src/subscribers.ts`: любое сообщение — не чаще раза в час, `my_chat_member` kicked/member), Mini App-вход тоже регистрирует. Сервис — `apps/api/src/services/telegramSubscribersService.ts`.
+- **Надёжность.** `/internal/notify/daily-free` отвечает 202 и шлёт в фоне; атомарный захват дня на подписчика (без дублей при параллельных прогонах), 403/deactivated → `blocked_at`, 429 → `retry_after`, сеть/5xx → откат захвата и догон часовым прогоном. Бот: таймаут 60 с + 3 попытки. Ошибки Telegram — `apps/api/src/lib/telegramSendErrors.ts`.
+- **Тексты** — `apps/api/src/lib/dailyNudgeMessages.ts` (`pickDailyNudge`): 21 нейтральный вариант + по 3 на пн/пт/вс на каждый язык, детерминированно по (день, получатель), соседние дни разные. Язык — `language_code` подписчика.
+- Новый подписчик получает рассылку со следующего дня слота (в день прихода — уже было приветствие). Админские и разовые broadcast всё ещё идут по `profiles`.
+- Тесты: `apps/api/tests/dailyNudge.test.ts`, `dailyNudgeMessages.test.ts`, `apps/bot/tests/notifyRetry.test.ts`.
+- Деплой: миграция → API → бот (порядок важен: без таблицы бот/API упадут на записи подписчиков).
+
 ## Заряды и язык Telegram (2026-10-15)
 
 - **Стартовый заряд.** Раньше новым пользователям не начислялось ничего: шапка показывала «1» за счёт бесплатного расклада дня, а модалка — 0 платных. Теперь при регистрации выдаётся `spread_credits = 1`: memory — `SIGNUP_SPREAD_CREDITS` в `apps/api/src/dev/memoryBackend.ts`, Supabase — миграция `supabase/migrations/20261015120000_signup_spread_credit.sql` (новая версия `handle_new_user`, к проду не применена). Бэкфилл старым пользователям не делали — решение владельца. Тест: `apps/api/tests/signupCredit.test.ts`.
