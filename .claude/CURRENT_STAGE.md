@@ -24,6 +24,14 @@ MVP закоммичен на `main` (закрыт флагом `ASTRO_ENABLED =
 
 Адаптив переключателя: колонки `minmax(0, 1fr)`, у кнопок `min-width: 0`, отступы 8 px, gap 6 px; при `max-width: 380px` иконки скрыты — иначе «АСТРОЛОГИЯ» с иконкой не влезает в половину и заезжает под бегунок. Прогнаны `tsc`, `i18n:check` и тесты; в браузере на 360–375 px после этой правки ещё не смотрели.
 
+## Автоперевход в Mini App (2026-10-17)
+
+- Проверка входа при каждом открытии: AppShell запрашивает `/api/auth/me`; любой 401 в Telegram (на старте или если сессия выпала посреди работы) → `baseQuery` в `apps/web-vite/src/shared/api/baseApi.ts` тихо перевходит по initData и повторяет запрос.
+- `shared/api/telegramReauth.ts`: initData из моста → hash `#tgWebAppData` → копия в sessionStorage (`tgInitData`, пишет inline-скрипт в `index.html`), т.е. вход работает и без загруженного telegram-web-app.js; ретраи ~90 с на 5xx/сеть, стоп на 400/401, одна попытка на все параллельные 401.
+- AppShell: убран одноразовый `telegramAuthAttempted`; если /me не удался по сети — вход с ретраями; при возврате в приложение без входа — новая попытка.
+- Ограничение: initData живёт 24 ч (`MAX_AUTH_AGE_SEC` в API) — если WebView не перезапускался сутки, нужен перезапуск Mini App.
+- Тесты: `shared/api/telegramReauth.test.ts`.
+
 ## Бесплатный заряд и рассылка (2026-10-16)
 
 - Правило владельца: у каждого (и нового) пользователя 1 бесплатный заряд; в 10:00 МСК он становится 1, если был потрачен, и не копится. Это дневной слот: `FREE_DAILY_CHARGES = 1` в `apps/api/src/lib/env.ts`, `getTarotDailyLimit()` с Supabase всегда 1 (env `TAROT_DAILY_INTERPRET_LIMIT` — только memory/dev:ui).

@@ -1,5 +1,6 @@
 import { store } from '@app/store';
 import { userApi } from '@entities/user/api';
+import { isTelegramLaunch, reauthTelegram } from '@shared/api/telegramReauth';
 import { THEME_CANVAS } from '../theme';
 import { trackMetrikaAuthTelegram, trackMetrikaMiniAppOpen } from '../metrika';
 
@@ -19,14 +20,9 @@ function telegramBg(): string {
   return document.documentElement.dataset.theme === 'light' ? THEME_CANVAS.light : THEME_CANVAS.dark;
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 /** True как только присутствует мост Telegram WebApp (до прихода initData). */
 export function isLikelyTelegramMiniApp(): boolean {
-  if (typeof window === 'undefined') return false;
-  return Boolean(window.Telegram?.WebApp);
+  return isTelegramLaunch();
 }
 
 export function isTelegramMiniApp(): boolean {
@@ -116,87 +112,30 @@ export function initTelegramWebAppChrome(): void {
   window.setTimeout(() => applyTelegramSafeAreaCssVars(), 400);
 }
 
-async function waitForInitData(timeoutMs = 3000): Promise<string> {
-  const started = Date.now();
-  while (Date.now() - started < timeoutMs) {
-    const value = window.Telegram?.WebApp?.initData?.trim();
-    if (value) return value;
-    await sleep(100);
-  }
-  return window.Telegram?.WebApp?.initData?.trim() || '';
-}
-
-type TelegramAuthAttempt = 'ok' | 'invalid' | 'retry';
-
-/**
- * 401/400 — initData отвергнут (подпись/срок), повтор не поможет.
- * Сеть, таймаут, 5xx/504 — обычно холодный старт Render (Free засыпает, будится ~30–60 с):
- * пробуем ещё.
- */
-async function postTelegramAuth(initData: string): Promise<TelegramAuthAttempt> {
-  const result = await store.dispatch(userApi.endpoints.telegramAuth.initiate({ initData }));
-  if (userApi.endpoints.telegramAuth.matchFulfilled(result)) return 'ok';
-  const status = 'error' in result ? (result.error as { status?: unknown } | undefined)?.status : undefined;
-  return status === 400 || status === 401 ? 'invalid' : 'retry';
-}
-
-/** Паузы между попытками: суммарно ~90 с — хватает, чтобы Render проснулся. */
-const TELEGRAM_AUTH_RETRY_DELAYS_MS = [1000, 2000, 4000, 8000, 15000, 20000, 30000];
-
 export type TelegramAuthResult = { inTelegram: boolean; authenticated: boolean };
 
-let telegramAuthInflight: Promise<TelegramAuthResult> | null = null;
-
 /**
- * Готовит Telegram-мост и делает тихий логин по initData → /api/auth/telegram.
- * Параллельные вызовы делят одну попытку (повтор по возврату в приложение не дублирует запросы).
+ * Тихий вход Mini App по initData → /api/auth/telegram (ретраи и дедуп — в
+ * shared/api/telegramReauth.ts, тот же путь использует baseQuery при 401).
+ * Мост для входа не обязателен: initData есть и в hash запуска.
  */
-export function tryAuthenticateTelegramMiniApp(): Promise<TelegramAuthResult> {
-  telegramAuthInflight ??= authenticateTelegramMiniApp().finally(() => {
-    telegramAuthInflight = null;
-  });
-  return telegramAuthInflight;
-}
-
-async function authenticateTelegramMiniApp(): Promise<TelegramAuthResult> {
+export async function tryAuthenticateTelegramMiniApp(): Promise<TelegramAuthResult> {
   if (typeof window === 'undefined') return { inTelegram: false, authenticated: false };
 
-  try {
-    await ensureTelegramWebAppScript();
-  } catch {
-    return { inTelegram: false, authenticated: false };
-  }
+  // Хром Mini App (expand, свайпы, цвета) — если мост грузится; вход от него не зависит.
+  await ensureTelegramWebAppScript().catch(() => undefined);
+  if (window.Telegram?.WebApp) initTelegramWebAppChrome();
 
-  if (!window.Telegram?.WebApp) {
-    return { inTelegram: false, authenticated: false };
-  }
-
-  initTelegramWebAppChrome();
-
-  const initData = await waitForInitData();
-  if (!initData) {
-    return { inTelegram: true, authenticated: false };
-  }
+  if (!isTelegramLaunch()) return { inTelegram: false, authenticated: false };
   trackMetrikaMiniAppOpen();
 
-  for (let attempt = 0; attempt <= TELEGRAM_AUTH_RETRY_DELAYS_MS.length; attempt += 1) {
-    let outcome: TelegramAuthAttempt = 'retry';
-    try {
-      outcome = await postTelegramAuth(initData);
-    } catch {
-      // сеть — повторяем
-    }
-    if (outcome === 'ok') {
-      trackMetrikaAuthTelegram();
-      return { inTelegram: true, authenticated: true };
-    }
-    if (outcome === 'invalid') break;
-    const delay = TELEGRAM_AUTH_RETRY_DELAYS_MS[attempt];
-    if (delay === undefined) break;
-    await sleep(delay);
+  const authenticated = await reauthTelegram();
+  if (authenticated) {
+    trackMetrikaAuthTelegram();
+    // Сессия новая — перезапросить всё, что зависит от пользователя.
+    store.dispatch(userApi.util.invalidateTags(['User', 'Settings', 'Favorites', 'Spreads']));
   }
-
-  return { inTelegram: true, authenticated: false };
+  return { inTelegram: true, authenticated };
 }
 
 /**

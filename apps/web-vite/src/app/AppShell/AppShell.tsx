@@ -52,7 +52,6 @@ export function AppShell(): ReactElement {
   });
   const dispatch = useAppDispatch();
   const quickLoginAttempted = useRef(false);
-  const telegramAuthAttempted = useRef(false);
 
   // Метрика: оплата Lava прошла (возврат с ?lava=success или заряды выросли после чекаута).
   const spreadCredits = useAppSelector((state) => state.user.spreadCredits);
@@ -124,6 +123,10 @@ export function AppShell(): ReactElement {
     }
   }, [dispatch]);
 
+  // Проверка входа при каждом открытии: AppShell сразу запрашивает /api/auth/me.
+  // 401 в Telegram чинит сам baseQuery (shared/api/baseApi.ts: перевход по initData и
+  // повтор запроса) — и на старте, и если сессия выпала посреди работы. Сюда попадаем,
+  // когда /me так и не удался: сеть/5xx (холодный старт API) или перевход не прошёл.
   useEffect(() => {
     // Сеть/5xx на /me не должны запускать повторный telegram/dev login, если сессия уже есть.
     if (!isError || isAuthenticated) return;
@@ -132,19 +135,12 @@ export function AppShell(): ReactElement {
       else dispatch(setAuthRetryPending(false));
     };
 
-    if (isLikelyTelegramMiniApp() && !telegramAuthAttempted.current) {
-      telegramAuthAttempted.current = true;
+    if (isLikelyTelegramMiniApp()) {
+      dispatch(setAuthRetryPending(true));
       void tryAuthenticateTelegramMiniApp().then((result) => {
         // initData уже пришёл — язык Telegram точно известен.
         void syncLanguageFromTelegram();
-        if (result.authenticated) {
-          void refetch();
-        } else if (!quickLoginAttempted.current) {
-          quickLoginAttempted.current = true;
-          void tryDevQuickLogin().then(settle);
-        } else {
-          settle(false);
-        }
+        settle(result.authenticated);
       });
       return;
     }
@@ -154,13 +150,13 @@ export function AppShell(): ReactElement {
     void tryDevQuickLogin().then(settle);
   }, [dispatch, isError, isAuthenticated, refetch]);
 
-  // Новый пользователь Mini App: если тихий вход не прошёл (Render спал дольше окна
-  // ретраев), пробуем снова, когда человек возвращается в приложение — иначе он так и
-  // остаётся гостем без бейджа зарядов до перезапуска.
+  // Mini App свернули и вернулись (WebView не перезагружался): если входа нет —
+  // пробуем снова. Если вход есть, /me и так перезапросится (refetchOnFocus), а при 401
+  // baseQuery перевойдёт сам.
   useEffect(() => {
     if (isAuthenticated || !isLikelyTelegramMiniApp()) return;
     const onVisible = () => {
-      if (document.visibilityState !== 'visible' || !telegramAuthAttempted.current) return;
+      if (document.visibilityState !== 'visible') return;
       dispatch(setAuthRetryPending(true));
       void tryAuthenticateTelegramMiniApp().then((result) => {
         if (result.authenticated) void refetch();

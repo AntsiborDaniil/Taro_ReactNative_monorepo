@@ -70,6 +70,14 @@
     />
     <!-- canonical и og:url подставляет scripts/inject-seo-html.mjs после сборки (WEB_APP_URL). -->
     <script>
+      // initData запуска (#tgWebAppData=…) — копия на время открытия: hash пропадёт после
+      // навигации SPA, а перевход при выпавшей сессии нужен в любой момент (shared/api/telegramReauth.ts).
+      try {
+        var tgInit = new URLSearchParams(location.hash.replace(/^#/, '')).get('tgWebAppData');
+        if (tgInit) sessionStorage.setItem('tgInitData', tgInit);
+      } catch (e) {}
+    </script>
+    <script>
       // Будим API на Render (Free засыпает) как можно раньше — пока грузятся мост и бандл,
       // иначе первый вход нового пользователя Mini App упирается в холодный старт.
       try { fetch('/health', { cache: 'no-store', keepalive: true }).catch(function () {}); } catch (e) {}
