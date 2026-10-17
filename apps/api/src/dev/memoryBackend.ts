@@ -53,8 +53,6 @@ const settingsByUser = new Map<string, UserSettingsRecord>();
 const dailyUsageByUserDay = new Map<string, number>();
 const spreadCreditsByUser = new Map<string, number>();
 
-/** Стартовый заряд новому пользователю (как profiles.spread_credits в handle_new_user). */
-export const SIGNUP_SPREAD_CREDITS = 1;
 const lavaCheckoutsByInvoice = new Map<
   string,
   {
@@ -133,10 +131,6 @@ function createVerifiedUser(input: {
   };
   usersByEmail.set(input.email, user);
   usersById.set(user.id, user);
-  // Только при создании: повторный логин сюда не попадает (пользователь уже в usersByEmail).
-  if (!spreadCreditsByUser.has(user.id)) {
-    spreadCreditsByUser.set(user.id, SIGNUP_SPREAD_CREDITS);
-  }
   return user;
 }
 
@@ -358,6 +352,23 @@ export function memoryTryConsumeTarotDailySlot(
   const next = used + 1;
   dailyUsageByUserDay.set(key, next);
   return { ok: true, used: next, limit, day };
+}
+
+/** Для рассылки 10:00: платные заряды и потраченный бесплатный заряд за день слота по telegram_id. */
+export function memoryNudgeContext(
+  telegramIds: number[],
+  day: string,
+): Map<number, { credits: number; used: number }> {
+  const result = new Map<number, { credits: number; used: number }>();
+  for (const tg of telegramIds) {
+    const userId = userIdByTelegramId.get(tg);
+    if (!userId) continue;
+    result.set(tg, {
+      credits: spreadCreditsByUser.get(userId) ?? 0,
+      used: dailyUsageByUserDay.get(dailyKey(userId, day)) ?? 0,
+    });
+  }
+  return result;
 }
 
 export function memoryRefundTarotDailySlot(userId: string): void {

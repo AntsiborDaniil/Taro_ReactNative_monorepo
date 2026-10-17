@@ -154,6 +154,23 @@ export function AppShell(): ReactElement {
     void tryDevQuickLogin().then(settle);
   }, [dispatch, isError, isAuthenticated, refetch]);
 
+  // Новый пользователь Mini App: если тихий вход не прошёл (Render спал дольше окна
+  // ретраев), пробуем снова, когда человек возвращается в приложение — иначе он так и
+  // остаётся гостем без бейджа зарядов до перезапуска.
+  useEffect(() => {
+    if (isAuthenticated || !isLikelyTelegramMiniApp()) return;
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible' || !telegramAuthAttempted.current) return;
+      dispatch(setAuthRetryPending(true));
+      void tryAuthenticateTelegramMiniApp().then((result) => {
+        if (result.authenticated) void refetch();
+        else dispatch(setAuthRetryPending(false));
+      });
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [dispatch, isAuthenticated, refetch]);
+
   const { pathname } = useLocation();
   // Мир «Астрология» (/astro/*): перекрашиваем токены и шапку Telegram, запоминаем выбор.
   useEffect(() => {

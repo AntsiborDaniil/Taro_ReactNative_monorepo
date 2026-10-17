@@ -69,6 +69,11 @@
       content="Онлайн-таро: расклады, карта дня, толкования карт и история гаданий. Бесплатно в тестовом режиме — войдите в аккаунт, чтобы сохранять расклады и избранное."
     />
     <!-- canonical и og:url подставляет scripts/inject-seo-html.mjs после сборки (WEB_APP_URL). -->
+    <script>
+      // Будим API на Render (Free засыпает) как можно раньше — пока грузятся мост и бандл,
+      // иначе первый вход нового пользователя Mini App упирается в холодный старт.
+      try { fetch('/health', { cache: 'no-store', keepalive: true }).catch(function () {}); } catch (e) {}
+    </script>
     <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
     <!--
       Критический boot-splash: рисуется до JS-модулей, чтобы не было пустого #root

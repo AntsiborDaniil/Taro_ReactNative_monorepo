@@ -1,3 +1,5 @@
+import { useMemoryBackend } from './devMode';
+
 function requireEnv(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) {
@@ -23,13 +25,18 @@ export function getOpenAiApiKey(): string | undefined {
 }
 
 /**
- * Бесплатных AI-интерпретаций в сутки. Сутки считает сервер (UTC), поэтому
- * смена часового пояса/даты на устройстве не даёт лишних слотов.
+ * Бесплатный дневной заряд: ровно 1. В 10:00 МСК (день слота, lib/tarotSlotDay.ts) он
+ * снова становится 1, если был потрачен; неиспользованный не копится. Сутки считает
+ * сервер, поэтому смена даты на устройстве лишних зарядов не даёт.
+ * TAROT_DAILY_INTERPRET_LIMIT учитывается только на memory-бэкенде (pnpm dev:ui — обзор UI без лимита).
  */
+export const FREE_DAILY_CHARGES = 1;
+
 export function getTarotDailyLimit(): number {
+  if (!useMemoryBackend()) return FREE_DAILY_CHARGES;
   const raw = process.env.TAROT_DAILY_INTERPRET_LIMIT?.trim();
-  const parsed = raw ? Number(raw) : 1;
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+  const parsed = raw ? Number(raw) : FREE_DAILY_CHARGES;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : FREE_DAILY_CHARGES;
 }
 
 export function assertSupabaseEnv(): void {

@@ -98,7 +98,7 @@ Vercel не запускает долгоживущий Node-сервер — AP
 | `WEB_APP_URL` | `https://taro-react-native-monorepo-x59s.vercel.app` |
 | `API_PUBLIC_URL` | `https://taro-react-native-monorepo.vercel.app` (тот же домен, что Vercel — для OAuth/PKCE) |
 | `ALLOW_VERCEL_PREVIEW` | `1` |
-| `TAROT_DAILY_INTERPRET_LIMIT` | `1` (прод: один бесплатный AI-расклад в UTC-сутки) |
+| `TAROT_DAILY_INTERPRET_LIMIT` | На проде игнорируется: бесплатный заряд всегда 1, обновляется в 10:00 МСК до 1 (не копится). Действует только на memory-бэкенде (`pnpm dev:ui`) |
 
 После деплоя скопируйте URL сервиса, например: `https://tarot-api.onrender.com`
 

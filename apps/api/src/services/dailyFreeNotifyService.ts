@@ -1,3 +1,4 @@
+import * as memory from '../dev/memoryBackend';
 import { useMemoryBackend } from '../lib/devMode';
 import { getTarotDailyLimit } from '../lib/env';
 import { getSupabaseAdmin } from '../lib/supabase';
@@ -25,7 +26,6 @@ const MAX_RATE_LIMIT_RETRIES = 3;
 /** Страница кандидатов (keyset по telegram_id: PostgREST режет выборку на 1000 строк). */
 const CANDIDATE_PAGE_SIZE = 200;
 /** Первые часы после обновления ⚡ шлём ВСЕМ; позже — только тем, кто ещё не потратил слот. */
-const PRIMARY_WINDOW_END_HOUR_MSK = 12;
 const BROADCAST_STATE_KEY = 'broadcast_daily_free_v1';
 /** Журнал запусков рассылок для админки (bot_notify_state, без отдельной таблицы). */
 const NOTIFY_LOG_KEY = 'notify_log_v1';
@@ -175,15 +175,12 @@ export function resolveNudgeLang(languageCode?: string | null): NotifyLang {
   return base === 'ru' ? 'ru' : 'en';
 }
 
-/** Первые часы после 10:00 МСК: шлём всем, не глядя, потратил ли человек слот. */
-export function isPrimaryNudgeWindow(now: Date = new Date()): boolean {
-  const hour = moscowHour(now);
-  return hour >= SLOT_RESET_HOUR_MSK && hour < PRIMARY_WINDOW_END_HOUR_MSK;
-}
-
-/** Решение по адресату: в основном окне шлём всем, в догоняющем — только с неиспользованным слотом. */
-export function shouldSendNudge(input: { primary: boolean; used: number; limit: number }): boolean {
-  return input.primary || input.used < input.limit;
+/**
+ * Шлём, только если бесплатный заряд сейчас есть (не потрачен за день слота).
+ * Кто ещё не открывал Mini App (нет профиля) — used = 0: заряд его ждёт.
+ */
+export function shouldSendNudge(input: { used: number; limit: number }): boolean {
+  return input.used < input.limit;
 }
 
 function webAppKeyboard(lang: NotifyLang, label: string = OPEN_APP_LABEL[lang]) {
@@ -256,10 +253,10 @@ type RecipientContext = { credits: number; used: number };
 async function loadRecipientContext(
   telegramIds: number[],
   day: string,
-  needUsage: boolean,
 ): Promise<Map<number, RecipientContext>> {
+  if (useMemoryBackend()) return memory.memoryNudgeContext(telegramIds, day);
   const result = new Map<number, RecipientContext>();
-  if (useMemoryBackend() || telegramIds.length === 0) return result;
+  if (telegramIds.length === 0) return result;
   const admin = getSupabaseAdmin();
   const { data, error } = await admin
     .from('profiles')
@@ -275,7 +272,7 @@ async function loadRecipientContext(
     });
     idByTelegram.set(row.id as string, tg);
   }
-  if (needUsage && idByTelegram.size > 0) {
+  if (idByTelegram.size > 0) {
     const { data: usageRows, error: usageError } = await admin
       .from('tarot_daily_usage')
       .select('user_id, count')
@@ -298,7 +295,7 @@ const ZERO_RESULT: DailyFreeNudgeResult = { sent: 0, skipped: 0, failed: 0, bloc
  * - Адресаты: не заблокированные, у которых daily_nudge_sent_on < день слота (keyset-страницы).
  * - Идемпотентность: перед отправкой атомарный «захват» дня (conditional UPDATE ... RETURNING);
  *   параллельные прогоны (10:00 + часовой + рестарт) не дадут дублей. Неудача → откат захвата.
- * - 10:00–12:00 МСК шлём всем; позже (догоняющий прогон) — только тем, кто не потратил слот.
+ * - Только тем, у кого бесплатный заряд есть (не потрачен за день слота) — и в 10:00, и в догоняющих прогонах.
  * - 403/chat not found → blocked_at; 429 → ждём retry_after; сеть/5xx → остаётся кандидатом.
  */
 export async function runDailyFreeNudges(
@@ -312,7 +309,6 @@ export async function runDailyFreeNudges(
 
   const day = tarotSlotDay(now);
   const limit = getTarotDailyLimit();
-  const primary = isPrimaryNudgeWindow(now);
   const result: DailyFreeNudgeResult = { ...ZERO_RESULT };
 
   let afterId = 0;
@@ -324,7 +320,6 @@ export async function runDailyFreeNudges(
     const ctxById = await loadRecipientContext(
       page.map((r) => Number(r.telegram_id)),
       day,
-      !primary,
     );
 
     for (const row of page) {
@@ -334,7 +329,7 @@ export async function runDailyFreeNudges(
         continue;
       }
       const ctx = ctxById.get(chatId) ?? { credits: 0, used: 0 };
-      if (!shouldSendNudge({ primary, used: ctx.used, limit })) {
+      if (!shouldSendNudge({ used: ctx.used, limit })) {
         result.skipped += 1;
         continue;
       }

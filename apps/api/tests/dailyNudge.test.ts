@@ -11,11 +11,11 @@ vi.mock('../src/lib/telegramNotify', async () => {
   return { ...actual, sendTelegramMessage: (...args: unknown[]) => sendMock(...args) };
 });
 
+import { memorySignInWithTelegram, memoryTryConsumeTarotDailySlot } from '../src/dev/memoryBackend';
 import { TelegramSendError } from '../src/lib/telegramNotify';
 import { tarotSlotDay } from '../src/lib/tarotSlotDay';
 import { classifyTelegramSendError } from '../src/lib/telegramSendErrors';
 import {
-  isPrimaryNudgeWindow,
   resolveNudgeLang,
   runDailyFreeNudges,
   sendWithRateLimit,
@@ -65,12 +65,9 @@ describe('чистые функции рассылки', () => {
     expect(resolveNudgeLang('de')).toBe('en');
     expect(resolveNudgeLang(null)).toBe('ru');
   });
-  it('основное окно 10–12 МСК шлёт всем, догоняющее — только с неиспользованным слотом', () => {
-    expect(isPrimaryNudgeWindow(new Date('2026-10-20T07:00:05Z'))).toBe(true);
-    expect(isPrimaryNudgeWindow(new Date('2026-10-20T10:00:00Z'))).toBe(false);
-    expect(shouldSendNudge({ primary: true, used: 5, limit: 1 })).toBe(true);
-    expect(shouldSendNudge({ primary: false, used: 1, limit: 1 })).toBe(false);
-    expect(shouldSendNudge({ primary: false, used: 0, limit: 1 })).toBe(true);
+  it('шлём только если бесплатный заряд есть (не потрачен за день слота)', () => {
+    expect(shouldSendNudge({ used: 0, limit: 1 })).toBe(true);
+    expect(shouldSendNudge({ used: 1, limit: 1 })).toBe(false);
   });
 });
 
@@ -163,5 +160,33 @@ describe('runDailyFreeNudges', () => {
     const r = await runDailyFreeNudges({ now: new Date('2026-10-23T05:00:00Z'), sleep: noSleep });
     expect(r.sent + r.failed + r.blocked).toBe(0);
     expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  it('в 10:00 приходит тем, у кого 1 бесплатный заряд; потратившим — нет (и в догоняющем прогоне)', async () => {
+    const withCharge = 760001;
+    const spent = 760002;
+    await addSubscriber(withCharge);
+    await addSubscriber(spent);
+    memorySignInWithTelegram({ telegramId: withCharge, displayName: 'A' });
+    const spentUser = memorySignInWithTelegram({ telegramId: spent, displayName: 'B' });
+    // День слота 2026-10-24: человек уже потратил бесплатный заряд в 10:00:01.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-24T07:00:01Z'));
+    expect(memoryTryConsumeTarotDailySlot(spentUser.user.id).ok).toBe(true);
+    sendMock.mockResolvedValue(undefined);
+    await runDailyFreeNudges({ now: new Date('2026-10-24T07:00:05Z'), sleep: noSleep });
+    await runDailyFreeNudges({ now: new Date('2026-10-24T12:00:00Z'), sleep: noSleep });
+    vi.useRealTimers();
+    const chats = sendMock.mock.calls.map((c) => (c[0] as { chatId: number }).chatId);
+    expect(chats.filter((c) => c === withCharge)).toHaveLength(1);
+    expect(chats).not.toContain(spent);
+  });
+
+  it('новый пользователь без профиля (только /start) тоже получает: его заряд ждёт', async () => {
+    await addSubscriber(770001);
+    sendMock.mockResolvedValue(undefined);
+    await runDailyFreeNudges({ now: new Date('2026-10-25T07:00:05Z'), sleep: noSleep });
+    const chats = sendMock.mock.calls.map((c) => (c[0] as { chatId: number }).chatId);
+    expect(chats).toContain(770001);
   });
 });

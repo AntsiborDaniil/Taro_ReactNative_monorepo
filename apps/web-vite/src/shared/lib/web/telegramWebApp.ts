@@ -126,15 +126,39 @@ async function waitForInitData(timeoutMs = 3000): Promise<string> {
   return window.Telegram?.WebApp?.initData?.trim() || '';
 }
 
-async function postTelegramAuth(initData: string): Promise<boolean> {
+type TelegramAuthAttempt = 'ok' | 'invalid' | 'retry';
+
+/**
+ * 401/400 — initData отвергнут (подпись/срок), повтор не поможет.
+ * Сеть, таймаут, 5xx/504 — обычно холодный старт Render (Free засыпает, будится ~30–60 с):
+ * пробуем ещё.
+ */
+async function postTelegramAuth(initData: string): Promise<TelegramAuthAttempt> {
   const result = await store.dispatch(userApi.endpoints.telegramAuth.initiate({ initData }));
-  return userApi.endpoints.telegramAuth.matchFulfilled(result);
+  if (userApi.endpoints.telegramAuth.matchFulfilled(result)) return 'ok';
+  const status = 'error' in result ? (result.error as { status?: unknown } | undefined)?.status : undefined;
+  return status === 400 || status === 401 ? 'invalid' : 'retry';
 }
+
+/** Паузы между попытками: суммарно ~90 с — хватает, чтобы Render проснулся. */
+const TELEGRAM_AUTH_RETRY_DELAYS_MS = [1000, 2000, 4000, 8000, 15000, 20000, 30000];
 
 export type TelegramAuthResult = { inTelegram: boolean; authenticated: boolean };
 
-/** Готовит Telegram-мост и делает тихий логин по initData → /api/auth/telegram. */
-export async function tryAuthenticateTelegramMiniApp(): Promise<TelegramAuthResult> {
+let telegramAuthInflight: Promise<TelegramAuthResult> | null = null;
+
+/**
+ * Готовит Telegram-мост и делает тихий логин по initData → /api/auth/telegram.
+ * Параллельные вызовы делят одну попытку (повтор по возврату в приложение не дублирует запросы).
+ */
+export function tryAuthenticateTelegramMiniApp(): Promise<TelegramAuthResult> {
+  telegramAuthInflight ??= authenticateTelegramMiniApp().finally(() => {
+    telegramAuthInflight = null;
+  });
+  return telegramAuthInflight;
+}
+
+async function authenticateTelegramMiniApp(): Promise<TelegramAuthResult> {
   if (typeof window === 'undefined') return { inTelegram: false, authenticated: false };
 
   try {
@@ -155,17 +179,21 @@ export async function tryAuthenticateTelegramMiniApp(): Promise<TelegramAuthResu
   }
   trackMetrikaMiniAppOpen();
 
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  for (let attempt = 0; attempt <= TELEGRAM_AUTH_RETRY_DELAYS_MS.length; attempt += 1) {
+    let outcome: TelegramAuthAttempt = 'retry';
     try {
-      const ok = await postTelegramAuth(initData);
-      if (ok) {
-        trackMetrikaAuthTelegram();
-        return { inTelegram: true, authenticated: true };
-      }
+      outcome = await postTelegramAuth(initData);
     } catch {
-      // retry
+      // сеть — повторяем
     }
-    await sleep(200 * (attempt + 1));
+    if (outcome === 'ok') {
+      trackMetrikaAuthTelegram();
+      return { inTelegram: true, authenticated: true };
+    }
+    if (outcome === 'invalid') break;
+    const delay = TELEGRAM_AUTH_RETRY_DELAYS_MS[attempt];
+    if (delay === undefined) break;
+    await sleep(delay);
   }
 
   return { inTelegram: true, authenticated: false };
