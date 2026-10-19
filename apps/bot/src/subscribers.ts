@@ -4,16 +4,25 @@ export type SubscriberEvent = 'interaction' | 'blocked' | 'unblocked';
 
 /** Не чаще раза в час на пользователя: реестру нужен факт диалога, а не каждое сообщение. */
 const INTERACTION_THROTTLE_MS = 60 * 60 * 1000;
-const lastReported = new Map<number, number>();
 
+export type ReportedInteraction = { at: number; languageCode: string | null };
+const lastReported = new Map<number, ReportedInteraction>();
+
+/**
+ * Троттлинг отчёта 'interaction'. Смена language_code (не пустого) отправляется сразу,
+ * в обход троттлинга: от него зависит язык рассылки 10:00.
+ */
 export function shouldReportInteraction(
   telegramId: number,
   now: number = Date.now(),
-  store: Map<number, number> = lastReported,
+  store: Map<number, ReportedInteraction> = lastReported,
+  languageCode?: string | null,
 ): boolean {
+  const lang = languageCode?.trim() || null;
   const prev = store.get(telegramId);
-  if (prev !== undefined && now - prev < INTERACTION_THROTTLE_MS) return false;
-  store.set(telegramId, now);
+  const langChanged = prev !== undefined && lang !== null && lang !== prev.languageCode;
+  if (prev !== undefined && !langChanged && now - prev.at < INTERACTION_THROTTLE_MS) return false;
+  store.set(telegramId, { at: now, languageCode: lang ?? prev?.languageCode ?? null });
   return true;
 }
 

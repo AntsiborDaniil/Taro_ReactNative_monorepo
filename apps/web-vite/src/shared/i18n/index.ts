@@ -7,12 +7,15 @@ import {
   type AppLanguage,
 } from './namespaces';
 import {
-  isLanguageManual,
+  isManualChoiceActive,
   LANGUAGE_KEY,
   LANGUAGE_MANUAL_KEY,
+  LANGUAGE_TELEGRAM_SEEN_KEY,
   looksLikeTelegramLaunch,
-  readAutoLanguage,
+  readSavedLanguage,
+  readTelegramLanguage,
   readTelegramLanguageCode,
+  readUrlLanguage,
   resolveInitialLanguage,
 } from './resolveLanguage';
 import { syncDocumentMeta } from './syncDocumentMeta';
@@ -98,26 +101,43 @@ async function initI18next() {
   return i18next;
 }
 
-/** Смена языка из настроек — фиксируем как ручной выбор (не перетираем из Telegram). */
+/**
+ * Смена языка из настроек — ручной выбор. Запоминаем текущий язык Telegram как
+ * «увиденный»: выбор держится, пока язык в Telegram не сменят.
+ */
 export async function changeLanguage(lng: AppLanguage): Promise<void> {
   await applyLanguage(lng);
   try {
     window.localStorage.setItem(LANGUAGE_MANUAL_KEY, '1');
+    const tg = readTelegramLanguage();
+    if (tg) window.localStorage.setItem(LANGUAGE_TELEGRAM_SEEN_KEY, tg);
   } catch {
     /* ignore */
   }
 }
 
 /**
- * Подтянуть язык после загрузки bridge (script defer) или прихода initData.
- * Приоритет как при старте: язык Telegram → ?lang= от бота.
- * Не трогает ручной выбор пользователя.
+ * Подтянуть язык на старте, после загрузки bridge / прихода initData, после входа
+ * и при возврате в Mini App. Приоритет как в resolveInitialLanguage: ручной выбор
+ * (пока язык Telegram не сменился) → язык Telegram → ?lang= от бота.
+ * Возвращает применённый язык или null, если менять нечего / действует ручной выбор.
  */
 export async function syncLanguageFromTelegram(): Promise<AppLanguage | null> {
-  if (typeof window === 'undefined' || isLanguageManual()) return null;
-  const next = readAutoLanguage();
+  if (typeof window === 'undefined') return null;
+  const tg = readTelegramLanguage();
+  if (isManualChoiceActive(tg)) return null;
+  if (tg) {
+    // Ручной выбор устарел (или его не было): решает Telegram, запоминаем его язык.
+    try {
+      window.localStorage.removeItem(LANGUAGE_MANUAL_KEY);
+      window.localStorage.setItem(LANGUAGE_TELEGRAM_SEEN_KEY, tg);
+    } catch {
+      /* ignore */
+    }
+  }
+  const next = tg ?? readUrlLanguage();
   if (!next) return null;
-  if (normalizeLanguage(i18next.language) === next) return next;
+  if (normalizeLanguage(i18next.language) === next && readSavedLanguage() === next) return next;
   await applyLanguage(next);
   return next;
 }
@@ -131,7 +151,6 @@ export function watchTelegramLanguage(timeoutMs = 6000, intervalMs = 150): void 
   if (typeof window === 'undefined' || !looksLikeTelegramLaunch()) return;
   const started = Date.now();
   const tick = () => {
-    if (isLanguageManual()) return;
     if (readTelegramLanguageCode()) {
       void syncLanguageFromTelegram();
       return;

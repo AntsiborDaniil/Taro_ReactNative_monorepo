@@ -94,9 +94,10 @@ export function AppShell(): ReactElement {
     initSafeAreaInsetVars();
   }, []);
 
-  // Mini App: язык = ?lang= от бота → language_code Telegram (пока пользователь
-  // сам не выбрал язык в настройках). Script в index.html с defer — после ready
-  // initDataUnsafe.user уже доступен.
+  // Mini App: язык синхронизируем вместе с проверкой входа (/me летит параллельно):
+  // language_code Telegram → ?lang= от бота; ручной выбор из настроек держится, пока
+  // язык Telegram не сменился (см. shared/i18n/resolveLanguage.ts isManualChoiceActive).
+  // Script в index.html с defer — после ready initDataUnsafe.user уже доступен.
   // Здесь же — initTelegramWebAppChrome(): expand + disableVerticalSwipes нужны
   // как можно раньше, до первого скролла (иначе свайп сворачивает приложение).
   useEffect(() => {
@@ -160,13 +161,26 @@ export function AppShell(): ReactElement {
       if (document.visibilityState !== 'visible') return;
       dispatch(setAuthRetryPending(true));
       void tryAuthenticateTelegramMiniApp().then((result) => {
-        if (result.authenticated) void refetch();
-        else dispatch(setAuthRetryPending(false));
+        if (result.authenticated) {
+          void syncLanguageFromTelegram();
+          void refetch();
+        } else dispatch(setAuthRetryPending(false));
       });
     };
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [dispatch, isAuthenticated, refetch]);
+
+  // Возврат в Mini App: язык Telegram могли сменить, пока WebView был в фоне —
+  // синхронизируем независимо от входа (эффект выше работает только без сессии).
+  useEffect(() => {
+    if (!isLikelyTelegramMiniApp()) return;
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void syncLanguageFromTelegram();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
 
   const { pathname } = useLocation();
   // Мир «Астрология» (/astro/*): перекрашиваем токены и шапку Telegram, запоминаем выбор.

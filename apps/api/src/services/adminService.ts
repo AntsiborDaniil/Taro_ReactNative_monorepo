@@ -112,7 +112,7 @@ export async function listAdminUsers(input: {
   filter: Record<string, unknown>;
 }): Promise<AdminListResult<Record<string, unknown>>> {
   const admin = getSupabaseAdmin();
-  const q = sanitizeSearch(filterString(input.filter, 'q'));
+  const q = sanitizeSearch(filterString(input.filter, 'q').trim().replace(/^@+/, ''));
   const role = filterString(input.filter, 'role');
   const acquisitionSource = filterString(input.filter, 'acquisition_source');
   const hasCredits = input.filter.hasCredits;
@@ -134,14 +134,16 @@ export async function listAdminUsers(input: {
   if (q) {
     if (/^\d+$/.test(q)) {
       query = query.or(
-        `email.ilike.%${q}%,name.ilike.%${q}%,telegram_id.eq.${q}`
+        `email.ilike.%${q}%,name.ilike.%${q}%,telegram_username.ilike.%${q}%,telegram_id.eq.${q}`
       );
     } else if (
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(q)
     ) {
       query = query.or(`email.ilike.%${q}%,name.ilike.%${q}%,id.eq.${q}`);
     } else {
-      query = query.or(`email.ilike.%${q}%,name.ilike.%${q}%`);
+      query = query.or(
+        `email.ilike.%${q}%,name.ilike.%${q}%,telegram_username.ilike.%${q}%`
+      );
     }
   }
 

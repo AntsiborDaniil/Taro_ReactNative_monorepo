@@ -86,12 +86,36 @@ describe('resolveInitialLanguage', () => {
     expect(resolveInitialLanguage()).toBe('ru');
   });
 
-  it('ручной выбор главнее всего', () => {
+  it('ручной выбор главнее всего, пока язык Telegram не сменился', () => {
     window.localStorage.setItem('languageManual', '1');
+    window.localStorage.setItem('languageTelegramSeen', 'en');
     window.localStorage.setItem('language', 'ru');
     setUrl('?lang=en');
     setTelegram({ language_code: 'en' });
     expect(resolveInitialLanguage()).toBe('ru');
+  });
+
+  it('миграция: ручной ru без seen + Telegram en → en', () => {
+    window.localStorage.setItem('languageManual', '1');
+    window.localStorage.setItem('language', 'ru');
+    setUrl('?lang=ru');
+    setTelegram({ language_code: 'en' });
+    expect(resolveInitialLanguage()).toBe('en');
+  });
+
+  it('Telegram сменили после ручного выбора → язык Telegram', () => {
+    window.localStorage.setItem('languageManual', '1');
+    window.localStorage.setItem('languageTelegramSeen', 'ru');
+    window.localStorage.setItem('language', 'ru');
+    setTelegram({ language_code: 'en' });
+    expect(resolveInitialLanguage()).toBe('en');
+  });
+
+  it('вне Telegram ручной выбор действует (?lang и seen не важны)', () => {
+    window.localStorage.setItem('languageManual', '1');
+    window.localStorage.setItem('language', 'en');
+    setUrl('?lang=ru');
+    expect(resolveInitialLanguage()).toBe('en');
   });
 });
 
@@ -105,11 +129,47 @@ describe('syncLanguageFromTelegram', () => {
     expect(i18next.language).toBe('en');
   });
 
-  it('ручной выбор не перетирается', async () => {
+  it('ручной ru, выбранный при Telegram en, не перетирается', async () => {
     await i18nReady;
-    await changeLanguage('ru');
     setTelegram({ language_code: 'en' });
+    await changeLanguage('ru');
+    expect(window.localStorage.getItem('languageTelegramSeen')).toBe('en');
     expect(await syncLanguageFromTelegram()).toBeNull();
     expect(i18next.language).toBe('ru');
+    expect(resolveInitialLanguage()).toBe('ru');
+  });
+
+  it('Telegram сменили ru → en после ручного выбора → en, ручной флаг снят', async () => {
+    await i18nReady;
+    setTelegram({ language_code: 'ru' });
+    await changeLanguage('ru');
+    expect(await syncLanguageFromTelegram()).toBeNull();
+    setTelegram({ language_code: 'en' });
+    expect(await syncLanguageFromTelegram()).toBe('en');
+    expect(i18next.language).toBe('en');
+    expect(window.localStorage.getItem('languageManual')).toBeNull();
+    expect(window.localStorage.getItem('languageTelegramSeen')).toBe('en');
+    expect(window.localStorage.getItem('language')).toBe('en');
+  });
+
+  it('миграция: languageManual=1 без seen, сохранён ru, Telegram en → en', async () => {
+    await i18nReady;
+    await i18next.changeLanguage('ru');
+    window.localStorage.setItem('languageManual', '1');
+    window.localStorage.setItem('language', 'ru');
+    setUrl('?lang=ru');
+    setTelegram({ language_code: 'en' });
+    expect(await syncLanguageFromTelegram()).toBe('en');
+    expect(i18next.language).toBe('en');
+    expect(window.localStorage.getItem('languageTelegramSeen')).toBe('en');
+  });
+
+  it('вне Telegram ручной выбор не трогается', async () => {
+    await i18nReady;
+    await changeLanguage('en');
+    setUrl('?lang=ru');
+    expect(await syncLanguageFromTelegram()).toBeNull();
+    expect(i18next.language).toBe('en');
+    expect(resolveInitialLanguage()).toBe('en');
   });
 });

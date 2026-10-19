@@ -24,6 +24,13 @@ MVP закоммичен на `main` (закрыт флагом `ASTRO_ENABLED =
 
 Адаптив переключателя: колонки `minmax(0, 1fr)`, у кнопок `min-width: 0`, отступы 8 px, gap 6 px; при `max-width: 380px` иконки скрыты — иначе «АСТРОЛОГИЯ» с иконкой не влезает в половину и заезжает под бегунок. Прогнаны `tsc`, `i18n:check` и тесты; в браузере на 360–375 px после этой правки ещё не смотрели.
 
+## Ник в админке и язык из Telegram (2026-10-19)
+
+- **Ник.** Колонка `profiles.telegram_username`, миграция `supabase/migrations/20261019120000_profiles_telegram_username.sql` (бэкфилл из `auth.users` метаданных и `telegram_acquisition`; триггер `protect_profile_privileges` не даёт пользователю подменить ник). API обновляет ник при каждом Telegram-входе (`syncTelegramProfile` в `authService.ts`; без колонки вход не падает). Админка: колонка «Telegram» = `@username`, иначе telegram id; поиск по `@username`. В лидах без ника — id. К проду не применена.
+- **Язык Mini App.** Ручной выбор держится, пока язык Telegram не сменился: ключ `languageTelegramSeen` в localStorage (`shared/i18n/resolveLanguage.ts`, `isManualChoiceActive`). Старый `languageManual=1` без `seen` — язык Telegram побеждает один раз. Синк на старте рядом с проверкой входа, после входа и при возврате в приложение (`AppShell.tsx`).
+- **Язык бота.** Per-chat Menu Button (`?lang=` и подпись) обновляется при смене `language_code` (`apps/bot/src/menuButtonSync.ts`); смена языка сразу уходит в реестр подписчиков, минуя часовой троттлинг — рассылка 10:00 переключается.
+- Деплой: миграция → API → бот / Vercel. Поиск в админке по пользователям сломан, пока миграция не применена.
+
 ## Вход с reply-кнопки бота (2026-10-18)
 
 - Причина «не входит, нет в админке»: постоянная нижняя клавиатура бота (`mainReplyKeyboard`) открывала Mini App reply-кнопкой `web_app` — Telegram не передаёт туда initData, вход невозможен.

@@ -66,8 +66,8 @@ export function LeadList() {
           <FunctionField
             label="Username"
             sortable={false}
-            render={(record: { username?: string }) =>
-              record.username ? `@${record.username}` : '—'
+            render={(record: { username?: string; telegram_id?: number }) =>
+              record.username ? `@${record.username}` : String(record.telegram_id ?? '—')
             }
           />
           <TextField source="display_name" label="Имя" emptyText="—" sortable={false} />
@@ -87,7 +87,12 @@ export function LeadShow() {
     <Show>
       <SimpleShowLayout>
         <TextField source="telegram_id" label="Telegram ID" />
-        <TextField source="username" label="Username" emptyText="—" />
+        <FunctionField
+          label="Username"
+          render={(record: { username?: string; telegram_id?: number }) =>
+            record.username ? `@${record.username}` : String(record.telegram_id ?? '—')
+          }
+        />
         <TextField source="display_name" label="Имя" emptyText="—" />
         <SelectField source="source" label="Источник" choices={sourceChoices} />
         <BooleanField source="opened_app" label="Открыл приложение" />

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { isRetryableStatus, postInternalNotify } from '../src/dailyFreeNudge';
-import { shouldReportInteraction } from '../src/subscribers';
+import { shouldReportInteraction, type ReportedInteraction } from '../src/subscribers';
 
 const noSleep = async () => {};
 const ok = (body: unknown, status = 202) =>
@@ -64,10 +64,27 @@ describe('postInternalNotify', () => {
 
 describe('shouldReportInteraction', () => {
   it('не чаще раза в час на пользователя', () => {
-    const store = new Map<number, number>();
+    const store = new Map<number, ReportedInteraction>();
     expect(shouldReportInteraction(1, 0, store)).toBe(true);
     expect(shouldReportInteraction(1, 1000, store)).toBe(false);
     expect(shouldReportInteraction(2, 1000, store)).toBe(true);
     expect(shouldReportInteraction(1, 3_600_001, store)).toBe(true);
+  });
+
+  it('смена языка отправляется сразу, в обход троттлинга', () => {
+    const store = new Map<number, ReportedInteraction>();
+    expect(shouldReportInteraction(1, 0, store, 'ru')).toBe(true);
+    expect(shouldReportInteraction(1, 1000, store, 'ru')).toBe(false);
+    expect(shouldReportInteraction(1, 2000, store, 'en')).toBe(true);
+    expect(shouldReportInteraction(1, 3000, store, 'en')).toBe(false);
+  });
+
+  it('пустой язык не считается сменой и не стирает известный', () => {
+    const store = new Map<number, ReportedInteraction>();
+    expect(shouldReportInteraction(1, 0, store, 'en')).toBe(true);
+    expect(shouldReportInteraction(1, 1000, store, null)).toBe(false);
+    expect(shouldReportInteraction(1, 3_600_001, store, undefined)).toBe(true);
+    expect(store.get(1)?.languageCode).toBe('en');
+    expect(shouldReportInteraction(1, 3_601_000, store, 'en')).toBe(false);
   });
 });

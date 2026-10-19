@@ -5,6 +5,7 @@ import {
   DateField,
   Edit,
   EditButton,
+  FunctionField,
   List,
   NumberField,
   NumberInput,
@@ -44,8 +45,22 @@ const acquisitionChoices = [
   { id: 'direct', name: 'Без метки (прямой /start)' },
 ];
 
+type TelegramIdentity = { telegram_username?: string | null; telegram_id?: number | string | null };
+
+/** Правило владельца: @username, если есть, иначе числовой telegram id. */
+function telegramLabel(record: TelegramIdentity | undefined): string | null {
+  if (record?.telegram_username) return `@${record.telegram_username}`;
+  if (record?.telegram_id != null && record.telegram_id !== '') return String(record.telegram_id);
+  return null;
+}
+
 const userFilters = [
-  <TextInput key="q" label="Поиск (email, имя, telegram id)" source="q" alwaysOn />,
+  <TextInput
+    key="q"
+    label="Поиск (email, имя, @username, telegram id)"
+    source="q"
+    alwaysOn
+  />,
   <SelectInput key="role" label="Роль" source="role" choices={roleChoices} />,
   <SelectInput
     key="acquisition_source"
@@ -134,7 +149,9 @@ export function UserList() {
       <List filters={userFilters} sort={{ field: 'created_at', order: 'DESC' }} perPage={25}>
         {isMobile ? (
           <SimpleList
-            primaryText={(record) => record.name || record.email || record.telegram_id || record.id}
+            primaryText={(record) =>
+              record.name || telegramLabel(record) || record.email || record.id
+            }
             secondaryText={(record) =>
               `${record.email || '—'} · ${record.role} · ${record.spread_credits ?? 0} зар.`
             }
@@ -147,6 +164,11 @@ export function UserList() {
           <Datagrid rowClick="show" bulkActionButtons={false}>
             <TextField source="email" label="Email" emptyText="—" />
             <TextField source="name" label="Имя" emptyText="—" />
+            <FunctionField
+              label="Telegram"
+              sortable={false}
+              render={(record: TelegramIdentity) => telegramLabel(record) ?? '—'}
+            />
             <TextField source="telegram_id" label="Telegram ID" emptyText="—" />
             <SelectField
               source="acquisition_source"
@@ -196,6 +218,10 @@ export function UserShow() {
         <TextField source="id" label="ID" />
         <TextField source="email" emptyText="—" />
         <TextField source="name" emptyText="—" />
+        <FunctionField
+          label="Telegram"
+          render={(record: TelegramIdentity) => telegramLabel(record) ?? '—'}
+        />
         <TextField source="telegram_id" emptyText="—" label="Telegram ID" />
         <SelectField
           source="acquisition_source"
@@ -232,6 +258,7 @@ export function UserEdit() {
         <TextInput source="email" disabled />
         <TextInput source="name" label="Имя" />
         <TextInput source="telegram_id" disabled label="Telegram ID" />
+        <TextInput source="telegram_username" disabled label="Telegram username" />
         <SelectInput
           source="acquisition_source"
           label="Источник"

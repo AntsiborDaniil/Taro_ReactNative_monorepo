@@ -2,6 +2,8 @@ import { languageFromTelegramCode, normalizeLanguage, type AppLanguage } from '.
 
 export const LANGUAGE_KEY = 'language';
 export const LANGUAGE_MANUAL_KEY = 'languageManual';
+/** Язык Telegram на момент последнего решения о языке (ru|en). */
+export const LANGUAGE_TELEGRAM_SEEN_KEY = 'languageTelegramSeen';
 
 export function isLanguageManual(): boolean {
   try {
@@ -85,22 +87,41 @@ export function readSavedLanguage(): AppLanguage | null {
   }
 }
 
+export function readTelegramSeenLanguage(): AppLanguage | null {
+  try {
+    const raw = window.localStorage.getItem(LANGUAGE_TELEGRAM_SEEN_KEY);
+    return raw === 'en' || raw === 'ru' ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
- * Язык без ручного выбора: Telegram → ?lang= → null.
+ * Ручной выбор действует, пока язык Telegram не сменился с момента выбора
+ * (`languageTelegramSeen`). Вне Telegram (`tg === null`) ручной выбор действует всегда.
+ * Миграция: у старых пользователей `languageManual=1` без `seen` — считаем, что язык
+ * Telegram «сменился», и он побеждает. Отличить «выбрал ru вручную» от «сменил Telegram
+ * на en после выбора» без `seen` нельзя, а жалоба именно на второе; при совпадении
+ * языков ничего видимо не меняется, при расхождении — один раз сбросится на язык
+ * Telegram, повторный выбор в настройках уже запомнит `seen`.
+ */
+export function isManualChoiceActive(tg: AppLanguage | null = readTelegramLanguage()): boolean {
+  if (!isLanguageManual()) return false;
+  if (!tg) return true;
+  return readTelegramSeenLanguage() === tg;
+}
+
+/**
+ * Старт: ручной выбор (пока язык Telegram не сменился) → язык Telegram → ?lang= от бота
+ * → сохранённый → ru.
  * Telegram важнее ?lang=: Menu Button в чате хранит устаревший ?lang= (кнопка
  * ставится на /start и не обновляется при смене языка клиента), а global-кнопка
  * раньше всегда вела на ?lang=ru.
  */
-export function readAutoLanguage(): AppLanguage | null {
-  return readTelegramLanguage() ?? readUrlLanguage();
-}
-
-/**
- * Старт: ручной выбор → язык Telegram → ?lang= от бота → сохранённый → ru.
- */
 export function resolveInitialLanguage(): AppLanguage {
-  if (isLanguageManual()) {
+  const tg = readTelegramLanguage();
+  if (isManualChoiceActive(tg)) {
     return readSavedLanguage() ?? 'ru';
   }
-  return readAutoLanguage() ?? readSavedLanguage() ?? 'ru';
+  return tg ?? readUrlLanguage() ?? readSavedLanguage() ?? 'ru';
 }

@@ -513,6 +513,36 @@ export async function completeOAuthCallback(
   );
 }
 
+/**
+ * Привязка telegram_id и актуального @username к профилю на каждом входе.
+ * Если миграция с колонкой telegram_username ещё не применена (PostgREST: PGRST204 / 42703),
+ * повторяем без неё — вход не должен падать из-за порядка деплоя.
+ */
+async function syncTelegramProfile(
+  userId: string,
+  telegramId: number,
+  username: string | undefined
+): Promise<void> {
+  const admin = getSupabaseAdmin();
+  const telegramUsername = username?.trim().replace(/^@/, '') || null;
+  const { error } = await admin
+    .from('profiles')
+    .update({ telegram_id: telegramId, telegram_username: telegramUsername })
+    .eq('id', userId);
+  if (!error) return;
+
+  const missingColumn =
+    error.code === 'PGRST204' ||
+    error.code === '42703' ||
+    error.message?.includes('telegram_username');
+  if (!missingColumn) {
+    console.error('[auth telegram] profile sync failed:', error);
+    return;
+  }
+  console.warn('[auth telegram] profiles.telegram_username missing, apply migration');
+  await admin.from('profiles').update({ telegram_id: telegramId }).eq('id', userId);
+}
+
 export async function signInWithTelegram(initData: string): Promise<AuthSession> {
   const validated = validateTelegramWebAppInitData(initData);
   if (!validated) {
@@ -573,10 +603,7 @@ export async function signInWithTelegram(initData: string): Promise<AuthSession>
           email,
           name: displayName,
         });
-        await admin
-          .from('profiles')
-          .update({ telegram_id: telegramId })
-          .eq('id', publicUser.id);
+        await syncTelegramProfile(publicUser.id, telegramId, validated.user.username);
         return mapSession(
           signInExisting.session.access_token,
           signInExisting.session.refresh_token,
@@ -616,10 +643,7 @@ export async function signInWithTelegram(initData: string): Promise<AuthSession>
     name: displayName,
   });
 
-  await admin
-    .from('profiles')
-    .update({ telegram_id: telegramId })
-    .eq('id', publicUser.id);
+  await syncTelegramProfile(publicUser.id, telegramId, validated.user.username);
 
   try {
     await applyAcquisitionToProfile({

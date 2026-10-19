@@ -47,6 +47,7 @@ import {
 } from './dailyFreeNudge';
 import { scheduleDailyAtMoscow } from './schedule';
 import { reportSubscriber, shouldReportInteraction } from './subscribers';
+import { forgetMenuButtonLang, shouldSyncMenuButton } from './menuButtonSync';
 
 const bot = new Bot(config.botToken);
 
@@ -54,12 +55,32 @@ const bot = new Bot(config.botToken);
 // человек начал диалог и может получать ежедневную рассылку. Не блокируем ответ.
 bot.use(async (ctx, next) => {
   const from = ctx.from;
-  if (from && !from.is_bot && ctx.chat?.type === 'private' && shouldReportInteraction(from.id)) {
+  if (
+    from &&
+    !from.is_bot &&
+    ctx.chat?.type === 'private' &&
+    shouldReportInteraction(from.id, Date.now(), undefined, from.language_code)
+  ) {
     void reportSubscriber({
       telegramId: from.id,
       event: 'interaction',
       languageCode: from.language_code,
     });
+  }
+  await next();
+});
+
+// Menu Button чата держим в языке Telegram: пользователь мог сменить язык после /start,
+// а кнопка с ?lang=ru и текстом «Открыть Tarot» осталась бы старой. Не блокируем ответ.
+bot.use(async (ctx, next) => {
+  const from = ctx.from;
+  if (from && !from.is_bot && ctx.chat?.type === 'private') {
+    const lang = langOf(ctx);
+    if (shouldSyncMenuButton(from.id, lang)) {
+      void configureUserMenuButton(ctx, lang).then((ok) => {
+        if (!ok) forgetMenuButtonLang(from.id, lang);
+      });
+    }
   }
   await next();
 });
@@ -124,13 +145,16 @@ async function trackStartIfNeeded(ctx: Context, payload: string): Promise<void> 
   }
 }
 
-/** Menu Button с ?lang= для этого чата — язык Mini App совпадает с ботом. */
+/**
+ * Menu Button с ?lang= для этого чата — язык Mini App совпадает с ботом.
+ * Вызывается из middleware при смене языка (см. menuButtonSync). false — не удалось.
+ */
 async function configureUserMenuButton(
   ctx: Context,
   lang: BotLang,
-): Promise<void> {
+): Promise<boolean> {
   const chatId = ctx.chat?.id;
-  if (chatId == null) return;
+  if (chatId == null) return false;
   try {
     await ctx.api.setChatMenuButton({
       chat_id: chatId,
@@ -140,8 +164,10 @@ async function configureUserMenuButton(
         web_app: { url: webAppUrlWithLang(config.webAppUrl, lang) },
       },
     });
+    return true;
   } catch (error) {
     console.warn('[bot] setChatMenuButton(chat) failed:', error);
+    return false;
   }
 }
 
@@ -151,7 +177,6 @@ const replyKeyboardHint: Record<BotLang, string> = {
 };
 
 async function sendWelcome(ctx: Context, lang: BotLang): Promise<void> {
-  await configureUserMenuButton(ctx, lang);
   await ctx.reply(welcomeText[lang], {
     parse_mode: 'Markdown',
     reply_markup: openMiniAppInlineKeyboard(lang),
@@ -191,8 +216,6 @@ bot.command('start', async (ctx) => {
   const payload = startPayload(ctx);
   const lang = langOf(ctx);
   const replyMarkup = openMiniAppInlineKeyboard(lang);
-
-  await configureUserMenuButton(ctx, lang);
 
   if (payload === 'lava_success') {
     let successMarkup = openMiniAppInlineKeyboard(lang);
