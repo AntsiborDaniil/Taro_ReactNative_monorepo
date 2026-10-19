@@ -24,6 +24,14 @@ MVP закоммичен на `main` (закрыт флагом `ASTRO_ENABLED =
 
 Адаптив переключателя: колонки `minmax(0, 1fr)`, у кнопок `min-width: 0`, отступы 8 px, gap 6 px; при `max-width: 380px` иконки скрыты — иначе «АСТРОЛОГИЯ» с иконкой не влезает в половину и заезжает под бегунок. Прогнаны `tsc`, `i18n:check` и тесты; в браузере на 360–375 px после этой правки ещё не смотрели.
 
+## Вход с reply-кнопки бота (2026-10-18)
+
+- Причина «не входит, нет в админке»: постоянная нижняя клавиатура бота (`mainReplyKeyboard`) открывала Mini App reply-кнопкой `web_app` — Telegram не передаёт туда initData, вход невозможен.
+- Бот: кнопка «🔮 Открыть Mindful Tarot» теперь текстовая → бот отвечает inline web_app-кнопкой; `message:web_app_data` (sendData из Mini App) → inline-кнопка + новая клавиатура. Тест в `apps/bot/tests/messages.test.ts`.
+- Mini App: `app/AppShell/TelegramNoInitDataScreen.tsx` — внутри Telegram без initData экран «Открыть заново» (sendData('relaunch')), ключи `core:telegramRelaunch.*`.
+- Старые клавиатуры у пользователей обновятся после /start или после нажатия «Открыть заново».
+- На проде: `telegram_bot_subscribers.last_interaction_at` у всех NULL — бот с отчётами о подписчиках долго не выкатывался (билды Timeweb падали/висели); после успешного деплоя этого коммита запись подписчиков должна пойти.
+
 ## Автоперевход в Mini App (2026-10-17)
 
 - Проверка входа при каждом открытии: AppShell запрашивает `/api/auth/me`; любой 401 в Telegram (на старте или если сессия выпала посреди работы) → `baseQuery` в `apps/web-vite/src/shared/api/baseApi.ts` тихо перевходит по initData и повторяет запрос.

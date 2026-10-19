@@ -356,3 +356,16 @@ describe('reply-кнопки', () => {
     expect(matchesReplyBtn('random', 'help')).toBe(false);
   });
 });
+
+describe('reply-клавиатура: открытие приложения', () => {
+  it('кнопка «Открыть» — текстовая, не web_app (с reply-кнопки нет initData)', async () => {
+    const { mainReplyKeyboard } = await import('../src/keyboards');
+    const { BTN_LABELS, matchesReplyBtn } = await import('../src/messages');
+    for (const lang of ['ru', 'en'] as const) {
+      const buttons = mainReplyKeyboard(lang).keyboard.flat();
+      expect(buttons.some((b) => typeof b === 'object' && 'web_app' in b)).toBe(false);
+      expect(buttons.map((b) => (typeof b === 'string' ? b : b.text))).toContain(BTN_LABELS.open[lang]);
+      expect(matchesReplyBtn(BTN_LABELS.open[lang], 'open')).toBe(true);
+    }
+  });
+});

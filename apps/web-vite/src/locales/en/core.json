@@ -171,5 +171,11 @@
   "stub.emptyResults": "Nothing found",
   "stub.emptyResultsModal.subtitle": "Change your filters or try again later.",
   "stub.emptyResultsModal.button": "OK",
-  "stub.emptyResultsModal.closeBackdrop": "Close"
+  "stub.emptyResultsModal.closeBackdrop": "Close",
+
+  "telegramRelaunch.title": "Couldn't sign you in",
+  "telegramRelaunch.text": "This bot button opens the app without your Telegram account. Tap below and the bot will send a button that opens it properly.",
+  "telegramRelaunch.cta": "Reopen the app",
+  "telegramRelaunch.hint": "Open the app with the “🔮 Open Mindful Tarot” button under a bot message, or the menu button next to the message field.",
+  "telegramRelaunch.close": "Close"
 }

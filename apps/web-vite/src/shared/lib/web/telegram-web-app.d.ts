@@ -21,6 +21,11 @@ declare global {
 
   interface TelegramWebApp {
     initData?: string;
+    /** ios | android | tdesktop | weba | … ; 'unknown' — скрипт моста открыт в обычном браузере. */
+    platform?: string;
+    /** Только для запуска с reply-кнопки (KeyboardButton): данные боту, Mini App закрывается. */
+    sendData?: (data: string) => void;
+    close?: () => void;
     HapticFeedback?: TelegramHapticFeedback;
     /** Bot API 7.7+: вернуть свайп вниз после disableVerticalSwipes. */
     enableVerticalSwipes?: () => void;

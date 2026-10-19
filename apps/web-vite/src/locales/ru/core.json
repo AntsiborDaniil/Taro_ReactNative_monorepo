@@ -172,5 +172,11 @@
   "stub.emptyResults": "Ничего не найдено",
   "stub.emptyResultsModal.subtitle": "Измените условия или попробуйте позже.",
   "stub.emptyResultsModal.button": "Понятно",
-  "stub.emptyResultsModal.closeBackdrop": "Закрыть"
+  "stub.emptyResultsModal.closeBackdrop": "Закрыть",
+
+  "telegramRelaunch.title": "Не получилось войти",
+  "telegramRelaunch.text": "Эта кнопка бота открывает приложение без твоего аккаунта Telegram. Нажми ниже — бот пришлёт кнопку, которая откроет всё как надо.",
+  "telegramRelaunch.cta": "Открыть заново",
+  "telegramRelaunch.hint": "Открой приложение кнопкой «🔮 Открыть Mindful Tarot» под сообщением бота или кнопкой меню слева от поля ввода.",
+  "telegramRelaunch.close": "Закрыть"
 }

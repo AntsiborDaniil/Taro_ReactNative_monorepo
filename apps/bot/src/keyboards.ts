@@ -93,7 +93,8 @@ export function openTogetherInlineKeyboard(
 /** Persistent reply keyboard: quick access to main actions / commands. */
 export function mainReplyKeyboard(lang: BotLang): Keyboard {
   return new Keyboard()
-    .webApp(openAppLabel[lang], webAppUrlWithLang(config.webAppUrl, lang))
+    // Не .webApp(): с reply-кнопки Telegram не передаёт initData — пользователь не войдёт.
+    .text(BTN_LABELS.open[lang])
     .row()
     .text(BTN_LABELS.channel[lang])
     .text(BTN_LABELS.faq[lang])

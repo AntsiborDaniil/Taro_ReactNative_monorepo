@@ -37,6 +37,7 @@ import {
   supportPromptText,
   welcomeText,
   CHANNEL_URL,
+  openAppViaInlineText,
 } from './messages';
 import { fetchLatestPaymentReturn } from './paymentReturn';
 import { ingestSupportTicket } from './support';
@@ -278,6 +279,20 @@ bot.callbackQuery(/^faq:(.+)$/, async (ctx) => {
   });
 });
 
+/**
+ * Mini App, открытый со старой reply-кнопки web_app (без initData), шлёт sendData('relaunch'):
+ * отвечаем inline-кнопкой (она даёт initData) и заменяем клавиатуру на новую — без web_app.
+ */
+bot.on('message:web_app_data', async (ctx) => {
+  const lang = langOf(ctx);
+  await ctx.reply(openAppViaInlineText[lang], {
+    reply_markup: openMiniAppInlineKeyboard(lang),
+  });
+  await ctx.reply(replyKeyboardHint[lang], {
+    reply_markup: mainReplyKeyboard(lang),
+  });
+});
+
 bot.on('message:text', async (ctx) => {
   if (ctx.message.text.startsWith('/')) {
     return;
@@ -286,6 +301,12 @@ bot.on('message:text', async (ctx) => {
   const text = ctx.message.text.trim();
   const lang = langOf(ctx);
 
+  if (matchesReplyBtn(text, 'open')) {
+    await ctx.reply(openAppViaInlineText[lang], {
+      reply_markup: openMiniAppInlineKeyboard(lang),
+    });
+    return;
+  }
   if (matchesReplyBtn(text, 'channel')) {
     await sendChannel(ctx, lang);
     return;

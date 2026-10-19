@@ -30,6 +30,7 @@ import { useTelegramBackButton } from '@shared/lib/web/useTelegramBackButton';
 import { useSyncTodayCheckins } from '@features/habits';
 import { NavRail } from './NavRail';
 import { BottomTabBar } from './BottomTabBar';
+import { TelegramNoInitDataScreen } from './TelegramNoInitDataScreen';
 import { useSharedReadingDeepLink } from './useSharedReadingDeepLink';
 import styles from './AppShell.module.css';
 
@@ -198,6 +199,7 @@ export function AppShell(): ReactElement {
       </main>
       <BottomTabBar hidden={hideBottomNav} />
       <ModalRoot />
+      <TelegramNoInitDataScreen />
       <Toaster />
     </div>
   );

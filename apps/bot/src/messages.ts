@@ -407,6 +407,11 @@ export const channelLinkLabel: Record<BotLang, string> = {
 };
 
 export const BTN_LABELS = {
+  /**
+   * Открыть приложение — обычная текстовая кнопка, бот отвечает inline web_app-кнопкой.
+   * Reply-кнопка web_app (KeyboardButton) открывает Mini App без initData → вход невозможен.
+   */
+  open: { ru: '🔮 Открыть Mindful Tarot', en: '🔮 Open Mindful Tarot' },
   channel: { ru: '📣 Канал', en: '📣 Channel' },
   faq: { ru: '❓ FAQ', en: '❓ FAQ' },
   support: { ru: '💬 Поддержка', en: '💬 Support' },
@@ -414,6 +419,12 @@ export const BTN_LABELS = {
 } as const;
 
 export type ReplyBtnKind = keyof typeof BTN_LABELS;
+
+/** Ответ на запуск без initData (sendData из Mini App) или на текстовую кнопку «Открыть». */
+export const openAppViaInlineText: Record<BotLang, string> = {
+  ru: 'Открой приложение кнопкой ниже — так оно сразу узнает твой аккаунт Telegram.',
+  en: 'Open the app with the button below so it recognises your Telegram account.',
+};
 
 export function matchesReplyBtn(text: string, kind: ReplyBtnKind): boolean {
   return text === BTN_LABELS[kind].ru || text === BTN_LABELS[kind].en;
